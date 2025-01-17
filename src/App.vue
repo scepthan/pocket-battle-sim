@@ -5,7 +5,9 @@
 </template>
 
 <script setup lang="ts">
-import cards from "./assets/cards.json";
+import card_data from "./assets/cards.json";
+import type { InputCard } from "./types/InputCard.js";
 
+const cards: InputCard[] = card_data;
 console.log(cards);
 </script>
