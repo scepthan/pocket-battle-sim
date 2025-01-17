@@ -20,6 +20,7 @@ export interface PokemonCard extends BaseCard {
   Type: string;
   HP: number;
   Stage: number;
+  EvolvesFrom?: string;
   RetreatCost: number;
   Weakness: string;
   Moves: Move[];
