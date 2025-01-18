@@ -1,4 +1,4 @@
-import type { Energy, PlayingCard } from "./PlayingCard.js";
+import type { Energy, PlayingCard } from "./PlayingCard";
 
 export interface Deck {
   Cards: PlayingCard[];

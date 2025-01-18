@@ -5,9 +5,9 @@
 </template>
 
 <script setup lang="ts">
-import card_data from "./assets/cards.json";
-import type { InputCard } from "./types/InputCard.js";
+import { usePlayingCardStore } from "./stores/usePlayingCardStore";
 
-const cards: InputCard[] = card_data;
-console.log(cards);
+const cardStore = usePlayingCardStore();
+
+cardStore.loadCards();
 </script>

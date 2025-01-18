@@ -1,6 +1,6 @@
-import type { PlayingCard, PokemonCard } from "@/types/PlayingCard.js";
-import { Player } from "./Player.js";
-import type { Deck } from "@/types/Deck.js";
+import type { PlayingCard, PokemonCard } from "@/types/PlayingCard";
+import { Player } from "./Player";
+import type { Deck } from "@/types/Deck";
 
 export class GameState {
   Player1: Player;

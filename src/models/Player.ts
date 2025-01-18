@@ -1,5 +1,5 @@
-import type { Deck } from "@/types/Deck.js";
-import type { Energy, PlayingCard, PokemonCard } from "@/types/PlayingCard.js";
+import type { Deck } from "@/types/Deck";
+import type { Energy, PlayingCard, PokemonCard } from "@/types/PlayingCard";
 
 export class Player {
   EnergyTypes: Energy[];
