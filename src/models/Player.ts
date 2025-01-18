@@ -1,16 +1,19 @@
-import type { Deck } from "@/types/Deck";
-import type { Energy, PlayingCard, PokemonCard } from "@/types/PlayingCard";
+import type { DeckInfo } from "@/types/DeckInfo";
+import type { PlayingCard } from "@/types/PlayingCard";
+import type { PokemonCard } from "./PokemonCard";
+import type { Energy } from "@/types/Energy";
 
 export class Player {
   EnergyTypes: Energy[];
   Deck: PlayingCard[];
   Hand: PlayingCard[];
   Discard: PlayingCard[];
+  GamePoints: number;
 
   ActivePokemon?: PokemonCard;
   BenchedPokemon: PokemonCard[];
 
-  constructor(deck: Deck) {
+  constructor(deck: DeckInfo) {
     if (
       !deck.Cards.some((card) => card.CardType == "Pokemon" && card.Stage == 0)
     )
@@ -39,6 +42,7 @@ export class Player {
     this.Hand = [];
     this.Discard = [];
     this.BenchedPokemon = [];
+    this.GamePoints = 0;
   }
 
   reset() {

@@ -1,4 +1,7 @@
-export type Effect = (...args: unknown[]) => void;
+import type { GameState } from "@/models/GameState";
+import type { Energy } from "./Energy";
+
+export type Effect = (gameState: GameState) => void;
 export type AbilityTrigger =
   | "OnceDuringTurn"
   | "ManyDuringTurn"
@@ -7,18 +10,6 @@ export type AbilityTrigger =
 export type Condition = "Active" | "OnBench" | "HasDamage";
 export type PrimaryStatus = "Asleep"; // | "Paralyzed" | "Confused"
 export type SecondaryStatus = "Poisoned"; // | "Burned"
-export const EnergyMap = {
-  C: "Colorless",
-  G: "Grass",
-  R: "Fire",
-  W: "Water",
-  L: "Lightning",
-  P: "Psychic",
-  F: "Fighting",
-  D: "Darkness",
-  M: "Metal",
-} as const;
-export type Energy = (typeof EnergyMap)[keyof typeof EnergyMap];
 
 export interface Ability {
   Name: string;
@@ -38,7 +29,7 @@ export interface BaseCard {
 }
 export interface PokemonCard extends BaseCard {
   CardType: "Pokemon";
-  Type: string;
+  Type: Energy;
   BaseHP: number;
   Stage: number;
   EvolvesFrom?: string;
@@ -47,11 +38,6 @@ export interface PokemonCard extends BaseCard {
   PrizePoints: number;
   Moves: Move[];
   Ability?: Ability;
-
-  CurrentHP: number;
-  PrimaryStatus?: PrimaryStatus;
-  SecondaryStatuses: SecondaryStatus[];
-  AttachedEnergy: Energy[];
 }
 export interface ItemCard extends BaseCard {
   CardType: "Item";

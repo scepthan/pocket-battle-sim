@@ -1,33 +1,34 @@
-export interface Ability {
+export interface InputCardAbility {
   Name: string;
   Effect: string;
 }
-export interface Move {
+export interface InputCardMove {
   Name: string;
   Energy: string;
   HP?: number;
   Effect?: string;
 }
-export interface BaseCard {
+export interface BaseInputCard {
   ID: string;
   Name: string;
   Rarity: string;
   SetID: string;
   PackID: string;
-  CardType: string;
 }
-export interface PokemonCard extends BaseCard {
+export interface PokemonInputCard extends BaseInputCard {
+  CardType: "Pokemon";
   Type: string;
   HP: number;
   Stage: number;
   EvolvesFrom?: string;
   RetreatCost: number;
   Weakness: string;
-  Moves: Move[];
-  Ability?: Ability;
+  Moves: InputCardMove[];
+  Ability?: InputCardAbility;
 }
-export interface TrainerCard extends BaseCard {
+export interface TrainerInputCard extends BaseInputCard {
+  CardType: "Item" | "Supporter";
   Text: string;
 }
 
-export type InputCard = PokemonCard | TrainerCard;
+export type InputCard = PokemonInputCard | TrainerInputCard;
