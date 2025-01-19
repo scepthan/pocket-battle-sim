@@ -25,6 +25,7 @@ export class PokemonCard implements IPokemonCard {
   PrimaryStatus?: PrimaryStatus;
   SecondaryStatuses: SecondaryStatus[];
   AttachedEnergy: Energy[];
+  CanEvolve: boolean;
 
   constructor(inputCard: IPokemonCard) {
     this.ID = inputCard.ID;
@@ -43,10 +44,16 @@ export class PokemonCard implements IPokemonCard {
     this.CurrentHP = this.BaseHP;
     this.SecondaryStatuses = [];
     this.AttachedEnergy = [];
+    this.CanEvolve = false;
   }
 
   applyDamage(HP: number) {
     this.CurrentHP -= HP;
     if (this.CurrentHP < 0) this.CurrentHP = 0;
+  }
+
+  healDamage(HP: number) {
+    this.CurrentHP += HP;
+    if (this.CurrentHP > this.BaseHP) this.CurrentHP = this.BaseHP;
   }
 }

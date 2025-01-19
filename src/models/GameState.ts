@@ -3,6 +3,9 @@ import { Player } from "./Player";
 import type { DeckInfo } from "@/types/DeckInfo";
 import type { PokemonCard } from "./PokemonCard";
 import type { Energy } from "@/types/Energy";
+import { useCoinFlip } from "@/composables/useCoinFlip";
+
+const { coinFlip } = useCoinFlip();
 
 export class GameState {
   Player1: Player;
@@ -10,18 +13,23 @@ export class GameState {
 
   AttackingPlayer: Player;
   DefendingPlayer: Player;
+  CanRetreat: boolean;
+  CanPlaySupporter: boolean;
 
   constructor(deck1: DeckInfo, deck2: DeckInfo) {
     this.Player1 = new Player(deck1);
     this.Player2 = new Player(deck2);
 
-    if (Math.random() >= 0.5) {
+    if (coinFlip()) {
       this.AttackingPlayer = this.Player1;
       this.DefendingPlayer = this.Player2;
     } else {
       this.AttackingPlayer = this.Player2;
       this.DefendingPlayer = this.Player1;
     }
+
+    this.CanRetreat = true;
+    this.CanPlaySupporter = true;
   }
 
   attackActivePokemon(HP: number) {
