@@ -1,6 +1,6 @@
 import type { DeckInfo } from "@/types/DeckInfo";
 import type { PlayingCard } from "@/types/PlayingCard";
-import type { PokemonCard } from "./PokemonCard";
+import type { InPlayPokemonCard } from "./InPlayPokemonCard";
 import type { Energy } from "@/types/Energy";
 
 export class Player {
@@ -10,8 +10,10 @@ export class Player {
   Discard: PlayingCard[];
   GamePoints: number;
 
-  ActivePokemon?: PokemonCard;
-  BenchedPokemon: PokemonCard[];
+  ActivePokemon?: InPlayPokemonCard;
+  BenchedPokemon: InPlayPokemonCard[];
+  AvailableEnergy?: Energy;
+  NextEnergy: Energy;
 
   constructor(deck: DeckInfo) {
     if (
@@ -43,6 +45,12 @@ export class Player {
     this.Discard = [];
     this.BenchedPokemon = [];
     this.GamePoints = 0;
+    this.NextEnergy = "Colorless";
+  }
+
+  setup() {
+    this.drawInitialHand(5);
+    this.chooseNextEnergy();
   }
 
   reset() {
@@ -65,7 +73,7 @@ export class Player {
         this.Hand.some((card) => card.CardType == "Pokemon" && card.Stage == 0)
       )
         break;
-      this.shuffleHandIntoDeck;
+      this.shuffleHandIntoDeck();
     }
   }
 
@@ -89,6 +97,16 @@ export class Player {
   drawCards(count: number) {
     while (count-- > 0 && this.Deck.length > 0) {
       this.Hand.push(this.Deck.shift()!);
+    }
+  }
+
+  chooseNextEnergy() {
+    const length = this.EnergyTypes.length;
+    if (length == 1) {
+      this.NextEnergy = this.EnergyTypes[0];
+    } else {
+      const randomIndex = Math.floor(Math.random() * length);
+      this.NextEnergy = this.EnergyTypes[randomIndex];
     }
   }
 }

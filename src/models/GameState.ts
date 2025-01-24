@@ -1,7 +1,7 @@
 import type { PlayingCard } from "@/types/PlayingCard";
 import { Player } from "./Player";
 import type { DeckInfo } from "@/types/DeckInfo";
-import type { PokemonCard } from "./PokemonCard";
+import type { InPlayPokemonCard } from "./InPlayPokemonCard";
 import type { Energy } from "@/types/Energy";
 import { useCoinFlip } from "@/composables/useCoinFlip";
 
@@ -11,6 +11,7 @@ export class GameState {
   Player1: Player;
   Player2: Player;
 
+  TurnNumber: number;
   AttackingPlayer: Player;
   DefendingPlayer: Player;
   CanRetreat: boolean;
@@ -19,6 +20,7 @@ export class GameState {
   constructor(deck1: DeckInfo, deck2: DeckInfo) {
     this.Player1 = new Player(deck1);
     this.Player2 = new Player(deck2);
+    this.TurnNumber = 0;
 
     if (coinFlip()) {
       this.AttackingPlayer = this.Player1;
@@ -39,7 +41,7 @@ export class GameState {
     this.attackPokemon(defender, HP, attacker.Type);
   }
 
-  attackPokemon(defender: PokemonCard, HP: number, Type: Energy) {
+  attackPokemon(defender: InPlayPokemonCard, HP: number, Type: Energy) {
     let totalDamage = HP;
     if (totalDamage > 0 && Type == defender.Weakness) {
       totalDamage += 20;
@@ -47,7 +49,7 @@ export class GameState {
     defender.applyDamage(totalDamage);
   }
 
-  applyDamage(Pokemon: PokemonCard, HP: number) {
+  applyDamage(Pokemon: InPlayPokemonCard, HP: number) {
     Pokemon.applyDamage(HP);
 
     if (Pokemon.CurrentHP == 0) {

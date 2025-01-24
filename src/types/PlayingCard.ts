@@ -7,14 +7,14 @@ export type AbilityTrigger =
   | "ManyDuringTurn"
   | "OnAttackDamage"
   | "GameRule";
-export type Condition = "Active" | "OnBench" | "HasDamage";
+export type AbilityCondition = "Active" | "OnBench" | "HasDamage";
 export type PrimaryStatus = "Asleep"; // | "Paralyzed" | "Confused"
 export type SecondaryStatus = "Poisoned"; // | "Burned"
 
 export interface Ability {
   Name: string;
   Trigger: AbilityTrigger;
-  Conditions: Condition[];
+  Conditions: AbilityCondition[];
   Effect: Effect;
 }
 export interface Move {

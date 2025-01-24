@@ -7,7 +7,7 @@ import type {
   SecondaryStatus,
 } from "@/types/PlayingCard";
 
-export class PokemonCard implements IPokemonCard {
+export class InPlayPokemonCard implements IPokemonCard {
   ID: string;
   Name: string;
   CardType: "Pokemon";
