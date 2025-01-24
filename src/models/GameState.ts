@@ -1,4 +1,3 @@
-import type { PlayingCard } from "@/types/PlayingCard";
 import { Player } from "./Player";
 import type { DeckInfo } from "@/types/DeckInfo";
 import type { InPlayPokemonCard } from "./InPlayPokemonCard";
@@ -35,8 +34,8 @@ export class GameState {
   }
 
   attackActivePokemon(HP: number) {
-    let defender = this.DefendingPlayer.ActivePokemon;
-    let attacker = this.AttackingPlayer.ActivePokemon;
+    const defender = this.DefendingPlayer.ActivePokemon;
+    const attacker = this.AttackingPlayer.ActivePokemon;
     if (!defender || !attacker) return;
     this.attackPokemon(defender, HP, attacker.Type);
   }

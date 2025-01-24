@@ -24,7 +24,10 @@ export const usePlayingCardStore = defineStore("playing-cards", () => {
       }
       if (!parsed.parseSuccessful) {
         console.log("Failed to parse card:", card, parsed.value);
-        if (parsed.value) successCount--, softFailCount++;
+        if (parsed.value) {
+          successCount--;
+          softFailCount++;
+        }
       }
     }
     console.log(

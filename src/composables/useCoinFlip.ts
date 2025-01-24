@@ -2,8 +2,8 @@ export const useCoinFlip = () => {
   const coinFlip = () => Math.random() >= 0.5;
 
   const multiCoinFlip = (count: number) => {
-    let heads = 0,
-      results = [];
+    let heads = 0;
+    const results = [];
 
     for (let i = 0; i < count; i++) {
       const result = coinFlip();
@@ -15,8 +15,8 @@ export const useCoinFlip = () => {
   };
 
   const untilTailsCoinFlip = () => {
-    let heads = 0,
-      results = [];
+    let heads = 0;
+    const results = [];
 
     while (true) {
       const result = coinFlip();

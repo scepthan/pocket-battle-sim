@@ -78,7 +78,7 @@ export const useCardParser = () => {
     const Name = inputMove.Name;
 
     const RequiredEnergy: Energy[] = [];
-    for (let E of inputMove.Energy) {
+    for (const E of inputMove.Energy) {
       if (isEnergyShort(E)) RequiredEnergy.push(EnergyMap[E]);
       else parseSuccessful = false;
     }
