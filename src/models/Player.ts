@@ -7,6 +7,7 @@ export class Player {
   EnergyTypes: Energy[];
   Deck: PlayingCard[];
   Hand: PlayingCard[];
+  InPlay: PlayingCard[];
   Discard: PlayingCard[];
   GamePoints: number;
 
@@ -19,25 +20,26 @@ export class Player {
     this.EnergyTypes = deck.EnergyTypes;
     this.Deck = deck.Cards;
     this.Hand = [];
+    this.InPlay = [];
     this.Discard = [];
     this.BenchedPokemon = [];
     this.GamePoints = 0;
     this.NextEnergy = "Colorless";
   }
 
-  setup() {
-    this.drawInitialHand(5);
+  setup(handSize: number) {
+    this.drawInitialHand(handSize);
     this.chooseNextEnergy();
   }
 
   reset() {
-    this.Deck = this.Deck.concat(this.Hand, this.Discard, this.BenchedPokemon);
-    if (this.ActivePokemon) this.Deck.push(this.ActivePokemon);
-
     this.ActivePokemon = undefined;
     this.BenchedPokemon = [];
-    this.Discard = [];
+
+    this.Deck = this.Deck.concat(this.Hand, this.InPlay, this.Discard);
     this.Hand = [];
+    this.InPlay = [];
+    this.Discard = [];
     this.shuffleDeck();
   }
 

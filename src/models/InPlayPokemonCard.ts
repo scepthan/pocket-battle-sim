@@ -1,23 +1,18 @@
 import type { Energy } from "@/types/Energy";
-import type {
-  Ability,
-  PokemonCard as IPokemonCard,
-  Move,
-} from "@/types/PlayingCard";
+import type { Ability, PokemonCard, Move } from "@/types/PlayingCard";
 
 export type PrimaryStatus = "Asleep"; // | "Paralyzed" | "Confused"
 export type SecondaryStatus = "Poisoned"; // | "Burned"
 
-export class InPlayPokemonCard implements IPokemonCard {
-  ID: string;
+export class InPlayPokemonCard {
+  BaseCard: PokemonCard;
+
   Name: string;
-  CardType: "Pokemon";
   Type: Energy;
   BaseHP: number;
   Stage: number;
-  EvolvesFrom?: string;
-  RetreatCost: number;
-  Weakness: string;
+  RetreatCost?: number;
+  Weakness?: string;
   PrizePoints: number;
   Moves: Move[];
   Ability?: Ability;
@@ -26,16 +21,15 @@ export class InPlayPokemonCard implements IPokemonCard {
   PrimaryStatus?: PrimaryStatus;
   SecondaryStatuses: SecondaryStatus[];
   AttachedEnergy: Energy[];
-  CanEvolve: boolean;
+  ReadyToEvolve: boolean;
 
-  constructor(inputCard: IPokemonCard) {
-    this.ID = inputCard.ID;
+  constructor(inputCard: PokemonCard) {
+    this.BaseCard = inputCard;
+
     this.Name = inputCard.Name;
-    this.CardType = inputCard.CardType;
     this.Type = inputCard.Type;
     this.BaseHP = inputCard.BaseHP;
     this.Stage = inputCard.Stage;
-    this.EvolvesFrom = inputCard.EvolvesFrom;
     this.RetreatCost = inputCard.RetreatCost;
     this.Weakness = inputCard.Weakness;
     this.PrizePoints = inputCard.PrizePoints;
@@ -45,7 +39,7 @@ export class InPlayPokemonCard implements IPokemonCard {
     this.CurrentHP = this.BaseHP;
     this.SecondaryStatuses = [];
     this.AttachedEnergy = [];
-    this.CanEvolve = false;
+    this.ReadyToEvolve = false;
   }
 
   applyDamage(HP: number) {
