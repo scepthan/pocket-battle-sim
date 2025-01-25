@@ -3,9 +3,10 @@ import type {
   Ability,
   PokemonCard as IPokemonCard,
   Move,
-  PrimaryStatus,
-  SecondaryStatus,
 } from "@/types/PlayingCard";
+
+export type PrimaryStatus = "Asleep"; // | "Paralyzed" | "Confused"
+export type SecondaryStatus = "Poisoned"; // | "Burned"
 
 export class InPlayPokemonCard implements IPokemonCard {
   ID: string;
@@ -15,8 +16,8 @@ export class InPlayPokemonCard implements IPokemonCard {
   BaseHP: number;
   Stage: number;
   EvolvesFrom?: string;
-  RetreatCost?: number;
-  Weakness?: string;
+  RetreatCost: number;
+  Weakness: string;
   PrizePoints: number;
   Moves: Move[];
   Ability?: Ability;

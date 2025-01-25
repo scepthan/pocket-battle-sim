@@ -8,6 +8,10 @@ export type BenchSetup = [
   PokemonCard | undefined,
   PokemonCard | undefined
 ];
+export interface PlayerGameSetup {
+  active: PokemonCard;
+  bench: BenchSetup;
+}
 export interface GameInitState {
   hand: PlayingCard[];
   isGoingFirst: boolean;
@@ -18,10 +22,7 @@ export interface PlayerAgent {
   EnergyTypes: Energy[];
   Deck: PlayingCard[];
 
-  setupPokemon: (gameState: GameInitState) => Promise<{
-    active: PokemonCard;
-    bench: BenchSetup;
-  }>;
+  setupPokemon: (gameState: GameInitState) => Promise<PlayerGameSetup>;
   doTurn: (gameState: PlayerGameView) => Promise<Move | undefined>;
   swapActivePokemon: (gameState: PlayerGameView) => Promise<InPlayPokemonCard>;
 }

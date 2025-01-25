@@ -8,8 +8,6 @@ export type AbilityTrigger =
   | "OnAttackDamage"
   | "GameRule";
 export type AbilityCondition = "Active" | "OnBench" | "HasDamage";
-export type PrimaryStatus = "Asleep"; // | "Paralyzed" | "Confused"
-export type SecondaryStatus = "Poisoned"; // | "Burned"
 
 export interface Ability {
   Name: string;
@@ -33,8 +31,8 @@ export interface PokemonCard extends BaseCard {
   BaseHP: number;
   Stage: number;
   EvolvesFrom?: string;
-  RetreatCost?: number;
-  Weakness?: string;
+  RetreatCost: number;
+  Weakness: string;
   PrizePoints: number;
   Moves: Move[];
   Ability?: Ability;
@@ -47,5 +45,14 @@ export interface SupporterCard extends BaseCard {
   CardType: "Supporter";
   Effect: Effect;
 }
+export interface ToolCard extends BaseCard {
+  CardType: "Tool";
+  Effect: Effect;
+}
+export interface StadiumCard extends BaseCard {
+  CardType: "Stadium";
+  Effect: Effect;
+}
 
-export type PlayingCard = PokemonCard | ItemCard | SupporterCard;
+export type TrainerCard = ItemCard | SupporterCard; // | ToolCard | StadiumCard
+export type PlayingCard = PokemonCard | TrainerCard;

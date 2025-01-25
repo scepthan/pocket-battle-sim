@@ -16,29 +16,6 @@ export class Player {
   NextEnergy: Energy;
 
   constructor(deck: DeckInfo) {
-    if (
-      !deck.Cards.some((card) => card.CardType == "Pokemon" && card.Stage == 0)
-    )
-      throw new Error("Cannot use a deck with no Basic Pokemon");
-
-    if (
-      !deck.Cards.some(
-        (card) =>
-          card.CardType == "Pokemon" &&
-          card.Moves.some((move) =>
-            move.RequiredEnergy.every(
-              (energy) =>
-                energy == "Colorless" || deck.EnergyTypes.includes(energy)
-            )
-          )
-      )
-    )
-      throw new Error("Must be able to use at least one attack");
-
-    for (const name of new Set(deck.Cards.map((card) => card.Name)))
-      if (deck.Cards.filter((card) => card.Name == name).length > 2)
-        throw new Error("Cannot use more than two cards with the same name");
-
     this.EnergyTypes = deck.EnergyTypes;
     this.Deck = deck.Cards;
     this.Hand = [];
@@ -69,10 +46,9 @@ export class Player {
 
     while (true) {
       this.drawCards(handSize);
-      if (
-        this.Hand.some((card) => card.CardType == "Pokemon" && card.Stage == 0)
-      )
+      if (this.hasBasicPokemon()) {
         break;
+      }
       this.shuffleHandIntoDeck();
     }
   }
@@ -108,5 +84,11 @@ export class Player {
       const randomIndex = Math.floor(Math.random() * length);
       this.NextEnergy = this.EnergyTypes[randomIndex];
     }
+  }
+
+  hasBasicPokemon() {
+    return this.Hand.some(
+      (card) => card.CardType == "Pokemon" && card.Stage == 0
+    );
   }
 }
