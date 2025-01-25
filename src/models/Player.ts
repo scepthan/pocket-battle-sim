@@ -1,4 +1,4 @@
-import type { DeckInfo } from "@/types/DeckInfo";
+import type { Deck } from "@/types/Deck";
 import type { PlayingCard } from "@/types/PlayingCard";
 import type { InPlayPokemonCard } from "./InPlayPokemonCard";
 import type { Energy } from "@/types/Energy";
@@ -16,7 +16,7 @@ export class Player {
   AvailableEnergy?: Energy;
   NextEnergy: Energy;
 
-  constructor(deck: DeckInfo) {
+  constructor(deck: Deck) {
     this.EnergyTypes = deck.EnergyTypes;
     this.Deck = deck.Cards;
     this.Hand = [];

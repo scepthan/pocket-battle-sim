@@ -1,12 +1,14 @@
 import { Player } from "./Player";
-import type { DeckInfo } from "@/types/DeckInfo";
+import type { DeckInfo } from "@/types/Deck";
 import type { InPlayPokemonCard } from "./InPlayPokemonCard";
 import type { Energy } from "@/types/Energy";
 import { useCoinFlip } from "@/composables/useCoinFlip";
 import { useDeckValidator } from "@/composables/useDeckValidator";
 import type { GameRules } from "@/types/GameRules";
+import { usePlayingCardStore } from "@/stores/usePlayingCardStore";
 
 const { coinFlip } = useCoinFlip();
+const { parseDeck } = usePlayingCardStore();
 
 export class GameState {
   Player1: Player;
@@ -18,8 +20,18 @@ export class GameState {
   CanRetreat: boolean;
   CanPlaySupporter: boolean;
 
-  constructor(rules: GameRules, deck1: DeckInfo, deck2: DeckInfo) {
+  constructor(rules: GameRules, deckInfo1: DeckInfo, deckInfo2: DeckInfo) {
+    const deck1 = {
+      Cards: parseDeck(deckInfo1.Cards),
+      EnergyTypes: deckInfo1.EnergyTypes,
+    };
+    const deck2 = {
+      Cards: parseDeck(deckInfo2.Cards),
+      EnergyTypes: deckInfo2.EnergyTypes,
+    };
+
     const { validateDeck } = useDeckValidator(rules);
+
     const validation1 = validateDeck(deck1);
     if (validation1 !== true) {
       throw new Error("Player 1 has an invalid deck: " + validation1);

@@ -7,6 +7,7 @@ export type SecondaryStatus = "Poisoned"; // | "Burned"
 export class InPlayPokemonCard {
   BaseCard: PokemonCard;
 
+  ID: string;
   Name: string;
   Type: Energy;
   BaseHP: number;
@@ -26,6 +27,7 @@ export class InPlayPokemonCard {
   constructor(inputCard: PokemonCard) {
     this.BaseCard = inputCard;
 
+    this.ID = inputCard.ID;
     this.Name = inputCard.Name;
     this.Type = inputCard.Type;
     this.BaseHP = inputCard.BaseHP;

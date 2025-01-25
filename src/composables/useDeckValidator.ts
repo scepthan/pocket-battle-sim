@@ -1,16 +1,16 @@
-import type { DeckInfo } from "@/types/DeckInfo";
+import type { Deck } from "@/types/Deck";
 import type { Energy } from "@/types/Energy";
 import type { GameRules } from "@/types/GameRules";
 import type { Move, PokemonCard } from "@/types/PlayingCard";
 
 export const useDeckValidator = (rules: GameRules) => {
-  const hasCorrectAmountOfCards = (deck: DeckInfo) =>
+  const hasCorrectAmountOfCards = (deck: Deck) =>
     deck.Cards.length == rules.DeckSize;
 
-  const hasBasicPokemon = (deck: DeckInfo) =>
+  const hasBasicPokemon = (deck: Deck) =>
     deck.Cards.some((card) => card.CardType == "Pokemon" && card.Stage == 0);
 
-  const hasNoMoreThanTwoWithSameName = (deck: DeckInfo) => {
+  const hasNoMoreThanTwoWithSameName = (deck: Deck) => {
     for (const name of new Set(deck.Cards.map((card) => card.Name)))
       if (deck.Cards.filter((card) => card.Name == name).length > 2)
         return false;
@@ -23,13 +23,13 @@ export const useDeckValidator = (rules: GameRules) => {
     );
   const canUseAnyMove = (card: PokemonCard, energyTypes: Energy[]) =>
     card.Moves.some((move) => canUseMove(move, energyTypes));
-  const anyCanUseAnyMove = (deck: DeckInfo) =>
+  const anyCanUseAnyMove = (deck: Deck) =>
     deck.Cards.some(
       (card) =>
         card.CardType == "Pokemon" && canUseAnyMove(card, deck.EnergyTypes)
     );
 
-  const validateDeck = (deck: DeckInfo) => {
+  const validateDeck = (deck: Deck) => {
     if (!hasCorrectAmountOfCards(deck)) {
       return `Deck must consist of exactly ${rules.DeckSize} cards`;
     }
