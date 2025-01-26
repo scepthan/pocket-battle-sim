@@ -86,7 +86,7 @@ export class PlayerGameView {
         return !bench[0] || !bench[1] || !bench[2];
       } else {
         const currPokemon = [this.selfActive, ...this.selfBenched];
-        return currPokemon.some((pokemon) => pokemon?.EvolvesFrom == card.Name);
+        return currPokemon.some((pokemon) => card.EvolvesFrom == pokemon?.Name);
       }
     } else if (card.CardType == "Supporter") {
       return this.canPlaySupporter;

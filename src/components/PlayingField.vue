@@ -1,9 +1,11 @@
 <template>
   <v-container fluid>
     <div class="d-flex flex-wrap ga-2">
-      <div v-for="(card, i) of deck.Cards" :key="i">
-        <PokemonCard :card="card" />
+      <div v-for="(cardId, i) of deck.Cards" :key="i">
+        <PlayingCard :card-id="cardId" />
       </div>
+      <PlayingCard />
+      <PlayingCard card-id="A1-001" :hp="70" />
     </div>
   </v-container>
 </template>
@@ -11,7 +13,7 @@
 <script setup lang="ts">
 import type { DeckInfo } from "@/types/Deck";
 import { ref } from "vue";
-import PokemonCard from "./PokemonCard.vue";
+import PlayingCard from "./PlayingCard.vue";
 
 const prebuiltDecks: Record<string, DeckInfo> = {
   Celebi1: {

@@ -15,3 +15,9 @@ const cardStore = usePlayingCardStore();
 
 cardStore.loadCards();
 </script>
+
+<style scoped>
+div.v-application {
+  background-color: #c0d8ef;
+}
+</style>
