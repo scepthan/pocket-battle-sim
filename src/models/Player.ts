@@ -12,7 +12,7 @@ export class Player {
   GamePoints: number;
 
   ActivePokemon?: InPlayPokemonCard;
-  BenchedPokemon: InPlayPokemonCard[];
+  Bench: (InPlayPokemonCard | undefined)[];
   AvailableEnergy?: Energy;
   NextEnergy: Energy;
 
@@ -22,7 +22,7 @@ export class Player {
     this.Hand = [];
     this.InPlay = [];
     this.Discard = [];
-    this.BenchedPokemon = [];
+    this.Bench = [];
     this.GamePoints = 0;
     this.NextEnergy = "Colorless";
   }
@@ -34,7 +34,7 @@ export class Player {
 
   reset() {
     this.ActivePokemon = undefined;
-    this.BenchedPokemon = [];
+    this.Bench = [];
 
     this.Deck = this.Deck.concat(this.Hand, this.InPlay, this.Discard);
     this.Hand = [];

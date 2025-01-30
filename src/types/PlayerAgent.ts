@@ -3,11 +3,7 @@ import type { Energy } from "./Energy";
 import type { Move, PlayingCard, PokemonCard } from "./PlayingCard";
 import type { PlayerGameView } from "@/models/PlayerGameView";
 
-export type BenchSetup = [
-  PokemonCard | undefined,
-  PokemonCard | undefined,
-  PokemonCard | undefined
-];
+export type BenchSetup = (PokemonCard | undefined)[];
 export interface PlayerGameSetup {
   active: PokemonCard;
   bench: BenchSetup;

@@ -1,14 +1,12 @@
 import { Player } from "./Player";
-import type { DeckInfo } from "@/types/Deck";
 import type { InPlayPokemonCard } from "./InPlayPokemonCard";
 import type { Energy } from "@/types/Energy";
 import { useCoinFlip } from "@/composables/useCoinFlip";
 import { useDeckValidator } from "@/composables/useDeckValidator";
 import type { GameRules } from "@/types/GameRules";
-import { usePlayingCardStore } from "@/stores/usePlayingCardStore";
+import type { PlayerAgent } from "@/types/PlayerAgent";
 
 const { coinFlip } = useCoinFlip();
-const { parseDeck } = usePlayingCardStore();
 
 export class GameState {
   Player1: Player;
@@ -20,14 +18,14 @@ export class GameState {
   CanRetreat: boolean;
   CanPlaySupporter: boolean;
 
-  constructor(rules: GameRules, deckInfo1: DeckInfo, deckInfo2: DeckInfo) {
+  constructor(rules: GameRules, agent1: PlayerAgent, agent2: PlayerAgent) {
     const deck1 = {
-      Cards: parseDeck(deckInfo1.Cards),
-      EnergyTypes: deckInfo1.EnergyTypes,
+      Cards: agent1.Deck,
+      EnergyTypes: agent1.EnergyTypes,
     };
     const deck2 = {
-      Cards: parseDeck(deckInfo2.Cards),
-      EnergyTypes: deckInfo2.EnergyTypes,
+      Cards: agent2.Deck,
+      EnergyTypes: agent2.EnergyTypes,
     };
 
     const { validateDeck } = useDeckValidator(rules);
@@ -55,6 +53,9 @@ export class GameState {
 
     this.CanRetreat = true;
     this.CanPlaySupporter = true;
+
+    this.AttackingPlayer.setup(rules.HandSize);
+    this.DefendingPlayer.setup(rules.HandSize);
   }
 
   attackActivePokemon(HP: number) {

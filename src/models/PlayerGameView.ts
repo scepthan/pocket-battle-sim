@@ -1,6 +1,7 @@
 import type { PlayingCard } from "@/types/PlayingCard";
 import type { GameState } from "./GameState";
 import type { Player } from "./Player";
+import type { InPlayPokemonCard } from "./InPlayPokemonCard";
 
 export class PlayerGameView {
   #gameState: GameState;
@@ -29,8 +30,11 @@ export class PlayerGameView {
   get selfActive() {
     return this.#player.ActivePokemon;
   }
+  get selfBench() {
+    return this.#player.Bench.slice();
+  }
   get selfBenched() {
-    return this.#player.BenchedPokemon.slice();
+    return this.#player.Bench.filter((x) => x) as InPlayPokemonCard[];
   }
   get selfHand() {
     return this.#player.Hand.slice();
@@ -52,8 +56,11 @@ export class PlayerGameView {
   get opponentActive() {
     return this.#opponent.ActivePokemon;
   }
+  get opponentBench() {
+    return this.#opponent.Bench.slice();
+  }
   get opponentBenched() {
-    return this.#opponent.BenchedPokemon.slice();
+    return this.#opponent.Bench.filter((x) => x) as InPlayPokemonCard[];
   }
   get opponentHandSize() {
     return this.#opponent.Hand.length;

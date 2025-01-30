@@ -1,20 +1,19 @@
 <template>
   <v-container fluid>
     <div class="d-flex flex-wrap ga-2">
-      <div v-for="(cardId, i) of deck.Cards" :key="i">
-        <PlayingCard :card-id="cardId" />
+      <div v-for="(card, i) of game?.Player1.Hand" :key="i">
+        <PlayingCard :card="card" />
       </div>
-      <PlayingCard />
-      <PlayingCard card-id="A1-001" :hp="40" :base-hp="70" />
-      <PlayingCard card-id="A1-001" :hp="40" :base-hp="70" :height-px="150" />
     </div>
   </v-container>
 </template>
 
 <script setup lang="ts">
 import type { DeckInfo } from "@/types/Deck";
-import { ref } from "vue";
 import PlayingCard from "./PlayingCard.vue";
+import { GameState } from "@/models/GameState";
+import { RandomAgent } from "@/models/agents/RandomAgent";
+import { onMounted, ref } from "vue";
 
 const prebuiltDecks: Record<string, DeckInfo> = {
   Celebi1: {
@@ -23,9 +22,9 @@ const prebuiltDecks: Record<string, DeckInfo> = {
       "A1a-004",
       "A1a-005",
       "A1a-005",
-      "A1a-006",
-      "A1a-006",
       "A1a-009",
+      "A1a-070",
+      "A1a-070",
       "A1a-075",
       "A1a-085",
       "PROMO-001",
@@ -50,10 +49,10 @@ const prebuiltDecks: Record<string, DeckInfo> = {
       "A1-116",
       "A1-116",
       "A1-131",
-      "A1-117",
-      "A1-117",
-      "A1-132",
       "A1a-033",
+      "A1-132",
+      "A1-236",
+      "A1-236",
       "PROMO-001",
       "PROMO-002",
       "PROMO-002",
@@ -69,5 +68,23 @@ const prebuiltDecks: Record<string, DeckInfo> = {
   },
 };
 
-const deck = ref<DeckInfo>(prebuiltDecks.Celebi1);
+const player = ref<RandomAgent>();
+const opponent = ref<RandomAgent>();
+const game = ref<GameState>();
+
+onMounted(() => {
+  player.value = new RandomAgent(prebuiltDecks.Celebi1);
+  opponent.value = new RandomAgent(prebuiltDecks.Alakazam1);
+
+  game.value = new GameState(
+    {
+      DeckSize: 20,
+      HandSize: 5,
+    },
+    player.value,
+    opponent.value
+  );
+
+  console.log(game.value);
+});
 </script>

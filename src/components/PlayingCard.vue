@@ -4,11 +4,11 @@
       <div class="flip-card-front stacked">
         <img :src="cardURL" :height="height" />
         <div
-          v-if="hp !== undefined"
+          v-if="card && 'BaseCard' in card"
           class="card-hp d-flex flex-column align-end"
           :style="{ fontSize: height / 8 + 'px' }"
         >
-          {{ Math.floor(hp) }}
+          {{ Math.floor(card.BaseHP) }}
           <div
             class="stacked"
             :style="{
@@ -59,18 +59,18 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import cardBackUrl from "@/assets/cardback.jpg";
+import type { InPlayPokemonCard } from "@/models/InPlayPokemonCard";
+import type { PlayingCard } from "@/types/PlayingCard";
 
 export interface Props {
   heightPx?: number;
-  cardId?: string;
-  hp?: number;
-  baseHp?: number;
+  card?: PlayingCard | InPlayPokemonCard;
 }
 const props = defineProps<Props>();
 
 const cardURL = computed(() =>
-  props.cardId
-    ? `https://static.dotgg.gg/pokepocket/card/${props.cardId}.webp`
+  props.card
+    ? `https://static.dotgg.gg/pokepocket/card/${props.card.ID}.webp`
     : cardBackUrl
 );
 
@@ -79,7 +79,9 @@ const height = computed(() => props.heightPx ?? 200);
 const width = computed(() => height.value * ratio);
 
 const hpPercent = computed(() =>
-  props.hp && props.baseHp ? (props.hp / props.baseHp) * 100 : 0
+  props.card && "BaseCard" in props.card
+    ? (props.card.CurrentHP / props.card.BaseHP) * 100
+    : 0
 );
 
 const style = computed(() => ({

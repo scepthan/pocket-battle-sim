@@ -2,7 +2,7 @@
   <v-app>
     <v-main>
       Hello world!
-      <PlayingField />
+      <PlayingField v-if="cardStore.Cards.length > 0" />
     </v-main>
   </v-app>
 </template>
