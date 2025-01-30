@@ -5,7 +5,8 @@
         <PlayingCard :card-id="cardId" />
       </div>
       <PlayingCard />
-      <PlayingCard card-id="A1-001" :hp="70" />
+      <PlayingCard card-id="A1-001" :hp="40" :base-hp="70" />
+      <PlayingCard card-id="A1-001" :hp="40" :base-hp="70" :height-px="150" />
     </div>
   </v-container>
 </template>
