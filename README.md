@@ -10,7 +10,7 @@ Backend todo:
 
 Frontend todo:
 
-- [ ] Battle simulator UI
+- [ ] Battle simulator UI (~10%)
 - [ ] Deck builder UI
 
 Other todo:

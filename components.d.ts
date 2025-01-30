@@ -7,7 +7,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    InPlayPokemonCard: typeof import('./src/components/InPlayPokemonCard.vue')['default']
+    InPlayCardSlot: typeof import('./src/components/InPlayCardSlot.vue')['default']
     PlayingCard: typeof import('./src/components/PlayingCard.vue')['default']
     PlayingField: typeof import('./src/components/PlayingField.vue')['default']
   }
