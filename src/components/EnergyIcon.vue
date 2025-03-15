@@ -1,5 +1,5 @@
 <template>
-  <img :src="energyUrl" />
+  <img :src="energyUrl" :title="energy" />
 </template>
 
 <script setup lang="ts">

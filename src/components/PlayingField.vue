@@ -31,8 +31,20 @@
         <div
           class="h-100 d-flex flex-column align-center justify-space-between"
         >
-          <PlayerHandHidden :cards="game?.Player2.Hand.length ?? 0" />
-          <PlayerHandVisible :cards="game?.Player1.Hand ?? []" />
+          <div class="d-flex flex-row">
+            <EnergyZone
+              :current-energy="game?.Player2.AvailableEnergy"
+              :next-energy="game?.Player2.NextEnergy"
+            />
+            <PlayerHandHidden :cards="game?.Player2.Hand.length ?? 0" />
+          </div>
+          <div class="d-flex flex-row align-end">
+            <EnergyZone
+              :current-energy="game?.Player1.AvailableEnergy"
+              :next-energy="game?.Player1.NextEnergy"
+            />
+            <PlayerHandVisible :cards="game?.Player1.Hand ?? []" />
+          </div>
         </div>
       </div>
     </div>
