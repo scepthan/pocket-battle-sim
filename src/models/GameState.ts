@@ -5,6 +5,7 @@ import { useCoinFlip } from "@/composables/useCoinFlip";
 import { useDeckValidator } from "@/composables/useDeckValidator";
 import type { GameRules } from "@/types/GameRules";
 import type { PlayerAgent, PlayerGameSetup } from "@/types/PlayerAgent";
+import type { PokemonCard } from "@/types/PlayingCard";
 
 const { coinFlip } = useCoinFlip();
 
@@ -108,10 +109,28 @@ export class GameState {
 
     setup.bench.map((card, i) => {
       if (!card) return;
-      player.Bench[i] = new InPlayPokemonCard(card);
-      player.InPlay.push(card);
-      player.Hand.splice(player.Hand.indexOf(card), 1);
+      this.putPokemonOnBench(player, card, i);
     });
+  }
+
+  putPokemonOnBench(player: Player, card: PokemonCard, index: number) {
+    if (player.Bench[index]) {
+      throw new Error("Bench already has a Pokemon in this slot");
+    }
+    if (!player.Hand.includes(card)) {
+      throw new Error("Card not in hand");
+    }
+    if (card.Stage != 0) {
+      throw new Error("Can only play Basic Pokemon to bench");
+    }
+
+    player.Bench[index] = new InPlayPokemonCard(card);
+    player.InPlay.push(card);
+    player.Hand.splice(player.Hand.indexOf(card), 1);
+  }
+
+  playToBench(card: PokemonCard, index: number) {
+    this.putPokemonOnBench(this.AttackingPlayer, card, index);
   }
 
   attackActivePokemon(HP: number) {

@@ -5,6 +5,8 @@ import type { GameInitState, PlayerAgent } from "@/types/PlayerAgent";
 import type { PlayingCard, PokemonCard } from "@/types/PlayingCard";
 import type { PlayerGameView } from "../PlayerGameView";
 
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export class RandomAgent implements PlayerAgent {
   EnergyTypes: Energy[];
   Deck: PlayingCard[];
@@ -20,14 +22,19 @@ export class RandomAgent implements PlayerAgent {
     const basicPokemon = gameState.hand.filter(
       (x) => x.CardType == "Pokemon" && x.Stage == 0
     ) as PokemonCard[];
+    if (basicPokemon.length === 0) {
+      throw new Error("No basic Pokemon in hand");
+    }
+
     return {
-      active: basicPokemon[(Math.random() * basicPokemon.length) | 0],
-      bench: [],
+      active: basicPokemon[0],
+      bench: basicPokemon.slice(1, 4),
     };
   }
 
   async doTurn(gameState: PlayerGameView) {
     console.log(gameState);
+    wait(1000); // wait for 1 second to simulate thinking time
     return undefined;
   }
 
