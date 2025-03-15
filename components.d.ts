@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     copy: typeof import('./src/components/PlayerHandVisible copy.vue')['default']
+    EnergyIcon: typeof import('./src/components/EnergyIcon.vue')['default']
     InPlayCardSlot: typeof import('./src/components/InPlayCardSlot.vue')['default']
     PlayerHand: typeof import('./src/components/PlayerHand.vue')['default']
     PlayerHandHidden: typeof import('./src/components/PlayerHandHidden.vue')['default']

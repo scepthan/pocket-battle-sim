@@ -1,60 +1,39 @@
 <template>
-  <div v-if="card" class="stacked" :style="style">
+  <div v-if="card" class="stacked" :style="cardStyle">
     <PlayingCard :card="card.BaseCard" :height-px="heightPx" />
 
     <div class="card-hp d-flex flex-column align-end">
       {{ Math.floor(card.BaseHP) }}
-      <div
-        class="stacked"
-        :style="{
-          width: '25%',
-          height: '4%',
-          marginTop: '-5%',
-        }"
-      >
-        <div
-          class="d-flex flex-row"
-          :style="{
-            width: 'calc(100% - 3px)',
-            height: 'calc(100% - 3px)',
-            marginTop: '1.5px',
-            marginLeft: '1.5px',
-          }"
-        >
-          <div
-            :style="{
-              width: hpPercent + '%',
-              backgroundColor: '#2F0',
-            }"
-          />
-          <div
-            :style="{
-              width: 100 - hpPercent + '%',
-              backgroundColor: '#333',
-            }"
-          />
+      <div class="stacked hp-bar-container">
+        <div class="hp-bar-inner">
+          <div :style="hpBarStyle" />
+          <div :style="hpBarPaddingStyle" />
         </div>
-
-        <div
-          :style="{
-            border: '2px solid #333',
-            borderRadius: '4px',
-          }"
-        ></div>
+        <div class="hp-bar-border" />
       </div>
+    </div>
+
+    <div class="card-energy">
+      <EnergyIcon
+        v-for="i in card.AttachedEnergy.length"
+        :key="i"
+        :width="height / 10"
+        :energy="card.AttachedEnergy[i - 1]"
+      />
     </div>
   </div>
 
   <div
     v-else
-    :style="{ ...style, border: '2px solid #333a', borderRadius: '4px' }"
-  ></div>
+    :style="{ ...cardStyle, border: '2px solid #333a', borderRadius: '4px' }"
+  />
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
 import type { InPlayPokemonCard } from "@/models/InPlayPokemonCard";
 import PlayingCard from "./PlayingCard.vue";
+import EnergyIcon from "./EnergyIcon.vue";
 
 export interface Props {
   heightPx?: number;
@@ -72,10 +51,18 @@ const hpPercent = computed(() =>
     : 0
 );
 
-const style = computed(() => ({
+const cardStyle = computed(() => ({
   width: width.value + "px",
   height: height.value + "px",
   fontSize: height.value / 8 + "px",
+}));
+const hpBarStyle = computed(() => ({
+  width: hpPercent.value + "%",
+  backgroundColor: "#2F0", // ideally would change color based on %
+}));
+const hpBarPaddingStyle = computed(() => ({
+  width: 100 - hpPercent.value + "%",
+  backgroundColor: "#333",
 }));
 </script>
 
@@ -99,5 +86,32 @@ const style = computed(() => ({
     0.07em 0 0.04em white, 0.07em -0.07em 0.04em white, 0 -0.07em 0.04em white,
     -0.07em -0.07em 0.04em white, -0.07em 0 0.04em white,
     -0.07em 0.07em 0.04em white;
+}
+
+.hp-bar-container {
+  width: 25%;
+  height: 4%;
+  margin-top: -5%;
+}
+.hp-bar-inner {
+  display: flex;
+  flex-direction: row;
+  width: calc(100% - 3px);
+  height: calc(100% - 3px);
+  margin-top: 1.5px;
+  margin-left: 1.5px;
+}
+.hp-bar-border {
+  border: 2px solid #333;
+  border-radius: 4px;
+}
+
+.card-energy {
+  z-index: 100;
+  display: flex;
+  align-items: end;
+}
+.card-energy img {
+  margin-right: -8px;
 }
 </style>
