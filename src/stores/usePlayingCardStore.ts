@@ -43,9 +43,9 @@ export const usePlayingCardStore = defineStore("playing-cards", () => {
     for (const cardId of cardIds) {
       const card = Cards.value.find((c) => c.ID == cardId);
       if (card) {
-        deck.push(card);
+        deck.push(Object.assign({}, card));
       } else {
-        console.warn("Could not find card with ID " + cardId);
+        throw new Error("Could not find card with ID " + cardId);
       }
     }
 
