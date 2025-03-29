@@ -15,6 +15,7 @@ export interface GameInitState {
 }
 
 export interface PlayerAgent {
+  Name: string;
   EnergyTypes: Energy[];
   Deck: PlayingCard[];
 

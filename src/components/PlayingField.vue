@@ -38,6 +38,22 @@
             />
             <PlayerHandHidden :cards="game?.Player2.Hand.length ?? 0" />
           </div>
+          <div
+            class="flex-grow-1 d-flex flex-column-reverse overflow-y-auto"
+            style="max-height: 270px"
+          >
+            <div>
+              <p
+                v-for="(message, i) in game?.GameLog ?? []"
+                :key="i"
+                :class="{
+                  'text-h2': /^Turn \d+$/.test(message),
+                }"
+              >
+                {{ message }}
+              </p>
+            </div>
+          </div>
           <div class="d-flex flex-row align-end">
             <EnergyZone
               :current-energy="game?.Player1.AvailableEnergy"

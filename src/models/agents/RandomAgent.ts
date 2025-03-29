@@ -8,6 +8,7 @@ import type { PlayerGameView } from "../PlayerGameView";
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export class RandomAgent implements PlayerAgent {
+  Name: string = "Random Agent";
   EnergyTypes: Energy[];
   Deck: PlayingCard[];
 

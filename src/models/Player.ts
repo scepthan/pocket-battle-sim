@@ -4,27 +4,23 @@ import type { InPlayPokemonCard } from "./InPlayPokemonCard";
 import type { Energy } from "@/types/Energy";
 
 export class Player {
-  EnergyTypes: Energy[];
-  Deck: PlayingCard[];
-  Hand: PlayingCard[];
-  InPlay: PlayingCard[];
-  Discard: PlayingCard[];
-  GamePoints: number;
+  Name: string;
+  EnergyTypes: Energy[]; // The types of energy available in the player's deck
+  Deck: PlayingCard[]; // The player's deck of cards, initially set from the provided deck
+  Hand: PlayingCard[] = []; // Cards in the player's hand
+  InPlay: PlayingCard[] = []; // Cards that are currently in play (active or benched Pokémon)
+  Discard: PlayingCard[] = []; // Cards that have been discarded during the game
+  GamePoints: number = 0; // The number of prize cards the player has taken (for winning the game)
 
-  ActivePokemon?: InPlayPokemonCard;
-  Bench: (InPlayPokemonCard | undefined)[];
-  AvailableEnergy?: Energy;
-  NextEnergy: Energy;
+  ActivePokemon?: InPlayPokemonCard; // The active Pokémon card (undefined only for setup phase)
+  Bench: (InPlayPokemonCard | undefined)[] = []; // Pokémon cards on the bench, undefined if no Pokémon is in a slot
+  AvailableEnergy?: Energy; // The energy type available for use this turn, if any (not used in all game modes)
+  NextEnergy: Energy = "Colorless"; // The next energy type to be used for attaching to Pokémon, set when the game starts
 
-  constructor(deck: Deck) {
+  constructor(name: string, deck: Deck) {
+    this.Name = name;
     this.EnergyTypes = deck.EnergyTypes;
     this.Deck = deck.Cards;
-    this.Hand = [];
-    this.InPlay = [];
-    this.Discard = [];
-    this.Bench = [];
-    this.GamePoints = 0;
-    this.NextEnergy = "Colorless";
   }
 
   setup(handSize: number) {

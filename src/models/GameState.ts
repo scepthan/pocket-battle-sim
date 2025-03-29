@@ -15,11 +15,12 @@ export class GameState {
   Player1: Player;
   Player2: Player;
 
-  TurnNumber: number;
+  TurnNumber: number = 0;
   AttackingPlayer: Player;
   DefendingPlayer: Player;
-  CanRetreat: boolean;
-  CanPlaySupporter: boolean;
+  CanRetreat: boolean = true;
+  CanPlaySupporter: boolean = true;
+  GameLog: string[] = [];
 
   constructor(rules: GameRules, agent1: PlayerAgent, agent2: PlayerAgent) {
     this.Agent1 = agent1;
@@ -45,20 +46,17 @@ export class GameState {
       throw new Error("Player 2 has an invalid deck: " + validation2);
     }
 
-    this.Player1 = new Player(deck1);
-    this.Player2 = new Player(deck2);
-    this.TurnNumber = 0;
+    this.Player1 = new Player(agent1.Name + " (1)", deck1);
+    this.Player2 = new Player(agent2.Name + " (2)", deck2);
 
+    // Randomize who goes first based on a coin flip
+    const players = [this.Player1, this.Player2];
     if (coinFlip()) {
-      this.AttackingPlayer = this.Player1;
-      this.DefendingPlayer = this.Player2;
-    } else {
-      this.AttackingPlayer = this.Player2;
-      this.DefendingPlayer = this.Player1;
+      players.reverse();
     }
-
-    this.CanRetreat = true;
-    this.CanPlaySupporter = true;
+    this.GameLog.push(players[0].Name + " wins the coin flip and goes first!");
+    this.AttackingPlayer = players[0];
+    this.DefendingPlayer = players[1];
 
     this.AttackingPlayer.setup(rules.HandSize);
     this.DefendingPlayer.setup(rules.HandSize);
@@ -72,6 +70,17 @@ export class GameState {
 
     this.setupPlayer(this.Player1, setup1);
     this.setupPlayer(this.Player2, setup2);
+    for (const player of [this.Player1, this.Player2]) {
+      this.GameLog.push(
+        `${player.Name} has setup their Pokémon:`,
+        `- Active: ${player.ActivePokemon!.Name} (${player.ActivePokemon!.ID})`,
+        `- Bench: ${
+          player.Bench.filter((x) => x !== undefined)
+            .map((x) => `${x.Name} (${x.ID})`)
+            .join(", ") || "none"
+        }`
+      );
+    }
   }
 
   async startPlayer(agent: PlayerAgent, player: Player) {
