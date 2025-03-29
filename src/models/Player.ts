@@ -68,10 +68,19 @@ export class Player {
     this.shuffleDeck();
   }
 
-  drawCards(count: number) {
-    while (count-- > 0 && this.Deck.length > 0) {
+  drawCards(count: number, maxHandSize: number) {
+    let cardsDrawn = 0;
+    while (cardsDrawn < count) {
+      if (this.Deck.length == 0) {
+        return { success: false, cardsDrawn, message: "Deck is empty" };
+      }
+      if (this.Hand.length >= maxHandSize) {
+        return { success: false, cardsDrawn, message: "Hand is full" };
+      }
       this.Hand.push(this.Deck.shift()!);
+      cardsDrawn += 1;
     }
+    return { success: true, cardsDrawn, message: "Cards drawn successfully" };
   }
 
   chooseNextEnergy() {

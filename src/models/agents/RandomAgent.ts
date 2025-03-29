@@ -35,7 +35,7 @@ export class RandomAgent implements PlayerAgent {
 
   async doTurn(gameState: PlayerGameView) {
     console.log(gameState);
-    wait(1000); // wait for 1 second to simulate thinking time
+    await wait(1000); // wait for 1 second to simulate thinking time
     return undefined;
   }
 

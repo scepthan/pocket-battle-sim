@@ -6,6 +6,7 @@ import { useDeckValidator } from "@/composables/useDeckValidator";
 import type { GameRules } from "@/types/GameRules";
 import type { PlayerAgent, PlayerGameSetup } from "@/types/PlayerAgent";
 import type { PokemonCard } from "@/types/PlayingCard";
+import { PlayerGameView } from "./PlayerGameView";
 
 const { coinFlip } = useCoinFlip();
 
@@ -21,6 +22,9 @@ export class GameState {
   CanRetreat: boolean = true;
   CanPlaySupporter: boolean = true;
   GameLog: string[] = [];
+
+  MaxHandSize: number = 10;
+  MaxTurnNumber: number = 30;
 
   constructor(rules: GameRules, agent1: PlayerAgent, agent2: PlayerAgent) {
     this.Agent1 = agent1;
@@ -81,6 +85,10 @@ export class GameState {
         }`
       );
     }
+
+    while (this.TurnNumber < this.MaxTurnNumber) {
+      await this.nextTurn();
+    }
   }
 
   async startPlayer(agent: PlayerAgent, player: Player) {
@@ -136,6 +144,74 @@ export class GameState {
     player.Bench[index] = new InPlayPokemonCard(card);
     player.InPlay.push(card);
     player.Hand.splice(player.Hand.indexOf(card), 1);
+  }
+
+  async nextTurn() {
+    if (this.TurnNumber > 0) {
+      // Switch the attacking and defending players
+      [this.AttackingPlayer, this.DefendingPlayer] = [
+        this.DefendingPlayer,
+        this.AttackingPlayer,
+      ];
+    }
+    this.TurnNumber += 1;
+
+    // Reset turn-based flags
+    this.CanRetreat = true;
+    this.CanPlaySupporter = true;
+
+    // Log the turn change
+    this.GameLog.push(
+      `Turn ${this.TurnNumber}`,
+      `${this.AttackingPlayer.Name} is now the attacking player!`
+    );
+
+    if (this.TurnNumber > 1) {
+      this.AttackingPlayer.AvailableEnergy = this.AttackingPlayer.NextEnergy; // Set the available energy for the attacking player
+      this.AttackingPlayer.chooseNextEnergy();
+      this.GameLog.push(
+        `${this.AttackingPlayer.AvailableEnergy} Energy generated. (Next: ${this.AttackingPlayer.NextEnergy})`
+      );
+    }
+
+    // Draw a card into the attacking player's hand
+    const draw = this.AttackingPlayer.drawCards(1, this.MaxHandSize);
+    if (draw.success) {
+      this.GameLog.push(
+        `Card drawn. Hand size: ${this.AttackingPlayer.Hand.length}`
+      );
+    } else {
+      this.GameLog.push(`Cannot draw a card (${draw.message}).`);
+    }
+
+    const move = await (this.AttackingPlayer == this.Player1
+      ? this.Agent1
+      : this.Agent2
+    ).doTurn(new PlayerGameView(this, this.AttackingPlayer));
+
+    if (move) {
+      this.GameLog.push(
+        `${this.AttackingPlayer.ActivePokemon!.Name} used ${move.Name}!`,
+        "But it failed! (Please try again after I implement attacks.)"
+      );
+    } else {
+      this.GameLog.push(
+        `${this.AttackingPlayer.Name} ended their turn without attacking.`
+      );
+    }
+
+    if (this.AttackingPlayer.AvailableEnergy) {
+      // Discard energy if player did not use it
+      this.GameLog.push(
+        `Discarding ${this.AttackingPlayer.AvailableEnergy} Energy.`
+      );
+      this.AttackingPlayer.AvailableEnergy = undefined;
+    }
+
+    if (this.TurnNumber >= this.MaxTurnNumber) {
+      this.GameLog.push("Game over: reached maximum turn limit.");
+      return;
+    }
   }
 
   playToBench(card: PokemonCard, index: number) {

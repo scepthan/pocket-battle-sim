@@ -47,7 +47,7 @@
                 v-for="(message, i) in game?.GameLog ?? []"
                 :key="i"
                 :class="{
-                  'text-h2': /^Turn \d+$/.test(message),
+                  'text-h5': /^Turn \d+$/.test(message),
                 }"
               >
                 {{ message }}
