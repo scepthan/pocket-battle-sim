@@ -4,9 +4,9 @@ import type { Energy } from "@/types/Energy";
 import { useCoinFlip } from "@/composables/useCoinFlip";
 import { useDeckValidator } from "@/composables/useDeckValidator";
 import type { GameRules } from "@/types/GameRules";
-import type { PlayerAgent, PlayerGameSetup } from "@/types/PlayerAgent";
-import type { PokemonCard } from "@/types/PlayingCard";
+import type { PlayerAgent } from "@/types/PlayerAgent";
 import { PlayerGameView } from "./PlayerGameView";
+import { GameLogger } from "./GameLogger";
 
 const { coinFlip } = useCoinFlip();
 
@@ -21,7 +21,7 @@ export class GameState {
   DefendingPlayer: Player;
   CanRetreat: boolean = true;
   CanPlaySupporter: boolean = true;
-  GameLog: string[] = [];
+  GameLog: GameLogger = new GameLogger();
 
   MaxHandSize: number = 10;
   MaxTurnNumber: number = 30;
@@ -50,20 +50,33 @@ export class GameState {
       throw new Error("Player 2 has an invalid deck: " + validation2);
     }
 
-    this.Player1 = new Player(agent1.Name + " (1)", deck1);
-    this.Player2 = new Player(agent2.Name + " (2)", deck2);
+    const name1 = agent1.Name || "Player 1";
+    const name2 = agent2.Name || "Player 2";
+
+    if (name1 === name2) {
+      // Ensure both players have unique names
+      agent1.Name = `${name1} (1)`;
+      agent2.Name = `${name2} (2)`;
+    }
+
+    this.Player1 = new Player(name1, deck1);
+    this.Player2 = new Player(name2, deck2);
 
     // Randomize who goes first based on a coin flip
     const players = [this.Player1, this.Player2];
     if (coinFlip()) {
       players.reverse();
     }
-    this.GameLog.push(players[0].Name + " wins the coin flip and goes first!");
+    this.GameLog.addEntry({
+      type: "startGame",
+      firstPlayer: players[0].Name,
+      secondPlayer: players[1].Name,
+    });
     this.AttackingPlayer = players[0];
     this.DefendingPlayer = players[1];
 
-    this.AttackingPlayer.setup(rules.HandSize);
-    this.DefendingPlayer.setup(rules.HandSize);
+    this.AttackingPlayer.setup(rules.HandSize, this.GameLog);
+    this.DefendingPlayer.setup(rules.HandSize, this.GameLog);
   }
 
   async start() {
@@ -72,78 +85,30 @@ export class GameState {
       this.startPlayer(this.Agent2, this.Player2),
     ]);
 
-    this.setupPlayer(this.Player1, setup1);
-    this.setupPlayer(this.Player2, setup2);
-    for (const player of [this.Player1, this.Player2]) {
-      this.GameLog.push(
-        `${player.Name} has setup their Pokémon:`,
-        `- Active: ${player.ActivePokemon!.Name} (${player.ActivePokemon!.ID})`,
-        `- Bench: ${
-          player.Bench.filter((x) => x !== undefined)
-            .map((x) => `${x.Name} (${x.ID})`)
-            .join(", ") || "none"
-        }`
-      );
-    }
+    this.Player1.setupPokemon(setup1, this.GameLog);
+    this.Player2.setupPokemon(setup2, this.GameLog);
 
     while (this.TurnNumber < this.MaxTurnNumber) {
-      await this.nextTurn();
+      try {
+        await this.nextTurn();
+      } catch (error) {
+        console.error("Error during turn:", error);
+        this.GameLog.addEntry({
+          type: "gameOver",
+          draw: true,
+          reason: "invalidGameState",
+        });
+        break;
+      }
     }
   }
 
   async startPlayer(agent: PlayerAgent, player: Player) {
-    const { active, bench } = await agent.setupPokemon({
+    return await agent.setupPokemon({
       hand: player.Hand,
       firstEnergy: player.NextEnergy,
       isGoingFirst: player == this.AttackingPlayer,
     });
-    const allPokemon = [active, ...bench.filter((x) => x !== undefined)];
-    if (
-      !allPokemon.every(
-        (pokemon) => player.Hand.includes(pokemon) && pokemon.Stage == 0
-      )
-    ) {
-      throw new Error("Can only setup Basic Pokemon from your hand");
-    }
-    if (
-      allPokemon.some((p1, i1) =>
-        allPokemon.some((p2, i2) => p1 == p2 && i1 != i2)
-      )
-    ) {
-      throw new Error("Can't play the same card twice");
-    }
-    if (bench.some((_, i) => i > 2)) {
-      throw new Error("Bench only has 3 slots");
-    }
-
-    return { active, bench };
-  }
-
-  setupPlayer(player: Player, setup: PlayerGameSetup) {
-    player.ActivePokemon = new InPlayPokemonCard(setup.active);
-    player.InPlay.push(setup.active);
-    player.Hand.splice(player.Hand.indexOf(setup.active), 1);
-
-    setup.bench.map((card, i) => {
-      if (!card) return;
-      this.putPokemonOnBench(player, card, i);
-    });
-  }
-
-  putPokemonOnBench(player: Player, card: PokemonCard, index: number) {
-    if (player.Bench[index]) {
-      throw new Error("Bench already has a Pokemon in this slot");
-    }
-    if (!player.Hand.includes(card)) {
-      throw new Error("Card not in hand");
-    }
-    if (card.Stage != 0) {
-      throw new Error("Can only play Basic Pokemon to bench");
-    }
-
-    player.Bench[index] = new InPlayPokemonCard(card);
-    player.InPlay.push(card);
-    player.Hand.splice(player.Hand.indexOf(card), 1);
   }
 
   async nextTurn() {
@@ -161,28 +126,26 @@ export class GameState {
     this.CanPlaySupporter = true;
 
     // Log the turn change
-    this.GameLog.push(
-      `Turn ${this.TurnNumber}`,
-      `${this.AttackingPlayer.Name} is now the attacking player!`
-    );
+    this.GameLog.addEntry({
+      type: "nextTurn",
+      turnNumber: this.TurnNumber,
+      attackingPlayer: this.AttackingPlayer.Name,
+      defendingPlayer: this.DefendingPlayer.Name,
+    });
 
     if (this.TurnNumber > 1) {
       this.AttackingPlayer.AvailableEnergy = this.AttackingPlayer.NextEnergy; // Set the available energy for the attacking player
       this.AttackingPlayer.chooseNextEnergy();
-      this.GameLog.push(
-        `${this.AttackingPlayer.AvailableEnergy} Energy generated. (Next: ${this.AttackingPlayer.NextEnergy})`
-      );
+      this.GameLog.addEntry({
+        type: "generateNextEnergy",
+        player: this.AttackingPlayer.Name,
+        currentEnergy: this.AttackingPlayer.AvailableEnergy,
+        nextEnergy: this.AttackingPlayer.NextEnergy,
+      });
     }
 
     // Draw a card into the attacking player's hand
-    const draw = this.AttackingPlayer.drawCards(1, this.MaxHandSize);
-    if (draw.success) {
-      this.GameLog.push(
-        `Card drawn. Hand size: ${this.AttackingPlayer.Hand.length}`
-      );
-    } else {
-      this.GameLog.push(`Cannot draw a card (${draw.message}).`);
-    }
+    this.AttackingPlayer.drawCards(1, this.MaxHandSize, this.GameLog);
 
     const move = await (this.AttackingPlayer == this.Player1
       ? this.Agent1
@@ -190,32 +153,40 @@ export class GameState {
     ).doTurn(new PlayerGameView(this, this.AttackingPlayer));
 
     if (move) {
-      this.GameLog.push(
-        `${this.AttackingPlayer.ActivePokemon!.Name} used ${move.Name}!`,
-        "But it failed! (Please try again after I implement attacks.)"
-      );
-    } else {
-      this.GameLog.push(
-        `${this.AttackingPlayer.Name} ended their turn without attacking.`
-      );
+      this.GameLog.addEntry({
+        type: "useAttack",
+        player: this.AttackingPlayer.Name,
+        attackName: move.Name,
+        attackingPokemon: {
+          location: "active",
+          cardId: this.DefendingPlayer.ActivePokemon!.ID,
+        },
+      });
     }
 
     if (this.AttackingPlayer.AvailableEnergy) {
       // Discard energy if player did not use it
-      this.GameLog.push(
-        `Discarding ${this.AttackingPlayer.AvailableEnergy} Energy.`
-      );
+      this.GameLog.addEntry({
+        type: "discardEnergy",
+        player: this.AttackingPlayer.Name,
+        source: "energyZone",
+        energyTypes: [this.AttackingPlayer.AvailableEnergy],
+      });
       this.AttackingPlayer.AvailableEnergy = undefined;
     }
 
+    this.GameLog.addEntry({
+      type: "pokemonCheckup",
+    });
+
     if (this.TurnNumber >= this.MaxTurnNumber) {
-      this.GameLog.push("Game over: reached maximum turn limit.");
+      this.GameLog.addEntry({
+        type: "gameOver",
+        draw: true,
+        reason: "maxTurnNumberReached",
+      });
       return;
     }
-  }
-
-  playToBench(card: PokemonCard, index: number) {
-    this.putPokemonOnBench(this.AttackingPlayer, card, index);
   }
 
   attackActivePokemon(HP: number) {

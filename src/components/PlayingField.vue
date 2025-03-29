@@ -1,7 +1,7 @@
 <template>
   <v-container fluid>
-    <div class="d-flex">
-      <div class="d-flex w-100 justify-center flex-row ga-6">
+    <div class="d-flex" style="width: 1004px; height: 704px">
+      <div class="d-flex w-100 justify-center flex-row">
         <div class="d-flex flex-column align-center ga-2">
           <v-row no-gutters class="align-center ga-1">
             <InPlayCardSlot
@@ -32,33 +32,33 @@
           class="h-100 d-flex flex-column align-center justify-space-between"
         >
           <div class="d-flex flex-row">
-            <EnergyZone
-              :current-energy="game?.Player2.AvailableEnergy"
-              :next-energy="game?.Player2.NextEnergy"
-            />
+            <div class="d-flex flex-column align-center" style="width: 128px">
+              <span>{{ game?.Player2.Name }}</span>
+              <EnergyZone
+                class="ml-5"
+                :current-energy="game?.Player2.AvailableEnergy"
+                :next-energy="game?.Player2.NextEnergy"
+              />
+            </div>
             <PlayerHandHidden :cards="game?.Player2.Hand.length ?? 0" />
           </div>
           <div
-            class="flex-grow-1 d-flex flex-column-reverse overflow-y-auto"
-            style="max-height: 270px"
+            class="flex-grow-1 w-100 d-flex flex-column-reverse overflow-y-auto"
           >
-            <div>
-              <p
-                v-for="(message, i) in game?.GameLog ?? []"
-                :key="i"
-                :class="{
-                  'text-h5': /^Turn \d+$/.test(message),
-                }"
-              >
-                {{ message }}
-              </p>
-            </div>
+            <GameLog
+              :log-entries="game?.GameLog.entries ?? []"
+              :shown-players="['Celebii']"
+            />
           </div>
           <div class="d-flex flex-row align-end">
-            <EnergyZone
-              :current-energy="game?.Player1.AvailableEnergy"
-              :next-energy="game?.Player1.NextEnergy"
-            />
+            <div class="d-flex flex-column align-center" style="width: 128px">
+              <EnergyZone
+                class="ml-5"
+                :current-energy="game?.Player1.AvailableEnergy"
+                :next-energy="game?.Player1.NextEnergy"
+              />
+              <span>{{ game?.Player1.Name }}</span>
+            </div>
             <PlayerHandVisible :cards="game?.Player1.Hand ?? []" />
           </div>
         </div>
@@ -73,6 +73,7 @@ import { GameState } from "@/models/GameState";
 import { RandomAgent } from "@/models/agents/RandomAgent";
 import { onMounted, ref } from "vue";
 import InPlayCardSlot from "./InPlayCardSlot.vue";
+import GameLog from "./GameLog.vue";
 
 const prebuiltDecks: Record<string, DeckInfo> = {
   Celebi1: {
@@ -132,8 +133,8 @@ const opponent = ref<RandomAgent>();
 const game = ref<GameState>();
 
 onMounted(() => {
-  player.value = new RandomAgent(prebuiltDecks.Celebi1);
-  opponent.value = new RandomAgent(prebuiltDecks.Alakazam1);
+  player.value = new RandomAgent("Celebii", prebuiltDecks.Celebi1);
+  opponent.value = new RandomAgent("AlexTheZam", prebuiltDecks.Alakazam1);
 
   game.value = new GameState(
     {

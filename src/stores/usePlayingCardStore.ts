@@ -6,6 +6,7 @@ import { ref } from "vue";
 
 export const usePlayingCardStore = defineStore("playing-cards", () => {
   const Cards = ref<PlayingCard[]>([]);
+  const cardLookup = ref<Record<string, PlayingCard>>({});
 
   const { parseCard } = useCardParser();
 
@@ -20,6 +21,7 @@ export const usePlayingCardStore = defineStore("playing-cards", () => {
       const parsed = parseCard(card);
       if (parsed.value) {
         outputCards.push(parsed.value);
+        cardLookup.value[parsed.value.ID] = parsed.value;
         successCount++;
       }
       if (!parsed.parseSuccessful) {
@@ -41,7 +43,7 @@ export const usePlayingCardStore = defineStore("playing-cards", () => {
     const deck: PlayingCard[] = [];
 
     for (const cardId of cardIds) {
-      const card = Cards.value.find((c) => c.ID == cardId);
+      const card = cardLookup.value[cardId];
       if (card) {
         deck.push(Object.assign({}, card));
       } else {
@@ -52,5 +54,15 @@ export const usePlayingCardStore = defineStore("playing-cards", () => {
     return deck;
   };
 
-  return { Cards, loadCards, parseDeck };
+  const getCardById = (cardId: string): PlayingCard | undefined => {
+    // Helper function to get a card by its ID
+    const card = cardLookup.value[cardId];
+    if (!card) {
+      console.warn(`Card with ID ${cardId} not found`);
+      return undefined;
+    }
+    return card;
+  };
+
+  return { Cards, loadCards, parseDeck, getCardById };
 });

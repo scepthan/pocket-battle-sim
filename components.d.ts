@@ -7,8 +7,10 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    CardName: typeof import('./src/components/CardName.vue')['default']
     EnergyIcon: typeof import('./src/components/EnergyIcon.vue')['default']
     EnergyZone: typeof import('./src/components/EnergyZone.vue')['default']
+    GameLog: typeof import('./src/components/GameLog.vue')['default']
     InPlayCardSlot: typeof import('./src/components/InPlayCardSlot.vue')['default']
     PlayerHandHidden: typeof import('./src/components/PlayerHandHidden.vue')['default']
     PlayerHandVisible: typeof import('./src/components/PlayerHandVisible.vue')['default']

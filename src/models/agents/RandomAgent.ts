@@ -12,9 +12,10 @@ export class RandomAgent implements PlayerAgent {
   EnergyTypes: Energy[];
   Deck: PlayingCard[];
 
-  constructor(deck: DeckInfo) {
+  constructor(name: string, deck: DeckInfo) {
     const { parseDeck } = usePlayingCardStore();
 
+    this.Name = name;
     this.EnergyTypes = deck.EnergyTypes;
     this.Deck = parseDeck(deck.Cards);
   }

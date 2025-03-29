@@ -1,7 +1,9 @@
 import type { Deck } from "@/types/Deck";
-import type { PlayingCard } from "@/types/PlayingCard";
-import type { InPlayPokemonCard } from "./InPlayPokemonCard";
+import type { PlayingCard, PokemonCard } from "@/types/PlayingCard";
+import { InPlayPokemonCard } from "./InPlayPokemonCard";
 import type { Energy } from "@/types/Energy";
+import type { GameLogger, LoggedEvent } from "./GameLogger";
+import type { PlayerGameSetup } from "@/types/PlayerAgent";
 
 export class Player {
   Name: string;
@@ -23,9 +25,16 @@ export class Player {
     this.Deck = deck.Cards;
   }
 
-  setup(handSize: number) {
-    this.drawInitialHand(handSize);
+  setup(handSize: number, logger: GameLogger) {
+    this.drawInitialHand(handSize, logger);
+
     this.chooseNextEnergy();
+    logger.addEntry({
+      type: "generateNextEnergy",
+      player: this.Name,
+      currentEnergy: "none",
+      nextEnergy: this.NextEnergy,
+    });
   }
 
   reset() {
@@ -39,16 +48,24 @@ export class Player {
     this.shuffleDeck();
   }
 
-  drawInitialHand(handSize: number) {
+  drawInitialHand(handSize: number, logger: GameLogger) {
     this.reset();
 
     while (true) {
-      this.drawCards(handSize);
+      this.drawCards(handSize, handSize);
       if (this.hasBasicPokemon()) {
         break;
       }
       this.shuffleHandIntoDeck();
     }
+
+    logger.addEntry({
+      type: "drawToHand",
+      player: this.Name,
+      attempted: handSize,
+      cardIds: this.Hand.map((card) => card.ID),
+      success: true,
+    });
   }
 
   shuffleDeck() {
@@ -68,19 +85,31 @@ export class Player {
     this.shuffleDeck();
   }
 
-  drawCards(count: number, maxHandSize: number) {
-    let cardsDrawn = 0;
-    while (cardsDrawn < count) {
+  drawCards(count: number, maxHandSize: number, logger?: GameLogger) {
+    const cardsDrawn: PlayingCard[] = [];
+    const logEntry: LoggedEvent = {
+      type: "drawToHand",
+      player: this.Name,
+      attempted: count,
+      cardIds: [],
+      success: true,
+    };
+    while (cardsDrawn.length < count) {
       if (this.Deck.length == 0) {
-        return { success: false, cardsDrawn, message: "Deck is empty" };
+        logEntry.success = false;
+        logEntry.failureReason = "deckEmpty";
+        break;
       }
       if (this.Hand.length >= maxHandSize) {
-        return { success: false, cardsDrawn, message: "Hand is full" };
+        logEntry.success = false;
+        logEntry.failureReason = "handFull";
+        break;
       }
-      this.Hand.push(this.Deck.shift()!);
-      cardsDrawn += 1;
+      cardsDrawn.push(this.Deck.shift()!);
     }
-    return { success: true, cardsDrawn, message: "Cards drawn successfully" };
+    this.Hand.push(...cardsDrawn);
+    logEntry.cardIds = cardsDrawn.map((card) => card.ID);
+    logger?.addEntry(logEntry);
   }
 
   chooseNextEnergy() {
@@ -97,5 +126,54 @@ export class Player {
     return this.Hand.some(
       (card) => card.CardType == "Pokemon" && card.Stage == 0
     );
+  }
+
+  setupPokemon(setup: PlayerGameSetup, logger: GameLogger) {
+    // Set up the active Pokémon
+    if (!this.Hand.includes(setup.active)) {
+      throw new Error("Card not in hand");
+    }
+    if (setup.active.Stage != 0) {
+      throw new Error("Can only play Basic Pokemon at game start");
+    }
+
+    this.ActivePokemon = new InPlayPokemonCard(setup.active);
+    this.InPlay.push(setup.active);
+    this.Hand.splice(this.Hand.indexOf(setup.active), 1);
+
+    logger.addEntry({
+      type: "playToActive",
+      player: this.Name,
+      cardId: setup.active.ID,
+    });
+
+    // Set up the bench Pokémon
+    setup.bench.forEach((card, i) => {
+      if (!card) return;
+      this.putPokemonOnBench(card, i, logger);
+    });
+  }
+
+  putPokemonOnBench(card: PokemonCard, index: number, logger: GameLogger) {
+    if (this.Bench[index]) {
+      throw new Error("Bench already has a Pokemon in this slot");
+    }
+    if (!this.Hand.includes(card)) {
+      throw new Error("Card not in hand");
+    }
+    if (card.Stage != 0) {
+      throw new Error("Can only play Basic Pokemon to bench");
+    }
+
+    this.Bench[index] = new InPlayPokemonCard(card);
+    this.InPlay.push(card);
+    this.Hand.splice(this.Hand.indexOf(card), 1);
+
+    logger.addEntry({
+      type: "playToBench",
+      player: this.Name,
+      cardId: card.ID,
+      benchIndex: index,
+    });
   }
 }
