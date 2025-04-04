@@ -53,4 +53,8 @@ export class InPlayPokemonCard {
     this.CurrentHP += HP;
     if (this.CurrentHP > this.BaseHP) this.CurrentHP = this.BaseHP;
   }
+
+  attachEnergy(energy: Energy) {
+    this.AttachedEnergy.push(energy);
+  }
 }

@@ -36,8 +36,12 @@ export class RandomAgent implements PlayerAgent {
 
   async doTurn(gameState: PlayerGameView) {
     console.log(gameState);
-    await wait(1000); // wait for 1 second to simulate thinking time
-    return undefined;
+    await wait(1000);
+    if (gameState.selfAvailableEnergy) {
+      gameState.attachAvailableEnergy(gameState.selfActive!);
+      await wait(1000);
+    }
+    return;
   }
 
   async swapActivePokemon(gameState: PlayerGameView) {

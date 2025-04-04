@@ -1,6 +1,6 @@
 import type { InPlayPokemonCard } from "@/models/InPlayPokemonCard";
 import type { Energy } from "./Energy";
-import type { Move, PlayingCard, PokemonCard } from "./PlayingCard";
+import type { PlayingCard, PokemonCard } from "./PlayingCard";
 import type { PlayerGameView } from "@/models/PlayerGameView";
 
 export type BenchSetup = (PokemonCard | undefined)[];
@@ -20,6 +20,6 @@ export interface PlayerAgent {
   Deck: PlayingCard[];
 
   setupPokemon: (gameState: GameInitState) => Promise<PlayerGameSetup>;
-  doTurn: (gameState: PlayerGameView) => Promise<Move | undefined>;
+  doTurn: (gameState: PlayerGameView) => Promise<void>;
   swapActivePokemon: (gameState: PlayerGameView) => Promise<InPlayPokemonCard>;
 }

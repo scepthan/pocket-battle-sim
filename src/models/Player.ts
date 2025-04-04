@@ -2,7 +2,11 @@ import type { Deck } from "@/types/Deck";
 import type { PlayingCard, PokemonCard } from "@/types/PlayingCard";
 import { InPlayPokemonCard } from "./InPlayPokemonCard";
 import type { Energy } from "@/types/Energy";
-import type { GameLogger, LoggedEvent } from "./GameLogger";
+import type {
+  GameLogger,
+  InPlayPokemonDescriptor,
+  LoggedEvent,
+} from "./GameLogger";
 import type { PlayerGameSetup } from "@/types/PlayerAgent";
 
 export class Player {
@@ -19,17 +23,35 @@ export class Player {
   AvailableEnergy?: Energy; // The energy type available for use this turn, if any (not used in all game modes)
   NextEnergy: Energy = "Colorless"; // The next energy type to be used for attaching to Pokémon, set when the game starts
 
-  constructor(name: string, deck: Deck) {
+  logger: GameLogger;
+
+  constructor(name: string, deck: Deck, logger: GameLogger) {
     this.Name = name;
     this.EnergyTypes = deck.EnergyTypes;
     this.Deck = deck.Cards;
+    this.logger = logger;
   }
 
-  setup(handSize: number, logger: GameLogger) {
-    this.drawInitialHand(handSize, logger);
+  pokemonToDescriptor(pokemon: InPlayPokemonCard): InPlayPokemonDescriptor {
+    if (pokemon == this.ActivePokemon) {
+      return {
+        cardId: pokemon.ID,
+        location: "active",
+      };
+    } else {
+      return {
+        cardId: pokemon.ID,
+        location: "bench",
+        index: this.Bench.indexOf(pokemon),
+      };
+    }
+  }
+
+  setup(handSize: number) {
+    this.drawInitialHand(handSize);
 
     this.chooseNextEnergy();
-    logger.addEntry({
+    this.logger.addEntry({
       type: "generateNextEnergy",
       player: this.Name,
       currentEnergy: "none",
@@ -48,7 +70,7 @@ export class Player {
     this.shuffleDeck();
   }
 
-  drawInitialHand(handSize: number, logger: GameLogger) {
+  drawInitialHand(handSize: number) {
     this.reset();
 
     while (true) {
@@ -59,7 +81,7 @@ export class Player {
       this.shuffleHandIntoDeck();
     }
 
-    logger.addEntry({
+    this.logger.addEntry({
       type: "drawToHand",
       player: this.Name,
       attempted: handSize,
@@ -85,7 +107,7 @@ export class Player {
     this.shuffleDeck();
   }
 
-  drawCards(count: number, maxHandSize: number, logger?: GameLogger) {
+  drawCards(count: number, maxHandSize: number, log?: boolean) {
     const cardsDrawn: PlayingCard[] = [];
     const logEntry: LoggedEvent = {
       type: "drawToHand",
@@ -109,7 +131,7 @@ export class Player {
     }
     this.Hand.push(...cardsDrawn);
     logEntry.cardIds = cardsDrawn.map((card) => card.ID);
-    logger?.addEntry(logEntry);
+    if (log) this.logger?.addEntry(logEntry);
   }
 
   chooseNextEnergy() {
@@ -128,7 +150,7 @@ export class Player {
     );
   }
 
-  setupPokemon(setup: PlayerGameSetup, logger: GameLogger) {
+  setupPokemon(setup: PlayerGameSetup) {
     // Set up the active Pokémon
     if (!this.Hand.includes(setup.active)) {
       throw new Error("Card not in hand");
@@ -141,7 +163,7 @@ export class Player {
     this.InPlay.push(setup.active);
     this.Hand.splice(this.Hand.indexOf(setup.active), 1);
 
-    logger.addEntry({
+    this.logger.addEntry({
       type: "playToActive",
       player: this.Name,
       cardId: setup.active.ID,
@@ -150,11 +172,11 @@ export class Player {
     // Set up the bench Pokémon
     setup.bench.forEach((card, i) => {
       if (!card) return;
-      this.putPokemonOnBench(card, i, logger);
+      this.putPokemonOnBench(card, i);
     });
   }
 
-  putPokemonOnBench(card: PokemonCard, index: number, logger: GameLogger) {
+  putPokemonOnBench(card: PokemonCard, index: number) {
     if (this.Bench[index]) {
       throw new Error("Bench already has a Pokemon in this slot");
     }
@@ -169,11 +191,36 @@ export class Player {
     this.InPlay.push(card);
     this.Hand.splice(this.Hand.indexOf(card), 1);
 
-    logger.addEntry({
+    this.logger.addEntry({
       type: "playToBench",
       player: this.Name,
       cardId: card.ID,
       benchIndex: index,
+    });
+  }
+
+  attachAvailableEnergy(pokemon: InPlayPokemonCard) {
+    if (!this.AvailableEnergy) {
+      throw new Error("No energy available to attach");
+    }
+    this.attachEnergy(pokemon, this.AvailableEnergy, "energyZone");
+    this.AvailableEnergy = undefined;
+  }
+
+  attachEnergy(
+    pokemon: InPlayPokemonCard,
+    energy: Energy,
+    from: "energyZone" | "discard" | "pokemon",
+    fromPokemon?: InPlayPokemonCard
+  ) {
+    pokemon.attachEnergy(energy);
+    this.logger.addEntry({
+      type: "attachEnergy",
+      player: this.Name,
+      energyType: energy,
+      from,
+      targetPokemon: this.pokemonToDescriptor(pokemon),
+      fromPokemon: fromPokemon && this.pokemonToDescriptor(fromPokemon),
     });
   }
 }

@@ -102,4 +102,14 @@ export class PlayerGameView {
       return true;
     }
   }
+
+  // Action methods
+  async attachAvailableEnergy(pokemon: InPlayPokemonCard) {
+    if (!this.isSelfTurn) return false;
+    if (this.selfAvailableEnergy) {
+      this.#player.attachAvailableEnergy(pokemon);
+      return true;
+    }
+    return false;
+  }
 }

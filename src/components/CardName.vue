@@ -15,8 +15,7 @@ export interface Props {
 }
 const { cardId } = defineProps<Props>();
 
-const cardStore = usePlayingCardStore(); // Assuming you have a card store to get card details
-
+const cardStore = usePlayingCardStore();
 const cardName = computed(() => cardStore.getCardById(cardId)?.Name || null);
 </script>
 

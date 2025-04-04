@@ -9,7 +9,9 @@ interface BenchPokemonDescriptor {
   location: "bench";
   index: number;
 }
-type InPlayPokemonDescriptor = ActivePokemonDescriptor | BenchPokemonDescriptor;
+export type InPlayPokemonDescriptor =
+  | ActivePokemonDescriptor
+  | BenchPokemonDescriptor;
 type CoinFlipResult = "Heads" | "Tails";
 
 // General game format events

@@ -53,6 +53,13 @@
         </p>
       </div>
 
+      <div v-else-if="entry.type == 'attachEnergy'">
+        <p>
+          <EnergyIcon :energy="entry.energyType" /> energy attached to
+          <CardName :card-id="entry.targetPokemon.cardId" />.
+        </p>
+      </div>
+
       <div v-else-if="entry.type == 'generateNextEnergy'">
         <p v-if="entry.currentEnergy == 'none'">
           Next energy for <b>{{ entry.player }}</b

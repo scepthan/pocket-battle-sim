@@ -59,8 +59,8 @@ export class GameState {
       agent2.Name = `${name2} (2)`;
     }
 
-    this.Player1 = new Player(name1, deck1);
-    this.Player2 = new Player(name2, deck2);
+    this.Player1 = new Player(name1, deck1, this.GameLog);
+    this.Player2 = new Player(name2, deck2, this.GameLog);
 
     // Randomize who goes first based on a coin flip
     const players = [this.Player1, this.Player2];
@@ -75,8 +75,8 @@ export class GameState {
     this.AttackingPlayer = players[0];
     this.DefendingPlayer = players[1];
 
-    this.AttackingPlayer.setup(rules.HandSize, this.GameLog);
-    this.DefendingPlayer.setup(rules.HandSize, this.GameLog);
+    this.AttackingPlayer.setup(rules.HandSize);
+    this.DefendingPlayer.setup(rules.HandSize);
   }
 
   async start() {
@@ -85,8 +85,8 @@ export class GameState {
       this.startPlayer(this.Agent2, this.Player2),
     ]);
 
-    this.Player1.setupPokemon(setup1, this.GameLog);
-    this.Player2.setupPokemon(setup2, this.GameLog);
+    this.Player1.setupPokemon(setup1);
+    this.Player2.setupPokemon(setup2);
 
     while (this.TurnNumber < this.MaxTurnNumber) {
       try {
@@ -145,24 +145,12 @@ export class GameState {
     }
 
     // Draw a card into the attacking player's hand
-    this.AttackingPlayer.drawCards(1, this.MaxHandSize, this.GameLog);
+    this.AttackingPlayer.drawCards(1, this.MaxHandSize);
 
-    const move = await (this.AttackingPlayer == this.Player1
+    await (this.AttackingPlayer == this.Player1
       ? this.Agent1
       : this.Agent2
     ).doTurn(new PlayerGameView(this, this.AttackingPlayer));
-
-    if (move) {
-      this.GameLog.addEntry({
-        type: "useAttack",
-        player: this.AttackingPlayer.Name,
-        attackName: move.Name,
-        attackingPokemon: {
-          location: "active",
-          cardId: this.DefendingPlayer.ActivePokemon!.ID,
-        },
-      });
-    }
 
     if (this.AttackingPlayer.AvailableEnergy) {
       // Discard energy if player did not use it
