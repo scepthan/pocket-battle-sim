@@ -1,15 +1,18 @@
-import pluginVue from "eslint-plugin-vue";
 import {
   defineConfigWithVueTs,
-  vueTsConfigs,
+  vueTsConfigs
 } from "@vue/eslint-config-typescript";
 import eslintConfigPrettier from "eslint-config-prettier";
+import pluginVue from "eslint-plugin-vue";
 
 export default defineConfigWithVueTs(
+  { ignores: ["dist/**/*", "**/*.d.ts"] },
   pluginVue.configs["flat/recommended"],
   vueTsConfigs.recommended,
   eslintConfigPrettier,
   {
-    ignores: ["dist/"]
+    rules: {
+      "@typescript-eslint/no-floating-promises": "error"
+    }
   }
 );

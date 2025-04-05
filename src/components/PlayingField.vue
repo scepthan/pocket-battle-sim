@@ -148,7 +148,7 @@ onMounted(() => {
   setTimeout(async () => {
     if (!game.value) return;
 
-    game.value.start();
+    void game.value.start();
   }, 3000);
 });
 </script>

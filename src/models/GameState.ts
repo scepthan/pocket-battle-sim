@@ -23,6 +23,8 @@ export class GameState {
   MaxHandSize: number = 10;
   MaxTurnNumber: number = 30;
 
+  DelayPerAction: number = 1000; // milliseconds
+
   GameOver: boolean = false;
 
   endTurnResolve: (value: unknown) => void = () => {};
@@ -78,6 +80,12 @@ export class GameState {
 
     this.AttackingPlayer.setup(rules.HandSize);
     this.DefendingPlayer.setup(rules.HandSize);
+  }
+
+  async delay() {
+    if (this.DelayPerAction) {
+      await new Promise((resolve) => setTimeout(resolve, this.DelayPerAction));
+    }
   }
 
   async start() {
@@ -163,7 +171,10 @@ export class GameState {
         // Otherwise, the turn will end when the agent returns
         (this.AttackingPlayer == this.Player1 ? this.Agent1 : this.Agent2)
           .doTurn(new PlayerGameView(this, this.AttackingPlayer))
-          .then(resolve);
+          .then(resolve)
+          .catch((error) => {
+            throw error;
+          });
       });
     } catch (error) {
       console.error("Error during turn:", error);
@@ -185,12 +196,15 @@ export class GameState {
         energyTypes: [this.AttackingPlayer.AvailableEnergy],
       });
       this.AttackingPlayer.AvailableEnergy = undefined;
+      await this.delay();
     }
 
     // Pokemon Checkup phase
     this.GameLog.addEntry({
       type: "pokemonCheckup",
     });
+
+    await this.delay();
 
     if (this.TurnNumber >= this.MaxTurnNumber) {
       this.GameLog.addEntry({

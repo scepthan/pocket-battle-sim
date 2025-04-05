@@ -7,12 +7,12 @@
 </template>
 
 <script setup lang="ts">
-import { usePlayingCardStore } from "./stores/usePlayingCardStore";
 import PlayingField from "./components/PlayingField.vue";
+import { usePlayingCardStore } from "./stores/usePlayingCardStore";
 
 const cardStore = usePlayingCardStore();
 
-cardStore.loadCards();
+void cardStore.loadCards();
 </script>
 
 <style scoped>

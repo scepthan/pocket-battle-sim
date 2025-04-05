@@ -9,7 +9,6 @@ import type {
 } from "@/types";
 import type { PlayerGameView } from "../PlayerGameView";
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const rand = <T>(arr: T[]) => arr[(Math.random() * arr.length) | 0];
 
 export class RandomAgent implements PlayerAgent {
@@ -40,14 +39,12 @@ export class RandomAgent implements PlayerAgent {
   }
 
   async doTurn(gameState: PlayerGameView) {
-    await wait(1000);
     const ownPokemon = [gameState.selfActive, ...gameState.selfBenched].filter(
       (x) => x !== undefined
     );
 
     if (gameState.selfAvailableEnergy) {
-      gameState.attachAvailableEnergy(rand(ownPokemon));
-      await wait(1000);
+      await gameState.attachAvailableEnergy(rand(ownPokemon));
     }
 
     const handBasics = gameState.selfHand.filter(
@@ -58,8 +55,7 @@ export class RandomAgent implements PlayerAgent {
       const bench = gameState.selfBenched;
       for (let i = 0; i < 3; i++) {
         if (bench[i] == undefined) {
-          gameState.playPokemonToBench(randomBasic, i);
-          await wait(1000);
+          await gameState.playPokemonToBench(randomBasic, i);
           break;
         }
       }
@@ -67,8 +63,7 @@ export class RandomAgent implements PlayerAgent {
 
     if (gameState.canRetreat() && Math.random() < 0.25) {
       const randomBench = rand(gameState.selfBenched);
-      gameState.retreatActivePokemon(randomBench);
-      await wait(1000);
+      await gameState.retreatActivePokemon(randomBench);
     }
 
     const evolveablePokemon = ownPokemon.filter((x) => x.ReadyToEvolve);
@@ -84,8 +79,7 @@ export class RandomAgent implements PlayerAgent {
         (x) => x.Name == randomEvolver.EvolvesFrom
       );
       const randomEvolvee = rand(pokemonToEvolveFrom);
-      gameState.playPokemonToEvolve(randomEvolver, randomEvolvee);
-      await wait(1000);
+      await gameState.playPokemonToEvolve(randomEvolver, randomEvolvee);
     }
 
     const attacks = [];
@@ -94,14 +88,12 @@ export class RandomAgent implements PlayerAgent {
     }
     if (attacks.length > 0) {
       const randomAttack = rand(attacks);
-      gameState.useAttack(randomAttack);
-      await wait(1000);
+      await gameState.useAttack(randomAttack);
     }
     return;
   }
 
   async swapActivePokemon(gameState: PlayerGameView) {
-    await wait(1000);
     const bench = gameState.selfBenched.filter((x) => x !== undefined);
     return rand(bench);
   }

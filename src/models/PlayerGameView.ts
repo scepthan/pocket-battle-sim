@@ -137,6 +137,7 @@ export class PlayerGameView {
 
   // Action methods
   async attachAvailableEnergy(pokemon: InPlayPokemonCard) {
+    await this.#gameState.delay();
     if (!this.canPlay) return false;
     if (this.selfAvailableEnergy) {
       this.#player.attachAvailableEnergy(pokemon);
@@ -145,6 +146,7 @@ export class PlayerGameView {
     return false;
   }
   async playPokemonToBench(pokemon: PokemonCard, index: number) {
+    await this.#gameState.delay();
     if (!this.canPlay) return false;
     if (pokemon.Stage == 0 && this.selfBench[index] == undefined) {
       this.#player.putPokemonOnBench(pokemon, index);
@@ -156,6 +158,7 @@ export class PlayerGameView {
     pokemon: PokemonCard,
     inPlayPokemon: InPlayPokemonCard
   ) {
+    await this.#gameState.delay();
     if (!this.canPlay) return false;
     if (pokemon.EvolvesFrom == inPlayPokemon.Name) {
       this.#player.evolvePokemon(inPlayPokemon, pokemon);
@@ -164,6 +167,7 @@ export class PlayerGameView {
     return false;
   }
   async useAttack(attack: Move) {
+    await this.#gameState.delay();
     if (!this.canUseAttack(attack)) return false;
     await this.#gameState.useAttack(attack);
     return true;
@@ -172,6 +176,7 @@ export class PlayerGameView {
     benchedPokemon: InPlayPokemonCard,
     energy?: Energy[]
   ) {
+    await this.#gameState.delay();
     if (!this.canRetreat()) return false;
     if (!energy)
       energy = this.selfActive!.AttachedEnergy.slice(
