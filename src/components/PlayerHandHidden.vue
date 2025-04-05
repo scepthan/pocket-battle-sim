@@ -14,6 +14,10 @@ defineProps<Props>();
 </script>
 
 <style scoped>
+.card-container {
+  width: 534px;
+  height: 230px;
+}
 .hand-card {
   margin-right: -100px;
   float: left;

@@ -7,6 +7,7 @@ import type {
   PlayerAgent,
   PlayingCard,
   PokemonCard,
+  SupporterCard,
 } from "@/types";
 import type { PlayerGameView } from "../PlayerGameView";
 
@@ -68,6 +69,14 @@ export class RandomAgent implements PlayerAgent {
     for (const card of itemCards) {
       if (Math.random() < 0.5) continue;
       await gameState.playItemCard(card);
+    }
+
+    const supporterCards = gameState.selfHand.filter(
+      (x) => x.CardType == "Supporter"
+    ) as SupporterCard[];
+    if (supporterCards.length > 0) {
+      const randomSupporter = rand(supporterCards);
+      await gameState.playSupporterCard(randomSupporter);
     }
 
     if (gameState.canRetreat() && Math.random() < 0.125) {

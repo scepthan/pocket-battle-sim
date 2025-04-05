@@ -1,4 +1,11 @@
-import type { Energy, ItemCard, Move, PlayingCard, PokemonCard } from "@/types";
+import type {
+  Energy,
+  ItemCard,
+  Move,
+  PlayingCard,
+  PokemonCard,
+  SupporterCard,
+} from "@/types";
 import type { GameState } from "./GameState";
 import type { InPlayPokemonCard } from "./InPlayPokemonCard";
 import type { Player } from "./Player";
@@ -188,7 +195,13 @@ export class PlayerGameView {
   }
   async playItemCard(card: ItemCard) {
     await this.#gameState.delay();
-    if (!this.canPlay) return false;
+    if (!this.canPlayCard(card)) return false;
+    await this.#gameState.playTrainer(card);
+    return true;
+  }
+  async playSupporterCard(card: SupporterCard) {
+    await this.#gameState.delay();
+    if (!this.canPlayCard(card)) return false;
     await this.#gameState.playTrainer(card);
     return true;
   }

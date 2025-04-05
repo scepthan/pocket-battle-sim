@@ -357,6 +357,12 @@ export class GameState {
     if (!this.AttackingPlayer.Hand.includes(card)) {
       throw new Error("Card not in hand");
     }
+    if (card.CardType == "Supporter") {
+      if (!this.CanPlaySupporter) {
+        throw new Error("Cannot play supporter card currently");
+      }
+      this.CanPlaySupporter = false;
+    }
     this.GameLog.addEntry({
       type: "playTrainer",
       player: this.AttackingPlayer.Name,
