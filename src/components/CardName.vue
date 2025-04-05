@@ -1,5 +1,5 @@
 <template>
-  <v-tooltip :text="cardId" location="top" :offset="5">
+  <v-tooltip :text="cardId + ': ' + cardType" location="top" :offset="5">
     <template #activator="{ props }">
       <span v-bind="props" class="card-name">{{ cardName }}</span>
     </template>
@@ -16,7 +16,9 @@ export interface Props {
 const { cardId } = defineProps<Props>();
 
 const cardStore = usePlayingCardStore();
-const cardName = computed(() => cardStore.getCardById(cardId)?.Name || null);
+const card = computed(() => cardStore.getCardById(cardId));
+const cardName = computed(() => card.value?.Name || null);
+const cardType = computed(() => card.value?.CardType || null);
 </script>
 
 <style scoped>
