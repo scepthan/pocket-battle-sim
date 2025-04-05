@@ -111,6 +111,14 @@
         </p>
       </div>
 
+      <div v-else-if="entry.type == 'scorePrizePoints'">
+        <p>
+          <b>{{ entry.player }}</b> scores {{ entry.prizePointsScored }} prize
+          {{ entry.prizePointsScored == 1 ? "point" : "points" }}! (Total:
+          {{ entry.totalPrizePoints }})
+        </p>
+      </div>
+
       <div v-else-if="entry.type == 'discardCards'">
         <p v-if="entry.source == 'inPlay'">
           {{ entry.cardIds.length }} cards discarded:
@@ -139,8 +147,9 @@
 
       <div v-else-if="entry.type == 'gameOver'">
         <p v-if="entry.winner">
-          Game over: <b>{{ entry.winner }}</b> wins the game!
-          <span v-if="entry.reason"> ({{ entry.reason }}) </span>
+          Game over: <b>{{ entry.winner }}</b> is victorious! ({{
+            entry.reason
+          }})
         </p>
         <p v-else>Game over: draw... ({{ entry.reason }})</p>
       </div>

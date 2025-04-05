@@ -200,6 +200,9 @@ export class GameState {
   async useInitialEffect(effect: Effect) {
     this.useEffect(effect);
 
+    const attackerPrizePoints = this.AttackingPlayer.GamePoints;
+    const defenderPrizePoints = this.DefendingPlayer.GamePoints;
+
     // Check for any pokemon that are knocked out
     for (const player of [this.DefendingPlayer, this.AttackingPlayer]) {
       for (const pokemon of player.InPlayPokemon) {
@@ -208,6 +211,9 @@ export class GameState {
         }
       }
     }
+
+    this.AttackingPlayer.checkPrizePointsChange(attackerPrizePoints);
+    this.DefendingPlayer.checkPrizePointsChange(defenderPrizePoints);
 
     // Check for game over conditions
     if (

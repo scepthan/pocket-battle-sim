@@ -29,6 +29,12 @@ interface NextTurnEvent {
 interface PokemonCheckupEvent {
   type: "pokemonCheckup";
 }
+interface ScorePrizePointsEvent {
+  type: "scorePrizePoints";
+  player: string;
+  prizePointsScored: number;
+  totalPrizePoints: number;
+}
 interface GameOverEvent {
   type: "gameOver";
   draw: boolean;
@@ -212,6 +218,7 @@ export type LoggedEvent =
   | StartGameEvent
   | NextTurnEvent
   | PokemonCheckupEvent
+  | ScorePrizePointsEvent
   | GameOverEvent
   | TurnErrorEvent
   | DrawToHandEvent

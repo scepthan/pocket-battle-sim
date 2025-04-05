@@ -290,4 +290,15 @@ export class Player {
       fromPokemon: fromPokemon && this.pokemonToDescriptor(fromPokemon),
     });
   }
+
+  checkPrizePointsChange(previousPoints: number) {
+    if (this.GamePoints > previousPoints) {
+      this.logger.addEntry({
+        type: "scorePrizePoints",
+        player: this.Name,
+        prizePointsScored: this.GamePoints - previousPoints,
+        totalPrizePoints: this.GamePoints,
+      });
+    }
+  }
 }
