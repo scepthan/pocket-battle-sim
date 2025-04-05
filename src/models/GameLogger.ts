@@ -1,4 +1,4 @@
-import type { Energy } from "@/types/Energy";
+import type { Energy } from "@/types";
 
 interface ActivePokemonDescriptor {
   cardId: string;

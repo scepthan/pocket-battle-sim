@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import type { PlayingCard } from "@/types/PlayingCard";
+import type { PlayingCard } from "@/types";
 
 export interface Props {
   cards: PlayingCard[] | number;

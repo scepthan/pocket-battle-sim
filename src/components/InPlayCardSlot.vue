@@ -30,10 +30,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
 import type { InPlayPokemonCard } from "@/models/InPlayPokemonCard";
-import PlayingCard from "./PlayingCard.vue";
+import { computed } from "vue";
 import EnergyIcon from "./EnergyIcon.vue";
+import PlayingCard from "./PlayingCard.vue";
 
 export interface Props {
   heightPx?: number;

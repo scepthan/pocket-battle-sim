@@ -1,6 +1,5 @@
 import { useCardParser } from "@/composables/useCardParser";
-import type { InputCard } from "@/types/InputCard.js";
-import type { PlayingCard } from "@/types/PlayingCard.js";
+import type { InputCard, PlayingCard } from "@/types";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 

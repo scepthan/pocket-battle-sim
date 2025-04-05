@@ -1,7 +1,7 @@
-import type { Move, PlayingCard, PokemonCard } from "@/types/PlayingCard";
+import type { Move, PlayingCard, PokemonCard } from "@/types";
 import type { GameState } from "./GameState";
-import type { Player } from "./Player";
 import type { InPlayPokemonCard } from "./InPlayPokemonCard";
+import type { Player } from "./Player";
 
 export class PlayerGameView {
   #gameState: GameState;

@@ -1,10 +1,4 @@
-import type { Energy } from "@/types/Energy";
-import type {
-  Ability,
-  PokemonCard,
-  Move,
-  PlayingCard,
-} from "@/types/PlayingCard";
+import type { Ability, Energy, Move, PlayingCard, PokemonCard } from "@/types";
 
 export type PrimaryStatus = "Asleep"; // | "Paralyzed" | "Confused"
 export type SecondaryStatus = "Poisoned"; // | "Burned"

@@ -68,12 +68,12 @@
 </template>
 
 <script setup lang="ts">
-import type { DeckInfo } from "@/types/Deck";
 import { GameState } from "@/models/GameState";
 import { RandomAgent } from "@/models/agents/RandomAgent";
+import type { DeckInfo } from "@/types";
 import { onMounted, ref } from "vue";
-import InPlayCardSlot from "./InPlayCardSlot.vue";
 import GameLog from "./GameLog.vue";
+import InPlayCardSlot from "./InPlayCardSlot.vue";
 
 const prebuiltDecks: Record<string, DeckInfo> = {
   Celebi1: {

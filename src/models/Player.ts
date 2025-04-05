@@ -1,13 +1,16 @@
-import type { Deck } from "@/types/Deck";
-import type { PlayingCard, PokemonCard } from "@/types/PlayingCard";
-import { InPlayPokemonCard } from "./InPlayPokemonCard";
-import type { Energy } from "@/types/Energy";
+import type {
+  Deck,
+  Energy,
+  PlayerGameSetup,
+  PlayingCard,
+  PokemonCard,
+} from "@/types";
 import type {
   GameLogger,
   InPlayPokemonDescriptor,
   LoggedEvent,
 } from "./GameLogger";
-import type { PlayerGameSetup } from "@/types/PlayerAgent";
+import { InPlayPokemonCard } from "./InPlayPokemonCard";
 
 export class Player {
   Name: string;

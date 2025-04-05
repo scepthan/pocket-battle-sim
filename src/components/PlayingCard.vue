@@ -12,9 +12,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
 import cardBackUrl from "@/assets/cardback.jpg";
 import type { PlayingCard } from "@/types/PlayingCard";
+import { computed } from "vue";
 
 export interface Props {
   heightPx?: number;

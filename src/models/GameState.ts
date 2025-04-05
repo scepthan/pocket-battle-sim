@@ -1,13 +1,9 @@
-import { Player } from "./Player";
-import { InPlayPokemonCard } from "./InPlayPokemonCard";
-import type { Energy } from "@/types/Energy";
-import { useCoinFlip } from "@/composables/useCoinFlip";
-import { useDeckValidator } from "@/composables/useDeckValidator";
-import type { GameRules } from "@/types/GameRules";
-import type { PlayerAgent } from "@/types/PlayerAgent";
-import { PlayerGameView } from "./PlayerGameView";
+import { useCoinFlip, useDeckValidator } from "@/composables";
+import type { Effect, Energy, GameRules, Move, PlayerAgent } from "@/types";
 import { GameLogger } from "./GameLogger";
-import type { Effect, Move } from "@/types/PlayingCard";
+import { InPlayPokemonCard } from "./InPlayPokemonCard";
+import { Player } from "./Player";
+import { PlayerGameView } from "./PlayerGameView";
 
 const { coinFlip } = useCoinFlip();
 

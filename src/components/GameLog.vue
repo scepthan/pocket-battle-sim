@@ -152,8 +152,8 @@
 
 <script setup lang="ts">
 import type { LoggedEvent } from "@/models/GameLogger";
-import EnergyIcon from "./EnergyIcon.vue";
 import CardName from "./CardName.vue";
+import EnergyIcon from "./EnergyIcon.vue";
 
 export interface Props {
   logEntries: readonly LoggedEvent[];

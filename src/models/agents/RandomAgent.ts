@@ -1,8 +1,12 @@
 import { usePlayingCardStore } from "@/stores/usePlayingCardStore";
-import type { DeckInfo } from "@/types/Deck";
-import type { Energy } from "@/types/Energy";
-import type { GameInitState, PlayerAgent } from "@/types/PlayerAgent";
-import type { PlayingCard, PokemonCard } from "@/types/PlayingCard";
+import type {
+  DeckInfo,
+  Energy,
+  GameInitState,
+  PlayerAgent,
+  PlayingCard,
+  PokemonCard,
+} from "@/types";
 import type { PlayerGameView } from "../PlayerGameView";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

@@ -3,15 +3,15 @@ import {
   EnergyMap,
   isEnergy,
   isEnergyShort,
+  type Ability,
   type Energy,
-} from "@/types/Energy";
-import type {
-  InputCard,
-  InputCardAbility,
-  InputCardMove,
-} from "@/types/InputCard";
-import type { ParsedResult } from "@/types/ParsedResult";
-import type { PlayingCard, Move, Ability } from "@/types/PlayingCard";
+  type InputCard,
+  type InputCardAbility,
+  type InputCardMove,
+  type Move,
+  type ParsedResult,
+  type PlayingCard,
+} from "@/types";
 
 export const useCardParser = () => {
   const parseCard = (

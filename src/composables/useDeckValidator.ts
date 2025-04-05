@@ -1,7 +1,4 @@
-import type { Deck } from "@/types/Deck";
-import type { Energy } from "@/types/Energy";
-import type { GameRules } from "@/types/GameRules";
-import type { Move, PokemonCard } from "@/types/PlayingCard";
+import type { Deck, Energy, GameRules, Move, PokemonCard } from "@/types";
 
 export const useDeckValidator = (rules: GameRules) => {
   const hasCorrectAmountOfCards = (deck: Deck) =>
