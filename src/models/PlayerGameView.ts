@@ -1,4 +1,4 @@
-import type { Energy, Move, PlayingCard, PokemonCard } from "@/types";
+import type { Energy, ItemCard, Move, PlayingCard, PokemonCard } from "@/types";
 import type { GameState } from "./GameState";
 import type { InPlayPokemonCard } from "./InPlayPokemonCard";
 import type { Player } from "./Player";
@@ -184,6 +184,12 @@ export class PlayerGameView {
         this.selfActive!.RetreatCost
       );
     this.#player.retreatActivePokemon(benchedPokemon, energy);
+    return true;
+  }
+  async playItemCard(card: ItemCard) {
+    await this.#gameState.delay();
+    if (!this.canPlay) return false;
+    await this.#gameState.playTrainer(card);
     return true;
   }
 }

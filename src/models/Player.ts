@@ -330,6 +330,30 @@ export class Player {
     });
   }
 
+  knockOutPokemon(pokemon: InPlayPokemonCard) {
+    this.logger.addEntry({
+      type: "pokemonKnockedOut",
+      player: this.Name,
+      targetPokemon: this.pokemonToDescriptor(pokemon),
+    });
+    for (const card of pokemon.InPlayCards) {
+      this.InPlay.splice(this.InPlay.indexOf(card), 1);
+      this.Discard.push(card);
+    }
+    this.logger.addEntry({
+      type: "discardCards",
+      player: this.Name,
+      source: "inPlay",
+      cardIds: pokemon.InPlayCards.map((card) => card.ID),
+    });
+
+    if (this.ActivePokemon == pokemon) {
+      this.ActivePokemon = undefined;
+    } else {
+      this.Bench[this.Bench.indexOf(pokemon)] = undefined;
+    }
+  }
+
   checkPrizePointsChange(previousPoints: number) {
     if (this.GamePoints > previousPoints) {
       this.logger.addEntry({
@@ -339,5 +363,16 @@ export class Player {
         totalPrizePoints: this.GamePoints,
       });
     }
+  }
+
+  discardCardsFromHand(cards: PlayingCard[]) {
+    this.Hand = this.Hand.filter((card) => !cards.includes(card));
+    this.Discard.push(...cards);
+    this.logger.addEntry({
+      type: "discardCards",
+      player: this.Name,
+      source: "hand",
+      cardIds: cards.map((card) => card.ID),
+    });
   }
 }

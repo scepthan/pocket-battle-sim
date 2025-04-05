@@ -108,6 +108,12 @@
         </p>
       </div>
 
+      <div v-else-if="entry.type == 'playTrainer'">
+        <p>
+          <b>{{ entry.player }}</b> uses <CardName :card-id="entry.cardId" />!
+        </p>
+      </div>
+
       <div v-else-if="entry.type == 'useAttack'">
         <p>
           <CardName :card-id="entry.attackingPokemon.cardId" /> uses
@@ -140,8 +146,9 @@
       </div>
 
       <div v-else-if="entry.type == 'discardCards'">
-        <p v-if="entry.source == 'inPlay'">
-          {{ entry.cardIds.length }} cards discarded:
+        <p v-if="entry.source == 'inPlay' || entry.source == 'hand'">
+          {{ entry.cardIds.length }}
+          {{ entry.cardIds.length == 1 ? "card" : "cards" }} discarded:
           <span v-for="(cardId, i) in entry.cardIds" :key="i">
             <CardName :card-id="cardId" />{{
               i + 1 === entry.cardIds.length ? "" : ", "

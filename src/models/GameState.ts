@@ -1,5 +1,12 @@
 import { useCoinFlip, useDeckValidator } from "@/composables";
-import type { Effect, Energy, GameRules, Move, PlayerAgent } from "@/types";
+import type {
+  Effect,
+  Energy,
+  GameRules,
+  Move,
+  PlayerAgent,
+  TrainerCard,
+} from "@/types";
 import { GameLogger } from "./GameLogger";
 import { InPlayPokemonCard } from "./InPlayPokemonCard";
 import { Player } from "./Player";
@@ -216,6 +223,7 @@ export class GameState {
     }
   }
 
+  // Methods to do things during turns
   async useInitialEffect(effect: Effect) {
     this.useEffect(effect);
 
@@ -339,29 +347,23 @@ export class GameState {
   }
 
   knockOutPokemon(player: Player, pokemon: InPlayPokemonCard) {
-    this.GameLog.addEntry({
-      type: "pokemonKnockedOut",
-      player: this.DefendingPlayer.Name,
-      targetPokemon: this.DefendingPlayer.pokemonToDescriptor(pokemon),
-    });
-    for (const card of pokemon.InPlayCards) {
-      player.InPlay.splice(player.InPlay.indexOf(card), 1);
-      player.Discard.push(card);
-    }
-    this.GameLog.addEntry({
-      type: "discardCards",
-      player: player.Name,
-      source: "inPlay",
-      cardIds: pokemon.InPlayCards.map((card) => card.ID),
-    });
+    player.knockOutPokemon(pokemon);
 
     const opposingPlayer = player == this.Player1 ? this.Player2 : this.Player1;
     opposingPlayer.GamePoints += pokemon.PrizePoints;
+  }
 
-    if (player.ActivePokemon == pokemon) {
-      player.ActivePokemon = undefined;
-    } else {
-      player.Bench[player.Bench.indexOf(pokemon)] = undefined;
+  async playTrainer(card: TrainerCard) {
+    if (!this.AttackingPlayer.Hand.includes(card)) {
+      throw new Error("Card not in hand");
     }
+    this.GameLog.addEntry({
+      type: "playTrainer",
+      player: this.AttackingPlayer.Name,
+      cardId: card.ID,
+      trainerType: card.CardType,
+    });
+    await this.useInitialEffect(card.Effect);
+    this.AttackingPlayer.discardCardsFromHand([card]);
   }
 }

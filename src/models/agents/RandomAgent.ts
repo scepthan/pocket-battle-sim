@@ -3,6 +3,7 @@ import type {
   DeckInfo,
   Energy,
   GameInitState,
+  ItemCard,
   PlayerAgent,
   PlayingCard,
   PokemonCard,
@@ -61,7 +62,15 @@ export class RandomAgent implements PlayerAgent {
       }
     }
 
-    if (gameState.canRetreat() && Math.random() < 0.25) {
+    const itemCards = gameState.selfHand.filter(
+      (x) => x.CardType == "Item"
+    ) as ItemCard[];
+    for (const card of itemCards) {
+      if (Math.random() < 0.5) continue;
+      await gameState.playItemCard(card);
+    }
+
+    if (gameState.canRetreat() && Math.random() < 0.125) {
       const randomBench = rand(gameState.selfBenched);
       await gameState.retreatActivePokemon(randomBench);
     }
