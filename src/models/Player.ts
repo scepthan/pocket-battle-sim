@@ -74,7 +74,7 @@ export class Player {
     this.reset();
 
     while (true) {
-      this.drawCards(handSize, handSize);
+      this.drawCards(handSize, handSize, false);
       if (this.hasBasicPokemon()) {
         break;
       }
@@ -107,7 +107,7 @@ export class Player {
     this.shuffleDeck();
   }
 
-  drawCards(count: number, maxHandSize: number, log?: boolean) {
+  drawCards(count: number, maxHandSize: number, log: boolean = true) {
     const cardsDrawn: PlayingCard[] = [];
     const logEntry: LoggedEvent = {
       type: "drawToHand",

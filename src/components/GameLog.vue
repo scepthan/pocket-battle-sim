@@ -56,7 +56,7 @@
       <div v-else-if="entry.type == 'attachEnergy'">
         <p>
           <EnergyIcon :energy="entry.energyType" /> energy attached to
-          <CardName :card-id="entry.targetPokemon.cardId" />.
+          <CardName :card-id="entry.targetPokemon.cardId" />!
         </p>
       </div>
 

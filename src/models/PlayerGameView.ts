@@ -1,4 +1,4 @@
-import type { PlayingCard } from "@/types/PlayingCard";
+import type { PlayingCard, PokemonCard } from "@/types/PlayingCard";
 import type { GameState } from "./GameState";
 import type { Player } from "./Player";
 import type { InPlayPokemonCard } from "./InPlayPokemonCard";
@@ -108,6 +108,14 @@ export class PlayerGameView {
     if (!this.isSelfTurn) return false;
     if (this.selfAvailableEnergy) {
       this.#player.attachAvailableEnergy(pokemon);
+      return true;
+    }
+    return false;
+  }
+  async playPokemonToBench(pokemon: PokemonCard, index: number) {
+    if (!this.isSelfTurn) return false;
+    if (pokemon.Stage == 0 && this.selfBench[index] == undefined) {
+      this.#player.putPokemonOnBench(pokemon, index);
       return true;
     }
     return false;

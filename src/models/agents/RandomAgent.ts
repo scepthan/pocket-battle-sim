@@ -38,7 +38,28 @@ export class RandomAgent implements PlayerAgent {
     console.log(gameState);
     await wait(1000);
     if (gameState.selfAvailableEnergy) {
-      gameState.attachAvailableEnergy(gameState.selfActive!);
+      const ownPokemon = [
+        gameState.selfActive,
+        ...gameState.selfBenched,
+      ].filter((x) => x !== undefined);
+      gameState.attachAvailableEnergy(
+        ownPokemon[(Math.random() * ownPokemon.length) | 0]
+      );
+      await wait(1000);
+    }
+
+    const handBasics = gameState.selfHand.filter(
+      (x) => x.CardType == "Pokemon" && x.Stage == 0
+    ) as PokemonCard[];
+    if (handBasics.length > 0) {
+      const randomBasic = handBasics[(Math.random() * handBasics.length) | 0];
+      const bench = gameState.selfBenched;
+      for (let i = 0; i < 3; i++) {
+        if (bench[i] == undefined) {
+          gameState.playPokemonToBench(randomBasic, i);
+          break;
+        }
+      }
       await wait(1000);
     }
     return;
