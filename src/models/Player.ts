@@ -291,6 +291,45 @@ export class Player {
     });
   }
 
+  retreatActivePokemon(benchedPokemon: InPlayPokemonCard, energy: Energy[]) {
+    if (!this.ActivePokemon) {
+      throw new Error("No active Pokemon to retreat");
+    }
+    if (
+      (this.ActivePokemon.RetreatCost ?? 0) >
+      this.ActivePokemon.AttachedEnergy.length
+    ) {
+      throw new Error("Not enough energy to retreat");
+    }
+    const previousActive = this.ActivePokemon;
+    const previousEnergy = previousActive.AttachedEnergy.slice();
+    const discardedEnergy: Energy[] = [];
+    for (const e of energy) {
+      if (!previousEnergy.includes(e)) {
+        throw new Error("Energy not attached to active Pokemon");
+      }
+      discardedEnergy.push(
+        previousEnergy.splice(previousEnergy.indexOf(e), 1)[0]
+      );
+    }
+    previousActive.AttachedEnergy = previousEnergy;
+    this.Bench[this.Bench.indexOf(benchedPokemon)] = previousActive;
+    this.ActivePokemon = benchedPokemon;
+    this.logger.addEntry({
+      type: "swapActivePokemon",
+      player: this.Name,
+      reason: "retreat",
+      fromPokemon: this.pokemonToDescriptor(previousActive),
+      toPokemon: this.pokemonToDescriptor(benchedPokemon),
+    });
+    this.logger.addEntry({
+      type: "discardEnergy",
+      player: this.Name,
+      source: "retreat",
+      energyTypes: discardedEnergy,
+    });
+  }
+
   checkPrizePointsChange(previousPoints: number) {
     if (this.GamePoints > previousPoints) {
       this.logger.addEntry({

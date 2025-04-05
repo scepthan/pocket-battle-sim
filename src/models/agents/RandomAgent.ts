@@ -65,6 +65,12 @@ export class RandomAgent implements PlayerAgent {
       }
     }
 
+    if (gameState.canRetreat() && Math.random() < 0.25) {
+      const randomBench = rand(gameState.selfBenched);
+      gameState.retreatActivePokemon(randomBench);
+      await wait(1000);
+    }
+
     const evolveablePokemon = ownPokemon.filter((x) => x.ReadyToEvolve);
     const pokemonToEvolveWith = gameState.selfHand.filter(
       (x) =>

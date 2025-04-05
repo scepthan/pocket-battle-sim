@@ -1,4 +1,4 @@
-import type { Move, PlayingCard, PokemonCard } from "@/types";
+import type { Energy, Move, PlayingCard, PokemonCard } from "@/types";
 import type { GameState } from "./GameState";
 import type { InPlayPokemonCard } from "./InPlayPokemonCard";
 import type { Player } from "./Player";
@@ -117,6 +117,14 @@ export class PlayerGameView {
     }
     return true;
   }
+  canRetreat() {
+    if (!this.isSelfTurn || !this.selfActive) return false;
+    if (this.selfBenched.length == 0) return false;
+    return (
+      (this.selfActive.RetreatCost ?? 0) <=
+      this.selfActive.AttachedEnergy.length
+    );
+  }
 
   // Action methods
   async attachAvailableEnergy(pokemon: InPlayPokemonCard) {
@@ -149,6 +157,19 @@ export class PlayerGameView {
   async useAttack(attack: Move) {
     if (!this.canUseAttack(attack)) return false;
     this.#gameState.useAttack(attack);
+    return true;
+  }
+  async retreatActivePokemon(
+    benchedPokemon: InPlayPokemonCard,
+    energy?: Energy[]
+  ) {
+    if (!this.canRetreat()) return false;
+    if (!energy)
+      energy = this.selfActive!.AttachedEnergy.slice(
+        0,
+        this.selfActive!.RetreatCost
+      );
+    this.#player.retreatActivePokemon(benchedPokemon, energy);
     return true;
   }
 }

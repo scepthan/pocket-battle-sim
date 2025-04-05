@@ -93,13 +93,14 @@ interface ReturnToHandEvent {
 interface DiscardEnergyEvent {
   type: "discardEnergy";
   player: string;
-  source: "effect" | "knockOut" | "energyZone";
+  source: "effect" | "retreat" | "knockOut" | "energyZone";
   energyTypes: Energy[];
 }
 
 interface SwapActivePokemonEvent {
   type: "swapActivePokemon";
   player: string;
+  reason: "retreat" | "selfEffect" | "opponentEffect";
   fromPokemon: InPlayPokemonDescriptor;
   toPokemon: InPlayPokemonDescriptor;
 }

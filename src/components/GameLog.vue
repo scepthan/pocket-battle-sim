@@ -86,6 +86,26 @@
           <b>{{ entry.player }}</b> discards an energy from their energy zone:
           <EnergyIcon :energy="entry.energyTypes[0]" />
         </p>
+        <p v-else>
+          Energy discarded:
+          <EnergyIcon
+            v-for="(energy, i) in entry.energyTypes"
+            :key="i"
+            :energy="energy"
+          />
+        </p>
+      </div>
+
+      <div v-else-if="entry.type == 'swapActivePokemon'">
+        <p v-if="entry.reason == 'retreat'">
+          <b>{{ entry.player }}</b> retreats their active
+          <CardName :card-id="entry.fromPokemon.cardId" /> and puts in
+          <CardName :card-id="entry.toPokemon.cardId" />!
+        </p>
+        <p v-else>
+          <b>{{ entry.player }}</b> switches their active Pokemon to
+          <CardName :card-id="entry.toPokemon.cardId" />!
+        </p>
       </div>
 
       <div v-else-if="entry.type == 'useAttack'">
