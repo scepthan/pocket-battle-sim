@@ -120,4 +120,15 @@ export class PlayerGameView {
     }
     return false;
   }
+  async playPokemonToEvolve(
+    pokemon: PokemonCard,
+    inPlayPokemon: InPlayPokemonCard
+  ) {
+    if (!this.isSelfTurn) return false;
+    if (pokemon.EvolvesFrom == inPlayPokemon.Name) {
+      this.#player.evolvePokemon(inPlayPokemon, pokemon);
+      return true;
+    }
+    return false;
+  }
 }

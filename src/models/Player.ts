@@ -199,6 +199,52 @@ export class Player {
     });
   }
 
+  evolvePokemon(pokemon: InPlayPokemonCard, card: PokemonCard) {
+    if (!this.Hand.includes(card)) {
+      throw new Error("Card not in hand");
+    }
+    if (card.EvolvesFrom != pokemon.Name) {
+      throw new Error("Card does not evolve from this Pokemon");
+    }
+    if (!pokemon.ReadyToEvolve) {
+      throw new Error("Pokemon is not ready to evolve");
+    }
+
+    this.Hand.splice(this.Hand.indexOf(card), 1);
+    this.InPlay.push(card);
+
+    const newPokemon = new InPlayPokemonCard(card);
+    newPokemon.InPlayCards.push(...pokemon.InPlayCards);
+    newPokemon.CurrentHP = card.BaseHP - (pokemon.BaseHP - pokemon.CurrentHP);
+    newPokemon.AttachedEnergy = pokemon.AttachedEnergy.slice();
+
+    if (this.ActivePokemon == pokemon) {
+      this.ActivePokemon = newPokemon;
+    } else {
+      this.Bench[this.Bench.indexOf(pokemon)] = newPokemon;
+    }
+
+    const statuses: string[] = pokemon.SecondaryStatuses.slice();
+    if (pokemon.PrimaryStatus) statuses.unshift(pokemon.PrimaryStatus);
+    for (const status of statuses) {
+      this.logger.addEntry({
+        type: "pokemonStatusEnded",
+        player: this.Name,
+        statusCondition: status,
+        targetPokemon: this.pokemonToDescriptor(pokemon),
+        currentStatusList: pokemon.SecondaryStatuses,
+      });
+    }
+
+    this.logger.addEntry({
+      type: "evolvePokemon",
+      player: this.Name,
+      cardId: card.ID,
+      fromPokemon: this.pokemonToDescriptor(pokemon),
+      stage: card.Stage,
+    });
+  }
+
   attachAvailableEnergy(pokemon: InPlayPokemonCard) {
     if (!this.AvailableEnergy) {
       throw new Error("No energy available to attach");

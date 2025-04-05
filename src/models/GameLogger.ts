@@ -40,6 +40,11 @@ interface GameOverEvent {
     | "concession"
     | "invalidGameState";
 }
+interface TurnErrorEvent {
+  type: "turnError";
+  player: string;
+  error: string;
+}
 
 // Card movement events
 interface DrawToHandEvent {
@@ -207,6 +212,7 @@ export type LoggedEvent =
   | NextTurnEvent
   | PokemonCheckupEvent
   | GameOverEvent
+  | TurnErrorEvent
   | DrawToHandEvent
   | PlayToActiveEvent
   | PlayToBenchEvent

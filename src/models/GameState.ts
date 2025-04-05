@@ -133,6 +133,7 @@ export class GameState {
       defendingPlayer: this.DefendingPlayer.Name,
     });
 
+    // Generate next energy for the attacking player
     if (this.TurnNumber > 1) {
       this.AttackingPlayer.AvailableEnergy = this.AttackingPlayer.NextEnergy; // Set the available energy for the attacking player
       this.AttackingPlayer.chooseNextEnergy();
@@ -143,17 +144,34 @@ export class GameState {
         nextEnergy: this.AttackingPlayer.NextEnergy,
       });
     }
+    if (this.TurnNumber > 2) {
+      if (this.AttackingPlayer.ActivePokemon)
+        this.AttackingPlayer.ActivePokemon.ReadyToEvolve = true;
+      for (const pokemon of this.AttackingPlayer.Bench) {
+        if (pokemon) pokemon.ReadyToEvolve = true;
+      }
+    }
 
     // Draw a card into the attacking player's hand
     this.AttackingPlayer.drawCards(1, this.MaxHandSize);
 
-    await (this.AttackingPlayer == this.Player1
-      ? this.Agent1
-      : this.Agent2
-    ).doTurn(new PlayerGameView(this, this.AttackingPlayer));
+    // Execute the player's turn
+    try {
+      await (this.AttackingPlayer == this.Player1
+        ? this.Agent1
+        : this.Agent2
+      ).doTurn(new PlayerGameView(this, this.AttackingPlayer));
+    } catch (error) {
+      console.error("Error during turn:", error);
+      this.GameLog.addEntry({
+        type: "turnError",
+        player: this.AttackingPlayer.Name,
+        error: String(error),
+      });
+    }
 
+    // Discard energy if player did not use it
     if (this.AttackingPlayer.AvailableEnergy) {
-      // Discard energy if player did not use it
       this.GameLog.addEntry({
         type: "discardEnergy",
         player: this.AttackingPlayer.Name,
@@ -163,6 +181,7 @@ export class GameState {
       this.AttackingPlayer.AvailableEnergy = undefined;
     }
 
+    // Pokemon Checkup phase
     this.GameLog.addEntry({
       type: "pokemonCheckup",
     });

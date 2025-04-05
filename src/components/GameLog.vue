@@ -46,10 +46,19 @@
           <CardName :card-id="entry.cardId" /> as their Active Pokemon!
         </p>
       </div>
+
       <div v-else-if="entry.type == 'playToBench'">
         <p>
           <b>{{ entry.player }}</b> plays
           <CardName :card-id="entry.cardId" /> to their Bench!
+        </p>
+      </div>
+
+      <div v-else-if="entry.type == 'evolvePokemon'">
+        <p>
+          <b>{{ entry.player }}</b> evolves
+          <CardName :card-id="entry.fromPokemon.cardId" /> into
+          <CardName :card-id="entry.cardId" />!
         </p>
       </div>
 

@@ -1,5 +1,10 @@
 import type { Energy } from "@/types/Energy";
-import type { Ability, PokemonCard, Move } from "@/types/PlayingCard";
+import type {
+  Ability,
+  PokemonCard,
+  Move,
+  PlayingCard,
+} from "@/types/PlayingCard";
 
 export type PrimaryStatus = "Asleep"; // | "Paralyzed" | "Confused"
 export type SecondaryStatus = "Poisoned"; // | "Burned"
@@ -20,12 +25,14 @@ export class InPlayPokemonCard {
 
   CurrentHP: number;
   PrimaryStatus?: PrimaryStatus;
-  SecondaryStatuses: SecondaryStatus[];
-  AttachedEnergy: Energy[];
-  ReadyToEvolve: boolean;
+  SecondaryStatuses: SecondaryStatus[] = [];
+  AttachedEnergy: Energy[] = [];
+  InPlayCards: PlayingCard[] = [];
+  ReadyToEvolve: boolean = false;
 
   constructor(inputCard: PokemonCard) {
     this.BaseCard = inputCard;
+    this.InPlayCards.push(inputCard);
 
     this.ID = inputCard.ID;
     this.Name = inputCard.Name;
@@ -39,9 +46,6 @@ export class InPlayPokemonCard {
     this.Ability = inputCard.Ability;
 
     this.CurrentHP = this.BaseHP;
-    this.SecondaryStatuses = [];
-    this.AttachedEnergy = [];
-    this.ReadyToEvolve = false;
   }
 
   applyDamage(HP: number) {
