@@ -346,6 +346,14 @@ export class Player {
       source: "inPlay",
       cardIds: pokemon.InPlayCards.map((card) => card.ID),
     });
+    if (pokemon.AttachedEnergy.length > 0) {
+      this.logger.addEntry({
+        type: "discardEnergy",
+        player: this.Name,
+        source: "knockOut",
+        energyTypes: pokemon.AttachedEnergy,
+      });
+    }
 
     if (this.ActivePokemon == pokemon) {
       this.ActivePokemon = undefined;
