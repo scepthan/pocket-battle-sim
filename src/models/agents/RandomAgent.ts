@@ -78,6 +78,16 @@ export class RandomAgent implements PlayerAgent {
       gameState.playPokemonToEvolve(randomEvolver, randomEvolvee);
       await wait(1000);
     }
+
+    const attacks = [];
+    for (const attack of gameState.selfActive?.Moves ?? []) {
+      if (gameState.canUseAttack(attack)) attacks.push(attack);
+    }
+    if (attacks.length > 0) {
+      const randomAttack = rand(attacks);
+      gameState.useAttack(randomAttack);
+      await wait(1000);
+    }
     return;
   }
 

@@ -1,4 +1,4 @@
-import type { PlayingCard, PokemonCard } from "@/types/PlayingCard";
+import type { Move, PlayingCard, PokemonCard } from "@/types/PlayingCard";
 import type { GameState } from "./GameState";
 import type { Player } from "./Player";
 import type { InPlayPokemonCard } from "./InPlayPokemonCard";
@@ -102,6 +102,21 @@ export class PlayerGameView {
       return true;
     }
   }
+  canUseAttack(attack: Move) {
+    if (!this.isSelfTurn || !this.selfActive) return false;
+    if (!this.selfActive.Moves.includes(attack)) return false;
+    const energyAvailable = this.selfActive.AttachedEnergy.slice();
+    for (const energy of attack.RequiredEnergy) {
+      if (energy === "Colorless") {
+        energyAvailable.pop();
+      } else if (energyAvailable.includes(energy)) {
+        energyAvailable.splice(energyAvailable.indexOf(energy), 1);
+      } else {
+        return false;
+      }
+    }
+    return true;
+  }
 
   // Action methods
   async attachAvailableEnergy(pokemon: InPlayPokemonCard) {
@@ -130,5 +145,10 @@ export class PlayerGameView {
       return true;
     }
     return false;
+  }
+  async useAttack(attack: Move) {
+    if (!this.canUseAttack(attack)) return false;
+    this.#gameState.useAttack(attack);
+    return true;
   }
 }

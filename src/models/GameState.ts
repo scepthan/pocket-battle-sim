@@ -7,6 +7,7 @@ import type { GameRules } from "@/types/GameRules";
 import type { PlayerAgent } from "@/types/PlayerAgent";
 import { PlayerGameView } from "./PlayerGameView";
 import { GameLogger } from "./GameLogger";
+import type { Move } from "@/types/PlayingCard";
 
 const { coinFlip } = useCoinFlip();
 
@@ -196,6 +197,18 @@ export class GameState {
     }
   }
 
+  useAttack(attack: Move) {
+    this.GameLog.addEntry({
+      type: "useAttack",
+      player: this.AttackingPlayer.Name,
+      attackName: attack.Name,
+      attackingPokemon: this.AttackingPlayer.pokemonToDescriptor(
+        this.AttackingPlayer.ActivePokemon!
+      ),
+    });
+    this.attackActivePokemon(20);
+  }
+
   attackActivePokemon(HP: number) {
     const defender = this.DefendingPlayer.ActivePokemon;
     const attacker = this.AttackingPlayer.ActivePokemon;
@@ -209,6 +222,16 @@ export class GameState {
       totalDamage += 20;
     }
     defender.applyDamage(totalDamage);
+    this.GameLog.addEntry({
+      type: "pokemonDamaged",
+      player: this.AttackingPlayer.Name,
+      targetPokemon: this.AttackingPlayer.pokemonToDescriptor(defender),
+      fromAttack: true,
+      damageDealt: HP,
+      initialHP: defender.CurrentHP + HP,
+      finalHP: defender.CurrentHP,
+      maxHP: defender.BaseHP,
+    });
   }
 
   applyDamage(Pokemon: InPlayPokemonCard, HP: number) {

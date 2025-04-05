@@ -88,6 +88,24 @@
         </p>
       </div>
 
+      <div v-else-if="entry.type == 'useAttack'">
+        <p>
+          <CardName :card-id="entry.attackingPokemon.cardId" /> uses
+          <b>{{ entry.attackName }}</b
+          >!
+        </p>
+      </div>
+
+      <div v-else-if="entry.type == 'pokemonDamaged'">
+        <p>
+          <CardName :card-id="entry.targetPokemon.cardId" /> is hit for
+          {{ entry.damageDealt }} damage! ({{ entry.finalHP }}/{{
+            entry.maxHP
+          }}
+          HP)
+        </p>
+      </div>
+
       <h5 v-else-if="entry.type == 'pokemonCheckup'">Pokemon Checkup phase</h5>
 
       <div v-else-if="entry.type == 'gameOver'">

@@ -3,7 +3,7 @@
     <PlayingCard :card="card.BaseCard" :height-px="heightPx" />
 
     <div class="card-hp d-flex flex-column align-end">
-      {{ Math.floor(card.BaseHP) }}
+      {{ Math.floor(card.CurrentHP) }}
       <div class="stacked hp-bar-container">
         <div class="hp-bar-inner">
           <div :style="hpBarStyle" />
