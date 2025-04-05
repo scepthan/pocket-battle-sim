@@ -25,6 +25,8 @@ export class GameState {
 
   GameOver: boolean = false;
 
+  endTurnResolve: (value: unknown) => void = () => {};
+
   constructor(rules: GameRules, agent1: PlayerAgent, agent2: PlayerAgent) {
     this.Agent1 = agent1;
     this.Agent2 = agent2;
@@ -123,6 +125,11 @@ export class GameState {
     // Reset turn-based flags
     this.CanRetreat = true;
     this.CanPlaySupporter = true;
+    if (this.TurnNumber > 2) {
+      for (const pokemon of this.AttackingPlayer.InPlayPokemon) {
+        pokemon.ReadyToEvolve = true;
+      }
+    }
 
     // Log the turn change
     this.GameLog.addEntry({
@@ -143,23 +150,21 @@ export class GameState {
         nextEnergy: this.AttackingPlayer.NextEnergy,
       });
     }
-    if (this.TurnNumber > 2) {
-      if (this.AttackingPlayer.ActivePokemon)
-        this.AttackingPlayer.ActivePokemon.ReadyToEvolve = true;
-      for (const pokemon of this.AttackingPlayer.Bench) {
-        if (pokemon) pokemon.ReadyToEvolve = true;
-      }
-    }
 
     // Draw a card into the attacking player's hand
     this.AttackingPlayer.drawCards(1, this.MaxHandSize);
 
     // Execute the player's turn
     try {
-      await (this.AttackingPlayer == this.Player1
-        ? this.Agent1
-        : this.Agent2
-      ).doTurn(new PlayerGameView(this, this.AttackingPlayer));
+      await new Promise((resolve) => {
+        // Any attack and some other effects will end the turn immediately
+        this.endTurnResolve = resolve;
+
+        // Otherwise, the turn will end when the agent returns
+        (this.AttackingPlayer == this.Player1 ? this.Agent1 : this.Agent2)
+          .doTurn(new PlayerGameView(this, this.AttackingPlayer))
+          .then(resolve);
+      });
     } catch (error) {
       console.error("Error during turn:", error);
       this.GameLog.addEntry({
@@ -276,7 +281,7 @@ export class GameState {
     effect(this);
   }
 
-  useAttack(attack: Move) {
+  async useAttack(attack: Move) {
     this.GameLog.addEntry({
       type: "useAttack",
       player: this.AttackingPlayer.Name,
@@ -285,7 +290,8 @@ export class GameState {
         this.AttackingPlayer.ActivePokemon!
       ),
     });
-    this.useInitialEffect(attack.Effect);
+    await this.useInitialEffect(attack.Effect);
+    this.endTurnResolve(true);
   }
 
   attackActivePokemon(HP: number) {

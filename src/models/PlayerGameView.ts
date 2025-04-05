@@ -5,11 +5,13 @@ import type { Player } from "./Player";
 
 export class PlayerGameView {
   #gameState: GameState;
+  #turnNumber: number;
   #player: Player;
   #opponent: Player;
 
   constructor(gameState: GameState, player: Player) {
     this.#gameState = gameState;
+    this.#turnNumber = gameState.TurnNumber;
     this.#player = player;
     if (player == gameState.Player1) {
       this.#opponent = gameState.Player2;
@@ -25,6 +27,13 @@ export class PlayerGameView {
   get isSelfTurn() {
     return this.#gameState.AttackingPlayer == this.#player;
   }
+  get canPlay() {
+    return (
+      this.isSelfTurn &&
+      this.#gameState.TurnNumber > 0 &&
+      this.#gameState.TurnNumber == this.#turnNumber
+    );
+  }
 
   // Self attributes
   get selfActive() {
@@ -34,7 +43,7 @@ export class PlayerGameView {
     return this.#player.Bench.slice();
   }
   get selfBenched() {
-    return this.#player.Bench.filter((x) => x) as InPlayPokemonCard[];
+    return this.#player.Bench.filter((x) => x !== undefined);
   }
   get selfHand() {
     return this.#player.Hand.slice();
@@ -60,7 +69,7 @@ export class PlayerGameView {
     return this.#opponent.Bench.slice();
   }
   get opponentBenched() {
-    return this.#opponent.Bench.filter((x) => x) as InPlayPokemonCard[];
+    return this.#opponent.Bench.filter((x) => x !== undefined);
   }
   get opponentHandSize() {
     return this.#opponent.Hand.length;
@@ -85,7 +94,7 @@ export class PlayerGameView {
 
   // Helper methods
   canPlayCard(card: PlayingCard) {
-    if (!this.isSelfTurn) return false;
+    if (!this.canPlay) return false;
 
     if (card.CardType == "Pokemon") {
       if (card.Stage == 0) {
@@ -103,7 +112,7 @@ export class PlayerGameView {
     }
   }
   canUseAttack(attack: Move) {
-    if (!this.isSelfTurn || !this.selfActive) return false;
+    if (!this.canPlay || !this.selfActive) return false;
     if (!this.selfActive.Moves.includes(attack)) return false;
     const energyAvailable = this.selfActive.AttachedEnergy.slice();
     for (const energy of attack.RequiredEnergy) {
@@ -118,7 +127,7 @@ export class PlayerGameView {
     return true;
   }
   canRetreat() {
-    if (!this.isSelfTurn || !this.selfActive) return false;
+    if (!this.canPlay || !this.selfActive) return false;
     if (this.selfBenched.length == 0) return false;
     return (
       (this.selfActive.RetreatCost ?? 0) <=
@@ -128,7 +137,7 @@ export class PlayerGameView {
 
   // Action methods
   async attachAvailableEnergy(pokemon: InPlayPokemonCard) {
-    if (!this.isSelfTurn) return false;
+    if (!this.canPlay) return false;
     if (this.selfAvailableEnergy) {
       this.#player.attachAvailableEnergy(pokemon);
       return true;
@@ -136,7 +145,7 @@ export class PlayerGameView {
     return false;
   }
   async playPokemonToBench(pokemon: PokemonCard, index: number) {
-    if (!this.isSelfTurn) return false;
+    if (!this.canPlay) return false;
     if (pokemon.Stage == 0 && this.selfBench[index] == undefined) {
       this.#player.putPokemonOnBench(pokemon, index);
       return true;
@@ -147,7 +156,7 @@ export class PlayerGameView {
     pokemon: PokemonCard,
     inPlayPokemon: InPlayPokemonCard
   ) {
-    if (!this.isSelfTurn) return false;
+    if (!this.canPlay) return false;
     if (pokemon.EvolvesFrom == inPlayPokemon.Name) {
       this.#player.evolvePokemon(inPlayPokemon, pokemon);
       return true;
@@ -156,7 +165,7 @@ export class PlayerGameView {
   }
   async useAttack(attack: Move) {
     if (!this.canUseAttack(attack)) return false;
-    this.#gameState.useAttack(attack);
+    await this.#gameState.useAttack(attack);
     return true;
   }
   async retreatActivePokemon(
