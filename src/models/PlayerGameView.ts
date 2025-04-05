@@ -107,7 +107,7 @@ export class PlayerGameView {
     if (!this.selfActive.Moves.includes(attack)) return false;
     const energyAvailable = this.selfActive.AttachedEnergy.slice();
     for (const energy of attack.RequiredEnergy) {
-      if (energy === "Colorless") {
+      if (energy === "Colorless" && energyAvailable.length > 0) {
         energyAvailable.pop();
       } else if (energyAvailable.includes(energy)) {
         energyAvailable.splice(energyAvailable.indexOf(energy), 1);

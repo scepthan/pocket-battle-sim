@@ -25,6 +25,10 @@ export class Player {
 
   logger: GameLogger;
 
+  get InPlayPokemon() {
+    return [this.ActivePokemon, ...this.Bench].filter((x) => x !== undefined);
+  }
+
   constructor(name: string, deck: Deck, logger: GameLogger) {
     this.Name = name;
     this.EnergyTypes = deck.EnergyTypes;
@@ -173,6 +177,20 @@ export class Player {
     setup.bench.forEach((card, i) => {
       if (!card) return;
       this.putPokemonOnBench(card, i);
+    });
+  }
+
+  setNewActivePokemon(pokemon: InPlayPokemonCard) {
+    if (!this.Bench.includes(pokemon)) {
+      throw new Error("Pokemon not on bench");
+    }
+    this.ActivePokemon = pokemon;
+    this.Bench[this.Bench.indexOf(pokemon)] = undefined;
+
+    this.logger.addEntry({
+      type: "selectActivePokemon",
+      player: this.Name,
+      toPokemon: this.pokemonToDescriptor(pokemon),
     });
   }
 

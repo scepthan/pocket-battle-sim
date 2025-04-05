@@ -36,7 +36,6 @@ export class RandomAgent implements PlayerAgent {
   }
 
   async doTurn(gameState: PlayerGameView) {
-    console.log(gameState);
     await wait(1000);
     const ownPokemon = [gameState.selfActive, ...gameState.selfBenched].filter(
       (x) => x !== undefined
@@ -92,7 +91,8 @@ export class RandomAgent implements PlayerAgent {
   }
 
   async swapActivePokemon(gameState: PlayerGameView) {
-    const bench = gameState.selfBenched;
+    await wait(1000);
+    const bench = gameState.selfBenched.filter((x) => x !== undefined);
     return rand(bench);
   }
 }

@@ -97,12 +97,41 @@
       </div>
 
       <div v-else-if="entry.type == 'pokemonDamaged'">
+        <p v-if="entry.weaknessBoost">It's super effective!</p>
         <p>
           <CardName :card-id="entry.targetPokemon.cardId" /> is hit for
-          {{ entry.damageDealt }} damage! ({{ entry.finalHP }}/{{
-            entry.maxHP
-          }}
+          {{ entry.damageDealt }} damage! ({{ entry.finalHP }}/{{ entry.maxHP }}
           HP)
+        </p>
+      </div>
+
+      <div v-else-if="entry.type == 'pokemonKnockedOut'">
+        <p>
+          <CardName :card-id="entry.targetPokemon.cardId" /> is knocked out!
+        </p>
+      </div>
+
+      <div v-else-if="entry.type == 'discardCards'">
+        <p v-if="entry.source == 'inPlay'">
+          {{ entry.cardIds.length }} cards discarded:
+          <span v-for="(cardId, i) in entry.cardIds" :key="i">
+            <CardName :card-id="cardId" />{{
+              i + 1 === entry.cardIds.length ? "" : ", "
+            }} </span
+          >.
+        </p>
+        <p v-else>
+          <b>{{ entry.player }}</b> discards {{ entry.cardIds.length }}
+          {{ entry.cardIds.length === 1 ? "card" : "cards" }} from their
+          {{ entry.source }}!
+        </p>
+      </div>
+
+      <div v-else-if="entry.type == 'selectActivePokemon'">
+        <p>
+          <b>{{ entry.player }}</b> chooses
+          <CardName :card-id="entry.toPokemon.cardId" /> as their next Active
+          Pokemon!
         </p>
       </div>
 

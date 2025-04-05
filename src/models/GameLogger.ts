@@ -35,7 +35,7 @@ interface GameOverEvent {
   winner?: string;
   reason:
     | "maxTurnNumberReached"
-    | "allPrizeCardsTaken"
+    | "maxPrizePointsReached"
     | "noPokemonLeft"
     | "concession"
     | "invalidGameState";
@@ -76,6 +76,7 @@ interface PlayTrainerEvent {
 interface DiscardCardsEvent {
   type: "discardCards";
   player: string;
+  source: "hand" | "deck" | "inPlay";
   cardIds: string[];
 }
 interface ReturnToHandEvent {

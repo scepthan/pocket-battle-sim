@@ -7,7 +7,7 @@ import type { GameRules } from "@/types/GameRules";
 import type { PlayerAgent } from "@/types/PlayerAgent";
 import { PlayerGameView } from "./PlayerGameView";
 import { GameLogger } from "./GameLogger";
-import type { Move } from "@/types/PlayingCard";
+import type { Effect, Move } from "@/types/PlayingCard";
 
 const { coinFlip } = useCoinFlip();
 
@@ -26,6 +26,8 @@ export class GameState {
 
   MaxHandSize: number = 10;
   MaxTurnNumber: number = 30;
+
+  GameOver: boolean = false;
 
   constructor(rules: GameRules, agent1: PlayerAgent, agent2: PlayerAgent) {
     this.Agent1 = agent1;
@@ -89,7 +91,7 @@ export class GameState {
     this.Player1.setupPokemon(setup1);
     this.Player2.setupPokemon(setup2);
 
-    while (this.TurnNumber < this.MaxTurnNumber) {
+    while (this.TurnNumber < this.MaxTurnNumber && !this.GameOver) {
       try {
         await this.nextTurn();
       } catch (error) {
@@ -171,6 +173,8 @@ export class GameState {
       });
     }
 
+    if (this.GameOver) return;
+
     // Discard energy if player did not use it
     if (this.AttackingPlayer.AvailableEnergy) {
       this.GameLog.addEntry({
@@ -197,6 +201,79 @@ export class GameState {
     }
   }
 
+  async useInitialEffect(effect: Effect) {
+    this.useEffect(effect);
+
+    // Check for any pokemon that are knocked out
+    for (const player of [this.DefendingPlayer, this.AttackingPlayer]) {
+      for (const pokemon of player.InPlayPokemon) {
+        if (pokemon.CurrentHP <= 0) {
+          this.knockOutPokemon(player, pokemon);
+        }
+      }
+    }
+
+    // Check for game over conditions
+    if (
+      this.Player1.InPlayPokemon.length == 0 ||
+      this.Player2.InPlayPokemon.length == 0
+    ) {
+      // The primary win condition is actually having pokemon left in play when your opponent does not
+      let winner: string | undefined = undefined;
+      if (this.Player1.InPlayPokemon.length > 0) {
+        winner = this.Player1.Name;
+      } else if (this.Player2.InPlayPokemon.length > 0) {
+        winner = this.Player2.Name;
+      }
+
+      this.GameLog.addEntry({
+        type: "gameOver",
+        draw: winner !== undefined,
+        winner: winner,
+        reason: "noPokemonLeft",
+      });
+      this.GameOver = true;
+      return;
+    } else if (this.Player1.GamePoints >= 3 || this.Player2.GamePoints >= 3) {
+      // Secondary win condition: one player has more than 3 points and the other does not
+      let winner: string | undefined = undefined;
+      if (this.Player1.GamePoints < 3) {
+        winner = this.Player2.Name;
+      } else if (this.Player2.GamePoints < 3) {
+        winner = this.Player1.Name;
+      }
+
+      this.GameLog.addEntry({
+        type: "gameOver",
+        draw: winner !== undefined,
+        winner: winner,
+        reason: "maxPrizePointsReached",
+      });
+      this.GameOver = true;
+      return;
+    }
+
+    // Have players choose a new Active Pokemon if their previous one was knocked out
+    const promises = [];
+    if (this.Player1.ActivePokemon === undefined) {
+      promises[0] = this.Agent1.swapActivePokemon(
+        new PlayerGameView(this, this.Player1)
+      );
+    }
+    if (this.Player2.ActivePokemon === undefined) {
+      promises[1] = this.Agent2.swapActivePokemon(
+        new PlayerGameView(this, this.Player2)
+      );
+    }
+    const newActive = await Promise.all(promises);
+    if (newActive[0]) this.Player1.setNewActivePokemon(newActive[0]);
+    if (newActive[1]) this.Player2.setNewActivePokemon(newActive[1]);
+  }
+
+  useEffect(effect: Effect) {
+    effect(this);
+  }
+
   useAttack(attack: Move) {
     this.GameLog.addEntry({
       type: "useAttack",
@@ -206,7 +283,7 @@ export class GameState {
         this.AttackingPlayer.ActivePokemon!
       ),
     });
-    this.attackActivePokemon(20);
+    this.useInitialEffect(attack.Effect);
   }
 
   attackActivePokemon(HP: number) {
@@ -227,18 +304,42 @@ export class GameState {
       player: this.AttackingPlayer.Name,
       targetPokemon: this.AttackingPlayer.pokemonToDescriptor(defender),
       fromAttack: true,
-      damageDealt: HP,
+      damageDealt: totalDamage,
       initialHP: defender.CurrentHP + HP,
       finalHP: defender.CurrentHP,
       maxHP: defender.BaseHP,
+      weaknessBoost: Type == defender.Weakness,
     });
   }
 
-  applyDamage(Pokemon: InPlayPokemonCard, HP: number) {
-    Pokemon.applyDamage(HP);
+  applyDamage(pokemon: InPlayPokemonCard, HP: number) {
+    pokemon.applyDamage(HP);
+  }
 
-    if (Pokemon.CurrentHP == 0) {
-      // knocked out logic
+  knockOutPokemon(player: Player, pokemon: InPlayPokemonCard) {
+    this.GameLog.addEntry({
+      type: "pokemonKnockedOut",
+      player: this.DefendingPlayer.Name,
+      targetPokemon: this.DefendingPlayer.pokemonToDescriptor(pokemon),
+    });
+    for (const card of pokemon.InPlayCards) {
+      player.InPlay.splice(player.InPlay.indexOf(card), 1);
+      player.Discard.push(card);
+    }
+    this.GameLog.addEntry({
+      type: "discardCards",
+      player: player.Name,
+      source: "inPlay",
+      cardIds: pokemon.InPlayCards.map((card) => card.ID),
+    });
+
+    const opposingPlayer = player == this.Player1 ? this.Player2 : this.Player1;
+    opposingPlayer.GamePoints += pokemon.PrizePoints;
+
+    if (player.ActivePokemon == pokemon) {
+      player.ActivePokemon = undefined;
+    } else {
+      player.Bench[player.Bench.indexOf(pokemon)] = undefined;
     }
   }
 }
