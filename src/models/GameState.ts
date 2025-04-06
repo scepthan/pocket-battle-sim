@@ -360,6 +360,10 @@ export class GameState {
     opposingPlayer.GamePoints += pokemon.PrizePoints;
   }
 
+  healPokemon(target: InPlayPokemonCard, HP: number) {
+    target.healDamage(HP);
+  }
+
   async playTrainer(card: TrainerCard) {
     if (!this.AttackingPlayer.Hand.includes(card)) {
       throw new Error("Card not in hand");

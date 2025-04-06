@@ -14,6 +14,11 @@ import {
   type PlayingCard,
 } from "@/types";
 
+interface EffectTransformer {
+  pattern: RegExp;
+  transform: (...args: string[]) => Effect;
+}
+
 export const useCardParser = () => {
   const parseCard = (
     inputCard: InputCard
@@ -93,14 +98,59 @@ export const useCardParser = () => {
       else parseSuccessful = false;
     }
 
-    const Effect = async (gameState: GameState) => {
+    const defaultEffect = async (gameState: GameState) => {
       gameState.attackActivePokemon(inputMove.HP ?? 0);
     };
-    if (inputMove.Effect) parseSuccessful = false;
+    if (inputMove.Effect) {
+      const dictionary: EffectTransformer[] = [
+        {
+          pattern: /^Heal (\d+) damage from this Pokémon\.$/,
+          transform: (_, HP) => async (game: GameState) => {
+            await defaultEffect(game);
+            game.healPokemon(game.AttackingPlayer.ActivePokemon!, Number(HP));
+          },
+        },
+        {
+          pattern:
+            /^If this Pokémon has at least (\d+) extra (?:{(\w)} )?Energy attached, this attack does (\d+) more damage\.$/,
+          transform: (_, energyCount, energyType, extraDamage) => {
+            const e = EnergyMap[isEnergyShort(energyType) ? energyType : "C"];
+            const secondaryRequiredEnergy = [...RequiredEnergy];
+            for (let i = 0; i < Number(energyCount); i++)
+              secondaryRequiredEnergy.unshift(e);
+
+            return async (game: GameState) => {
+              const active = game.AttackingPlayer.ActivePokemon!;
+              let damage = inputMove.HP!;
+              if (active.hasSufficientEnergy(secondaryRequiredEnergy))
+                damage += Number(extraDamage);
+              game.attackActivePokemon(damage);
+            };
+          },
+        },
+      ];
+
+      for (const { pattern, transform } of dictionary) {
+        const result = inputMove.Effect.match(pattern);
+
+        if (result) {
+          return {
+            parseSuccessful,
+            value: {
+              Name,
+              RequiredEnergy,
+              Effect: transform(...result),
+            },
+          };
+        }
+      }
+
+      parseSuccessful = false;
+    }
 
     return {
       parseSuccessful,
-      value: { Name, RequiredEnergy, Effect },
+      value: { Name, RequiredEnergy, Effect: defaultEffect },
     };
   };
 
@@ -125,10 +175,7 @@ export const useCardParser = () => {
   };
 
   const parseTrainerEffect = (cardText: string): ParsedResult<Effect> => {
-    const dictionary: {
-      pattern: RegExp;
-      transform: (...args: unknown[]) => Effect;
-    }[] = [
+    const dictionary: EffectTransformer[] = [
       {
         pattern: /^Draw (a|\d+) cards?\.$/,
         transform: (_, count) => async (game: GameState) =>

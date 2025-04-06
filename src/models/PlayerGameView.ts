@@ -121,17 +121,7 @@ export class PlayerGameView {
   canUseAttack(attack: Move) {
     if (!this.canPlay || !this.selfActive) return false;
     if (!this.selfActive.Moves.includes(attack)) return false;
-    const energyAvailable = this.selfActive.AttachedEnergy.slice();
-    for (const energy of attack.RequiredEnergy) {
-      if (energy === "Colorless" && energyAvailable.length > 0) {
-        energyAvailable.pop();
-      } else if (energyAvailable.includes(energy)) {
-        energyAvailable.splice(energyAvailable.indexOf(energy), 1);
-      } else {
-        return false;
-      }
-    }
-    return true;
+    return this.selfActive.hasSufficientEnergy(attack.RequiredEnergy);
   }
   canRetreat() {
     if (!this.canPlay || !this.selfActive) return false;

@@ -55,4 +55,18 @@ export class InPlayPokemonCard {
   attachEnergy(energy: Energy) {
     this.AttachedEnergy.push(energy);
   }
+
+  hasSufficientEnergy(energies: Energy[]) {
+    const energyAvailable = this.AttachedEnergy.slice();
+    for (const energy of energies) {
+      if (energy === "Colorless" && energyAvailable.length > 0) {
+        energyAvailable.pop();
+      } else if (energyAvailable.includes(energy)) {
+        energyAvailable.splice(energyAvailable.indexOf(energy), 1);
+      } else {
+        return false;
+      }
+    }
+    return true;
+  }
 }
