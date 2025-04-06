@@ -153,7 +153,10 @@
         <p v-if="entry.weaknessBoost">It's super effective!</p>
         <p>
           <CardName :card-id="entry.targetPokemon.cardId" /> is hit for
-          {{ entry.damageDealt }} damage! ({{ entry.finalHP }}/{{ entry.maxHP }}
+          {{ entry.damageDealt }} damage! ({{ entry.initialHP }}/{{
+            entry.maxHP
+          }}
+          &rarr; {{ entry.finalHP }}/{{ entry.maxHP }}
           HP)
         </p>
       </div>

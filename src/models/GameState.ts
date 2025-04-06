@@ -335,6 +335,7 @@ export class GameState {
     if (totalDamage > 0 && Type == defender.Weakness) {
       totalDamage += 20;
     }
+    const initialHP = defender.CurrentHP;
     defender.applyDamage(totalDamage);
     this.GameLog.addEntry({
       type: "pokemonDamaged",
@@ -342,7 +343,7 @@ export class GameState {
       targetPokemon: this.AttackingPlayer.pokemonToDescriptor(defender),
       fromAttack: true,
       damageDealt: totalDamage,
-      initialHP: defender.CurrentHP + HP,
+      initialHP,
       finalHP: defender.CurrentHP,
       maxHP: defender.BaseHP,
       weaknessBoost: Type == defender.Weakness,

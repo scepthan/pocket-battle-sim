@@ -137,7 +137,7 @@ export const useCardParser = () => {
         },
         {
           pattern:
-            /Flip a coin for each (?:{(\w)} )?Energy attached to this Pokémon. This attack does (\d+) damage for each heads./,
+            /^Flip a coin for each (?:{(\w)} )?Energy attached to this Pokémon\. This attack does (\d+) damage for each heads\.$/,
           transform: (_, energyType, damage) => async (game: GameState) => {
             const energy = game.AttackingPlayer.ActivePokemon!.AttachedEnergy;
             const totalFlips = isEnergyShort(energyType)
@@ -148,6 +148,16 @@ export const useCardParser = () => {
               totalFlips
             );
             game.attackActivePokemon(heads * Number(damage));
+          },
+        },
+        {
+          pattern:
+            /^This attack does (\d+) more damage for each Energy attached to your opponent's Active Pokémon\.$/,
+          transform: (_, extraDamage) => async (game: GameState) => {
+            const energyCount =
+              game.DefendingPlayer.ActivePokemon!.AttachedEnergy.length;
+            const damage = inputMove.HP! + Number(extraDamage) * energyCount;
+            game.attackActivePokemon(damage);
           },
         },
       ];
