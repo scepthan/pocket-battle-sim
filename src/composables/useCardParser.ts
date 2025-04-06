@@ -160,6 +160,14 @@ export const useCardParser = () => {
             game.attackActivePokemon(damage);
           },
         },
+        {
+          pattern: /^Switch this Pokémon with 1 of your Benched Pokémon\.$/,
+          transform: () => async (game: GameState) =>
+            void (await game.swapActivePokemon(
+              game.AttackingPlayer,
+              "selfEffect"
+            )),
+        },
       ];
 
       for (const { pattern, transform } of dictionary) {

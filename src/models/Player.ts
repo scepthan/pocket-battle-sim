@@ -337,20 +337,31 @@ export class Player {
       );
     }
     previousActive.AttachedEnergy = previousEnergy;
-    this.Bench[this.Bench.indexOf(benchedPokemon)] = previousActive;
-    this.ActivePokemon = benchedPokemon;
-    this.logger.addEntry({
-      type: "swapActivePokemon",
-      player: this.Name,
-      reason: "retreat",
-      fromPokemon: this.pokemonToDescriptor(previousActive),
-      toPokemon: this.pokemonToDescriptor(benchedPokemon),
-    });
+
+    this.swapActivePokemon(benchedPokemon, "retreat");
+
     this.logger.addEntry({
       type: "discardEnergy",
       player: this.Name,
       source: "retreat",
       energyTypes: discardedEnergy,
+    });
+  }
+
+  swapActivePokemon(
+    pokemon: InPlayPokemonCard,
+    reason: "retreat" | "selfEffect" | "opponentEffect"
+  ) {
+    const previousActive = this.ActivePokemon!;
+    this.ActivePokemon = pokemon;
+    this.Bench[this.Bench.indexOf(pokemon)] = previousActive;
+
+    this.logger.addEntry({
+      type: "swapActivePokemon",
+      player: this.Name,
+      fromPokemon: this.pokemonToDescriptor(previousActive),
+      toPokemon: this.pokemonToDescriptor(pokemon),
+      reason,
     });
   }
 

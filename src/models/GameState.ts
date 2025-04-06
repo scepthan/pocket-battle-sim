@@ -413,4 +413,17 @@ export class GameState {
     });
     return result;
   }
+
+  async swapActivePokemon(
+    player: Player,
+    reason: "selfEffect" | "opponentEffect"
+  ) {
+    if (!player.Bench.some((x) => x !== undefined)) return false;
+    const agent = player == this.Player1 ? this.Agent1 : this.Agent2;
+    const newActive = await agent.swapActivePokemon(
+      new PlayerGameView(this, player)
+    );
+    player.swapActivePokemon(newActive, reason);
+    return true;
+  }
 }
