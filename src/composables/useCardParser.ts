@@ -128,6 +128,28 @@ export const useCardParser = () => {
             };
           },
         },
+        {
+          pattern: /^Draw (a|\d+) cards?\.$/,
+          transform: (_, count) => async (game: GameState) => {
+            await defaultEffect(game);
+            game.drawCards(count == "a" ? 1 : Number(count));
+          },
+        },
+        {
+          pattern:
+            /Flip a coin for each (?:{(\w)} )?Energy attached to this Pokémon. This attack does (\d+) damage for each heads./,
+          transform: (_, energyType, damage) => async (game: GameState) => {
+            const energy = game.AttackingPlayer.ActivePokemon!.AttachedEnergy;
+            const totalFlips = isEnergyShort(energyType)
+              ? energy.filter((e) => e == EnergyMap[energyType]).length
+              : energy.length;
+            const { heads } = game.flipMultiCoin(
+              game.AttackingPlayer,
+              totalFlips
+            );
+            game.attackActivePokemon(heads * Number(damage));
+          },
+        },
       ];
 
       for (const { pattern, transform } of dictionary) {

@@ -12,7 +12,7 @@ import { InPlayPokemonCard } from "./InPlayPokemonCard";
 import { Player } from "./Player";
 import { PlayerGameView } from "./PlayerGameView";
 
-const { coinFlip } = useCoinFlip();
+const { coinFlip, multiCoinFlip, untilTailsCoinFlip } = useCoinFlip();
 
 export class GameState {
   Agent1: PlayerAgent;
@@ -382,5 +382,34 @@ export class GameState {
     });
     await this.useInitialEffect(card.Effect);
     this.AttackingPlayer.discardCardsFromHand([card]);
+  }
+
+  flipCoin(player: Player) {
+    const result = coinFlip();
+    this.GameLog.addEntry({
+      type: "coinFlip",
+      player: player.Name,
+      result: result ? "Heads" : "Tails",
+    });
+    return result;
+  }
+  flipMultiCoin(player: Player, count: number) {
+    const result = multiCoinFlip(count);
+    this.GameLog.addEntry({
+      type: "coinMultiFlip",
+      player: player.Name,
+      flips: count,
+      results: result.results.map((x) => (x ? "Heads" : "Tails")),
+    });
+    return result;
+  }
+  flipCoinUntilTails(player: Player) {
+    const result = untilTailsCoinFlip();
+    this.GameLog.addEntry({
+      type: "coinFlipUntilTails",
+      player: player.Name,
+      results: result.results.map((x) => (x ? "Heads" : "Tails")),
+    });
+    return result;
   }
 }

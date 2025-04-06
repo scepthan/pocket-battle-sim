@@ -124,6 +124,31 @@
         </p>
       </div>
 
+      <div v-else-if="entry.type == 'coinFlip'">
+        <p>Flipping a coin... {{ entry.result }}!</p>
+      </div>
+
+      <div v-else-if="entry.type == 'coinMultiFlip'">
+        <p>
+          Flipping {{ entry.flips }}
+          {{ entry.flips == 1 ? "coin" : "coins" }}...
+          <span v-for="(result, i) in entry.results" :key="i">
+            {{ result }}!
+          </span>
+          (Total: {{ entry.results.filter((x) => x == "Heads").length }} heads)
+        </p>
+      </div>
+
+      <div v-else-if="entry.type == 'coinFlipUntilTails'">
+        <p>
+          Flipping until tails...
+          <span v-for="(result, i) in entry.results" :key="i">
+            {{ result }}!
+          </span>
+          (Total: {{ entry.results.filter((x) => x == "Heads").length }} heads)
+        </p>
+      </div>
+
       <div v-else-if="entry.type == 'pokemonDamaged'">
         <p v-if="entry.weaknessBoost">It's super effective!</p>
         <p>
