@@ -54,7 +54,7 @@ export class RandomAgent implements PlayerAgent {
     ) as PokemonCard[];
     if (handBasics.length > 0) {
       const randomBasic = rand(handBasics);
-      const bench = gameState.selfBenched;
+      const bench = gameState.selfBench;
       for (let i = 0; i < 3; i++) {
         if (bench[i] == undefined) {
           await gameState.playPokemonToBench(randomBasic, i);
