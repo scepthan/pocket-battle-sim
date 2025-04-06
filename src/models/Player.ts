@@ -183,6 +183,30 @@ export class Player {
     });
   }
 
+  drawRandomBasic() {
+    const basicPokemon = this.Deck.filter(
+      (card) => card.CardType == "Pokemon" && card.Stage == 0
+    );
+    const result = [];
+    if (basicPokemon.length > 0) {
+      const card = basicPokemon[(Math.random() * basicPokemon.length) | 0];
+      result.push(card);
+      this.Deck.splice(this.Deck.indexOf(card), 1);
+      this.Hand.push(card);
+    }
+
+    this.logger.addEntry({
+      type: "drawToHand",
+      player: this.Name,
+      attempted: 1,
+      cardIds: result.map((card) => card.ID),
+      success: result.length > 0,
+      failureReason: result.length == 0 ? "noBasicPokemon" : undefined,
+    });
+
+    this.shuffleDeck();
+  }
+
   setNewActivePokemon(pokemon: InPlayPokemonCard) {
     if (!this.Bench.includes(pokemon)) {
       throw new Error("Pokemon not on bench");

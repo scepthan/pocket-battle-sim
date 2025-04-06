@@ -4,6 +4,7 @@ import {
   isEnergy,
   isEnergyShort,
   type Ability,
+  type Effect,
   type Energy,
   type InputCard,
   type InputCardAbility,
@@ -59,11 +60,20 @@ export const useCardParser = () => {
       inputCard.CardType == "Item" ||
       inputCard.CardType == "Supporter"
     ) {
+      const result = parseTrainerEffect(inputCard.Text);
+      if (!result.parseSuccessful) parseSuccessful = false;
+      else
+        console.log(
+          "\n\n\n\nCARD PARSED SUCCESSFULLY",
+          inputCard.Name,
+          result.value
+        );
+
       const outputCard = {
         ID: inputCard.ID,
         Name: inputCard.Name,
         CardType: inputCard.CardType,
-        Effect: () => {},
+        Effect: result.value,
       };
 
       return { value: outputCard, parseSuccessful };
@@ -83,7 +93,7 @@ export const useCardParser = () => {
       else parseSuccessful = false;
     }
 
-    const Effect = (gameState: GameState) => {
+    const Effect = async (gameState: GameState) => {
       gameState.attackActivePokemon(inputMove.HP ?? 0);
     };
     if (inputMove.Effect) parseSuccessful = false;
@@ -109,8 +119,42 @@ export const useCardParser = () => {
         Name: inputAbility.Name,
         Trigger: "GameRule",
         Conditions: [],
-        Effect: () => {},
+        Effect: async () => {},
       },
+    };
+  };
+
+  const parseTrainerEffect = (cardText: string): ParsedResult<Effect> => {
+    const dictionary: {
+      pattern: RegExp;
+      transform: (...args: unknown[]) => Effect;
+    }[] = [
+      {
+        pattern: /^Draw (a|\d+) cards?\.$/,
+        transform: (_, count) => async (game: GameState) =>
+          game.drawCards(count == "a" ? 1 : Number(count)),
+      },
+      {
+        pattern: /^Put 1 random Basic Pokemon from your deck into your hand\.$/,
+        transform: () => async (game: GameState) =>
+          game.AttackingPlayer.drawRandomBasic(),
+      },
+    ];
+
+    for (const { pattern, transform } of dictionary) {
+      const result = cardText.match(pattern);
+
+      if (result) {
+        return {
+          parseSuccessful: true,
+          value: transform(...result),
+        };
+      }
+    }
+
+    return {
+      parseSuccessful: false,
+      value: async () => {},
     };
   };
 

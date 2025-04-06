@@ -59,7 +59,7 @@ interface DrawToHandEvent {
   attempted: number;
   cardIds: string[];
   success: boolean;
-  failureReason?: "handFull" | "deckEmpty";
+  failureReason?: "handFull" | "deckEmpty" | "noBasicPokemon";
 }
 interface PlayToActiveEvent {
   type: "playToActive";

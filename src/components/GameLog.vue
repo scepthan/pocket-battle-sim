@@ -26,6 +26,8 @@
               ? "deck is empty"
               : entry.failureReason == "handFull"
               ? "hand is full"
+              : entry.failureReason == "noBasicPokemon"
+              ? "no Basic Pokemon in deck"
               : "unknown reason"
           }}).
         </span>

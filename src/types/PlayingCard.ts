@@ -1,7 +1,7 @@
 import type { GameState } from "@/models/GameState";
 import type { Energy } from "./Energy";
 
-export type Effect = (gameState: GameState) => void;
+export type Effect = (gameState: GameState) => Promise<void>;
 export type AbilityTrigger =
   | "OnceDuringTurn"
   | "ManyDuringTurn"

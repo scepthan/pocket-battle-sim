@@ -225,7 +225,7 @@ export class GameState {
 
   // Methods to do things during turns
   async useInitialEffect(effect: Effect) {
-    this.useEffect(effect);
+    await this.useEffect(effect);
 
     const attackerPrizePoints = this.AttackingPlayer.GamePoints;
     const defenderPrizePoints = this.DefendingPlayer.GamePoints;
@@ -294,13 +294,16 @@ export class GameState {
         new PlayerGameView(this, this.Player2)
       );
     }
-    const newActive = await Promise.all(promises);
-    if (newActive[0]) this.Player1.setNewActivePokemon(newActive[0]);
-    if (newActive[1]) this.Player2.setNewActivePokemon(newActive[1]);
+    if (promises.length > 0) {
+      await this.delay();
+      const newActive = await Promise.all(promises);
+      if (newActive[0]) this.Player1.setNewActivePokemon(newActive[0]);
+      if (newActive[1]) this.Player2.setNewActivePokemon(newActive[1]);
+    }
   }
 
-  useEffect(effect: Effect) {
-    effect(this);
+  async useEffect(effect: Effect) {
+    await effect(this);
   }
 
   async useAttack(attack: Move) {
@@ -314,6 +317,10 @@ export class GameState {
     });
     await this.useInitialEffect(attack.Effect);
     this.endTurnResolve(true);
+  }
+
+  drawCards(count: number) {
+    this.AttackingPlayer.drawCards(count, this.MaxHandSize);
   }
 
   attackActivePokemon(HP: number) {
