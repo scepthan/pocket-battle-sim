@@ -98,6 +98,9 @@ export class PlayerGameView {
   get canPlaySupporter() {
     return this.#gameState.CanPlaySupporter;
   }
+  get retreatCostModifier() {
+    return this.#gameState.RetreatCostModifier;
+  }
 
   // Helper methods
   canPlayCard(card: PlayingCard) {
@@ -127,7 +130,7 @@ export class PlayerGameView {
     if (!this.canPlay || !this.selfActive) return false;
     if (this.selfBenched.length == 0) return false;
     return (
-      (this.selfActive.RetreatCost ?? 0) <=
+      (this.selfActive.RetreatCost ?? 0) + this.retreatCostModifier <=
       this.selfActive.AttachedEnergy.length
     );
   }
@@ -178,9 +181,13 @@ export class PlayerGameView {
     if (!energy)
       energy = this.selfActive!.AttachedEnergy.slice(
         0,
-        this.selfActive!.RetreatCost
+        (this.selfActive!.RetreatCost ?? 0) + this.retreatCostModifier
       );
-    this.#player.retreatActivePokemon(benchedPokemon, energy);
+    this.#player.retreatActivePokemon(
+      benchedPokemon,
+      energy,
+      this.#gameState.RetreatCostModifier
+    );
     return true;
   }
   async playItemCard(card: ItemCard) {

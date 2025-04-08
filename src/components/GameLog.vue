@@ -98,6 +98,13 @@
         </p>
       </div>
 
+      <div v-else-if="entry.type == 'retreatCostModified'">
+        <p>
+          Retreat cost is now {{ Math.abs(entry.totalModifier) }}
+          {{ entry.totalModifier < 0 ? "less" : "more" }} for this turn!
+        </p>
+      </div>
+
       <div v-else-if="entry.type == 'swapActivePokemon'">
         <p v-if="entry.reason == 'retreat'">
           <b>{{ entry.player }}</b> retreats their active
@@ -216,7 +223,7 @@
           An effect of this move was not triggered... (Not implemented)
         </p>
         <p v-else>
-          But it failed! ({{
+          But it fails! ({{
             entry.reason == "notImplemented"
               ? "Effect not implemented"
               : entry.reason == "noBenchedPokemon"

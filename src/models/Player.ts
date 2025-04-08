@@ -315,20 +315,28 @@ export class Player {
     });
   }
 
-  retreatActivePokemon(benchedPokemon: InPlayPokemonCard, energy: Energy[]) {
-    if (!this.ActivePokemon) {
+  retreatActivePokemon(
+    benchedPokemon: InPlayPokemonCard,
+    energyToDiscard: Energy[],
+    costModifier: number
+  ) {
+    const previousActive = this.ActivePokemon;
+    if (!previousActive) {
       throw new Error("No active Pokemon to retreat");
     }
-    if (
-      (this.ActivePokemon.RetreatCost ?? 0) >
-      this.ActivePokemon.AttachedEnergy.length
-    ) {
+
+    const previousEnergy = previousActive.AttachedEnergy.slice();
+    const modifiedCost = (previousActive.RetreatCost ?? 0) + costModifier;
+
+    if (modifiedCost > previousEnergy.length) {
       throw new Error("Not enough energy to retreat");
     }
-    const previousActive = this.ActivePokemon;
-    const previousEnergy = previousActive.AttachedEnergy.slice();
+    if (modifiedCost > energyToDiscard.length) {
+      throw new Error("Not enough energy provided");
+    }
+
     const discardedEnergy: Energy[] = [];
-    for (const e of energy) {
+    for (const e of energyToDiscard) {
       if (!previousEnergy.includes(e)) {
         throw new Error("Energy not attached to active Pokemon");
       }

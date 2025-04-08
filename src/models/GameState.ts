@@ -19,13 +19,14 @@ export class GameState {
   Agent2: PlayerAgent;
   Player1: Player;
   Player2: Player;
+  GameLog: GameLogger = new GameLogger();
 
   TurnNumber: number = 0;
   AttackingPlayer: Player;
   DefendingPlayer: Player;
   CanRetreat: boolean = true;
   CanPlaySupporter: boolean = true;
-  GameLog: GameLogger = new GameLogger();
+  RetreatCostModifier: number = 0;
 
   MaxHandSize: number = 10;
   MaxTurnNumber: number = 30;
@@ -140,6 +141,7 @@ export class GameState {
     // Reset turn-based flags
     this.CanRetreat = true;
     this.CanPlaySupporter = true;
+    this.RetreatCostModifier = 0;
     if (this.TurnNumber > 2) {
       for (const pokemon of this.AttackingPlayer.InPlayPokemon) {
         pokemon.ReadyToEvolve = true;
@@ -418,6 +420,7 @@ export class GameState {
     player: Player,
     reason: "selfEffect" | "opponentEffect"
   ) {
+    await this.delay();
     if (!player.Bench.some((x) => x !== undefined)) {
       this.GameLog.addEntry({
         type: "actionFailed",
@@ -432,5 +435,15 @@ export class GameState {
     );
     player.swapActivePokemon(newActive, reason);
     return true;
+  }
+
+  reduceRetreatCost(modifier: number) {
+    this.RetreatCostModifier -= modifier;
+    this.GameLog.addEntry({
+      type: "retreatCostModified",
+      player: this.AttackingPlayer.Name,
+      newModifier: -modifier,
+      totalModifier: this.RetreatCostModifier,
+    });
   }
 }

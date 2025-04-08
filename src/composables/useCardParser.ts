@@ -251,11 +251,14 @@ export const useCardParser = () => {
       {
         pattern: /^Switch out your opponent's Active Pokémon to the Bench\./,
         transform: () => async (game: GameState) => {
-          if (game.DefendingPlayer.Bench.some((x) => x !== undefined))
-            await game.swapActivePokemon(
-              game.DefendingPlayer,
-              "opponentEffect"
-            );
+          await game.swapActivePokemon(game.DefendingPlayer, "opponentEffect");
+        },
+      },
+      {
+        pattern:
+          /^During this turn, the Retreat Cost of your Active Pokémon is (\d+) less\.$/,
+        transform: (_, modifier) => async (game: GameState) => {
+          game.reduceRetreatCost(Number(modifier));
         },
       },
     ];
