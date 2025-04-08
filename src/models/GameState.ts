@@ -418,7 +418,14 @@ export class GameState {
     player: Player,
     reason: "selfEffect" | "opponentEffect"
   ) {
-    if (!player.Bench.some((x) => x !== undefined)) return false;
+    if (!player.Bench.some((x) => x !== undefined)) {
+      this.GameLog.addEntry({
+        type: "actionFailed",
+        player: player.Name,
+        reason: "noBenchedPokemon",
+      });
+      return false;
+    }
     const agent = player == this.Player1 ? this.Agent1 : this.Agent2;
     const newActive = await agent.swapActivePokemon(
       new PlayerGameView(this, player)

@@ -211,6 +211,21 @@
         <p v-else>Game over: draw... ({{ entry.reason }})</p>
       </div>
 
+      <div v-else-if="entry.type == 'actionFailed'">
+        <p v-if="entry.reason == 'partiallyImplemented'">
+          An effect of this move was not triggered... (Not implemented)
+        </p>
+        <p v-else>
+          But it failed! ({{
+            entry.reason == "notImplemented"
+              ? "Effect not implemented"
+              : entry.reason == "noBenchedPokemon"
+              ? "Player has no benched Pokemon"
+              : "Unknown reason"
+          }})
+        </p>
+      </div>
+
       <p v-else>{{ entry }}</p>
     </div>
   </div>

@@ -46,6 +46,11 @@ interface GameOverEvent {
     | "concession"
     | "invalidGameState";
 }
+interface ActionFailedEvent {
+  type: "actionFailed";
+  player: string;
+  reason: "notImplemented" | "partiallyImplemented" | "noBenchedPokemon";
+}
 interface TurnErrorEvent {
   type: "turnError";
   player: string;
@@ -221,6 +226,7 @@ export type LoggedEvent =
   | PokemonCheckupEvent
   | ScorePrizePointsEvent
   | GameOverEvent
+  | ActionFailedEvent
   | TurnErrorEvent
   | DrawToHandEvent
   | PlayToActiveEvent

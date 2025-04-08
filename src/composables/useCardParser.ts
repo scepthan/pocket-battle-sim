@@ -185,7 +185,29 @@ export const useCardParser = () => {
         }
       }
 
-      parseSuccessful = false;
+      return {
+        parseSuccessful: false,
+        value: {
+          Name,
+          RequiredEnergy,
+          Effect: inputMove.HP
+            ? async (game: GameState) => {
+                await defaultEffect(game);
+                game.GameLog.addEntry({
+                  type: "actionFailed",
+                  player: game.AttackingPlayer.Name,
+                  reason: "partiallyImplemented",
+                });
+              }
+            : async (game: GameState) => {
+                game.GameLog.addEntry({
+                  type: "actionFailed",
+                  player: game.AttackingPlayer.Name,
+                  reason: "notImplemented",
+                });
+              },
+        },
+      };
     }
 
     return {
@@ -226,6 +248,16 @@ export const useCardParser = () => {
         transform: () => async (game: GameState) =>
           game.AttackingPlayer.drawRandomBasic(),
       },
+      {
+        pattern: /^Switch out your opponent's Active Pokémon to the Bench\./,
+        transform: () => async (game: GameState) => {
+          if (game.DefendingPlayer.Bench.some((x) => x !== undefined))
+            await game.swapActivePokemon(
+              game.DefendingPlayer,
+              "opponentEffect"
+            );
+        },
+      },
     ];
 
     for (const { pattern, transform } of dictionary) {
@@ -241,7 +273,13 @@ export const useCardParser = () => {
 
     return {
       parseSuccessful: false,
-      value: async () => {},
+      value: async (game: GameState) => {
+        game.GameLog.addEntry({
+          type: "actionFailed",
+          player: game.AttackingPlayer.Name,
+          reason: "notImplemented",
+        });
+      },
     };
   };
 
