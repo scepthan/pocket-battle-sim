@@ -206,6 +206,10 @@ interface PokemonStatusDamageEvent {
   targetPokemon: InPlayPokemonDescriptor;
   statusCondition: string;
 }
+interface AttackFailedEvent {
+  type: "attackFailed";
+  player: string;
+}
 
 interface ApplyModifierEvent {
   type: "applyModifier";
@@ -261,6 +265,7 @@ export type LoggedEvent =
   | PokemonStatusAppliedEvent
   | PokemonStatusEndedEvent
   | PokemonStatusDamageEvent
+  | AttackFailedEvent
   | ApplyModifierEvent
   | CoinFlipEvent
   | CoinMultiFlipEvent

@@ -162,6 +162,76 @@ export const useCardParser = () => {
               "selfEffect"
             )),
         },
+        {
+          pattern: /^Flip a coin\. If tails, this attack does nothing\.$/,
+          transform: () => async (game: GameState) => {
+            if (game.flipCoin(game.AttackingPlayer))
+              game.attackActivePokemon(inputMove.HP!);
+            else
+              game.GameLog.addEntry({
+                type: "attackFailed",
+                player: game.AttackingPlayer.Name,
+              });
+          },
+        },
+        {
+          pattern:
+            /^Flip a coin\. If heads, this attack does (\d+) more damage\.$/,
+          transform: (_, extraDamage) => async (game: GameState) => {
+            let damage = inputMove.HP!;
+            if (game.flipCoin(game.AttackingPlayer))
+              damage += Number(extraDamage);
+            game.attackActivePokemon(damage);
+          },
+        },
+        {
+          pattern:
+            /^Flip (\d+) coins\. This attack does (\d+) (more )?damage for each heads\.$/,
+          transform:
+            (_, coins, multiplier, more) => async (game: GameState) => {
+              let damage = more ? inputMove.HP ?? 0 : 0;
+              const { heads } = game.flipMultiCoin(
+                game.AttackingPlayer,
+                Number(coins)
+              );
+              damage += heads * Number(multiplier);
+              game.attackActivePokemon(damage);
+            },
+        },
+        {
+          pattern: /^Discard (a|\d+) \{(\w)\} Energy from this Pokémon\.$/,
+          transform: (_, count, type) => {
+            if (!isEnergyShort(type))
+              throw new Error("Unrecognized energy shorthand: " + type);
+            const fullType = EnergyMap[type];
+            return async (game: GameState) => {
+              await defaultEffect(game);
+              game.discardEnergy(
+                game.AttackingPlayer.ActivePokemon!,
+                fullType,
+                Number(count) || 1
+              );
+            };
+          },
+        },
+        {
+          pattern: /^Discard all Energy from this Pokémon\.$/,
+          transform: () => async (game: GameState) => {
+            await defaultEffect(game);
+            game.discardAllEnergy(game.AttackingPlayer.ActivePokemon!);
+          },
+        },
+        {
+          pattern: /^This Pokémon also does (\d+) damage to itself\.$/,
+          transform: (_, selfDamage) => async (game: GameState) => {
+            await defaultEffect(game);
+            game.applyDamage(
+              game.AttackingPlayer.ActivePokemon!,
+              Number(selfDamage),
+              true
+            );
+          },
+        },
       ];
 
       for (const { pattern, transform } of dictionary) {

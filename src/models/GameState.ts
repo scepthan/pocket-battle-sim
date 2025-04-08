@@ -98,6 +98,11 @@ export class GameState {
       await new Promise((resolve) => setTimeout(resolve, this.DelayPerAction));
     }
   }
+  findOwner(pokemon: InPlayPokemonCard) {
+    return this.Player1.InPlayPokemon.includes(pokemon)
+      ? this.Player1
+      : this.Player2;
+  }
 
   async start() {
     const [setup1, setup2] = await Promise.all([
@@ -355,8 +360,8 @@ export class GameState {
 
     this.GameLog.addEntry({
       type: "pokemonDamaged",
-      player: this.AttackingPlayer.Name,
-      targetPokemon: this.AttackingPlayer.pokemonToDescriptor(defender),
+      player: this.DefendingPlayer.Name,
+      targetPokemon: this.DefendingPlayer.pokemonToDescriptor(defender),
       fromAttack: true,
       damageDealt: totalDamage,
       initialHP,
@@ -366,8 +371,22 @@ export class GameState {
     });
   }
 
-  applyDamage(pokemon: InPlayPokemonCard, HP: number) {
-    pokemon.applyDamage(HP);
+  applyDamage(target: InPlayPokemonCard, HP: number, fromAttack: boolean) {
+    const initialHP = target.CurrentHP;
+    const owner = this.findOwner(target);
+
+    target.applyDamage(HP);
+
+    this.GameLog.addEntry({
+      type: "pokemonDamaged",
+      player: owner.Name,
+      targetPokemon: owner.pokemonToDescriptor(target),
+      fromAttack,
+      damageDealt: HP,
+      initialHP,
+      finalHP: target.CurrentHP,
+      maxHP: target.BaseHP,
+    });
   }
 
   knockOutPokemon(player: Player, pokemon: InPlayPokemonCard) {
@@ -390,6 +409,33 @@ export class GameState {
       healingDealt: HP,
       finalHP: target.CurrentHP,
       maxHP: target.BaseHP,
+    });
+  }
+
+  discardEnergy(pokemon: InPlayPokemonCard, type: Energy, count: number) {
+    const discardedEnergy: Energy[] = [];
+    while (pokemon.AttachedEnergy.includes(type) && count > 0) {
+      discardedEnergy.push(type);
+      pokemon.AttachedEnergy.splice(pokemon.AttachedEnergy.indexOf(type), 1);
+      count--;
+    }
+
+    this.GameLog.addEntry({
+      type: "discardEnergy",
+      player: this.findOwner(pokemon).Name,
+      energyTypes: discardedEnergy,
+      source: "effect",
+    });
+  }
+  discardAllEnergy(pokemon: InPlayPokemonCard) {
+    const discardedEnergy = pokemon.AttachedEnergy.slice();
+    pokemon.AttachedEnergy = [];
+
+    this.GameLog.addEntry({
+      type: "discardEnergy",
+      player: this.findOwner(pokemon).Name,
+      energyTypes: discardedEnergy,
+      source: "effect",
     });
   }
 

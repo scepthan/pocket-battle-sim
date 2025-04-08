@@ -165,6 +165,10 @@
         </p>
       </div>
 
+      <div v-else-if="entry.type == 'attackFailed'">
+        <p>The attack did nothing...</p>
+      </div>
+
       <div v-else-if="entry.type == 'pokemonHealed'">
         <p>
           <CardName :card-id="entry.targetPokemon.cardId" /> is healed for
