@@ -49,7 +49,11 @@ interface GameOverEvent {
 interface ActionFailedEvent {
   type: "actionFailed";
   player: string;
-  reason: "notImplemented" | "partiallyImplemented" | "noBenchedPokemon";
+  reason:
+    | "notImplemented"
+    | "partiallyImplemented"
+    | "noBenchedPokemon"
+    | "noValidTargets";
 }
 interface TurnErrorEvent {
   type: "turnError";

@@ -67,12 +67,6 @@ export const useCardParser = () => {
     ) {
       const result = parseTrainerEffect(inputCard.Text);
       if (!result.parseSuccessful) parseSuccessful = false;
-      else
-        console.log(
-          "\n\n\n\nCARD PARSED SUCCESSFULLY",
-          inputCard.Name,
-          result.value
-        );
 
       const outputCard = {
         ID: inputCard.ID,
@@ -273,6 +267,23 @@ export const useCardParser = () => {
           /^During your opponent's next turn, all of your Pokémon take −(\d+) damage from attacks from your opponent's Pokémon\.$/,
         transform: (_, modifier) => async (game: GameState) => {
           game.increaseDefenseModifier(Number(modifier));
+        },
+      },
+      {
+        pattern: /^Heal (\d+) damage from 1 of your (?:\{(\w)\} )?Pokémon\.$/,
+        transform: (_, modifier, type) => async (game: GameState) => {
+          let validPokemon = game.AttackingPlayer.InPlayPokemon.filter(
+            (x) => x.CurrentHP < x.BaseHP
+          );
+          if (isEnergyShort(type))
+            validPokemon = validPokemon.filter(
+              (x) => x.Type == EnergyMap[type]
+            );
+          const pokemon = await game.choosePokemon(
+            game.AttackingPlayer,
+            validPokemon
+          );
+          if (pokemon) game.healPokemon(pokemon, Number(modifier));
         },
       },
     ];

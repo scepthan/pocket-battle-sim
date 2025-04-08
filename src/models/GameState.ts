@@ -378,7 +378,19 @@ export class GameState {
   }
 
   healPokemon(target: InPlayPokemonCard, HP: number) {
+    const initialHP = target.CurrentHP;
+
     target.healDamage(HP);
+
+    this.GameLog.addEntry({
+      type: "pokemonHealed",
+      player: this.AttackingPlayer.Name,
+      targetPokemon: this.AttackingPlayer.pokemonToDescriptor(target),
+      initialHP,
+      healingDealt: HP,
+      finalHP: target.CurrentHP,
+      maxHP: target.BaseHP,
+    });
   }
 
   async playTrainer(card: TrainerCard) {
@@ -449,6 +461,22 @@ export class GameState {
     );
     player.swapActivePokemon(newActive, reason);
     return true;
+  }
+  async choosePokemon(player: Player, validPokemon: InPlayPokemonCard[]) {
+    if (validPokemon.length == 0) {
+      this.GameLog.addEntry({
+        type: "actionFailed",
+        player: player.Name,
+        reason: "noValidTargets",
+      });
+      return;
+    }
+    const agent = player == this.Player1 ? this.Agent1 : this.Agent2;
+    const selected = await agent.choosePokemon(validPokemon);
+    if (!validPokemon.includes(selected)) {
+      throw new Error("Invalid Pokemon selected");
+    }
+    return selected;
   }
 
   reduceRetreatCost(modifier: number) {

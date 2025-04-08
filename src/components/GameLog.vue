@@ -165,6 +165,17 @@
         </p>
       </div>
 
+      <div v-else-if="entry.type == 'pokemonHealed'">
+        <p>
+          <CardName :card-id="entry.targetPokemon.cardId" /> is healed for
+          {{ entry.healingDealt }} damage! ({{ entry.initialHP }}/{{
+            entry.maxHP
+          }}
+          &rarr; {{ entry.finalHP }}/{{ entry.maxHP }}
+          HP)
+        </p>
+      </div>
+
       <div v-else-if="entry.type == 'pokemonDamaged'">
         <p v-if="entry.weaknessBoost">It's super effective!</p>
         <p>
@@ -237,6 +248,8 @@
               ? "Effect not implemented"
               : entry.reason == "noBenchedPokemon"
               ? "Player has no benched Pokemon"
+              : entry.reason == "noValidTargets"
+              ? "effect has no valid targets"
               : "Unknown reason"
           }})
         </p>

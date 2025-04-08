@@ -22,4 +22,5 @@ export interface PlayerAgent {
   setupPokemon: (gameState: GameInitState) => Promise<PlayerGameSetup>;
   doTurn: (gameState: PlayerGameView) => Promise<void>;
   swapActivePokemon: (gameState: PlayerGameView) => Promise<InPlayPokemonCard>;
+  choosePokemon: (pokemon: InPlayPokemonCard[]) => Promise<InPlayPokemonCard>;
 }

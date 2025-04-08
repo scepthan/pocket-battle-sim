@@ -9,6 +9,7 @@ import type {
   PokemonCard,
   SupporterCard,
 } from "@/types";
+import type { InPlayPokemonCard } from "../InPlayPokemonCard";
 import type { PlayerGameView } from "../PlayerGameView";
 
 const rand = <T>(arr: T[]) => arr[(Math.random() * arr.length) | 0];
@@ -122,5 +123,8 @@ export class RandomAgent implements PlayerAgent {
   async swapActivePokemon(gameState: PlayerGameView) {
     const bench = gameState.selfBenched.filter((x) => x !== undefined);
     return rand(bench);
+  }
+  async choosePokemon(pokemon: InPlayPokemonCard[]) {
+    return rand(pokemon);
   }
 }
