@@ -107,6 +107,11 @@
           Attacks used this turn do +{{ entry.totalModifier }} damage to your
           opponent's active Pokemon!
         </p>
+        <p v-else-if="entry.attribute == 'damageReduction'">
+          Attacks used next turn do -{{ entry.totalModifier }} damage to your
+          Pokemon!
+        </p>
+        <p v-else>Unknown modifier: {{ entry.attribute }}</p>
       </div>
 
       <div v-else-if="entry.type == 'swapActivePokemon'">

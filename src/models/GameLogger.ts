@@ -205,7 +205,7 @@ interface PokemonStatusDamageEvent {
 
 interface ApplyModifierEvent {
   type: "applyModifier";
-  attribute: "retreatCost" | "activeDamage";
+  attribute: "retreatCost" | "activeDamage" | "damageReduction";
   player: string;
   newModifier: number;
   totalModifier: number;

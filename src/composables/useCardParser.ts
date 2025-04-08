@@ -265,7 +265,14 @@ export const useCardParser = () => {
         pattern:
           /^During this turn, attacks used by your Pokémon do \+(\d+) damage to your opponent's Active Pokémon\.$/,
         transform: (_, modifier) => async (game: GameState) => {
-          game.increaseDamageModifier(Number(modifier));
+          game.increaseAttackModifier(Number(modifier));
+        },
+      },
+      {
+        pattern:
+          /^During your opponent's next turn, all of your Pokémon take −(\d+) damage from attacks from your opponent's Pokémon\.$/,
+        transform: (_, modifier) => async (game: GameState) => {
+          game.increaseDefenseModifier(Number(modifier));
         },
       },
     ];

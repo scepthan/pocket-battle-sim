@@ -28,6 +28,8 @@ export class GameState {
   CanPlaySupporter: boolean = true;
   RetreatCostModifier: number = 0;
   ActivePokemonDamageBoost: number = 0;
+  NextTurnDamageReduction: number = 0;
+  CurrentDamageReduction: number = 0;
 
   MaxHandSize: number = 10;
   MaxTurnNumber: number = 30;
@@ -144,6 +146,8 @@ export class GameState {
     this.CanPlaySupporter = true;
     this.RetreatCostModifier = 0;
     this.ActivePokemonDamageBoost = 0;
+    this.CurrentDamageReduction = this.NextTurnDamageReduction;
+    this.NextTurnDamageReduction = 0;
     if (this.TurnNumber > 2) {
       for (const pokemon of this.AttackingPlayer.InPlayPokemon) {
         pokemon.ReadyToEvolve = true;
@@ -335,6 +339,8 @@ export class GameState {
   }
 
   attackPokemon(defender: InPlayPokemonCard, HP: number, Type: Energy) {
+    const initialHP = defender.CurrentHP;
+
     let totalDamage = HP;
     if (totalDamage > 0 && defender == this.DefendingPlayer.ActivePokemon) {
       totalDamage += this.ActivePokemonDamageBoost;
@@ -342,8 +348,11 @@ export class GameState {
         totalDamage += 20;
       }
     }
-    const initialHP = defender.CurrentHP;
+    totalDamage -= this.CurrentDamageReduction;
+    if (totalDamage < 0) totalDamage = 0;
+
     defender.applyDamage(totalDamage);
+
     this.GameLog.addEntry({
       type: "pokemonDamaged",
       player: this.AttackingPlayer.Name,
@@ -452,7 +461,7 @@ export class GameState {
       totalModifier: this.RetreatCostModifier,
     });
   }
-  increaseDamageModifier(modifier: number) {
+  increaseAttackModifier(modifier: number) {
     this.ActivePokemonDamageBoost += modifier;
     this.GameLog.addEntry({
       type: "applyModifier",
@@ -460,6 +469,16 @@ export class GameState {
       player: this.AttackingPlayer.Name,
       newModifier: modifier,
       totalModifier: this.ActivePokemonDamageBoost,
+    });
+  }
+  increaseDefenseModifier(modifier: number) {
+    this.NextTurnDamageReduction += modifier;
+    this.GameLog.addEntry({
+      type: "applyModifier",
+      attribute: "damageReduction",
+      player: this.AttackingPlayer.Name,
+      newModifier: modifier,
+      totalModifier: this.NextTurnDamageReduction,
     });
   }
 }
