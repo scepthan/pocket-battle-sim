@@ -203,8 +203,9 @@ interface PokemonStatusDamageEvent {
   statusCondition: string;
 }
 
-interface RetreatCostModifiedEvent {
-  type: "retreatCostModified";
+interface ApplyModifierEvent {
+  type: "applyModifier";
+  attribute: "retreatCost" | "activeDamage";
   player: string;
   newModifier: number;
   totalModifier: number;
@@ -256,7 +257,7 @@ export type LoggedEvent =
   | PokemonStatusAppliedEvent
   | PokemonStatusEndedEvent
   | PokemonStatusDamageEvent
-  | RetreatCostModifiedEvent
+  | ApplyModifierEvent
   | CoinFlipEvent
   | CoinMultiFlipEvent
   | CoinFlipUntilTailsEvent;

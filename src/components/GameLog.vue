@@ -98,10 +98,14 @@
         </p>
       </div>
 
-      <div v-else-if="entry.type == 'retreatCostModified'">
-        <p>
+      <div v-else-if="entry.type == 'applyModifier'">
+        <p v-if="entry.attribute == 'retreatCost'">
           Retreat cost is now {{ Math.abs(entry.totalModifier) }}
           {{ entry.totalModifier < 0 ? "less" : "more" }} for this turn!
+        </p>
+        <p v-else-if="entry.attribute == 'activeDamage'">
+          Attacks used this turn do +{{ entry.totalModifier }} damage to your
+          opponent's active Pokemon!
         </p>
       </div>
 

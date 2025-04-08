@@ -2,7 +2,7 @@
 
 Backend todo:
 
-- [ ] Parse cards: 197/405 (48.6%)
+- [ ] Parse cards: 199/405 (49.1%)
 - [ ] Single battle simulation
 - [ ] Basic logic-based AI opponent (at least as competitive as Auto Mode)
 - [ ] Mass battle simulation

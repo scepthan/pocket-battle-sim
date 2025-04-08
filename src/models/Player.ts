@@ -348,12 +348,14 @@ export class Player {
 
     this.swapActivePokemon(benchedPokemon, "retreat");
 
-    this.logger.addEntry({
-      type: "discardEnergy",
-      player: this.Name,
-      source: "retreat",
-      energyTypes: discardedEnergy,
-    });
+    if (discardedEnergy.length > 0) {
+      this.logger.addEntry({
+        type: "discardEnergy",
+        player: this.Name,
+        source: "retreat",
+        energyTypes: discardedEnergy,
+      });
+    }
   }
 
   swapActivePokemon(

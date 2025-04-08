@@ -261,6 +261,13 @@ export const useCardParser = () => {
           game.reduceRetreatCost(Number(modifier));
         },
       },
+      {
+        pattern:
+          /^During this turn, attacks used by your Pokémon do \+(\d+) damage to your opponent's Active Pokémon\.$/,
+        transform: (_, modifier) => async (game: GameState) => {
+          game.increaseDamageModifier(Number(modifier));
+        },
+      },
     ];
 
     for (const { pattern, transform } of dictionary) {

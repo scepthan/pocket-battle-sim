@@ -27,6 +27,7 @@ export class GameState {
   CanRetreat: boolean = true;
   CanPlaySupporter: boolean = true;
   RetreatCostModifier: number = 0;
+  ActivePokemonDamageBoost: number = 0;
 
   MaxHandSize: number = 10;
   MaxTurnNumber: number = 30;
@@ -142,6 +143,7 @@ export class GameState {
     this.CanRetreat = true;
     this.CanPlaySupporter = true;
     this.RetreatCostModifier = 0;
+    this.ActivePokemonDamageBoost = 0;
     if (this.TurnNumber > 2) {
       for (const pokemon of this.AttackingPlayer.InPlayPokemon) {
         pokemon.ReadyToEvolve = true;
@@ -334,8 +336,11 @@ export class GameState {
 
   attackPokemon(defender: InPlayPokemonCard, HP: number, Type: Energy) {
     let totalDamage = HP;
-    if (totalDamage > 0 && Type == defender.Weakness) {
-      totalDamage += 20;
+    if (totalDamage > 0 && defender == this.DefendingPlayer.ActivePokemon) {
+      totalDamage += this.ActivePokemonDamageBoost;
+      if (Type == defender.Weakness) {
+        totalDamage += 20;
+      }
     }
     const initialHP = defender.CurrentHP;
     defender.applyDamage(totalDamage);
@@ -440,10 +445,21 @@ export class GameState {
   reduceRetreatCost(modifier: number) {
     this.RetreatCostModifier -= modifier;
     this.GameLog.addEntry({
-      type: "retreatCostModified",
+      type: "applyModifier",
+      attribute: "retreatCost",
       player: this.AttackingPlayer.Name,
       newModifier: -modifier,
       totalModifier: this.RetreatCostModifier,
+    });
+  }
+  increaseDamageModifier(modifier: number) {
+    this.ActivePokemonDamageBoost += modifier;
+    this.GameLog.addEntry({
+      type: "applyModifier",
+      attribute: "activeDamage",
+      player: this.AttackingPlayer.Name,
+      newModifier: modifier,
+      totalModifier: this.ActivePokemonDamageBoost,
     });
   }
 }
