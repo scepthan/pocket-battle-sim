@@ -46,10 +46,12 @@ export class RandomAgent implements PlayerAgent {
       (x) => x !== undefined
     );
 
+    // Attach energy to random Pokemon if available
     if (gameState.selfAvailableEnergy) {
       await gameState.attachAvailableEnergy(rand(ownPokemon));
     }
 
+    // Play a random Basic Pokemon to the Bench if available
     const handBasics = gameState.selfHand.filter(
       (x) => x.CardType == "Pokemon" && x.Stage == 0
     ) as PokemonCard[];
@@ -64,6 +66,7 @@ export class RandomAgent implements PlayerAgent {
       }
     }
 
+    // Play each held Item card with 50% chance
     const itemCards = gameState.selfHand.filter(
       (x) => x.CardType == "Item"
     ) as ItemCard[];
@@ -72,6 +75,7 @@ export class RandomAgent implements PlayerAgent {
       await gameState.playItemCard(card);
     }
 
+    // Play a random Supporter card if available
     const supporterCards = gameState.selfHand.filter(
       (x) => x.CardType == "Supporter"
     ) as SupporterCard[];
@@ -80,6 +84,7 @@ export class RandomAgent implements PlayerAgent {
       await gameState.playSupporterCard(randomSupporter);
     }
 
+    // Retreat with 100% chance if retreat cost is 0; 50% chance if cost is reduced; 12.5% chance if cost is normal
     if (gameState.canRetreat()) {
       if (
         gameState.retreatCostModifier < 0
@@ -93,6 +98,7 @@ export class RandomAgent implements PlayerAgent {
       }
     }
 
+    // Evolve a random Pokemon if possible
     const evolveablePokemon = ownPokemon.filter((x) => x.ReadyToEvolve);
     const pokemonToEvolveWith = gameState.selfHand.filter(
       (x) =>
@@ -109,6 +115,7 @@ export class RandomAgent implements PlayerAgent {
       await gameState.playPokemonToEvolve(randomEvolver, randomEvolvee);
     }
 
+    // End turn with a random attack
     const attacks = [];
     for (const attack of gameState.selfActive?.Attacks ?? []) {
       if (gameState.canUseAttack(attack)) attacks.push(attack);
