@@ -244,7 +244,7 @@
 
       <div v-else-if="entry.type == 'actionFailed'">
         <p v-if="entry.reason == 'partiallyImplemented'">
-          An effect of this move was not triggered... (Not implemented)
+          An effect of this attack was not triggered... (Not implemented)
         </p>
         <p v-else>
           But it fails! ({{

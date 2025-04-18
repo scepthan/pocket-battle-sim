@@ -6,11 +6,11 @@ export type {
   BaseInputCard,
   InputCard,
   InputCardAbility,
-  InputCardMove,
+  InputCardAttack,
   PokemonInputCard,
   TrainerInputCard,
 } from "./InputCard";
-export type { ParsedResult } from "./ParsedResult";
+export type { ParsedResult, ParsedResultOptional } from "./ParsedResult";
 export type {
   BenchSetup,
   GameInitState,
@@ -21,10 +21,10 @@ export type {
   Ability,
   AbilityCondition,
   AbilityTrigger,
+  Attack,
   BaseCard,
   Effect,
   ItemCard,
-  Move,
   PlayingCard,
   PokemonCard,
   StadiumCard,

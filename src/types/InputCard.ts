@@ -2,7 +2,7 @@ export interface InputCardAbility {
   Name: string;
   Effect: string;
 }
-export interface InputCardMove {
+export interface InputCardAttack {
   Name: string;
   Energy: string;
   HP?: number;
@@ -23,7 +23,7 @@ export interface PokemonInputCard extends BaseInputCard {
   EvolvesFrom?: string;
   RetreatCost: number;
   Weakness: string;
-  Moves: InputCardMove[];
+  Moves: InputCardAttack[];
   Ability?: InputCardAbility;
 }
 export interface TrainerInputCard extends BaseInputCard {

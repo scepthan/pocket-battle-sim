@@ -1,9 +1,9 @@
 import { useCoinFlip, useDeckValidator } from "@/composables";
 import type {
+  Attack,
   Effect,
   Energy,
   GameRules,
-  Move,
   PlayerAgent,
   TrainerCard,
 } from "@/types";
@@ -319,7 +319,7 @@ export class GameState {
     await effect(this);
   }
 
-  async useAttack(attack: Move) {
+  async useAttack(attack: Attack) {
     this.GameLog.addEntry({
       type: "useAttack",
       player: this.AttackingPlayer.Name,

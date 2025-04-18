@@ -110,7 +110,7 @@ export class RandomAgent implements PlayerAgent {
     }
 
     const attacks = [];
-    for (const attack of gameState.selfActive?.Moves ?? []) {
+    for (const attack of gameState.selfActive?.Attacks ?? []) {
       if (gameState.canUseAttack(attack)) attacks.push(attack);
     }
     if (attacks.length > 0) {

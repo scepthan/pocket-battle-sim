@@ -1,7 +1,7 @@
 import type {
+  Attack,
   Energy,
   ItemCard,
-  Move,
   PlayingCard,
   PokemonCard,
   SupporterCard,
@@ -121,9 +121,9 @@ export class PlayerGameView {
       return true;
     }
   }
-  canUseAttack(attack: Move) {
+  canUseAttack(attack: Attack) {
     if (!this.canPlay || !this.selfActive) return false;
-    if (!this.selfActive.Moves.includes(attack)) return false;
+    if (!this.selfActive.Attacks.includes(attack)) return false;
     return this.selfActive.hasSufficientEnergy(attack.RequiredEnergy);
   }
   canRetreat() {
@@ -166,7 +166,7 @@ export class PlayerGameView {
     }
     return false;
   }
-  async useAttack(attack: Move) {
+  async useAttack(attack: Attack) {
     await this.#gameState.delay();
     if (!this.canUseAttack(attack)) return false;
     await this.#gameState.useAttack(attack);

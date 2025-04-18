@@ -4,13 +4,14 @@ import {
   isEnergy,
   isEnergyShort,
   type Ability,
+  type Attack,
   type Effect,
   type Energy,
   type InputCard,
   type InputCardAbility,
-  type InputCardMove,
-  type Move,
+  type InputCardAttack,
   type ParsedResult,
+  type ParsedResultOptional,
   type PlayingCard,
 } from "@/types";
 
@@ -22,20 +23,21 @@ interface EffectTransformer {
 export const useCardParser = () => {
   const parseCard = (
     inputCard: InputCard
-  ): ParsedResult<PlayingCard | undefined> => {
+  ): ParsedResultOptional<PlayingCard> => {
     let parseSuccessful = true;
 
     if (inputCard.CardType == "Pokemon") {
-      const Moves = inputCard.Moves.map((move) => {
-        const result = parseMove(move);
+      const Attacks = inputCard.Moves.map((attack) => {
+        const result = parseAttack(attack);
         if (!result.parseSuccessful) parseSuccessful = false;
         return result.value;
       });
 
-      const outAbility = parseAbility(inputCard.Ability);
-      const Ability = outAbility.value;
-      if (!outAbility.parseSuccessful) {
-        parseSuccessful = false;
+      let Ability: Ability | undefined;
+      if (inputCard.Ability) {
+        const result = parseAbility(inputCard.Ability);
+        Ability = result.value;
+        if (!result.parseSuccessful) parseSuccessful = false;
       }
 
       let Type: Energy = "Colorless";
@@ -56,7 +58,7 @@ export const useCardParser = () => {
         RetreatCost: inputCard.RetreatCost,
         Weakness: inputCard.Weakness,
         PrizePoints: inputCard.Name.endsWith(" ex") ? 2 : 1,
-        Moves,
+        Attacks,
         Ability,
       };
 
@@ -82,20 +84,20 @@ export const useCardParser = () => {
     }
   };
 
-  const parseMove = (inputMove: InputCardMove): ParsedResult<Move> => {
+  const parseAttack = (inputAttack: InputCardAttack): ParsedResult<Attack> => {
     let parseSuccessful = true;
-    const Name = inputMove.Name;
+    const Name = inputAttack.Name;
 
     const RequiredEnergy: Energy[] = [];
-    for (const E of inputMove.Energy) {
+    for (const E of inputAttack.Energy) {
       if (isEnergyShort(E)) RequiredEnergy.push(EnergyMap[E]);
       else parseSuccessful = false;
     }
 
     const defaultEffect = async (gameState: GameState) => {
-      gameState.attackActivePokemon(inputMove.HP ?? 0);
+      gameState.attackActivePokemon(inputAttack.HP ?? 0);
     };
-    if (inputMove.Effect) {
+    if (inputAttack.Effect) {
       const dictionary: EffectTransformer[] = [
         {
           pattern: /^Heal (\d+) damage from this Pokémon\.$/,
@@ -115,7 +117,7 @@ export const useCardParser = () => {
 
             return async (game: GameState) => {
               const active = game.AttackingPlayer.ActivePokemon!;
-              let damage = inputMove.HP!;
+              let damage = inputAttack.HP!;
               if (active.hasSufficientEnergy(secondaryRequiredEnergy))
                 damage += Number(extraDamage);
               game.attackActivePokemon(damage);
@@ -150,7 +152,7 @@ export const useCardParser = () => {
           transform: (_, extraDamage) => async (game: GameState) => {
             const energyCount =
               game.DefendingPlayer.ActivePokemon!.AttachedEnergy.length;
-            const damage = inputMove.HP! + Number(extraDamage) * energyCount;
+            const damage = inputAttack.HP! + Number(extraDamage) * energyCount;
             game.attackActivePokemon(damage);
           },
         },
@@ -166,7 +168,7 @@ export const useCardParser = () => {
           pattern: /^Flip a coin\. If tails, this attack does nothing\.$/,
           transform: () => async (game: GameState) => {
             if (game.flipCoin(game.AttackingPlayer))
-              game.attackActivePokemon(inputMove.HP!);
+              game.attackActivePokemon(inputAttack.HP!);
             else
               game.GameLog.addEntry({
                 type: "attackFailed",
@@ -178,7 +180,7 @@ export const useCardParser = () => {
           pattern:
             /^Flip a coin\. If heads, this attack does (\d+) more damage\.$/,
           transform: (_, extraDamage) => async (game: GameState) => {
-            let damage = inputMove.HP!;
+            let damage = inputAttack.HP!;
             if (game.flipCoin(game.AttackingPlayer))
               damage += Number(extraDamage);
             game.attackActivePokemon(damage);
@@ -189,7 +191,7 @@ export const useCardParser = () => {
             /^Flip (\d+) coins\. This attack does (\d+) (more )?damage for each heads\.$/,
           transform:
             (_, coins, multiplier, more) => async (game: GameState) => {
-              let damage = more ? inputMove.HP ?? 0 : 0;
+              let damage = more ? inputAttack.HP ?? 0 : 0;
               const { heads } = game.flipMultiCoin(
                 game.AttackingPlayer,
                 Number(coins)
@@ -235,7 +237,7 @@ export const useCardParser = () => {
       ];
 
       for (const { pattern, transform } of dictionary) {
-        const result = inputMove.Effect.match(pattern);
+        const result = inputAttack.Effect.match(pattern);
 
         if (result) {
           return {
@@ -254,7 +256,7 @@ export const useCardParser = () => {
         value: {
           Name,
           RequiredEnergy,
-          Effect: inputMove.HP
+          Effect: inputAttack.HP
             ? async (game: GameState) => {
                 await defaultEffect(game);
                 game.GameLog.addEntry({
@@ -281,14 +283,8 @@ export const useCardParser = () => {
   };
 
   const parseAbility = (
-    inputAbility?: InputCardAbility
-  ): ParsedResult<Ability | undefined> => {
-    if (!inputAbility) {
-      return {
-        parseSuccessful: true,
-        value: undefined,
-      };
-    }
+    inputAbility: InputCardAbility
+  ): ParsedResult<Ability> => {
     return {
       parseSuccessful: false,
       value: {
@@ -381,5 +377,5 @@ export const useCardParser = () => {
     };
   };
 
-  return { parseCard, parseMove, parseAbility };
+  return { parseCard, parseAttack, parseAbility };
 };

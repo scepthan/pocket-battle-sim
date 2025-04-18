@@ -15,7 +15,7 @@ export interface Ability {
   Conditions: AbilityCondition[];
   Effect: Effect;
 }
-export interface Move {
+export interface Attack {
   Name: string;
   RequiredEnergy: Energy[];
   Effect: Effect;
@@ -34,7 +34,7 @@ export interface PokemonCard extends BaseCard {
   RetreatCost: number;
   Weakness: string;
   PrizePoints: number;
-  Moves: Move[];
+  Attacks: Attack[];
   Ability?: Ability;
 }
 export interface ItemCard extends BaseCard {

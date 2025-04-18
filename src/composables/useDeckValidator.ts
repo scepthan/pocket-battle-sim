@@ -1,4 +1,4 @@
-import type { Deck, Energy, GameRules, Move, PokemonCard } from "@/types";
+import type { Attack, Deck, Energy, GameRules, PokemonCard } from "@/types";
 
 export const useDeckValidator = (rules: GameRules) => {
   const hasCorrectAmountOfCards = (deck: Deck) =>
@@ -14,16 +14,16 @@ export const useDeckValidator = (rules: GameRules) => {
     return true;
   };
 
-  const canUseMove = (move: Move, energyTypes: Energy[]) =>
-    move.RequiredEnergy.every(
+  const canUseAttack = (attack: Attack, energyTypes: Energy[]) =>
+    attack.RequiredEnergy.every(
       (energy) => energy == "Colorless" || energyTypes.includes(energy)
     );
-  const canUseAnyMove = (card: PokemonCard, energyTypes: Energy[]) =>
-    card.Moves.some((move) => canUseMove(move, energyTypes));
-  const anyCanUseAnyMove = (deck: Deck) =>
+  const canUseAnyAttack = (card: PokemonCard, energyTypes: Energy[]) =>
+    card.Attacks.some((attack) => canUseAttack(attack, energyTypes));
+  const anyCanUseAnyAttack = (deck: Deck) =>
     deck.Cards.some(
       (card) =>
-        card.CardType == "Pokemon" && canUseAnyMove(card, deck.EnergyTypes)
+        card.CardType == "Pokemon" && canUseAnyAttack(card, deck.EnergyTypes)
     );
 
   const validateDeck = (deck: Deck) => {
@@ -39,7 +39,7 @@ export const useDeckValidator = (rules: GameRules) => {
       return "Cannot use more than two cards with the same name";
     }
 
-    if (!anyCanUseAnyMove(deck)) {
+    if (!anyCanUseAnyAttack(deck)) {
       return "Must be able to use at least one attack";
     }
 

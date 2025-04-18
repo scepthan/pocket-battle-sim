@@ -1,4 +1,10 @@
-import type { Ability, Energy, Move, PlayingCard, PokemonCard } from "@/types";
+import type {
+  Ability,
+  Attack,
+  Energy,
+  PlayingCard,
+  PokemonCard,
+} from "@/types";
 
 export type PrimaryStatus = "Asleep"; // | "Paralyzed" | "Confused"
 export type SecondaryStatus = "Poisoned"; // | "Burned"
@@ -14,7 +20,7 @@ export class InPlayPokemonCard {
   RetreatCost?: number;
   Weakness?: string;
   PrizePoints: number;
-  Moves: Move[];
+  Attacks: Attack[];
   Ability?: Ability;
 
   CurrentHP: number;
@@ -36,7 +42,7 @@ export class InPlayPokemonCard {
     this.RetreatCost = inputCard.RetreatCost;
     this.Weakness = inputCard.Weakness;
     this.PrizePoints = inputCard.PrizePoints;
-    this.Moves = inputCard.Moves;
+    this.Attacks = inputCard.Attacks;
     this.Ability = inputCard.Ability;
 
     this.CurrentHP = this.BaseHP;
