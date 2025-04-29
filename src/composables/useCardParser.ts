@@ -240,39 +240,26 @@ export const useCardParser = () => {
         const result = inputAttack.Effect.match(pattern);
 
         if (result) {
+          const Effect = transform(...result);
           return {
             parseSuccessful,
-            value: {
-              Name,
-              RequiredEnergy,
-              Effect: transform(...result),
-            },
+            value: { Name, RequiredEnergy, Effect },
           };
         }
       }
 
+      const damaging = !!inputAttack.HP;
+      const Effect = async (game: GameState) => {
+        if (damaging) await defaultEffect(game);
+        game.GameLog.addEntry({
+          type: "actionFailed",
+          player: game.AttackingPlayer.Name,
+          reason: damaging ? "partiallyImplemented" : "notImplemented",
+        });
+      };
       return {
         parseSuccessful: false,
-        value: {
-          Name,
-          RequiredEnergy,
-          Effect: inputAttack.HP
-            ? async (game: GameState) => {
-                await defaultEffect(game);
-                game.GameLog.addEntry({
-                  type: "actionFailed",
-                  player: game.AttackingPlayer.Name,
-                  reason: "partiallyImplemented",
-                });
-              }
-            : async (game: GameState) => {
-                game.GameLog.addEntry({
-                  type: "actionFailed",
-                  player: game.AttackingPlayer.Name,
-                  reason: "notImplemented",
-                });
-              },
-        },
+        value: { Name, RequiredEnergy, Effect },
       };
     }
 

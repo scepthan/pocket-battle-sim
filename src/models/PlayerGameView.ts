@@ -179,11 +179,12 @@ export class PlayerGameView {
     await this.#gameState.delay();
     if (!this.canRetreat()) return false;
 
-    let retreatCost = this.selfActive!.RetreatCost ?? 0;
-    retreatCost += this.retreatCostModifier;
-    if (retreatCost < 0) retreatCost = 0;
-
-    if (!energy) energy = this.selfActive!.AttachedEnergy.slice(0, retreatCost);
+    if (!energy) {
+      let retreatCost = this.selfActive!.RetreatCost ?? 0;
+      retreatCost += this.retreatCostModifier;
+      if (retreatCost < 0) retreatCost = 0;
+      energy = this.selfActive!.AttachedEnergy.slice(0, retreatCost);
+    }
 
     this.#player.retreatActivePokemon(
       benchedPokemon,
