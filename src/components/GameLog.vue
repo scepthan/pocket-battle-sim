@@ -26,8 +26,8 @@
               ? "deck is empty"
               : entry.failureReason == "handFull"
               ? "hand is full"
-              : entry.failureReason == "noBasicPokemon"
-              ? "no Basic Pokemon in deck"
+              : entry.failureReason == "noValidCards"
+              ? "no valid cards in deck"
               : "unknown reason"
           }}).
         </span>
@@ -88,7 +88,7 @@
           <b>{{ entry.player }}</b> discards an energy from their energy zone:
           <EnergyIcon :energy="entry.energyTypes[0]" />
         </p>
-        <p v-else>
+        <p v-else-if="entry.energyTypes.length > 0">
           Energy discarded:
           <EnergyIcon
             v-for="(energy, i) in entry.energyTypes"
@@ -96,6 +96,7 @@
             :energy="energy"
           />
         </p>
+        <p v-else>No energy could be discarded.</p>
       </div>
 
       <div v-else-if="entry.type == 'applyModifier'">

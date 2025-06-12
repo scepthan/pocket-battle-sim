@@ -183,13 +183,12 @@ export class Player {
     });
   }
 
-  drawRandomBasic() {
-    const basicPokemon = this.Deck.filter(
-      (card) => card.CardType == "Pokemon" && card.Stage == 0
-    );
+  drawRandomFiltered(predicate: (card: PlayingCard) => boolean) {
+    const filteredPokemon = this.Deck.filter(predicate);
     const result = [];
-    if (basicPokemon.length > 0) {
-      const card = basicPokemon[(Math.random() * basicPokemon.length) | 0];
+    if (filteredPokemon.length > 0) {
+      const card =
+        filteredPokemon[(Math.random() * filteredPokemon.length) | 0];
       result.push(card);
       this.Deck.splice(this.Deck.indexOf(card), 1);
       this.Hand.push(card);
@@ -201,10 +200,35 @@ export class Player {
       attempted: 1,
       cardIds: result.map((card) => card.ID),
       success: result.length > 0,
-      failureReason: result.length == 0 ? "noBasicPokemon" : undefined,
+      failureReason: result.length == 0 ? "noValidCards" : undefined,
     });
 
     this.shuffleDeck();
+
+    return;
+  }
+
+  discardRandomFiltered(
+    predicate: (card: PlayingCard) => boolean = () => true
+  ) {
+    const filteredCards = this.Hand.filter(predicate);
+    const discarded: PlayingCard[] = [];
+    if (filteredCards.length > 0) {
+      const index = Math.floor(Math.random() * filteredCards.length);
+      const card = filteredCards[index];
+      discarded.push(card);
+      this.Hand.splice(this.Hand.indexOf(card), 1);
+      this.Discard.push(card);
+    }
+
+    this.logger.addEntry({
+      type: "discardCards",
+      player: this.Name,
+      source: "hand",
+      cardIds: discarded.map((card) => card.ID),
+    });
+
+    return discarded;
   }
 
   setNewActivePokemon(pokemon: InPlayPokemonCard) {
@@ -312,6 +336,24 @@ export class Player {
       from,
       targetPokemon: this.pokemonToDescriptor(pokemon),
       fromPokemon: fromPokemon && this.pokemonToDescriptor(fromPokemon),
+    });
+  }
+
+  discardRandomEnergy(pokemon: InPlayPokemonCard, count: number = 1) {
+    const energies = pokemon.AttachedEnergy;
+
+    const discarded: Energy[] = [];
+    for (let i = 0; i < count; i++) {
+      if (energies.length == 0) break;
+      const index = Math.floor(Math.random() * energies.length);
+      discarded.push(energies.splice(index, 1)[0]);
+    }
+
+    this.logger.addEntry({
+      type: "discardEnergy",
+      player: this.Name,
+      source: "effect",
+      energyTypes: discarded,
     });
   }
 

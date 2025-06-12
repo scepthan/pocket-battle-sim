@@ -234,6 +234,193 @@ export const useCardParser = () => {
             );
           },
         },
+        {
+          pattern:
+            /^Put 1 random(?: \{(\w)\})? Pokémon from your deck into your hand\.$/,
+          transform: (_, type) => {
+            if (type && !isEnergyShort(type))
+              throw new Error("Unrecognized energy shorthand: " + type);
+
+            const predicate = (card: PlayingCard) =>
+              card.CardType == "Pokemon" &&
+              (isEnergyShort(type) ? card.Type == EnergyMap[type] : true);
+
+            return async (game: GameState) => {
+              await defaultEffect(game);
+              game.AttackingPlayer.drawRandomFiltered(predicate);
+            };
+          },
+        },
+        {
+          pattern:
+            /^Flip 2 coins. If both of them are heads, this attack does (\d+) more damage\.$/,
+          transform: (_, extraDamage) => async (game: GameState) => {
+            const { heads } = game.flipMultiCoin(game.AttackingPlayer, 2);
+            let damage = inputAttack.HP ?? 0;
+            if (heads == 2) damage += Number(extraDamage);
+            game.attackActivePokemon(damage);
+          },
+        },
+        {
+          pattern:
+            /^Discard a random Energy from your opponent's Active Pokémon.$/,
+          transform: () => async (game: GameState) => {
+            await defaultEffect(game);
+            game.DefendingPlayer.discardRandomEnergy(
+              game.DefendingPlayer.ActivePokemon!
+            );
+          },
+        },
+        {
+          pattern:
+            /^Flip a coin. If heads, discard a random Energy from your opponent's Active Pokémon.$/,
+          transform: () => async (game: GameState) => {
+            await defaultEffect(game);
+            if (game.flipCoin(game.AttackingPlayer)) {
+              game.DefendingPlayer.discardRandomEnergy(
+                game.DefendingPlayer.ActivePokemon!
+              );
+            }
+          },
+        },
+        {
+          pattern:
+            /^This attack also does (\d+) damage to each of your opponent's Benched Pokémon\.$/,
+          transform: (_, benchDamage) => async (game: GameState) => {
+            await defaultEffect(game);
+            const bench = game.DefendingPlayer.Bench.filter(
+              (p) => p !== undefined
+            );
+            for (const pokemon of bench) {
+              game.attackPokemon(pokemon, Number(benchDamage));
+            }
+          },
+        },
+        {
+          pattern:
+            /^If your opponent's Active Pokémon has damage on it, this attack does (\d+) more damage\.$/,
+          transform: (_, extraDamage) => async (game: GameState) => {
+            const active = game.DefendingPlayer.ActivePokemon!;
+            let damage = inputAttack.HP ?? 0;
+            // TODO: need to implement a separate "MaxHP" property for capes
+            if (active.CurrentHP < active.BaseHP) {
+              damage += Number(extraDamage);
+            }
+            game.attackActivePokemon(damage);
+          },
+        },
+        {
+          pattern:
+            /^If this Pokémon has damage on it, this attack does (\d+) more damage\.$/,
+          transform: (_, extraDamage) => async (game: GameState) => {
+            const active = game.AttackingPlayer.ActivePokemon!;
+            let damage = inputAttack.HP ?? 0;
+            if (active.CurrentHP < active.BaseHP) {
+              damage += Number(extraDamage);
+            }
+            game.attackActivePokemon(damage);
+          },
+        },
+        {
+          pattern:
+            /^This attack does (\d+)( more)? damage for each of your Benched(?: \{(\w)\})? (.+?)\.$/,
+          transform: (_, damagePerBench, addDamage, type, pokemon) => {
+            if (type && !isEnergyShort(type))
+              throw new Error("Unrecognized energy shorthand: " + type);
+
+            const e = isEnergyShort(type) ? EnergyMap[type] : undefined;
+
+            return async (game: GameState) => {
+              const bench = game.AttackingPlayer.Bench.filter(
+                (p) =>
+                  p !== undefined &&
+                  (!type || p.Type == e) &&
+                  (pokemon == "Pokémon" || p.Name == pokemon)
+              );
+              const damage =
+                (inputAttack.HP ?? 0) + bench.length * Number(damagePerBench);
+              game.attackActivePokemon(damage);
+            };
+          },
+        },
+        {
+          pattern:
+            /^Flip a coin. If heads, this attack does (\d+) more damage. If tails, this Pokémon also does (\d+) damage to itself\.$/,
+          transform:
+            (_, extraDamage, selfDamage) => async (game: GameState) => {
+              let damage = inputAttack.HP ?? 0;
+              let selfDamageApplied = false;
+              if (game.flipCoin(game.AttackingPlayer)) {
+                damage += Number(extraDamage);
+              } else {
+                selfDamageApplied = true;
+              }
+
+              game.attackActivePokemon(damage);
+              if (selfDamageApplied)
+                game.applyDamage(
+                  game.AttackingPlayer.ActivePokemon!,
+                  Number(selfDamage),
+                  true
+                );
+            },
+        },
+        {
+          pattern:
+            /^Heal from this Pokémon the same amount of damage you did to your opponent's Active Pokémon\.$/,
+          transform: () => async (game: GameState) => {
+            const damageDealt = game.attackActivePokemon(inputAttack.HP ?? 0);
+            game.healPokemon(game.AttackingPlayer.ActivePokemon!, damageDealt);
+          },
+        },
+        {
+          pattern: /^Switch out your opponent's Active Pokémon to the Bench\./,
+          transform: () => async (game: GameState) => {
+            await defaultEffect(game);
+            await game.swapActivePokemon(
+              game.DefendingPlayer,
+              "opponentEffect"
+            );
+          },
+        },
+        {
+          pattern:
+            /^Take 1 \{(\w)\} Energy from your Energy Zone and attach it to this Pokémon\.$/,
+          transform: (_, type) => {
+            if (!isEnergyShort(type))
+              throw new Error("Unrecognized energy shorthand: " + type);
+            const fullType = EnergyMap[type];
+            return async (game: GameState) => {
+              await defaultEffect(game);
+              game.AttackingPlayer.attachEnergy(
+                game.AttackingPlayer.ActivePokemon!,
+                fullType,
+                "energyZone"
+              );
+            };
+          },
+        },
+        {
+          pattern:
+            /^Flip a coin. If heads, discard a random card from your opponent's hand\.$/,
+          transform: () => async (game: GameState) => {
+            await defaultEffect(game);
+            if (game.flipCoin(game.AttackingPlayer)) {
+              game.DefendingPlayer.discardRandomFiltered();
+            }
+          },
+        },
+        {
+          pattern:
+            /^Flip a coin until you get tails\. This attack does (\d+)(?: more)? damage for each heads\.$/,
+          transform: (_, damage) => async (game: GameState) => {
+            let totalDamage = inputAttack.HP ?? 0;
+            while (game.flipCoin(game.AttackingPlayer)) {
+              totalDamage += Number(damage);
+            }
+            game.attackActivePokemon(totalDamage);
+          },
+        },
       ];
 
       for (const { pattern, transform } of dictionary) {
@@ -293,7 +480,9 @@ export const useCardParser = () => {
       {
         pattern: /^Put 1 random Basic Pokemon from your deck into your hand\.$/,
         transform: () => async (game: GameState) =>
-          game.AttackingPlayer.drawRandomBasic(),
+          game.AttackingPlayer.drawRandomFiltered(
+            (card) => card.CardType == "Pokemon" && card.Stage == 0
+          ),
       },
       {
         pattern: /^Switch out your opponent's Active Pokémon to the Bench\./,

@@ -2,8 +2,21 @@
 
 Backend todo:
 
-- [ ] Parse cards: 249/405 (61.5%)
-- [ ] Single battle simulation
+- [ ] Parse cards: 278/405 (68.6%)
+  - [ ] Attaching energy to Benched mon
+  - [ ] Choose a mon to attack
+  - [ ] Draw mon onto Bench
+  - [ ] Use opposing mon's attack
+  - [ ] Status conditions
+  - [ ] Other active mon effects
+  - [ ] Global effects
+  - [ ] Misty
+  - [ ] Supporters that affect specific mon
+  - [ ] Fossils
+  - [ ] Abilities
+  - [ ] A1a effects
+- [ ] Bring in newer sets
+- [x] Single battle simulation
 - [ ] Basic logic-based AI opponent (at least as competitive as Auto Mode)
 - [ ] Mass battle simulation
 - [ ] Deck fine-tuning via iteration
@@ -14,6 +27,7 @@ Frontend todo:
   - [ ] Collapse energy icons when at 5 or more
   - [ ] Display game points somewhere
   - [ ] Display discard somewhere
+  - [ ] Display deck somewhere
 - [ ] Allow user control of one or both players in battle simulator
 - [ ] Deck builder UI
 

@@ -337,19 +337,18 @@ export class GameState {
   }
 
   attackActivePokemon(HP: number) {
-    const defender = this.DefendingPlayer.ActivePokemon;
-    const attacker = this.AttackingPlayer.ActivePokemon;
-    if (!defender || !attacker) return;
-    this.attackPokemon(defender, HP, attacker.Type);
+    const defender = this.DefendingPlayer.ActivePokemon!;
+    return this.attackPokemon(defender, HP);
   }
 
-  attackPokemon(defender: InPlayPokemonCard, HP: number, Type: Energy) {
+  attackPokemon(defender: InPlayPokemonCard, HP: number) {
+    const type = this.AttackingPlayer.ActivePokemon!.Type;
     const initialHP = defender.CurrentHP;
 
     let totalDamage = HP;
     if (totalDamage > 0 && defender == this.DefendingPlayer.ActivePokemon) {
       totalDamage += this.ActivePokemonDamageBoost;
-      if (Type == defender.Weakness) {
+      if (type == defender.Weakness) {
         totalDamage += 20;
       }
     }
@@ -367,8 +366,10 @@ export class GameState {
       initialHP,
       finalHP: defender.CurrentHP,
       maxHP: defender.BaseHP,
-      weaknessBoost: Type == defender.Weakness,
+      weaknessBoost: type == defender.Weakness,
     });
+
+    return totalDamage;
   }
 
   applyDamage(target: InPlayPokemonCard, HP: number, fromAttack: boolean) {
