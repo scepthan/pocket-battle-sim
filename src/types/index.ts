@@ -1,5 +1,5 @@
 export type { Deck, DeckInfo } from "./Deck";
-export { EnergyMap, isEnergy, isEnergyShort } from "./Energy";
+export { EnergyMap, isEnergy, isEnergyShort, parseEnergy } from "./Energy";
 export type { Energy, EnergyShort } from "./Energy";
 export type { GameRules } from "./GameRules";
 export type {

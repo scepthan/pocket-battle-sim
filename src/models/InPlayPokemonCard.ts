@@ -63,6 +63,10 @@ export class InPlayPokemonCard {
   }
 
   hasSufficientEnergy(energies: Energy[]) {
+    // Move Colorless energy to the end of the list so colored Energies are checked first
+    energies = energies
+      .slice()
+      .sort((a, b) => (a == "Colorless" ? 1 : 0) - (b == "Colorless" ? 1 : 0));
     const energyAvailable = this.AttachedEnergy.slice();
     for (const energy of energies) {
       if (energy === "Colorless" && energyAvailable.length > 0) {
