@@ -385,7 +385,7 @@ export const useCardParser = () => {
         },
         {
           pattern:
-            /^Take (\d+) \{(\w)\} Energy from your Energy Zone and attach it to this Pokémon\.$/,
+            /^Take (a|\d+) \{(\w)\} Energy from your Energy Zone and attach it to this Pokémon\.$/,
           transform: (_, count, type) => {
             if (!isEnergyShort(type))
               throw new Error("Unrecognized energy shorthand: " + type);
@@ -394,7 +394,7 @@ export const useCardParser = () => {
               await defaultEffect(game);
               game.AttackingPlayer.attachEnergy(
                 game.AttackingPlayer.ActivePokemon!,
-                new Array(Number(count)).fill(fullType),
+                new Array(count == "a" ? 1 : Number(count)).fill(fullType),
                 "energyZone"
               );
             };
@@ -437,6 +437,63 @@ export const useCardParser = () => {
                   damages[i]
                 );
               }
+            }
+          },
+        },
+        {
+          pattern:
+            /^Take a \{(\w)\} Energy from your Energy Zone and attach it to 1 of your( Benched)?(?: \{(\w)\})? Pokémon\.$/,
+          transform:
+            (energyType, benched, pokemonType) => async (game: GameState) => {
+              if (!isEnergyShort(energyType))
+                throw new Error("Unrecognized energy shorthand: " + energyType);
+              if (pokemonType != "" && !isEnergyShort(pokemonType))
+                throw new Error("Unrecognized type shorthand: " + pokemonType);
+
+              const validPokemon = game.AttackingPlayer.InPlayPokemon.filter(
+                (x) =>
+                  (!benched || x != game.AttackingPlayer.ActivePokemon) &&
+                  (pokemonType == "" || x.Type == EnergyMap[pokemonType])
+              );
+              const pokemon = await game.choosePokemon(
+                game.AttackingPlayer,
+                validPokemon
+              );
+              if (pokemon) {
+                game.AttackingPlayer.attachEnergy(
+                  pokemon,
+                  [EnergyMap[energyType]],
+                  "energyZone"
+                );
+              }
+            },
+        },
+        {
+          pattern:
+            /^This attack does (\d+) damage to 1 of your opponent's( Benched)? Pokémon\.$/,
+          transform: (_, damage, benched) => async (game: GameState) => {
+            const pokemon = await game.choosePokemon(
+              game.AttackingPlayer,
+              game.DefendingPlayer.InPlayPokemon.filter(
+                (p) => !benched || p !== game.DefendingPlayer.ActivePokemon
+              )
+            );
+            if (pokemon) {
+              game.attackPokemon(pokemon, Number(damage));
+            }
+          },
+        },
+        {
+          pattern:
+            /^This attack also does (\d+) damage to 1 of your Benched Pokémon\.$/,
+          transform: (_, damage) => async (game: GameState) => {
+            await defaultEffect(game);
+            const pokemon = await game.choosePokemon(
+              game.AttackingPlayer,
+              game.AttackingPlayer.Bench.filter((p) => p !== undefined)
+            );
+            if (pokemon) {
+              game.attackPokemon(pokemon, Number(damage));
             }
           },
         },
@@ -550,14 +607,14 @@ export const useCardParser = () => {
       {
         pattern:
           /^Choose 1 of your {(\w)} Pokémon, and flip a coin until you get tails\. For each heads, take a {(\w)} Energy from your Energy Zone and attach it to that Pokémon\.$/,
-        transform: (_, type, energyType) => async (game: GameState) => {
-          if (!isEnergyShort(type))
-            throw new Error("Unrecognized type shorthand: " + type);
+        transform: (_, pokemonType, energyType) => async (game: GameState) => {
+          if (!isEnergyShort(pokemonType))
+            throw new Error("Unrecognized type shorthand: " + pokemonType);
           if (!isEnergyShort(energyType))
             throw new Error("Unrecognized energy shorthand: " + energyType);
 
           const validPokemon = game.AttackingPlayer.InPlayPokemon.filter(
-            (x) => x.Type == EnergyMap[type]
+            (x) => x.Type == EnergyMap[pokemonType]
           );
           const pokemon = await game.choosePokemon(
             game.AttackingPlayer,

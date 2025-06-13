@@ -2,11 +2,11 @@
 
 Backend todo:
 
-- [ ] Parse cards: 284/405 (70.1%)
+- [ ] Parse cards: 292/405 (72.1%)
   - [x] Dragon type
   - [x] Misty
-  - [ ] Attaching energy to Benched mon
-  - [ ] Choose a mon to attack
+  - [ ] Distribute energy among Benched mon
+  - [x] Choose a mon to attack
   - [ ] Draw mon onto Bench
   - [ ] Use opposing mon's attack
   - [ ] Status conditions
