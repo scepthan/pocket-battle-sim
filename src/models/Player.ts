@@ -19,6 +19,7 @@ export class Player {
   Hand: PlayingCard[] = []; // Cards in the player's hand
   InPlay: PlayingCard[] = []; // Cards that are currently in play (active or benched Pokémon)
   Discard: PlayingCard[] = []; // Cards that have been discarded during the game
+  DiscardedEnergy: Energy[] = []; // Energy that has been discarded during the game
   GamePoints: number = 0; // The number of prize cards the player has taken (for winning the game)
 
   ActivePokemon?: InPlayPokemonCard; // The active Pokémon card (undefined only for setup phase)
@@ -378,11 +379,22 @@ export class Player {
       discarded.push(energies.splice(index, 1)[0]);
     }
 
+    this.discardEnergy(discarded, "effect");
+  }
+
+  discardEnergy(
+    energies: Energy[],
+    source: "effect" | "retreat" | "knockOut" | "returnedToHand" | "energyZone"
+  ) {
+    if (energies.length == 0) return;
+
+    this.DiscardedEnergy.push(...energies);
+
     this.logger.addEntry({
       type: "discardEnergy",
       player: this.Name,
-      source: "effect",
-      energyTypes: discarded,
+      source: source,
+      energyTypes: energies,
     });
   }
 
@@ -418,15 +430,7 @@ export class Player {
     previousActive.AttachedEnergy = previousEnergy;
 
     this.swapActivePokemon(benchedPokemon, "retreat");
-
-    if (discardedEnergy.length > 0) {
-      this.logger.addEntry({
-        type: "discardEnergy",
-        player: this.Name,
-        source: "retreat",
-        energyTypes: discardedEnergy,
-      });
-    }
+    this.discardEnergy(discardedEnergy, "retreat");
   }
 
   swapActivePokemon(
@@ -463,6 +467,8 @@ export class Player {
       player: this.Name,
       cardIds: pokemon.InPlayCards.map((card) => card.ID),
     });
+
+    this.discardEnergy(pokemon.AttachedEnergy, "returnedToHand");
   }
 
   knockOutPokemon(pokemon: InPlayPokemonCard) {
@@ -481,14 +487,7 @@ export class Player {
       source: "inPlay",
       cardIds: pokemon.InPlayCards.map((card) => card.ID),
     });
-    if (pokemon.AttachedEnergy.length > 0) {
-      this.logger.addEntry({
-        type: "discardEnergy",
-        player: this.Name,
-        source: "knockOut",
-        energyTypes: pokemon.AttachedEnergy,
-      });
-    }
+    this.discardEnergy(pokemon.AttachedEnergy, "knockOut");
 
     if (this.ActivePokemon == pokemon) {
       this.ActivePokemon = undefined;

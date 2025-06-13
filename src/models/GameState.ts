@@ -209,12 +209,10 @@ export class GameState {
 
     // Discard energy if player did not use it
     if (this.AttackingPlayer.AvailableEnergy) {
-      this.GameLog.addEntry({
-        type: "discardEnergy",
-        player: this.AttackingPlayer.Name,
-        source: "energyZone",
-        energyTypes: [this.AttackingPlayer.AvailableEnergy],
-      });
+      this.AttackingPlayer.discardEnergy(
+        [this.AttackingPlayer.AvailableEnergy],
+        "energyZone"
+      );
       this.AttackingPlayer.AvailableEnergy = undefined;
       await this.delay();
     }
@@ -437,23 +435,13 @@ export class GameState {
       count--;
     }
 
-    this.GameLog.addEntry({
-      type: "discardEnergy",
-      player: this.findOwner(pokemon).Name,
-      energyTypes: discardedEnergy,
-      source: "effect",
-    });
+    this.findOwner(pokemon).discardEnergy(discardedEnergy, "effect");
   }
   discardAllEnergy(pokemon: InPlayPokemonCard) {
     const discardedEnergy = pokemon.AttachedEnergy.slice();
     pokemon.AttachedEnergy = [];
 
-    this.GameLog.addEntry({
-      type: "discardEnergy",
-      player: this.findOwner(pokemon).Name,
-      energyTypes: discardedEnergy,
-      source: "effect",
-    });
+    this.findOwner(pokemon).discardEnergy(discardedEnergy, "effect");
   }
 
   async playTrainer(card: TrainerCard) {

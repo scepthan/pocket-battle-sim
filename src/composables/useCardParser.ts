@@ -1,6 +1,5 @@
 import type { GameState } from "@/models/GameState";
 import {
-  EnergyMap,
   isEnergy,
   isEnergyShort,
   parseEnergy,
@@ -91,7 +90,7 @@ export const useCardParser = () => {
 
     const RequiredEnergy: Energy[] = [];
     for (const E of inputAttack.Energy) {
-      if (isEnergyShort(E)) RequiredEnergy.push(EnergyMap[E]);
+      if (isEnergyShort(E)) RequiredEnergy.push(parseEnergy(E));
       else parseSuccessful = false;
     }
 
@@ -264,7 +263,7 @@ export const useCardParser = () => {
       },
       {
         pattern:
-          /^Flip a coin for each (?:{(\w)} )?Energy attached to this Pokémon\. This attack does (\d+) damage for each heads\.$/i,
+          /^Flip a coin for each(?: {(\w)})? Energy attached to this Pokémon\. This attack does (\d+) damage for each heads\.$/i,
         transform: (_, energyType, damage) => {
           const fullType = energyType ? parseEnergy(energyType) : undefined;
           const predicate = fullType
@@ -524,11 +523,10 @@ export const useCardParser = () => {
       // Switching effects
       {
         pattern: /^Switch this Pokémon with 1 of your Benched Pokémon\.$/i,
-        transform: () => async (game: GameState) =>
-          void (await game.swapActivePokemon(
-            game.AttackingPlayer,
-            "selfEffect"
-          )),
+        transform: () => async (game: GameState) => {
+          await defaultEffect(game);
+          await game.swapActivePokemon(game.AttackingPlayer, "selfEffect");
+        },
       },
       {
         pattern: /^Switch out your opponent's Active Pokémon to the Bench\./i,
@@ -619,7 +617,7 @@ export const useCardParser = () => {
           );
           if (isEnergyShort(type))
             validPokemon = validPokemon.filter(
-              (x) => x.Type == EnergyMap[type]
+              (x) => x.Type == parseEnergy(type)
             );
           const pokemon = await game.choosePokemon(
             game.AttackingPlayer,
@@ -710,12 +708,9 @@ export const useCardParser = () => {
         pattern:
           /^Move all {(\w)} Energy from your Benched Pokémon to your (.+?) in the Active Spot\.$/,
         transform: (_, energyType, pokemonNames) => {
-          if (!isEnergyShort(energyType))
-            throw new Error("Unrecognized energy shorthand: " + energyType);
-
-          const fullType = EnergyMap[energyType];
+          const fullType = parseEnergy(energyType);
           const names = parsePokemonNames(pokemonNames);
-          console.log("Parsed names:", names);
+
           return async (game: GameState) => {
             if (!names.includes(game.AttackingPlayer.ActivePokemon!.Name)) {
               game.GameLog.addEntry({

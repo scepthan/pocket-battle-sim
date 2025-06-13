@@ -103,7 +103,7 @@ interface ReturnToHandEvent {
 interface DiscardEnergyEvent {
   type: "discardEnergy";
   player: string;
-  source: "effect" | "retreat" | "knockOut" | "energyZone";
+  source: "effect" | "retreat" | "knockOut" | "returnedToHand" | "energyZone";
   energyTypes: Energy[];
 }
 
