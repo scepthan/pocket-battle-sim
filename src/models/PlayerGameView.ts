@@ -50,7 +50,7 @@ export class PlayerGameView {
     return this.#player.Bench.slice();
   }
   get selfBenched() {
-    return this.#player.Bench.filter((x) => x !== undefined);
+    return this.#player.BenchedPokemon;
   }
   get selfHand() {
     return this.#player.Hand.slice();
@@ -76,7 +76,7 @@ export class PlayerGameView {
     return this.#opponent.Bench.slice();
   }
   get opponentBenched() {
-    return this.#opponent.Bench.filter((x) => x !== undefined);
+    return this.#opponent.BenchedPokemon;
   }
   get opponentHandSize() {
     return this.#opponent.Hand.length;

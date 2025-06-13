@@ -314,9 +314,8 @@ export const useCardParser = () => {
           const e = type ? parseEnergy(type) : undefined;
 
           return async (game: GameState) => {
-            const bench = game.AttackingPlayer.Bench.filter(
+            const bench = game.AttackingPlayer.BenchedPokemon.filter(
               (p) =>
-                p !== undefined &&
                 (!e || p.Type == e) &&
                 (pokemon == "Pokémon" || p.Name == pokemon)
             );
@@ -351,10 +350,7 @@ export const useCardParser = () => {
           /^This attack also does (\d+) damage to each of your opponent's Benched Pokémon\.$/i,
         transform: (_, benchDamage) => async (game: GameState) => {
           await defaultEffect(game);
-          const bench = game.DefendingPlayer.Bench.filter(
-            (p) => p !== undefined
-          );
-          for (const pokemon of bench) {
+          for (const pokemon of game.DefendingPlayer.BenchedPokemon) {
             game.attackPokemon(pokemon, Number(benchDamage));
           }
         },
@@ -365,9 +361,9 @@ export const useCardParser = () => {
         transform: (_, damage, benched) => async (game: GameState) => {
           const pokemon = await game.choosePokemon(
             game.AttackingPlayer,
-            game.DefendingPlayer.InPlayPokemon.filter(
-              (p) => !benched || p !== game.DefendingPlayer.ActivePokemon
-            )
+            benched
+              ? game.DefendingPlayer.BenchedPokemon
+              : game.DefendingPlayer.InPlayPokemon
           );
           if (pokemon) {
             game.attackPokemon(pokemon, Number(damage));
@@ -394,7 +390,7 @@ export const useCardParser = () => {
           await defaultEffect(game);
           const pokemon = await game.choosePokemon(
             game.AttackingPlayer,
-            game.AttackingPlayer.Bench.filter((p) => p !== undefined)
+            game.AttackingPlayer.BenchedPokemon
           );
           if (pokemon) {
             game.attackPokemon(pokemon, Number(damage));
@@ -509,11 +505,11 @@ export const useCardParser = () => {
           const pt = pokemonType ? parseEnergy(pokemonType) : undefined;
 
           return async (game: GameState) => {
-            const validPokemon = game.AttackingPlayer.InPlayPokemon.filter(
-              (x) =>
-                (!benched || x != game.AttackingPlayer.ActivePokemon) &&
-                (!pt || x.Type == pt)
-            );
+            const validPokemon = (
+              benched
+                ? game.AttackingPlayer.BenchedPokemon
+                : game.AttackingPlayer.InPlayPokemon
+            ).filter((x) => !pt || x.Type == pt);
             const pokemon = await game.choosePokemon(
               game.AttackingPlayer,
               validPokemon

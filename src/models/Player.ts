@@ -31,6 +31,9 @@ export class Player {
   get InPlayPokemon() {
     return [this.ActivePokemon, ...this.Bench].filter((x) => x !== undefined);
   }
+  get BenchedPokemon() {
+    return this.Bench.filter((x) => x !== undefined);
+  }
 
   constructor(name: string, deck: Deck, logger: GameLogger) {
     this.Name = name;

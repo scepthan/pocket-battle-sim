@@ -128,7 +128,7 @@ export class RandomAgent implements PlayerAgent {
   }
 
   async swapActivePokemon(gameState: PlayerGameView) {
-    const bench = gameState.selfBenched.filter((x) => x !== undefined);
+    const bench = gameState.selfBenched;
     return rand(bench);
   }
   async choosePokemon(pokemon: InPlayPokemonCard[]) {
