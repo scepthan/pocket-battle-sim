@@ -43,6 +43,7 @@ interface GameOverEvent {
     | "maxTurnNumberReached"
     | "maxPrizePointsReached"
     | "noPokemonLeft"
+    | "bothPlayersGameOver"
     | "concession"
     | "invalidGameState";
 }

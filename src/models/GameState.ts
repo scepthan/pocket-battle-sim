@@ -256,41 +256,57 @@ export class GameState {
     this.DefendingPlayer.checkPrizePointsChange(defenderPrizePoints);
 
     // Check for game over conditions
-    if (
-      this.Player1.InPlayPokemon.length == 0 ||
-      this.Player2.InPlayPokemon.length == 0
-    ) {
-      // The primary win condition is actually having pokemon left in play when your opponent does not
-      let winner: string | undefined = undefined;
-      if (this.Player1.InPlayPokemon.length > 0) {
-        winner = this.Player1.Name;
-      } else if (this.Player2.InPlayPokemon.length > 0) {
-        winner = this.Player2.Name;
+    const player1WinConditions = [];
+    const player2WinConditions = [];
+
+    // There are two main win conditions:
+    // 1. A player has reached 3 prize points
+    // 2. A player's opponent has no Pokemon left in play
+    // Once either of these conditions is met, the game is over, and the player with the most win conditions wins.
+    // If both players have the same number of win conditions, the game is a draw.
+    // For example, if player 1 scores their third prize point while knocking out their own Active Pokemon to give player 2 their second prize point,
+    // but player 2 has Pokemon on the Bench while player 1 does not, both players have only one win condition, so the game is a draw.
+    if (this.Player1.InPlayPokemon.length == 0) {
+      player2WinConditions.push("noPokemonLeft");
+    }
+    if (this.Player2.InPlayPokemon.length == 0) {
+      player1WinConditions.push("noPokemonLeft");
+    }
+    if (this.Player1.GamePoints >= 3) {
+      player1WinConditions.push("maxPrizePointsReached");
+    }
+    if (this.Player2.GamePoints >= 3) {
+      player2WinConditions.push("maxPrizePointsReached");
+    }
+
+    // If either player has reached a win condition, the game is over
+    if (player1WinConditions.length > 0 || player2WinConditions.length > 0) {
+      if (player1WinConditions.length > player2WinConditions.length) {
+        this.GameLog.addEntry({
+          type: "gameOver",
+          draw: false,
+          winner: this.Player1.Name,
+          reason: player1WinConditions.includes("maxPrizePointsReached")
+            ? "maxPrizePointsReached"
+            : "noPokemonLeft",
+        });
+      } else if (player1WinConditions.length < player2WinConditions.length) {
+        this.GameLog.addEntry({
+          type: "gameOver",
+          draw: false,
+          winner: this.Player2.Name,
+          reason: player2WinConditions.includes("maxPrizePointsReached")
+            ? "maxPrizePointsReached"
+            : "noPokemonLeft",
+        });
+      } else {
+        this.GameLog.addEntry({
+          type: "gameOver",
+          draw: true,
+          reason: "bothPlayersGameOver",
+        });
       }
 
-      this.GameLog.addEntry({
-        type: "gameOver",
-        draw: winner !== undefined,
-        winner: winner,
-        reason: "noPokemonLeft",
-      });
-      this.GameOver = true;
-      return;
-    } else if (this.Player1.GamePoints >= 3 || this.Player2.GamePoints >= 3) {
-      // Secondary win condition: one player has more than 3 points and the other does not
-      let winner: string | undefined = undefined;
-      if (this.Player1.GamePoints < 3) {
-        winner = this.Player2.Name;
-      } else if (this.Player2.GamePoints < 3) {
-        winner = this.Player1.Name;
-      }
-
-      this.GameLog.addEntry({
-        type: "gameOver",
-        draw: winner !== undefined,
-        winner: winner,
-        reason: "maxPrizePointsReached",
-      });
       this.GameOver = true;
       return;
     }
