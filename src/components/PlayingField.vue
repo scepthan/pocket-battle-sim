@@ -132,9 +132,14 @@ const player = ref<RandomAgent>();
 const opponent = ref<RandomAgent>();
 const game = ref<GameState>();
 
-onMounted(() => {
-  player.value = new RandomAgent("Celebii", prebuiltDecks.Celebi1);
-  opponent.value = new RandomAgent("AlexTheZam", prebuiltDecks.Alakazam1);
+onMounted(async () => {
+  const importedDecks = (await import("@/assets/decks.json")).default as Record<
+    string,
+    Record<string, DeckInfo>
+  >;
+
+  player.value = new RandomAgent("Izzard", importedDecks.A1["Charizard ex"]);
+  opponent.value = new RandomAgent("Venny", importedDecks.A1["Venusaur ex"]);
 
   game.value = new GameState(
     {
