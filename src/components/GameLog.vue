@@ -66,7 +66,15 @@
 
       <div v-else-if="entry.type == 'attachEnergy'">
         <p>
-          Energy attached to <CardName :card-id="entry.targetPokemon.cardId" />:
+          <span v-if="entry.from == 'pokemon'">
+            Energy transferred from
+            <CardName :card-id="entry.fromPokemon!.cardId" /> to
+            <CardName :card-id="entry.targetPokemon.cardId" />:
+          </span>
+          <span v-else>
+            Energy attached to
+            <CardName :card-id="entry.targetPokemon.cardId" />:
+          </span>
           <EnergyIcon
             v-for="(energy, i) in entry.energyTypes"
             :key="i"
@@ -225,6 +233,18 @@
           <b>{{ entry.player }}</b> discards {{ entry.cardIds.length }}
           {{ entry.cardIds.length === 1 ? "card" : "cards" }} from their
           {{ entry.source }}!
+        </p>
+      </div>
+
+      <div v-else-if="entry.type == 'returnToHand'">
+        <p>
+          {{ entry.cardIds.length }}
+          {{ entry.cardIds.length == 1 ? "card" : "cards" }} returned to hand:
+          <span v-for="(cardId, i) in entry.cardIds" :key="i">
+            <CardName :card-id="cardId" />{{
+              i + 1 === entry.cardIds.length ? "" : ", "
+            }}
+          </span>
         </p>
       </div>
 

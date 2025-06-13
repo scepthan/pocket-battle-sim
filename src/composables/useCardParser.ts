@@ -630,6 +630,94 @@ export const useCardParser = () => {
           }
         },
       },
+      {
+        pattern: /^Put your (.+?) in the Active Spot into your hand\.$/,
+        transform: (_, pokemon) => {
+          const names = parsePokemonNames(pokemon);
+          return async (game: GameState) => {
+            const active = game.AttackingPlayer.ActivePokemon;
+            if (active && names.includes(active.Name)) {
+              game.AttackingPlayer.returnPokemonToHand(active);
+            } else {
+              game.GameLog.addEntry({
+                type: "actionFailed",
+                player: game.AttackingPlayer.Name,
+                reason: "noValidTargets",
+              });
+            }
+          };
+        },
+      },
+      {
+        pattern:
+          /^Take a {(\w)} Energy from your Energy Zone and attach it to (.+?)\.$/,
+        transform: (_, energyType, pokemon) => {
+          if (!isEnergyShort(energyType))
+            throw new Error("Unrecognized energy shorthand: " + energyType);
+
+          const fullType = EnergyMap[energyType];
+          const names = parsePokemonNames(pokemon);
+          return async (game: GameState) => {
+            const validPokemon = game.AttackingPlayer.InPlayPokemon.filter(
+              (x) => names.includes(x.Name)
+            );
+            if (validPokemon.length > 0) {
+              const pokemon = await game.choosePokemon(
+                game.AttackingPlayer,
+                validPokemon
+              );
+              if (pokemon) {
+                game.AttackingPlayer.attachEnergy(
+                  pokemon,
+                  [fullType],
+                  "energyZone"
+                );
+              }
+            } else {
+              game.GameLog.addEntry({
+                type: "actionFailed",
+                player: game.AttackingPlayer.Name,
+                reason: "noValidTargets",
+              });
+            }
+          };
+        },
+      },
+      {
+        pattern:
+          /^Move all {(\w)} Energy from your Benched Pokémon to your (.+?) in the Active Spot\.$/,
+        transform: (_, energyType, pokemonNames) => {
+          if (!isEnergyShort(energyType))
+            throw new Error("Unrecognized energy shorthand: " + energyType);
+
+          const fullType = EnergyMap[energyType];
+          const names = parsePokemonNames(pokemonNames);
+          console.log("Parsed names:", names);
+          return async (game: GameState) => {
+            if (!names.includes(game.AttackingPlayer.ActivePokemon!.Name)) {
+              game.GameLog.addEntry({
+                type: "actionFailed",
+                player: game.AttackingPlayer.Name,
+                reason: "noValidTargets",
+              });
+              return;
+            }
+            for (const pokemon of game.AttackingPlayer.Bench) {
+              if (!pokemon) continue;
+              const energyToMove = pokemon.AttachedEnergy.filter(
+                (e) => e == fullType
+              );
+              if (energyToMove.length > 0) {
+                game.AttackingPlayer.transferEnergy(
+                  pokemon,
+                  game.AttackingPlayer.ActivePokemon!,
+                  energyToMove
+                );
+              }
+            }
+          };
+        },
+      },
     ];
 
     for (const { pattern, transform } of dictionary) {
@@ -655,5 +743,9 @@ export const useCardParser = () => {
     };
   };
 
-  return { parseCard, parseAttack, parseAbility };
+  const parsePokemonNames = (nameString: string) => {
+    return nameString.split(/, or | or |, /);
+  };
+
+  return { parseCard, parseAttack, parseAbility, parseTrainerEffect };
 };

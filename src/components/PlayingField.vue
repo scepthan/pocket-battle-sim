@@ -138,8 +138,8 @@ onMounted(async () => {
     Record<string, DeckInfo>
   >;
 
-  player.value = new RandomAgent("Turtler", importedDecks.A1["Blastoise ex"]);
-  opponent.value = new RandomAgent("Izzard", importedDecks.A1["Charizard ex"]);
+  player.value = new RandomAgent("Koga", importedDecks.A1["Koga"]);
+  opponent.value = new RandomAgent("Lt. Surge", importedDecks.A1["Lt. Surge"]);
 
   game.value = new GameState(
     {

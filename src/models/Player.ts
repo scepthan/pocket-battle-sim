@@ -339,6 +339,32 @@ export class Player {
     });
   }
 
+  transferEnergy(
+    fromPokemon: InPlayPokemonCard,
+    toPokemon: InPlayPokemonCard,
+    energy: Energy[]
+  ) {
+    for (const e of energy) {
+      if (!fromPokemon.AttachedEnergy.includes(e)) {
+        throw new Error("Energy not attached to fromPokemon");
+      }
+      fromPokemon.AttachedEnergy.splice(
+        fromPokemon.AttachedEnergy.indexOf(e),
+        1
+      );
+    }
+    toPokemon.attachEnergy(energy);
+
+    this.logger.addEntry({
+      type: "attachEnergy",
+      player: this.Name,
+      targetPokemon: this.pokemonToDescriptor(toPokemon),
+      energyTypes: energy,
+      from: "pokemon",
+      fromPokemon: this.pokemonToDescriptor(fromPokemon),
+    });
+  }
+
   discardRandomEnergy(pokemon: InPlayPokemonCard, count: number = 1) {
     const energies = pokemon.AttachedEnergy;
 
@@ -414,6 +440,25 @@ export class Player {
       fromPokemon: this.pokemonToDescriptor(previousActive),
       toPokemon: this.pokemonToDescriptor(pokemon),
       reason,
+    });
+  }
+
+  returnPokemonToHand(pokemon: InPlayPokemonCard) {
+    if (pokemon == this.ActivePokemon) {
+      this.ActivePokemon = undefined;
+    } else {
+      this.Bench[this.Bench.indexOf(pokemon)] = undefined;
+    }
+
+    for (const card of pokemon.InPlayCards) {
+      this.InPlay.splice(this.InPlay.indexOf(card), 1);
+      this.Hand.push(card);
+    }
+
+    this.logger.addEntry({
+      type: "returnToHand",
+      player: this.Name,
+      cardIds: pokemon.InPlayCards.map((card) => card.ID),
     });
   }
 

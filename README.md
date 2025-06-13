@@ -2,17 +2,17 @@
 
 Backend todo:
 
-- [ ] Parse cards: 292/405 (72.1%)
+- [ ] Parse cards: 300/405 (74.1%)
   - [x] Dragon type
   - [x] Misty
-  - [ ] Distribute energy among Benched mon
+  - [x] Supporters that affect specific mon
   - [x] Choose a mon to attack
   - [ ] Draw mon onto Bench
+  - [ ] Distribute energy among Benched mon
   - [ ] Use opposing mon's attack
   - [ ] Status conditions
   - [ ] Other active mon effects
   - [ ] Global effects
-  - [ ] Supporters that affect specific mon
   - [ ] Fossils
   - [ ] Abilities
   - [ ] A1a effects
