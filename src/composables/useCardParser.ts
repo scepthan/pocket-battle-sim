@@ -385,8 +385,8 @@ export const useCardParser = () => {
         },
         {
           pattern:
-            /^Take 1 \{(\w)\} Energy from your Energy Zone and attach it to this Pokémon\.$/,
-          transform: (_, type) => {
+            /^Take (\d+) \{(\w)\} Energy from your Energy Zone and attach it to this Pokémon\.$/,
+          transform: (_, count, type) => {
             if (!isEnergyShort(type))
               throw new Error("Unrecognized energy shorthand: " + type);
             const fullType = EnergyMap[type];
@@ -394,7 +394,7 @@ export const useCardParser = () => {
               await defaultEffect(game);
               game.AttackingPlayer.attachEnergy(
                 game.AttackingPlayer.ActivePokemon!,
-                fullType,
+                new Array(Number(count)).fill(fullType),
                 "energyZone"
               );
             };
@@ -545,6 +545,32 @@ export const useCardParser = () => {
             validPokemon
           );
           if (pokemon) game.healPokemon(pokemon, Number(modifier));
+        },
+      },
+      {
+        pattern:
+          /^Choose 1 of your {(\w)} Pokémon, and flip a coin until you get tails\. For each heads, take a {(\w)} Energy from your Energy Zone and attach it to that Pokémon\.$/,
+        transform: (_, type, energyType) => async (game: GameState) => {
+          if (!isEnergyShort(type))
+            throw new Error("Unrecognized type shorthand: " + type);
+          if (!isEnergyShort(energyType))
+            throw new Error("Unrecognized energy shorthand: " + energyType);
+
+          const validPokemon = game.AttackingPlayer.InPlayPokemon.filter(
+            (x) => x.Type == EnergyMap[type]
+          );
+          const pokemon = await game.choosePokemon(
+            game.AttackingPlayer,
+            validPokemon
+          );
+          if (pokemon) {
+            const { heads } = game.flipCoinUntilTails(game.AttackingPlayer);
+            game.AttackingPlayer.attachEnergy(
+              pokemon,
+              new Array(heads).fill(EnergyMap[energyType]),
+              "energyZone"
+            );
+          }
         },
       },
     ];

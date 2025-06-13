@@ -318,13 +318,13 @@ export class Player {
     if (!this.AvailableEnergy) {
       throw new Error("No energy available to attach");
     }
-    this.attachEnergy(pokemon, this.AvailableEnergy, "energyZone");
+    this.attachEnergy(pokemon, [this.AvailableEnergy], "energyZone");
     this.AvailableEnergy = undefined;
   }
 
   attachEnergy(
     pokemon: InPlayPokemonCard,
-    energy: Energy,
+    energy: Energy[],
     from: "energyZone" | "discard" | "pokemon",
     fromPokemon?: InPlayPokemonCard
   ) {
@@ -332,7 +332,7 @@ export class Player {
     this.logger.addEntry({
       type: "attachEnergy",
       player: this.Name,
-      energyType: energy,
+      energyTypes: energy,
       from,
       targetPokemon: this.pokemonToDescriptor(pokemon),
       fromPokemon: fromPokemon && this.pokemonToDescriptor(fromPokemon),
