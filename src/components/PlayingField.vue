@@ -138,7 +138,7 @@ onMounted(async () => {
     Record<string, DeckInfo>
   >;
 
-  player.value = new RandomAgent("Izzard", importedDecks.A1["Charizard ex"]);
+  player.value = new RandomAgent("Malfoy", importedDecks.A1["Dragonite"]);
   opponent.value = new RandomAgent("Venny", importedDecks.A1["Venusaur ex"]);
 
   game.value = new GameState(

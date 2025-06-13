@@ -421,6 +421,25 @@ export const useCardParser = () => {
             game.attackActivePokemon(totalDamage);
           },
         },
+        {
+          pattern:
+            /^1 of your opponent's Pokémon is chosen at random (\d+) times\. For each time a Pokémon was chosen, do (\d+) damage to it\.$/,
+          transform: (_, times, damage) => async (game: GameState) => {
+            const damages = game.DefendingPlayer.InPlayPokemon.map(() => 0);
+            for (let i = 0; i < Number(times); i++) {
+              damages[Math.floor(Math.random() * damages.length)] +=
+                Number(damage);
+            }
+            for (let i = 0; i < damages.length; i++) {
+              if (damages[i] > 0) {
+                game.attackPokemon(
+                  game.DefendingPlayer.InPlayPokemon[i],
+                  damages[i]
+                );
+              }
+            }
+          },
+        },
       ];
 
       for (const { pattern, transform } of dictionary) {

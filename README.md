@@ -2,7 +2,8 @@
 
 Backend todo:
 
-- [ ] Parse cards: 278/405 (68.6%)
+- [ ] Parse cards: 282/405 (69.6%)
+  - [x] Dragon type
   - [ ] Attaching energy to Benched mon
   - [ ] Choose a mon to attack
   - [ ] Draw mon onto Bench
