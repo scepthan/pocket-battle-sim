@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import cardBackUrl from "@/assets/cardback.jpg";
+import cardBackUrl from "@/assets/img/cardback.jpg";
 import type { PlayingCard } from "@/types/PlayingCard";
 import { computed } from "vue";
 

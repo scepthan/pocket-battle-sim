@@ -1,0 +1,10 @@
+export { default as Colorless } from "./Colorless.png";
+export { default as Darkness } from "./Darkness.png";
+export { default as Dragon } from "./Dragon.png";
+export { default as Fighting } from "./Fighting.png";
+export { default as Fire } from "./Fire.png";
+export { default as Grass } from "./Grass.png";
+export { default as Lightning } from "./Lightning.png";
+export { default as Metal } from "./Metal.png";
+export { default as Psychic } from "./Psychic.png";
+export { default as Water } from "./Water.png";

@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import PlayingField from "./components/PlayingField.vue";
+import PlayingField from "./components/arena/PlayingField.vue";
 import { usePlayingCardStore } from "./stores/usePlayingCardStore";
 
 const cardStore = usePlayingCardStore();

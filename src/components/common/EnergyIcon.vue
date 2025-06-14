@@ -5,6 +5,7 @@
 <script setup lang="ts">
 import type { Energy } from "@/types/Energy";
 import { computed } from "vue";
+import * as Energies from "@/assets/img/energy";
 
 export interface Props {
   energy: Energy;
@@ -12,8 +13,5 @@ export interface Props {
 
 const props = defineProps<Props>();
 
-const energyUrl = computed(
-  () =>
-    `https://static.dotgg.gg/pokepocket/icons/${props.energy.toLowerCase()}.png`
-);
+const energyUrl = computed(() => Energies[props.energy]);
 </script>

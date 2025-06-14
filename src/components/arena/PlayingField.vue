@@ -72,8 +72,8 @@ import { GameState } from "@/models/GameState";
 import { RandomAgent } from "@/models/agents/RandomAgent";
 import type { DeckInfo } from "@/types";
 import { onMounted, ref } from "vue";
-import GameLog from "./GameLog.vue";
-import InPlayCardSlot from "./InPlayCardSlot.vue";
+import GameLog from "@/components/arena/GameLog.vue";
+import InPlayCardSlot from "@/components/arena/InPlayCardSlot.vue";
 
 const prebuiltDecks: Record<string, DeckInfo> = {
   Celebi1: {

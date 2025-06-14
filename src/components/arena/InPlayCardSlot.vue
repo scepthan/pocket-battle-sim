@@ -32,8 +32,8 @@
 <script setup lang="ts">
 import type { InPlayPokemonCard } from "@/models/InPlayPokemonCard";
 import { computed } from "vue";
-import EnergyIcon from "./EnergyIcon.vue";
-import PlayingCard from "./PlayingCard.vue";
+import EnergyIcon from "@/components/common/EnergyIcon.vue";
+import PlayingCard from "@/components/common/PlayingCard.vue";
 
 export interface Props {
   heightPx?: number;
