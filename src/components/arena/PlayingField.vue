@@ -68,12 +68,12 @@
 </template>
 
 <script setup lang="ts">
-import { GameState } from "@/models/GameState";
-import { RandomAgent } from "@/models/agents/RandomAgent";
-import type { DeckInfo } from "@/types";
-import { onMounted, ref } from "vue";
 import GameLog from "@/components/arena/GameLog.vue";
 import InPlayCardSlot from "@/components/arena/InPlayCardSlot.vue";
+import { GameState } from "@/models/GameState";
+import { BetterRandomAgent, RandomAgent } from "@/models/agents";
+import type { DeckInfo } from "@/types";
+import { onMounted, ref } from "vue";
 
 const prebuiltDecks: Record<string, DeckInfo> = {
   Celebi1: {
@@ -138,22 +138,35 @@ onMounted(async () => {
     Record<string, DeckInfo>
   >;
 
-  player.value = new RandomAgent("Koga", importedDecks.A1["Koga"]);
-  opponent.value = new RandomAgent("Lt. Surge", importedDecks.A1["Lt. Surge"]);
+  const allDecks = { ...importedDecks.A1, ...prebuiltDecks };
+  const deckNames = Object.keys(allDecks) as (keyof typeof allDecks)[];
+  let newGameCountdown = 0;
 
-  game.value = new GameState(
-    {
-      DeckSize: 20,
-      HandSize: 5,
-    },
-    player.value,
-    opponent.value
-  );
+  setInterval(() => {
+    if (game.value && !game.value.GameOver) return;
+    if (newGameCountdown > 0) return newGameCountdown--;
 
-  setTimeout(async () => {
-    if (!game.value) return;
+    newGameCountdown = 10;
+    const deck1 = deckNames[Math.floor(Math.random() * deckNames.length)];
+    const deck2 = deckNames[Math.floor(Math.random() * deckNames.length)];
 
-    void game.value.start();
-  }, 3000);
+    player.value = new BetterRandomAgent("Player", allDecks[deck1]);
+    opponent.value = new BetterRandomAgent("Opponent", allDecks[deck2]);
+
+    game.value = new GameState(
+      {
+        DeckSize: 20,
+        HandSize: 5,
+      },
+      player.value,
+      opponent.value
+    );
+
+    setTimeout(async () => {
+      if (!game.value) return;
+
+      void game.value.start();
+    }, 3000);
+  }, 1000);
 });
 </script>

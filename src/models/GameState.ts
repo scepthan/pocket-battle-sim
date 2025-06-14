@@ -230,6 +230,7 @@ export class GameState {
         draw: true,
         reason: "maxTurnNumberReached",
       });
+      this.GameOver = true;
       return;
     }
   }

@@ -239,22 +239,22 @@ export const useCardParser = () => {
       // Damage-determining effects
       {
         pattern:
-          /^Flip (\d+) coins\. This attack does (\d+)(?: more)? damage for each heads\.$/i,
-        transform: (_, coins, multiplier) => async (game: GameState) => {
-          let damage = baseAttackHP;
+          /^Flip (\d+) coins\. This attack does (\d+)( more)? damage for each heads\.$/i,
+        transform: (_, coins, damage, more) => async (game: GameState) => {
+          let totalDamage = more ? baseAttackHP : 0;
           const { heads } = game.flipMultiCoin(
             game.AttackingPlayer,
             Number(coins)
           );
-          damage += heads * Number(multiplier);
-          game.attackActivePokemon(damage);
+          totalDamage += heads * Number(damage);
+          game.attackActivePokemon(totalDamage);
         },
       },
       {
         pattern:
           /^Flip a coin until you get tails\. This attack does (\d+)(?: more)? damage for each heads\.$/i,
-        transform: (_, damage) => async (game: GameState) => {
-          let totalDamage = baseAttackHP;
+        transform: (_, damage, more) => async (game: GameState) => {
+          let totalDamage = more ? baseAttackHP : 0;
           while (game.flipCoin(game.AttackingPlayer)) {
             totalDamage += Number(damage);
           }
@@ -309,17 +309,18 @@ export const useCardParser = () => {
       {
         pattern:
           /^This attack does (\d+)( more)? damage for each of your Benched(?: \{(\w)\})? (.+?)\.$/i,
-        transform: (_, damagePerBench, addDamage, type, pokemon) => {
+        transform: (_, damagePerBench, more, type, pokemon) => {
           const e = type ? parseEnergy(type) : undefined;
 
           return async (game: GameState) => {
+            let totalDamage = more ? baseAttackHP : 0;
             const bench = game.AttackingPlayer.BenchedPokemon.filter(
               (p) =>
                 (!e || p.Type == e) &&
                 (pokemon == "Pokémon" || p.Name == pokemon)
             );
-            const damage = baseAttackHP + bench.length * Number(damagePerBench);
-            game.attackActivePokemon(damage);
+            totalDamage += bench.length * Number(damagePerBench);
+            game.attackActivePokemon(totalDamage);
           };
         },
       },
