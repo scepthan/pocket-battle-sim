@@ -6,8 +6,8 @@ import type {
   PokemonCard,
 } from "@/types";
 
-export type PrimaryStatus = "Asleep"; // | "Paralyzed" | "Confused"
-export type SecondaryStatus = "Poisoned"; // | "Burned"
+export type PrimaryStatus = "Asleep" | "Paralyzed" | "Confused";
+export type SecondaryStatus = "Poisoned" | "Burned";
 
 export class InPlayPokemonCard {
   BaseCard: PokemonCard;
@@ -46,6 +46,27 @@ export class InPlayPokemonCard {
     this.Ability = inputCard.Ability;
 
     this.CurrentHP = this.BaseHP;
+  }
+
+  evolveInto(inputCard: PokemonCard) {
+    this.BaseCard = inputCard;
+    this.InPlayCards.push(inputCard);
+
+    this.CurrentHP += inputCard.BaseHP - this.BaseHP;
+
+    this.ID = inputCard.ID;
+    this.Name = inputCard.Name;
+    this.Type = inputCard.Type;
+    this.BaseHP = inputCard.BaseHP;
+    this.Stage = inputCard.Stage;
+    this.RetreatCost = inputCard.RetreatCost;
+    this.Weakness = inputCard.Weakness;
+    this.PrizePoints = inputCard.PrizePoints;
+    this.Attacks = inputCard.Attacks;
+    this.Ability = inputCard.Ability;
+
+    this.PrimaryStatus = undefined;
+    this.SecondaryStatuses = [];
   }
 
   applyDamage(HP: number) {

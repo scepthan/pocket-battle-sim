@@ -283,22 +283,23 @@ export class Player {
       throw new Error("Pokemon is not ready to evolve");
     }
 
+    // Save info for logging purposes
+    const beforePokemon = this.pokemonToDescriptor(pokemon);
+    const statuses: string[] = pokemon.SecondaryStatuses.slice();
+    if (pokemon.PrimaryStatus) statuses.unshift(pokemon.PrimaryStatus);
+
     this.Hand.splice(this.Hand.indexOf(card), 1);
     this.InPlay.push(card);
 
-    const newPokemon = new InPlayPokemonCard(card);
-    newPokemon.InPlayCards.push(...pokemon.InPlayCards);
-    newPokemon.CurrentHP = card.BaseHP - (pokemon.BaseHP - pokemon.CurrentHP);
-    newPokemon.AttachedEnergy = pokemon.AttachedEnergy.slice();
+    pokemon.evolveInto(card);
 
-    if (this.ActivePokemon == pokemon) {
-      this.ActivePokemon = newPokemon;
-    } else {
-      this.Bench[this.Bench.indexOf(pokemon)] = newPokemon;
-    }
-
-    const statuses: string[] = pokemon.SecondaryStatuses.slice();
-    if (pokemon.PrimaryStatus) statuses.unshift(pokemon.PrimaryStatus);
+    this.logger.addEntry({
+      type: "evolvePokemon",
+      player: this.Name,
+      fromPokemon: beforePokemon,
+      cardId: card.ID,
+      stage: card.Stage,
+    });
     for (const status of statuses) {
       this.logger.addEntry({
         type: "pokemonStatusEnded",
@@ -308,14 +309,6 @@ export class Player {
         currentStatusList: pokemon.SecondaryStatuses,
       });
     }
-
-    this.logger.addEntry({
-      type: "evolvePokemon",
-      player: this.Name,
-      cardId: card.ID,
-      fromPokemon: this.pokemonToDescriptor(pokemon),
-      stage: card.Stage,
-    });
   }
 
   attachAvailableEnergy(pokemon: InPlayPokemonCard) {
