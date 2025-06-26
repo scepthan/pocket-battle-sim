@@ -31,8 +31,12 @@ export class GameState {
   NextTurnDamageReduction: number = 0;
   CurrentDamageReduction: number = 0;
 
-  MaxHandSize: number = 10;
-  MaxTurnNumber: number = 30;
+  GameRules: GameRules = {
+    DeckSize: 20,
+    InitialHandSize: 5,
+    MaxHandSize: 10,
+    TurnLimit: 30,
+  };
 
   DelayPerAction: number = 1000; // milliseconds
 
@@ -40,7 +44,12 @@ export class GameState {
 
   endTurnResolve: (value: unknown) => void = () => {};
 
-  constructor(rules: GameRules, agent1: PlayerAgent, agent2: PlayerAgent) {
+  constructor(
+    agent1: PlayerAgent,
+    agent2: PlayerAgent,
+    rules?: Partial<GameRules>
+  ) {
+    Object.assign(this.GameRules, rules);
     this.Agent1 = agent1;
     this.Agent2 = agent2;
 
@@ -53,7 +62,7 @@ export class GameState {
       EnergyTypes: agent2.EnergyTypes,
     };
 
-    const { validateDeck } = useDeckValidator(rules);
+    const { validateDeck } = useDeckValidator(this.GameRules);
 
     const validation1 = validateDeck(deck1);
     if (validation1 !== true) {
@@ -89,8 +98,8 @@ export class GameState {
     this.AttackingPlayer = players[0];
     this.DefendingPlayer = players[1];
 
-    this.AttackingPlayer.setup(rules.HandSize);
-    this.DefendingPlayer.setup(rules.HandSize);
+    this.AttackingPlayer.setup(this.GameRules.InitialHandSize);
+    this.DefendingPlayer.setup(this.GameRules.InitialHandSize);
   }
 
   async delay() {
@@ -113,7 +122,7 @@ export class GameState {
     this.Player1.setupPokemon(setup1);
     this.Player2.setupPokemon(setup2);
 
-    while (this.TurnNumber < this.MaxTurnNumber && !this.GameOver) {
+    while (this.TurnNumber < this.GameRules.TurnLimit && !this.GameOver) {
       try {
         await this.nextTurn();
       } catch (error) {
@@ -180,7 +189,7 @@ export class GameState {
     }
 
     // Draw a card into the attacking player's hand
-    this.AttackingPlayer.drawCards(1, this.MaxHandSize);
+    this.AttackingPlayer.drawCards(1, this.GameRules.MaxHandSize);
 
     // Execute the player's turn
     try {
@@ -224,7 +233,7 @@ export class GameState {
 
     await this.delay();
 
-    if (this.TurnNumber >= this.MaxTurnNumber) {
+    if (this.TurnNumber >= this.GameRules.TurnLimit) {
       this.GameLog.addEntry({
         type: "gameOver",
         draw: true,
@@ -348,7 +357,7 @@ export class GameState {
   }
 
   drawCards(count: number) {
-    this.AttackingPlayer.drawCards(count, this.MaxHandSize);
+    this.AttackingPlayer.drawCards(count, this.GameRules.MaxHandSize);
   }
 
   attackActivePokemon(HP: number) {

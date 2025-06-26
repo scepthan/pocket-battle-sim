@@ -43,6 +43,13 @@ export const useDeckValidator = (rules: GameRules) => {
       return "Must be able to use at least one attack";
     }
 
+    if (rules.ExtraValidation) {
+      const extraValidation = rules.ExtraValidation(deck);
+      if (extraValidation !== true) {
+        return extraValidation;
+      }
+    }
+
     return true;
   };
   return { validateDeck };
