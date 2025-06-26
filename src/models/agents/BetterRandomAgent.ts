@@ -125,7 +125,29 @@ export class BetterRandomAgent implements PlayerAgent {
 
     // Play energy
     const pokemonNeedingEnergy = ownPokemon.filter((p) => {
-      for (const attack of p.Attacks) {
+      const allAttacks = p.Attacks.slice();
+      let currentPokemon = [p.Name];
+      while (currentPokemon.length > 0) {
+        const nextEvolutions: PokemonCard[] = [];
+        for (const pokemon of currentPokemon) {
+          for (const potentialEvolution of game.selfHand.concat(
+            game.selfDeck
+          )) {
+            if (
+              potentialEvolution.CardType == "Pokemon" &&
+              potentialEvolution.EvolvesFrom == pokemon
+            ) {
+              allAttacks.push(...potentialEvolution.Attacks);
+              nextEvolutions.push(potentialEvolution);
+            }
+          }
+        }
+        currentPokemon = nextEvolutions
+          .map((x) => x.Name)
+          .filter((x, i, a) => a.indexOf(x) === i);
+      }
+
+      for (const attack of allAttacks) {
         const modifiedEnergy = attack.RequiredEnergy.slice();
         for (const e1 of p.AttachedEnergy)
           modifiedEnergy.splice(

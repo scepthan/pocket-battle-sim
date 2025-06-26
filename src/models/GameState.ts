@@ -30,6 +30,7 @@ export class GameState {
   ActivePokemonDamageBoost: number = 0;
   NextTurnDamageReduction: number = 0;
   CurrentDamageReduction: number = 0;
+  ActiveTrainerCard?: TrainerCard;
 
   GameRules: GameRules = {
     DeckSize: 20,
@@ -470,7 +471,9 @@ export class GameState {
       cardId: card.ID,
       trainerType: card.CardType,
     });
+    this.ActiveTrainerCard = card;
     await this.useInitialEffect(card.Effect);
+    this.ActiveTrainerCard = undefined;
     this.AttackingPlayer.discardCardsFromHand([card]);
   }
 

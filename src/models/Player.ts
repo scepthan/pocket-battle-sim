@@ -249,20 +249,21 @@ export class Player {
     });
   }
 
-  putPokemonOnBench(card: PokemonCard, index: number) {
+  putPokemonOnBench(
+    card: PokemonCard,
+    index: number,
+    trueCard: PlayingCard = card
+  ) {
     if (this.Bench[index]) {
       throw new Error("Bench already has a Pokemon in this slot");
-    }
-    if (!this.Hand.includes(card)) {
-      throw new Error("Card not in hand");
     }
     if (card.Stage != 0) {
       throw new Error("Can only play Basic Pokemon to bench");
     }
 
     this.Bench[index] = new InPlayPokemonCard(card);
-    this.InPlay.push(card);
-    this.Hand.splice(this.Hand.indexOf(card), 1);
+    this.InPlay.push(trueCard);
+    this.Hand.splice(this.Hand.indexOf(trueCard), 1);
 
     this.logger.addEntry({
       type: "playToBench",
@@ -501,6 +502,8 @@ export class Player {
   }
 
   discardCardsFromHand(cards: PlayingCard[]) {
+    cards = cards.filter((card) => this.Hand.includes(card));
+    if (cards.length == 0) return;
     this.Hand = this.Hand.filter((card) => !cards.includes(card));
     this.Discard.push(...cards);
     this.logger.addEntry({

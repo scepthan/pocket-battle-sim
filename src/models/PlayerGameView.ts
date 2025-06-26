@@ -106,6 +106,10 @@ export class PlayerGameView {
   canPlayCard(card: PlayingCard) {
     if (!this.canPlay) return false;
 
+    if (!this.selfHand.includes(card)) {
+      return false;
+    }
+
     if (card.CardType == "Pokemon") {
       if (card.Stage == 0) {
         const bench = this.selfBenched;
@@ -129,8 +133,9 @@ export class PlayerGameView {
   canRetreat() {
     if (!this.canPlay || !this.selfActive) return false;
     if (this.selfBenched.length == 0) return false;
+    if (this.selfActive.RetreatCost == -1) return false;
     return (
-      (this.selfActive.RetreatCost ?? 0) + this.retreatCostModifier <=
+      this.selfActive.RetreatCost + this.retreatCostModifier <=
       this.selfActive.AttachedEnergy.length
     );
   }

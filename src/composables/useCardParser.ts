@@ -737,6 +737,42 @@ export const useCardParser = () => {
           };
         },
       },
+      {
+        pattern:
+          /Play this card as if it were a (\d+)-HP Basic {(\w)} Pokémon. At any time during your turn, you may discard this card from play. This card can't retreat./i,
+        transform: (_, hp, type) => {
+          const fullType = parseEnergy(type);
+
+          return async (game: GameState) => {
+            const card = game.ActiveTrainerCard!;
+            let benchIndex = 0;
+            while (game.AttackingPlayer.Bench[benchIndex]) benchIndex++;
+            if (benchIndex >= 3) {
+              game.GameLog.addEntry({
+                type: "actionFailed",
+                player: game.AttackingPlayer.Name,
+                reason: "noValidTargets",
+              });
+              return;
+            }
+
+            const pokemon: PlayingCard = {
+              ID: card.ID,
+              Name: card.Name,
+              CardType: "Pokemon",
+              Type: fullType,
+              BaseHP: Number(hp),
+              Stage: 0,
+              RetreatCost: -1,
+              Weakness: "",
+              PrizePoints: 1,
+              Attacks: [],
+            };
+
+            game.AttackingPlayer.putPokemonOnBench(pokemon, benchIndex, card);
+          };
+        },
+      },
     ];
 
     for (const { pattern, transform } of dictionary) {

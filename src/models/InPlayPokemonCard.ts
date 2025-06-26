@@ -17,7 +17,7 @@ export class InPlayPokemonCard {
   Type: Energy;
   BaseHP: number;
   Stage: number;
-  RetreatCost?: number;
+  RetreatCost: number;
   Weakness?: string;
   PrizePoints: number;
   Attacks: Attack[];

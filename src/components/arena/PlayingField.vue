@@ -72,7 +72,7 @@ import GameLog from "@/components/arena/GameLog.vue";
 import InPlayCardSlot from "@/components/arena/InPlayCardSlot.vue";
 import { GameState } from "@/models/GameState";
 import { BetterRandomAgent, RandomAgent } from "@/models/agents";
-import type { DeckInfo } from "@/types";
+import type { DeckInfo, InputCard } from "@/types";
 import { onMounted, ref } from "vue";
 
 const prebuiltDecks: Record<string, DeckInfo> = {
@@ -138,17 +138,39 @@ onMounted(async () => {
     Record<string, DeckInfo>
   >;
 
+  const cards = (await import("@/assets/cards.json")).default as InputCard[];
+  const unusedCards = cards.filter(
+    (card) =>
+      ["Common", "Uncommon", "Rare", "Double Rare", "Promo"].includes(
+        card.Rarity
+      ) &&
+      !Object.values(importedDecks.A1).some((deck) =>
+        deck.Cards.includes(card.ID)
+      )
+  );
+  console.log(
+    `Found ${unusedCards.length} unused cards:`,
+    unusedCards.map((card) => `${card.ID} (${card.Name})`).join("; ")
+  );
+
   const allDecks = { ...importedDecks.A1, ...prebuiltDecks };
   const deckNames = Object.keys(allDecks) as (keyof typeof allDecks)[];
   let newGameCountdown = 0;
+
+  // For testing purposes, you can set playerDeck and opponentDeck to specific deck names
+  // Otherwise, they will be selected at random from the available decks
+  const playerDeck: string | undefined = undefined;
+  const opponentDeck: string | undefined = undefined;
 
   setInterval(() => {
     if (game.value && !game.value.GameOver) return;
     if (newGameCountdown > 0) return newGameCountdown--;
 
     newGameCountdown = 10;
-    const deck1 = deckNames[Math.floor(Math.random() * deckNames.length)];
-    const deck2 = deckNames[Math.floor(Math.random() * deckNames.length)];
+    const deck1 =
+      playerDeck || deckNames[Math.floor(Math.random() * deckNames.length)];
+    const deck2 =
+      opponentDeck || deckNames[Math.floor(Math.random() * deckNames.length)];
 
     player.value = new BetterRandomAgent("Player", allDecks[deck1]);
     opponent.value = new BetterRandomAgent("Opponent", allDecks[deck2]);
