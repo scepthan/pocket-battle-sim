@@ -124,56 +124,64 @@ export class BetterRandomAgent implements PlayerAgent {
     );
 
     // Play energy
-    const pokemonNeedingEnergy = ownPokemon.filter((p) => {
-      const allAttacks = p.Attacks.slice();
-      let currentPokemon = [p.Name];
-      while (currentPokemon.length > 0) {
-        const nextEvolutions: PokemonCard[] = [];
-        for (const pokemon of currentPokemon) {
-          for (const potentialEvolution of game.selfHand.concat(
-            game.selfDeck
-          )) {
-            if (
-              potentialEvolution.CardType == "Pokemon" &&
-              potentialEvolution.EvolvesFrom == pokemon
-            ) {
-              allAttacks.push(...potentialEvolution.Attacks);
-              nextEvolutions.push(potentialEvolution);
-            }
-          }
-        }
-        currentPokemon = nextEvolutions
-          .map((x) => x.Name)
-          .filter((x, i, a) => a.indexOf(x) === i);
-      }
-
-      for (const attack of allAttacks) {
-        const modifiedEnergy = attack.RequiredEnergy.slice();
-        for (const e1 of p.AttachedEnergy)
-          modifiedEnergy.splice(
-            modifiedEnergy.findIndex((e2) => e2 == e1 || e2 == "Colorless"),
-            1
-          );
-        if (
-          modifiedEnergy.some(
-            (e) => e == game.selfAvailableEnergy || e == "Colorless"
-          )
-        )
-          return true;
-      }
-      return false;
-    });
     if (
-      pokemonNeedingEnergy.includes(game.selfActive!) ||
-      pokemonNeedingEnergy.length == 0
+      game.selfActive!.Attacks.some((a) =>
+        this.findRemainingEnergy(game.selfActive!, a.RequiredEnergy).some(
+          (e) => e == game.selfAvailableEnergy || e == "Colorless"
+        )
+      )
     ) {
+      // If the active Pokemon needs the available energy for any attack, attach it
       await game.attachAvailableEnergy(game.selfActive!);
     } else {
-      const randomPokemon =
-        pokemonNeedingEnergy[
-          Math.floor(Math.random() * pokemonNeedingEnergy.length)
-        ];
-      await game.attachAvailableEnergy(randomPokemon);
+      // Otherwise, check the energy needs of all Pokemon on the field and their evolutions
+      const pokemonEnergyRequirements = ownPokemon.map((p) => {
+        const allPokemon = [p, ...this.findPotentialEvolutions(game, p)];
+        const allAttacks = allPokemon.flatMap((x) => x.Attacks);
+        let maxEnergyRequired = 0;
+
+        for (const attack of allAttacks) {
+          const remainingEnergy = this.findRemainingEnergy(
+            p,
+            attack.RequiredEnergy
+          );
+          if (
+            remainingEnergy.length > maxEnergyRequired &&
+            remainingEnergy.some(
+              (e) => e == game.selfAvailableEnergy || e == "Colorless"
+            )
+          )
+            maxEnergyRequired = remainingEnergy.length;
+        }
+        return { pokemon: p, maxEnergyRequired };
+      });
+
+      const pokemonNeedingExtraEnergy = pokemonEnergyRequirements.filter(
+        (x) => x.maxEnergyRequired >= 2
+      );
+      const pokemonNeedingSomeEnergy = pokemonEnergyRequirements.filter(
+        (x) => x.maxEnergyRequired >= 1
+      );
+      if (pokemonNeedingExtraEnergy.length > 0) {
+        // If any Pokemon need 2 or more energy, attach to one of them at random
+        // This way we don't waste energy on Pokemon that will be able to attack on the turn they switch in
+        if (
+          pokemonNeedingExtraEnergy.some((x) => x.pokemon == game.selfActive)
+        ) {
+          // If the active Pokemon needs extra energy, attach to it first
+          await game.attachAvailableEnergy(game.selfActive!);
+        } else {
+          const randomPokemon = rand(pokemonNeedingExtraEnergy).pokemon;
+          await game.attachAvailableEnergy(randomPokemon);
+        }
+      } else if (pokemonNeedingSomeEnergy.length > 0) {
+        // If we get to this point and any Pokemon need 1 energy, attach to one of them at random
+        const randomPokemon = rand(pokemonNeedingSomeEnergy).pokemon;
+        await game.attachAvailableEnergy(randomPokemon);
+      } else {
+        // If no Pokemon need energy, attach to the active Pokemon
+        await game.attachAvailableEnergy(game.selfActive!);
+      }
     }
 
     // End turn with a random attack
@@ -194,5 +202,39 @@ export class BetterRandomAgent implements PlayerAgent {
   }
   async choosePokemon(pokemon: InPlayPokemonCard[]) {
     return rand(pokemon);
+  }
+
+  findPotentialEvolutions(game: PlayerGameView, pokemon: InPlayPokemonCard) {
+    const allPokemon: PokemonCard[] = [];
+    let currentPokemon = [pokemon.Name];
+    while (currentPokemon.length > 0) {
+      const nextEvolutions: PokemonCard[] = [];
+      for (const mon of currentPokemon) {
+        for (const potentialEvolution of game.selfHand.concat(game.selfDeck)) {
+          if (
+            potentialEvolution.CardType == "Pokemon" &&
+            potentialEvolution.EvolvesFrom == mon
+          ) {
+            allPokemon.push(potentialEvolution);
+            nextEvolutions.push(potentialEvolution);
+          }
+        }
+      }
+      currentPokemon = nextEvolutions
+        .map((x) => x.Name)
+        .filter((x, i, a) => a.indexOf(x) === i);
+    }
+    return allPokemon;
+  }
+
+  findRemainingEnergy(pokemon: InPlayPokemonCard, cost: Energy[]): Energy[] {
+    const remainingEnergy = cost.slice();
+    for (const e1 of pokemon.AttachedEnergy) {
+      const index = remainingEnergy.findIndex(
+        (e2) => e2 == e1 || e2 == "Colorless"
+      );
+      if (index >= 0) remainingEnergy.splice(index, 1);
+    }
+    return remainingEnergy;
   }
 }

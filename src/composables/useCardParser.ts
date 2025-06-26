@@ -139,9 +139,12 @@ export const useCardParser = () => {
 
     // A shorthand for applying the base attack damage (as specified by the number next to the attack on the card).
     // You should usually call this first, unless the attack does no damage or can have a modified damage amount.
-    const defaultEffect = async (gameState: GameState) => {
-      gameState.attackActivePokemon(baseAttackHP);
-    };
+    const defaultEffect =
+      baseAttackHP > 0
+        ? async (gameState: GameState) => {
+            gameState.attackActivePokemon(baseAttackHP);
+          }
+        : async () => {};
 
     // A recursive function to parse nested effects, allowing for conditional effects and other complex structures.
     const recursiveParse = (effectText: string) => {
