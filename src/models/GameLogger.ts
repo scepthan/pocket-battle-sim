@@ -100,10 +100,15 @@ interface ReturnToHandEvent {
   player: string;
   cardIds: string[];
 }
+interface ReturnToDeckEvent {
+  type: "returnToDeck";
+  player: string;
+  cardIds: string[];
+}
 interface DiscardEnergyEvent {
   type: "discardEnergy";
   player: string;
-  source: "effect" | "retreat" | "knockOut" | "returnedToHand" | "energyZone";
+  source: "effect" | "retreat" | "knockOut" | "removedFromField" | "energyZone";
   energyTypes: Energy[];
 }
 
@@ -251,6 +256,7 @@ export type LoggedEvent =
   | PlayTrainerEvent
   | DiscardCardsEvent
   | ReturnToHandEvent
+  | ReturnToDeckEvent
   | DiscardEnergyEvent
   | SwapActivePokemonEvent
   | SelectActivePokemonEvent

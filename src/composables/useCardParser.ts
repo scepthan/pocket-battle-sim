@@ -539,6 +539,16 @@ export const useCardParser = () => {
           await game.swapActivePokemon(game.DefendingPlayer, "opponentEffect");
         },
       },
+      {
+        pattern:
+          /your opponent shuffles their Active Pokémon into their deck\./i,
+        transform: () => async (game: GameState) => {
+          await defaultEffect(game);
+          game.DefendingPlayer.shufflePokemonIntoDeck(
+            game.DefendingPlayer.ActivePokemon!
+          );
+        },
+      },
     ];
 
     for (const { pattern, transform } of dictionary) {

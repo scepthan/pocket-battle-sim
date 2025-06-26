@@ -378,7 +378,12 @@ export class Player {
 
   discardEnergy(
     energies: Energy[],
-    source: "effect" | "retreat" | "knockOut" | "returnedToHand" | "energyZone"
+    source:
+      | "effect"
+      | "retreat"
+      | "knockOut"
+      | "removedFromField"
+      | "energyZone"
   ) {
     if (energies.length == 0) return;
 
@@ -462,7 +467,30 @@ export class Player {
       cardIds: pokemon.InPlayCards.map((card) => card.ID),
     });
 
-    this.discardEnergy(pokemon.AttachedEnergy, "returnedToHand");
+    this.discardEnergy(pokemon.AttachedEnergy, "removedFromField");
+  }
+
+  shufflePokemonIntoDeck(pokemon: InPlayPokemonCard) {
+    if (pokemon == this.ActivePokemon) {
+      this.ActivePokemon = undefined;
+    } else {
+      this.Bench[this.Bench.indexOf(pokemon)] = undefined;
+    }
+
+    for (const card of pokemon.InPlayCards) {
+      this.InPlay.splice(this.InPlay.indexOf(card), 1);
+      this.Deck.push(card);
+    }
+
+    this.logger.addEntry({
+      type: "returnToDeck",
+      player: this.Name,
+      cardIds: pokemon.InPlayCards.map((card) => card.ID),
+    });
+
+    this.discardEnergy(pokemon.AttachedEnergy, "removedFromField");
+
+    this.shuffleDeck();
   }
 
   knockOutPokemon(pokemon: InPlayPokemonCard) {

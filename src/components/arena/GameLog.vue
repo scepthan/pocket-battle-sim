@@ -248,6 +248,18 @@
         </p>
       </div>
 
+      <div v-else-if="entry.type == 'returnToDeck'">
+        <p>
+          {{ entry.cardIds.length }}
+          {{ entry.cardIds.length == 1 ? "card" : "cards" }} returned to deck:
+          <span v-for="(cardId, i) in entry.cardIds" :key="i">
+            <CardName :card-id="cardId" />{{
+              i + 1 === entry.cardIds.length ? "" : ", "
+            }}
+          </span>
+        </p>
+      </div>
+
       <div v-else-if="entry.type == 'selectActivePokemon'">
         <p>
           <b>{{ entry.player }}</b> chooses
@@ -290,9 +302,9 @@
 </template>
 
 <script setup lang="ts">
-import type { LoggedEvent } from "@/models/GameLogger";
 import CardName from "@/components/common/CardName.vue";
 import EnergyIcon from "@/components/common/EnergyIcon.vue";
+import type { LoggedEvent } from "@/models/GameLogger";
 
 export interface Props {
   logEntries: readonly LoggedEvent[];
