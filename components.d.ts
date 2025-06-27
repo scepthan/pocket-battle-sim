@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     CardName: typeof import('./src/components/common/CardName.vue')['default']
+    DeckBuilder: typeof import('./src/components/builder/DeckBuilder.vue')['default']
     EnergyIcon: typeof import('./src/components/common/EnergyIcon.vue')['default']
     EnergyZone: typeof import('./src/components/arena/EnergyZone.vue')['default']
     GameLog: typeof import('./src/components/arena/GameLog.vue')['default']
@@ -16,5 +17,7 @@ declare module 'vue' {
     PlayerHandVisible: typeof import('./src/components/arena/PlayerHandVisible.vue')['default']
     PlayingCard: typeof import('./src/components/common/PlayingCard.vue')['default']
     PlayingField: typeof import('./src/components/arena/PlayingField.vue')['default']
+    RouterLink: typeof import('vue-router')['RouterLink']
+    RouterView: typeof import('vue-router')['RouterView']
   }
 }

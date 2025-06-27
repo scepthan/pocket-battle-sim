@@ -19,6 +19,8 @@ export interface Attack {
   Name: string;
   RequiredEnergy: Energy[];
   Effect: Effect;
+  Text?: string;
+  Damage?: number;
 }
 
 export interface BaseCard {

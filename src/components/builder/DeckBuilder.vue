@@ -1,0 +1,53 @@
+<template>
+  <v-row>
+    <v-col cols="9">
+      <v-text-field v-model="searchQuery" label="Search terms"></v-text-field>
+      <v-virtual-scroll :height="600" :items="cardRows" class="pr-6">
+        <template #default="{ item: row }">
+          <v-row class="mb-2">
+            <v-col v-for="(card, index) in row" :key="index" cols="2">
+              <PlayingCard :card="card" />
+            </v-col>
+          </v-row>
+        </template>
+      </v-virtual-scroll>
+    </v-col>
+    <v-col cols="3">
+      <pre>{{ deckJson }}</pre>
+    </v-col>
+  </v-row>
+</template>
+
+<script setup lang="ts">
+import { usePlayingCardStore } from "@/stores/usePlayingCardStore";
+import type { PlayingCard } from "@/types";
+import { computed, ref } from "vue";
+
+const cardStore = usePlayingCardStore();
+const cardsFiltered = computed(() =>
+  cardStore.Cards.filter(
+    (card) =>
+      searchQuery.value === "" ||
+      searchQuery.value
+        .toLowerCase()
+        .split(" ")
+        .every((term) => JSON.stringify(card).toLowerCase().includes(term))
+  )
+);
+
+const cardsPerRow = 6;
+const cardRows = computed(() => {
+  const rows = [];
+  for (let i = 0; i < cardsFiltered.value.length; i += cardsPerRow) {
+    rows.push(cardsFiltered.value.slice(i, i + cardsPerRow));
+  }
+  return rows;
+});
+
+const searchQuery = ref("");
+
+const selectedCards = ref<PlayingCard[]>([]);
+const deckJson = computed(
+  () => `[${selectedCards.value.map((card) => `"${card.ID}"`).join(", ")}]`
+);
+</script>

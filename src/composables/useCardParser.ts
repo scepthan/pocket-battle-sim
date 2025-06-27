@@ -87,6 +87,8 @@ export const useCardParser = () => {
   const parseAttack = (inputAttack: InputCardAttack): ParsedResult<Attack> => {
     let parseSuccessful = true;
     const Name = inputAttack.Name;
+    const Text = inputAttack.Effect;
+    const Damage = inputAttack.HP;
 
     const RequiredEnergy: Energy[] = [];
     for (const E of inputAttack.Energy) {
@@ -120,13 +122,13 @@ export const useCardParser = () => {
       }
       return {
         parseSuccessful,
-        value: { Name, RequiredEnergy, Effect },
+        value: { Name, RequiredEnergy, Effect, Text, Damage },
       };
     }
 
     return {
       parseSuccessful,
-      value: { Name, RequiredEnergy, Effect: defaultEffect },
+      value: { Name, RequiredEnergy, Effect: defaultEffect, Text, Damage },
     };
   };
 
