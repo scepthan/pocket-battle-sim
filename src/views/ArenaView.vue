@@ -6,7 +6,7 @@
 import { GameState } from "@/models/GameState";
 import { BetterRandomAgent, RandomAgent } from "@/models/agents";
 import { usePlayingCardStore } from "@/stores/usePlayingCardStore";
-import type { DeckInfo, InputCard } from "@/types";
+import type { DeckInfo } from "@/types";
 import { onMounted, ref } from "vue";
 
 const cardStore = usePlayingCardStore();
@@ -73,21 +73,6 @@ onMounted(async () => {
     string,
     Record<string, DeckInfo>
   >;
-
-  const cards = (await import("@/assets/cards.json")).default as InputCard[];
-  const unusedCards = cards.filter(
-    (card) =>
-      ["Common", "Uncommon", "Rare", "Double Rare", "Promo"].includes(
-        card.Rarity
-      ) &&
-      !Object.values(importedDecks.A1).some((deck) =>
-        deck.Cards.includes(card.ID)
-      )
-  );
-  console.log(
-    `Found ${unusedCards.length} unused cards:`,
-    unusedCards.map((card) => `${card.ID} (${card.Name})`).join("; ")
-  );
 
   const allDecks = { ...importedDecks.A1, ...prebuiltDecks };
   const deckNames = Object.keys(allDecks) as (keyof typeof allDecks)[];

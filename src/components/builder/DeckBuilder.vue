@@ -1,7 +1,7 @@
 <template>
   <v-row>
     <v-col cols="9">
-      <v-text-field v-model="searchQuery" label="Search terms"></v-text-field>
+      <v-text-field v-model="searchQuery" label="Search terms" clearable />
       <v-virtual-scroll :height="600" :items="cardRows" class="pr-6 no-select">
         <template #default="{ item: row }">
           <v-row class="mb-2">
@@ -19,7 +19,9 @@
       </v-virtual-scroll>
     </v-col>
     <v-col cols="3">
-      <div class="json-output">{{ deckJson }}</div>
+      <div class="json-output">
+        Cards: {{ selectedCards.length }}<br />{{ deckJson }}
+      </div>
     </v-col>
   </v-row>
 </template>
