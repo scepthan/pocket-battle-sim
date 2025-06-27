@@ -105,11 +105,9 @@ interface ReturnToDeckEvent {
   player: string;
   cardIds: string[];
 }
-interface DiscardEnergyEvent {
-  type: "discardEnergy";
+interface ShuffleDeckEvent {
+  type: "shuffleDeck";
   player: string;
-  source: "effect" | "retreat" | "knockOut" | "removedFromField" | "energyZone";
-  energyTypes: Energy[];
 }
 
 interface SwapActivePokemonEvent {
@@ -146,6 +144,13 @@ interface AttachEnergyEvent {
   from: "energyZone" | "discard" | "pokemon";
   fromPokemon?: InPlayPokemonDescriptor;
 }
+interface DiscardEnergyEvent {
+  type: "discardEnergy";
+  player: string;
+  source: "effect" | "retreat" | "knockOut" | "removedFromField" | "energyZone";
+  energyTypes: Energy[];
+}
+
 interface TriggerAbilityEvent {
   type: "triggerAbility";
   player: string;
@@ -257,12 +262,13 @@ export type LoggedEvent =
   | DiscardCardsEvent
   | ReturnToHandEvent
   | ReturnToDeckEvent
-  | DiscardEnergyEvent
+  | ShuffleDeckEvent
   | SwapActivePokemonEvent
   | SelectActivePokemonEvent
   | EvolvePokemonEvent
   | GenerateNextEnergyEvent
   | AttachEnergyEvent
+  | DiscardEnergyEvent
   | TriggerAbilityEvent
   | UseAbilityEvent
   | UseAttackEvent

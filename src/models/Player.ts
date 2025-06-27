@@ -78,7 +78,7 @@ export class Player {
     this.Hand = [];
     this.InPlay = [];
     this.Discard = [];
-    this.shuffleDeck();
+    this.shuffleDeck(false);
   }
 
   drawInitialHand(handSize: number) {
@@ -89,7 +89,7 @@ export class Player {
       if (this.hasBasicPokemon()) {
         break;
       }
-      this.shuffleHandIntoDeck();
+      this.shuffleHandIntoDeck(false);
     }
 
     this.logger.addEntry({
@@ -101,7 +101,7 @@ export class Player {
     });
   }
 
-  shuffleDeck() {
+  shuffleDeck(log: boolean = true) {
     const newDeck: PlayingCard[] = [];
 
     for (const card of this.Deck) {
@@ -110,12 +110,19 @@ export class Player {
     }
 
     this.Deck = newDeck;
+
+    if (log) {
+      this.logger.addEntry({
+        type: "shuffleDeck",
+        player: this.Name,
+      });
+    }
   }
 
-  shuffleHandIntoDeck() {
+  shuffleHandIntoDeck(log: boolean = true) {
     this.Deck = this.Deck.concat(this.Hand);
     this.Hand = [];
-    this.shuffleDeck();
+    this.shuffleDeck(log);
   }
 
   drawCards(count: number, maxHandSize: number, log: boolean = true) {

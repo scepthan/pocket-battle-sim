@@ -236,10 +236,14 @@
         </p>
       </div>
 
-      <div v-else-if="entry.type == 'returnToHand'">
+      <div
+        v-else-if="entry.type == 'returnToHand' || entry.type == 'returnToDeck'"
+      >
         <p>
           {{ entry.cardIds.length }}
-          {{ entry.cardIds.length == 1 ? "card" : "cards" }} returned to hand:
+          {{ entry.cardIds.length == 1 ? "card" : "cards" }} returned to
+          <b>{{ entry.player }}</b>
+          's {{ entry.type == "returnToHand" ? "hand" : "deck" }}:
           <span v-for="(cardId, i) in entry.cardIds" :key="i">
             <CardName :card-id="cardId" />{{
               i + 1 === entry.cardIds.length ? "" : ", "
@@ -248,15 +252,9 @@
         </p>
       </div>
 
-      <div v-else-if="entry.type == 'returnToDeck'">
+      <div v-else-if="entry.type == 'shuffleDeck'">
         <p>
-          {{ entry.cardIds.length }}
-          {{ entry.cardIds.length == 1 ? "card" : "cards" }} returned to deck:
-          <span v-for="(cardId, i) in entry.cardIds" :key="i">
-            <CardName :card-id="cardId" />{{
-              i + 1 === entry.cardIds.length ? "" : ", "
-            }}
-          </span>
+          <b>{{ entry.player }}</b> shuffles their deck.
         </p>
       </div>
 
