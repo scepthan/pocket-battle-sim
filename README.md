@@ -2,19 +2,22 @@
 
 Backend todo:
 
-- [ ] Parse cards: 300/405 (74.1%)
+- [ ] Parse cards: 305/405 (75.3%)
   - [x] Dragon type
-  - [x] Misty
-  - [x] Supporters that affect specific mon
-  - [x] Choose a mon to attack
-  - [ ] Draw mon onto Bench
-  - [ ] Distribute energy among Benched mon
-  - [ ] Use opposing mon's attack
-  - [ ] Status conditions
-  - [ ] Other active mon effects
-  - [ ] Global effects
-  - [ ] Fossils
+  - [ ] Conditions
+    - [ ] Special Conditions
+    - [ ] Other active mon conditions
+    - [ ] Global conditions
+  - [x] Fossils
   - [ ] Abilities
+  - [ ] A1 effects
+    - [x] Misty
+    - [x] Supporters that affect specific mon
+    - [x] Choose a mon to attack
+    - [x] Shuffle mon into deck
+    - [ ] Draw mon onto Bench
+    - [ ] Distribute energy among Benched mon
+    - [ ] Use opposing mon's attack
   - [ ] A1a effects
 - [ ] Bring in newer sets
 - [x] Single battle simulation
