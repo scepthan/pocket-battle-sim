@@ -1,13 +1,12 @@
 <template>
   <v-app>
     <v-main>
-      <PlayingField v-if="cardStore.Cards.length > 0" />
+      <RouterView />
     </v-main>
   </v-app>
 </template>
 
 <script setup lang="ts">
-import PlayingField from "./components/arena/PlayingField.vue";
 import { usePlayingCardStore } from "./stores/usePlayingCardStore";
 
 const cardStore = usePlayingCardStore();
