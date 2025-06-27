@@ -19,5 +19,6 @@ declare module 'vue' {
     PlayingField: typeof import('./src/components/arena/PlayingField.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SelectableCard: typeof import('./src/components/builder/SelectableCard.vue')['default']
   }
 }

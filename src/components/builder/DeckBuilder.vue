@@ -2,18 +2,24 @@
   <v-row>
     <v-col cols="9">
       <v-text-field v-model="searchQuery" label="Search terms"></v-text-field>
-      <v-virtual-scroll :height="600" :items="cardRows" class="pr-6">
+      <v-virtual-scroll :height="600" :items="cardRows" class="pr-6 no-select">
         <template #default="{ item: row }">
           <v-row class="mb-2">
             <v-col v-for="(card, index) in row" :key="index" cols="2">
-              <PlayingCard :card="card" />
+              <SelectableCard
+                :card="card"
+                :selectable="
+                  selectedCards.filter((x) => x.Name == card.Name).length < 2
+                "
+                @click="() => cardClicked(card)"
+              />
             </v-col>
           </v-row>
         </template>
       </v-virtual-scroll>
     </v-col>
     <v-col cols="3">
-      <pre>{{ deckJson }}</pre>
+      <div class="json-output">{{ deckJson }}</div>
     </v-col>
   </v-row>
 </template>
@@ -22,6 +28,7 @@
 import { usePlayingCardStore } from "@/stores/usePlayingCardStore";
 import type { PlayingCard } from "@/types";
 import { computed, ref } from "vue";
+import SelectableCard from "./SelectableCard.vue";
 
 const cardStore = usePlayingCardStore();
 const cardsFiltered = computed(() =>
@@ -48,6 +55,27 @@ const searchQuery = ref("");
 
 const selectedCards = ref<PlayingCard[]>([]);
 const deckJson = computed(
-  () => `[${selectedCards.value.map((card) => `"${card.ID}"`).join(", ")}]`
+  () =>
+    `[${selectedCards.value
+      .map((card) => `"${card.ID}"`)
+      .sort()
+      .join(", ")}]`
 );
+const cardClicked = (card: PlayingCard) => {
+  if (selectedCards.value.filter((x) => x.Name == card.Name).length < 2) {
+    selectedCards.value.push(card);
+  } else if (selectedCards.value.includes(card)) {
+    selectedCards.value = selectedCards.value.filter((x) => x !== card);
+  }
+};
 </script>
+
+<style scoped>
+.no-select {
+  user-select: none;
+}
+
+.json-output {
+  font-family: monospace;
+}
+</style>
