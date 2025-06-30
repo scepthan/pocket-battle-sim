@@ -12,6 +12,7 @@ import { usePlayingCardStore } from "./stores/usePlayingCardStore";
 import type { DeckInfo, InputCard } from "./types";
 
 const cardStore = usePlayingCardStore();
+const debugMultiUseCards = false;
 
 onMounted(async () => {
   await cardStore.loadCards();
@@ -91,6 +92,31 @@ onMounted(async () => {
     `Found ${unusedCards.length} unused cards:`,
     unusedCards.map((card) => `${card.ID} (${card.Name})`).join("; ")
   );
+
+  if (debugMultiUseCards) {
+    const multiUseCards = uniqueCards.filter(
+      (card) =>
+        Object.values(decklists).flatMap((decks) =>
+          Object.values(decks).filter((deck) => deck.Cards.includes(card.ID))
+        ).length > 1
+    );
+
+    console.log(
+      `Found ${multiUseCards.length} multi-use cards:\n`,
+      multiUseCards
+        .map(
+          (card) =>
+            `${card.ID} (${card.Name}): ${Object.entries(decklists)
+              .flatMap(([setName, set]) =>
+                Object.entries(set).flatMap(([deckName, deck]) =>
+                  deck.Cards.includes(card.ID) ? `${deckName} (${setName})` : []
+                )
+              )
+              .join(", ")}`
+        )
+        .join("\n")
+    );
+  }
 });
 </script>
 

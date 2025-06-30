@@ -378,7 +378,7 @@
   {"ID":"PROMO-005","Name":"Poké Ball","Rarity":"Promo","SetID":"PROMO","PackID":"","CardType":"Item","Text":"Put 1 random Basic Pokemon from your deck into your hand."},
   {"ID":"PROMO-006","Name":"Red Card","Rarity":"Promo","SetID":"PROMO","PackID":"","CardType":"Item","Text":"Your opponent shuffles their hand into their deck and draws 3 cards."},
   {"ID":"PROMO-007","Name":"Professor's Research","Rarity":"Promo","SetID":"PROMO","PackID":"","CardType":"Supporter","Text":"Draw 2 cards."},
-  {"ID":"PROMO-008","Name":"Pokédex","Rarity":"Promo","SetID":"PROMO","PackID":"","CardType":"Supporter","Text":"Look at the top 3 cards of your deck."},
+  {"ID":"PROMO-008","Name":"Pokédex","Rarity":"Promo","SetID":"PROMO","PackID":"","CardType":"Item","Text":"Look at the top 3 cards of your deck."},
   {"ID":"PROMO-009","Name":"Pikachu","Rarity":"Promo","SetID":"PROMO","PackID":"","CardType":"Pokemon","Type":"Lightning","HP":60,"Stage":0,"RetreatCost":1,"Weakness":"Fighting","Moves":[{"Energy":"L","Name":"Gnaw","HP":20}]},
   {"ID":"PROMO-010","Name":"Mewtwo","Rarity":"Promo","SetID":"PROMO","PackID":"","CardType":"Pokemon","Type":"Psychic","HP":120,"Stage":0,"RetreatCost":2,"Weakness":"Darkness","Moves":[{"Energy":"PPCC","Name":"Power Blast","HP":120,"Effect":"Discard 2 {P} Energy from this Pokémon."}]},
   {"ID":"PROMO-011","Name":"Chansey","Rarity":"Promo","SetID":"PROMO","PackID":"","CardType":"Pokemon","Type":"Colorless","HP":120,"Stage":0,"RetreatCost":3,"Weakness":"Fighting","Moves":[{"Energy":"CCC","Name":"Gentle Slap","HP":60}]},

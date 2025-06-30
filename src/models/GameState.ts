@@ -371,10 +371,12 @@ export class GameState {
     const initialHP = defender.CurrentHP;
 
     let totalDamage = HP;
+    let weaknessBoost = false;
     if (totalDamage > 0 && defender == this.DefendingPlayer.ActivePokemon) {
       totalDamage += this.ActivePokemonDamageBoost;
       if (type == defender.Weakness) {
         totalDamage += 20;
+        weaknessBoost = true;
       }
     }
     totalDamage -= this.CurrentDamageReduction;
@@ -391,9 +393,7 @@ export class GameState {
       initialHP,
       finalHP: defender.CurrentHP,
       maxHP: defender.BaseHP,
-      weaknessBoost:
-        type == defender.Weakness &&
-        defender == this.DefendingPlayer.ActivePokemon,
+      weaknessBoost,
     });
 
     return totalDamage;
