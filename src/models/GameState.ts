@@ -391,7 +391,9 @@ export class GameState {
       initialHP,
       finalHP: defender.CurrentHP,
       maxHP: defender.BaseHP,
-      weaknessBoost: type == defender.Weakness,
+      weaknessBoost:
+        type == defender.Weakness &&
+        defender == this.DefendingPlayer.ActivePokemon,
     });
 
     return totalDamage;

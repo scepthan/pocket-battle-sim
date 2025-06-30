@@ -23,36 +23,58 @@ onMounted(async () => {
 
   const cards = (await import("@/assets/cards.json")).default as InputCard[];
   const encounteredCards = new Set<string>();
-  const uniqueCards = cards.filter((card) => {
-    const baseCard = {
-      Name: card.Name,
-      CardType: card.CardType,
-    };
-    let functionalCard;
-    if (card.CardType === "Pokemon") {
-      functionalCard = {
-        ...baseCard,
-        Type: card.Type,
-        HP: card.HP,
-        RetreatCost: card.RetreatCost,
-        Ability: card.Ability,
-        Moves: card.Moves,
-      };
-    } else {
-      functionalCard = {
-        ...baseCard,
-        Text: card.Text,
-      };
-    }
+  const rarityIndex = (a: string) =>
+    [
+      "Common",
+      "Uncommon",
+      "Rare",
+      "Double Rare",
+      "Art Rare",
+      "Super Rare",
+      "Special Art Rare",
+      "Immersive Rare",
+      "Ultra Rare",
+      "Promo",
+    ].indexOf(a);
 
-    const cardString = JSON.stringify(functionalCard);
-    if (encounteredCards.has(cardString)) {
-      return false;
-    } else {
-      encounteredCards.add(cardString);
-      return true;
-    }
-  });
+  const uniqueCards = cards
+    .slice()
+    .sort(
+      (a, b) =>
+        rarityIndex(a.Rarity) - rarityIndex(b.Rarity) ||
+        a.ID.localeCompare(b.ID)
+    )
+    .filter((card) => {
+      const baseCard = {
+        Name: card.Name,
+        CardType: card.CardType,
+      };
+      let functionalCard;
+      if (card.CardType === "Pokemon") {
+        functionalCard = {
+          ...baseCard,
+          Type: card.Type,
+          HP: card.HP,
+          RetreatCost: card.RetreatCost,
+          Ability: card.Ability,
+          Moves: card.Moves,
+        };
+      } else {
+        functionalCard = {
+          ...baseCard,
+          Text: card.Text,
+        };
+      }
+
+      const cardString = JSON.stringify(functionalCard);
+      if (encounteredCards.has(cardString)) {
+        return false;
+      } else {
+        encounteredCards.add(cardString);
+        return true;
+      }
+    })
+    .sort((a, b) => a.ID.localeCompare(b.ID));
 
   console.log(
     `Loaded ${uniqueCards.length} unique cards from ${cards.length} total cards.`
