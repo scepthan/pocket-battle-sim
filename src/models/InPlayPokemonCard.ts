@@ -25,7 +25,7 @@ export class InPlayPokemonCard {
 
   CurrentHP: number;
   PrimaryStatus?: PrimaryStatus;
-  SecondaryStatuses: SecondaryStatus[] = [];
+  SecondaryStatuses: Set<SecondaryStatus> = new Set();
   AttachedEnergy: Energy[] = [];
   InPlayCards: PlayingCard[] = [];
   ReadyToEvolve: boolean = false;
@@ -66,7 +66,7 @@ export class InPlayPokemonCard {
     this.Ability = inputCard.Ability;
 
     this.PrimaryStatus = undefined;
-    this.SecondaryStatuses = [];
+    this.SecondaryStatuses = new Set();
   }
 
   applyDamage(HP: number) {

@@ -205,6 +205,26 @@
         </p>
       </div>
 
+      <div v-else-if="entry.type == 'pokemonStatusApplied'">
+        <p>
+          <CardName :card-id="entry.targetPokemon.cardId" /> is now
+          {{ entry.statusCondition }}!
+        </p>
+        <p v-if="entry.currentStatusList.length > 0">
+          Current status conditions: {{ entry.currentStatusList.join(", ") }}.
+        </p>
+      </div>
+
+      <div v-else-if="entry.type == 'pokemonStatusEnded'">
+        <p>
+          <CardName :card-id="entry.targetPokemon.cardId" /> recovered from
+          being {{ entry.statusCondition }}!
+        </p>
+        <p v-if="entry.currentStatusList.length > 0">
+          Current status conditions: {{ entry.currentStatusList.join(", ") }}.
+        </p>
+      </div>
+
       <div v-else-if="entry.type == 'pokemonKnockedOut'">
         <p>
           <CardName :card-id="entry.targetPokemon.cardId" /> is knocked out!

@@ -551,6 +551,13 @@ export const useCardParser = () => {
           );
         },
       },
+      {
+        pattern: /^Your opponent's active Pokémon is now Poisoned\.$/i,
+        transform: () => async (game: GameState) => {
+          await defaultEffect(game);
+          game.DefendingPlayer.poisonActivePokemon();
+        },
+      },
     ];
 
     for (const { pattern, transform } of dictionary) {

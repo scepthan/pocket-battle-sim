@@ -293,7 +293,7 @@ export class Player {
 
     // Save info for logging purposes
     const beforePokemon = this.pokemonToDescriptor(pokemon);
-    const statuses: string[] = pokemon.SecondaryStatuses.slice();
+    const statuses: string[] = [...pokemon.SecondaryStatuses];
     if (pokemon.PrimaryStatus) statuses.unshift(pokemon.PrimaryStatus);
 
     this.Hand.splice(this.Hand.indexOf(card), 1);
@@ -314,7 +314,7 @@ export class Player {
         player: this.Name,
         statusCondition: status,
         targetPokemon: this.pokemonToDescriptor(pokemon),
-        currentStatusList: pokemon.SecondaryStatuses,
+        currentStatusList: [...pokemon.SecondaryStatuses],
       });
     }
   }
@@ -546,6 +546,18 @@ export class Player {
       player: this.Name,
       source: "hand",
       cardIds: cards.map((card) => card.ID),
+    });
+  }
+
+  poisonActivePokemon() {
+    this.ActivePokemon!.SecondaryStatuses.add("Poisoned");
+
+    this.logger.addEntry({
+      type: "pokemonStatusApplied",
+      player: this.Name,
+      statusCondition: "Poisoned",
+      targetPokemon: this.pokemonToDescriptor(this.ActivePokemon!),
+      currentStatusList: [...this.ActivePokemon!.SecondaryStatuses],
     });
   }
 }
