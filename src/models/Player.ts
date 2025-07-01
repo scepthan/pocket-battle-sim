@@ -278,7 +278,10 @@ export class Player {
 
     this.Bench[index] = new InPlayPokemonCard(card);
     this.InPlay.push(trueCard);
-    this.Hand.splice(this.Hand.indexOf(trueCard), 1);
+    // Needs to be optional because fossils are currently removed from hand before this method is called
+    if (this.Hand.includes(trueCard)) {
+      this.Hand.splice(this.Hand.indexOf(trueCard), 1);
+    }
 
     this.logger.addEntry({
       type: "playToBench",

@@ -8,6 +8,8 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     CardName: typeof import('./src/components/common/CardName.vue')['default']
+    CardNameList: typeof import('./src/components/common/CardNameList.vue')['default']
+    CountDisplay: typeof import('./src/components/common/CountDisplay.vue')['default']
     DeckBuilder: typeof import('./src/components/builder/DeckBuilder.vue')['default']
     EnergyIcon: typeof import('./src/components/common/EnergyIcon.vue')['default']
     EnergyZone: typeof import('./src/components/arena/EnergyZone.vue')['default']

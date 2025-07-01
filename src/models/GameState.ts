@@ -6,6 +6,7 @@ import type {
   Energy,
   GameRules,
   PlayerAgent,
+  PlayingCard,
   TrainerCard,
 } from "@/types";
 import { GameLogger } from "./GameLogger";
@@ -580,13 +581,17 @@ export class GameState {
     await this.useInitialEffect(card.Effect);
 
     this.ActiveTrainerCard = undefined;
-    this.AttackingPlayer.Discard.push(card);
-    this.GameLog.addEntry({
-      type: "discardCards",
-      player: this.AttackingPlayer.Name,
-      source: "hand",
-      cardIds: [card.ID],
-    });
+    // Workaround for fossils being put into play by their effect
+    // Otherwise we could always push to discard
+    if (!this.AttackingPlayer.InPlay.includes(card)) {
+      this.AttackingPlayer.Discard.push(card);
+      this.GameLog.addEntry({
+        type: "discardCards",
+        player: this.AttackingPlayer.Name,
+        source: "hand",
+        cardIds: [card.ID],
+      });
+    }
   }
 
   flipCoin(player: Player) {
@@ -653,6 +658,15 @@ export class GameState {
       throw new Error("Invalid Pokemon selected");
     }
     return selected;
+  }
+  async showCards(player: Player, cards: PlayingCard[]) {
+    this.GameLog.addEntry({
+      type: "viewCards",
+      player: player.Name,
+      cardIds: cards.map((card) => card.ID),
+    });
+    const agent = player == this.Player1 ? this.Agent1 : this.Agent2;
+    await agent.viewCards(cards);
   }
 
   reduceRetreatCost(modifier: number) {

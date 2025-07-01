@@ -793,6 +793,21 @@ export const useCardParser = () => {
         },
       },
       {
+        pattern: /^Your opponent reveals their hand\.$/,
+        transform: () => async (game: GameState) => {
+          await game.showCards(game.AttackingPlayer, game.DefendingPlayer.Hand);
+        },
+      },
+      {
+        pattern: /^Look at the top (\d+) cards of your deck\.$/,
+        transform: (_, count) => async (game: GameState) => {
+          await game.showCards(
+            game.AttackingPlayer,
+            game.AttackingPlayer.Deck.slice(0, Number(count))
+          );
+        },
+      },
+      {
         pattern:
           /^During this turn, attacks used by your Pokémon do \+(\d+) damage to your opponent's Active Pokémon\.$/,
         transform: (_, modifier) => async (game: GameState) => {

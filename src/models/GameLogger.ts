@@ -116,6 +116,11 @@ interface ShuffleDeckEvent {
   type: "shuffleDeck";
   player: string;
 }
+interface ViewCardsEvent {
+  type: "viewCards";
+  player: string;
+  cardIds: string[];
+}
 
 interface SwapActivePokemonEvent {
   type: "swapActivePokemon";
@@ -283,6 +288,7 @@ export type LoggedEvent =
   | SwapActivePokemonEvent
   | SelectActivePokemonEvent
   | EvolvePokemonEvent
+  | ViewCardsEvent
   | GenerateNextEnergyEvent
   | AttachEnergyEvent
   | DiscardEnergyEvent

@@ -17,8 +17,8 @@
       </div>
 
       <p v-else-if="entry.type == 'drawToHand'">
-        <b>{{ entry.player }}</b> draws {{ entry.cardIds.length }}
-        {{ entry.cardIds.length === 1 ? "card" : "cards" }} to their
+        <b>{{ entry.player }}</b> draws
+        <CountDisplay :count="entry.cardIds" single="card" /> to their
 
         <span v-if="entry.cardIds.length === 0">
           hand ({{
@@ -32,12 +32,7 @@
           }}).
         </span>
         <span v-else-if="shownPlayers.includes(entry.player)">
-          hand:
-          <span v-for="(cardId, i) in entry.cardIds" :key="i">
-            <CardName :card-id="cardId" />{{
-              i + 1 === entry.cardIds.length ? "" : ", "
-            }} </span
-          >.
+          hand: <CardNameList :card-ids="entry.cardIds" />.
         </span>
         <span v-else> hand. </span>
       </p>
@@ -263,25 +258,20 @@
 
       <div v-else-if="entry.type == 'scorePrizePoints'">
         <p>
-          <b>{{ entry.player }}</b> scores {{ entry.prizePointsScored }} prize
-          {{ entry.prizePointsScored == 1 ? "point" : "points" }}! (Total:
-          {{ entry.totalPrizePoints }})
+          <b>{{ entry.player }}</b> scores
+          <CountDisplay :count="entry.totalPrizePoints" single="prize point" />!
+          (Total: {{ entry.totalPrizePoints }})
         </p>
       </div>
 
       <div v-else-if="entry.type == 'discardCards'">
         <p v-if="entry.source == 'inPlay' || entry.source == 'hand'">
-          {{ entry.cardIds.length }}
-          {{ entry.cardIds.length == 1 ? "card" : "cards" }} discarded:
-          <span v-for="(cardId, i) in entry.cardIds" :key="i">
-            <CardName :card-id="cardId" />{{
-              i + 1 === entry.cardIds.length ? "" : ", "
-            }} </span
-          >.
+          <CountDisplay :count="entry.cardIds" single="card" /> discarded:
+          <CardNameList :card-ids="entry.cardIds" />.
         </p>
         <p v-else>
-          <b>{{ entry.player }}</b> discards {{ entry.cardIds.length }}
-          {{ entry.cardIds.length === 1 ? "card" : "cards" }} from their
+          <b>{{ entry.player }}</b> discards
+          <CountDisplay :count="entry.cardIds" single="card" /> from their
           {{ entry.source }}!
         </p>
       </div>
@@ -290,24 +280,31 @@
         v-else-if="entry.type == 'returnToHand' || entry.type == 'returnToDeck'"
       >
         <p>
-          {{ entry.cardIds.length }}
-          {{ entry.cardIds.length == 1 ? "card" : "cards" }} returned to
+          <CountDisplay :count="entry.cardIds" single="card" /> returned to
           <b>{{ entry.player }}</b
           >'s {{ entry.type == "returnToHand" ? "hand" : "deck"
-          }}{{ entry.source == "inPlay" || shownPlayers.includes(entry.player) ? ":" : "." }}
-          <span v-if="entry.source == 'inPlay' || shownPlayers.includes(entry.player)">
-            <span v-for="(cardId, i) in entry.cardIds" :key="i">
-              <CardName :card-id="cardId" />{{
-                i + 1 === entry.cardIds.length ? "" : ", "
-              }}
-            </span>
-          </span>
+          }}<span
+            v-if="
+              entry.source == 'inPlay' || shownPlayers.includes(entry.player)
+            "
+            >: <CardNameList :card-ids="entry.cardIds" /> </span
+          >.
         </p>
       </div>
 
       <div v-else-if="entry.type == 'shuffleDeck'">
         <p>
           <b>{{ entry.player }}</b> shuffles their deck.
+        </p>
+      </div>
+
+      <div v-else-if="entry.type == 'viewCards'">
+        <p>
+          <b>{{ entry.player }}</b> is viewing
+          <CountDisplay :count="entry.cardIds" single="card" /><span
+            v-if="shownPlayers.includes(entry.player)"
+            >: <CardNameList :card-ids="entry.cardIds" /> </span
+          >.
         </p>
       </div>
 
@@ -356,6 +353,8 @@
 import CardName from "@/components/common/CardName.vue";
 import EnergyIcon from "@/components/common/EnergyIcon.vue";
 import type { LoggedEvent } from "@/models/GameLogger";
+import CardNameList from "../common/CardNameList.vue";
+import CountDisplay from "../common/CountDisplay.vue";
 
 export interface Props {
   logEntries: readonly LoggedEvent[];
