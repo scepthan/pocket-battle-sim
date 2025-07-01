@@ -313,14 +313,14 @@ export class Player {
     if (!this.AvailableEnergy) {
       throw new Error("No energy available to attach");
     }
-    this.attachEnergy(pokemon, [this.AvailableEnergy], "energyZone");
+    this.attachEnergy(pokemon, [this.AvailableEnergy], "player");
     this.AvailableEnergy = undefined;
   }
 
   attachEnergy(
     pokemon: InPlayPokemonCard,
     energy: Energy[],
-    from: "energyZone" | "discard" | "pokemon",
+    from: "player" | "energyZone" | "discard" | "pokemon",
     fromPokemon?: InPlayPokemonCard
   ) {
     pokemon.attachEnergy(energy);

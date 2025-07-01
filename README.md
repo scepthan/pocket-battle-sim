@@ -2,7 +2,7 @@
 
 Backend todo:
 
-- [ ] Parse cards: 329/405 (81.2%)
+- [ ] Parse cards: 330/405 (81.5%)
   - [x] Dragon type
   - [ ] Conditions
     - [ ] Special Conditions
@@ -15,6 +15,10 @@ Backend todo:
     - [ ] Global conditions
   - [x] Fossils
   - [ ] Abilities
+    - [x] Once during your turn
+    - [ ] As often as you like during your turn
+    - [ ] Damage reduction
+    - [ ] Attack retaliation
   - [ ] A1 effects
     - [x] Misty
     - [x] Supporters that affect specific mon

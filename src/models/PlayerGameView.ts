@@ -1,4 +1,5 @@
 import type {
+  Ability,
   Attack,
   Energy,
   ItemCard,
@@ -132,6 +133,23 @@ export class PlayerGameView {
     if (this.selfActive.PrimaryStatus == "Paralyzed") return false;
     return this.selfActive.hasSufficientEnergy(attack.RequiredEnergy);
   }
+  canUseAbility(pokemon: InPlayPokemonCard, ability: Ability) {
+    if (!this.canPlay || !this.selfActive) return false;
+    if (pokemon.Ability !== ability) return false;
+    if (ability.Trigger == "OnceDuringTurn") {
+      if (this.#gameState.UsedAbilities.has(pokemon)) return false;
+    }
+    if (ability.Conditions.includes("Active")) {
+      if (pokemon != this.selfActive) return false;
+    }
+    if (ability.Conditions.includes("OnBench")) {
+      if (!this.selfBenched.includes(pokemon)) return false;
+    }
+    if (ability.Conditions.includes("HasDamage")) {
+      if (pokemon.CurrentHP == pokemon.BaseHP) return false;
+    }
+    return true;
+  }
   canRetreat() {
     if (!this.canPlay || !this.selfActive) return false;
     if (this.selfBenched.length == 0) return false;
@@ -177,6 +195,13 @@ export class PlayerGameView {
       return true;
     }
     return false;
+  }
+  async useAbility(pokemon: InPlayPokemonCard, ability: Ability) {
+    if (!this.canUseAbility(pokemon, ability)) return false;
+    await this.#gameState.delay();
+
+    await this.#gameState.useAbility(pokemon, ability);
+    return true;
   }
   async useAttack(attack: Attack) {
     if (!this.canUseAttack(attack)) return false;

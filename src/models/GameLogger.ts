@@ -146,7 +146,7 @@ interface AttachEnergyEvent {
   player: string;
   targetPokemon: InPlayPokemonDescriptor;
   energyTypes: Energy[];
-  from: "energyZone" | "discard" | "pokemon";
+  from: "player" | "energyZone" | "discard" | "pokemon";
   fromPokemon?: InPlayPokemonDescriptor;
 }
 interface DiscardEnergyEvent {

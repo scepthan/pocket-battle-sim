@@ -1,5 +1,6 @@
 import { useCoinFlip, useDeckValidator } from "@/composables";
 import type {
+  Ability,
   Attack,
   Effect,
   Energy,
@@ -31,6 +32,7 @@ export class GameState {
   NextTurnDamageReduction: number = 0;
   CurrentDamageReduction: number = 0;
   ActiveTrainerCard?: TrainerCard;
+  UsedAbilities: Set<InPlayPokemonCard> = new Set();
 
   GameRules: GameRules = {
     DeckSize: 20,
@@ -163,6 +165,7 @@ export class GameState {
     this.ActivePokemonDamageBoost = 0;
     this.CurrentDamageReduction = this.NextTurnDamageReduction;
     this.NextTurnDamageReduction = 0;
+    this.UsedAbilities = new Set();
     if (this.TurnNumber > 2) {
       for (const pokemon of this.AttackingPlayer.InPlayPokemon) {
         pokemon.ReadyToEvolve = true;
@@ -315,8 +318,8 @@ export class GameState {
   }
 
   // Methods to do things during turns
-  async useInitialEffect(effect: Effect) {
-    await this.useEffect(effect);
+  async useInitialEffect(effect: Effect, pokemon?: InPlayPokemonCard) {
+    await this.useEffect(effect, pokemon);
 
     await this.checkForKnockOuts();
   }
@@ -413,8 +416,8 @@ export class GameState {
     }
   }
 
-  async useEffect(effect: Effect) {
-    await effect(this);
+  async useEffect(effect: Effect, pokemon?: InPlayPokemonCard) {
+    await effect(this, pokemon);
   }
 
   async useAttack(attack: Attack) {
@@ -428,6 +431,27 @@ export class GameState {
     });
     await this.useInitialEffect(attack.Effect);
     this.endTurnResolve(true);
+  }
+
+  async useAbility(pokemon: InPlayPokemonCard, ability: Ability) {
+    if (pokemon.Ability !== ability) {
+      throw new Error("Pokemon does not have this ability");
+    }
+    if (ability.Trigger === "OnceDuringTurn") {
+      if (this.UsedAbilities.has(pokemon)) {
+        throw new Error("Pokemon's ability has already been used this turn");
+      }
+      this.UsedAbilities.add(pokemon);
+    }
+
+    this.GameLog.addEntry({
+      type: "useAbility",
+      player: this.AttackingPlayer.Name,
+      abilityName: ability.Name,
+      abilityPokemon: this.AttackingPlayer.pokemonToDescriptor(pokemon),
+    });
+
+    await this.useInitialEffect(ability.Effect, pokemon);
   }
 
   drawCards(count: number) {

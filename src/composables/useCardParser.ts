@@ -1,4 +1,5 @@
 import type { GameState } from "@/models/GameState";
+import type { InPlayPokemonCard } from "@/models/InPlayPokemonCard";
 import {
   isEnergy,
   isEnergyShort,
@@ -18,6 +19,10 @@ import {
 interface EffectTransformer {
   pattern: RegExp;
   transform: (...args: string[]) => Effect;
+}
+interface AbilityTransformer {
+  pattern: RegExp;
+  transform: (...args: string[]) => void;
 }
 
 export const useCardParser = () => {
@@ -607,14 +612,65 @@ export const useCardParser = () => {
   const parseAbility = (
     inputAbility: InputCardAbility
   ): ParsedResult<Ability> => {
-    return {
-      parseSuccessful: false,
-      value: {
-        Name: inputAbility.Name,
-        Trigger: "GameRule",
-        Conditions: [],
-        Effect: async () => {},
+    const ability: Ability = {
+      Name: inputAbility.Name,
+      Trigger: "GameRule",
+      Conditions: [],
+      Effect: async (game: GameState) => {
+        game.GameLog.addEntry({
+          type: "actionFailed",
+          player: game.AttackingPlayer.Name,
+          reason: "notImplemented",
+        });
       },
+    };
+    let abilityText = inputAbility.Effect;
+    let parseSuccessful = true;
+    const dictionary: AbilityTransformer[] = [
+      {
+        pattern: /^Once during your turn, you may /i,
+        transform: () => {
+          ability.Trigger = "OnceDuringTurn";
+        },
+      },
+
+      {
+        pattern:
+          /^take a {(\w)} Energy from your Energy Zone and attach it to this Pokémon\.$/i,
+        transform: (_, energyType) => {
+          const fullType = parseEnergy(energyType);
+
+          ability.Effect = async (
+            game: GameState,
+            pokemon?: InPlayPokemonCard
+          ) => {
+            game.AttackingPlayer.attachEnergy(
+              pokemon!,
+              [fullType],
+              "energyZone"
+            );
+          };
+        },
+      },
+    ];
+
+    mainloop: while (abilityText) {
+      for (const { pattern, transform } of dictionary) {
+        const result = abilityText.match(pattern);
+        if (result) {
+          transform(...result);
+          abilityText = abilityText.replace(pattern, "").trim();
+          continue mainloop; // Restart the loop to re-evaluate the modified ability text
+        }
+      }
+
+      parseSuccessful = false;
+      break;
+    }
+
+    return {
+      parseSuccessful,
+      value: ability,
     };
   };
 

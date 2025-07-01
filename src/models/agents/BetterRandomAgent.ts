@@ -123,6 +123,14 @@ export class BetterRandomAgent implements PlayerAgent {
       (x) => x !== undefined
     );
 
+    // If any Pokemon has a usable Ability, use it
+    const pokemonWithAbilities = ownPokemon.filter(
+      (x) => x.Ability && game.canUseAbility(x, x.Ability)
+    );
+    for (const pokemon of pokemonWithAbilities) {
+      await game.useAbility(pokemon, pokemon.Ability!);
+    }
+
     // Play energy
     if (
       game.selfActive!.Attacks.some((a) =>

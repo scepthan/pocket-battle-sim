@@ -71,6 +71,10 @@
             <CardName :card-id="entry.fromPokemon!.cardId" /> to
             <CardName :card-id="entry.targetPokemon.cardId" />:
           </span>
+          <span v-else-if="entry.from == 'player'">
+            <b>{{ entry.player }}</b> attaches energy to
+            <CardName :card-id="entry.targetPokemon.cardId" />:
+          </span>
           <span v-else>
             Energy attached to
             <CardName :card-id="entry.targetPokemon.cardId" />:
@@ -149,6 +153,14 @@
         <p>
           <CardName :card-id="entry.attackingPokemon.cardId" /> uses
           <b>{{ entry.attackName }}</b
+          >!
+        </p>
+      </div>
+
+      <div v-else-if="entry.type == 'useAbility'">
+        <p>
+          <CardName :card-id="entry.abilityPokemon.cardId" /> uses
+          <b>{{ entry.abilityName }}</b
           >!
         </p>
       </div>
