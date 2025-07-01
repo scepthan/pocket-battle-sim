@@ -677,6 +677,38 @@ export const useCardParser = () => {
           };
         },
       },
+      {
+        pattern: /heal (\d+) damage from each of your Pokémon\.$/i,
+        transform: (_, healing) => {
+          ability.Effect = async (game: GameState) => {
+            for (const pokemon of game.AttackingPlayer.InPlayPokemon) {
+              if (pokemon.CurrentHP < pokemon.BaseHP) {
+                game.healPokemon(pokemon, Number(healing));
+              }
+            }
+          };
+        },
+      },
+      {
+        pattern: /do (\d+) damage to 1 of your opponent's Pokémon\.$/i,
+        transform: (_, damage) => {
+          ability.Effect = async (game: GameState) => {
+            const pokemon = await game.choosePokemon(
+              game.AttackingPlayer,
+              game.DefendingPlayer.InPlayPokemon
+            );
+            if (pokemon) {
+              game.applyDamage(pokemon, Number(damage), false);
+            } else {
+              game.GameLog.addEntry({
+                type: "actionFailed",
+                player: game.AttackingPlayer.Name,
+                reason: "noValidTargets",
+              });
+            }
+          };
+        },
+      },
     ];
 
     mainloop: while (abilityText) {
