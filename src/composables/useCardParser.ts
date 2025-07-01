@@ -709,6 +709,29 @@ export const useCardParser = () => {
           };
         },
       },
+      {
+        pattern:
+          /^flip a coin\. If heads, your opponent's Active Pokémon is now Asleep\.$/i,
+        transform: () => {
+          ability.Effect = async (game: GameState) => {
+            if (game.flipCoin(game.AttackingPlayer)) {
+              game.DefendingPlayer.sleepActivePokemon();
+            }
+          };
+        },
+      },
+      {
+        pattern:
+          /^switch out your opponent's Active Pokémon to the Bench\. \(Your opponent chooses the new Active Pokémon\.\)$/i,
+        transform: () => {
+          ability.Effect = async (game: GameState) => {
+            await game.swapActivePokemon(
+              game.DefendingPlayer,
+              "opponentEffect"
+            );
+          };
+        },
+      },
     ];
 
     mainloop: while (abilityText) {

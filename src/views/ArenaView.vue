@@ -80,8 +80,8 @@ onMounted(async () => {
 
   // For testing purposes, you can set playerDeck and opponentDeck to specific deck names
   // Otherwise, they will be selected at random from the available decks
-  const playerDeck: string | undefined = "Articuno ex";
-  const opponentDeck: string | undefined = "Butterfree & Beedrill";
+  const playerDeck: string | undefined = "Zapdos ex";
+  const opponentDeck: string | undefined = "Sabrina";
 
   setInterval(() => {
     if (game.value && !game.value.GameOver) return;
