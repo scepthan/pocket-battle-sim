@@ -1,5 +1,9 @@
 import type { Energy } from "@/types";
-import type { PrimaryStatus, SecondaryStatus } from "./InPlayPokemonCard";
+import type {
+  PrimaryStatus,
+  SecondaryStatus,
+  SpecialCondition,
+} from "./InPlayPokemonCard";
 
 interface ActivePokemonDescriptor {
   cardId: string;
@@ -202,15 +206,15 @@ interface PokemonStatusAppliedEvent {
   type: "pokemonStatusApplied";
   player: string;
   targetPokemon: InPlayPokemonDescriptor;
-  statusConditions: (PrimaryStatus | SecondaryStatus)[];
-  currentStatusList: (PrimaryStatus | SecondaryStatus)[];
+  statusConditions: SpecialCondition[];
+  currentStatusList: SpecialCondition[];
 }
 interface PokemonStatusEndedEvent {
   type: "pokemonStatusEnded";
   player: string;
   targetPokemon: InPlayPokemonDescriptor;
-  statusConditions: (PrimaryStatus | SecondaryStatus)[];
-  currentStatusList: (PrimaryStatus | SecondaryStatus)[];
+  statusConditions: SpecialCondition[];
+  currentStatusList: SpecialCondition[];
 }
 interface PokemonStatusDamageEvent {
   type: "pokemonStatusDamage";

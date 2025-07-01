@@ -10,7 +10,7 @@ import type {
   InPlayPokemonDescriptor,
   LoggedEvent,
 } from "./GameLogger";
-import { InPlayPokemonCard } from "./InPlayPokemonCard";
+import { InPlayPokemonCard, type SpecialCondition } from "./InPlayPokemonCard";
 
 export class Player {
   Name: string;
@@ -553,6 +553,7 @@ export class Player {
   discardCardsFromHand(cards: PlayingCard[]) {
     cards = cards.filter((card) => this.Hand.includes(card));
     if (cards.length == 0) return;
+
     this.Hand = this.Hand.filter((card) => !cards.includes(card));
     this.Discard.push(...cards);
     this.logger.addEntry({
@@ -565,35 +566,24 @@ export class Player {
 
   poisonActivePokemon() {
     this.ActivePokemon!.SecondaryStatuses.add("Poisoned");
-
-    this.logger.addEntry({
-      type: "pokemonStatusApplied",
-      player: this.Name,
-      statusConditions: ["Poisoned"],
-      targetPokemon: this.pokemonToDescriptor(this.ActivePokemon!),
-      currentStatusList: this.ActivePokemon!.CurrentStatuses,
-    });
+    this.logNewActiveStatus("Poisoned");
   }
 
   sleepActivePokemon() {
     this.ActivePokemon!.PrimaryStatus = "Asleep";
-
-    this.logger.addEntry({
-      type: "pokemonStatusApplied",
-      player: this.Name,
-      statusConditions: ["Asleep"],
-      targetPokemon: this.pokemonToDescriptor(this.ActivePokemon!),
-      currentStatusList: this.ActivePokemon!.CurrentStatuses,
-    });
+    this.logNewActiveStatus("Asleep");
   }
 
   paralyzeActivePokemon() {
     this.ActivePokemon!.PrimaryStatus = "Paralyzed";
+    this.logNewActiveStatus("Paralyzed");
+  }
 
+  logNewActiveStatus(status: SpecialCondition) {
     this.logger.addEntry({
       type: "pokemonStatusApplied",
       player: this.Name,
-      statusConditions: ["Paralyzed"],
+      statusConditions: [status],
       targetPokemon: this.pokemonToDescriptor(this.ActivePokemon!),
       currentStatusList: this.ActivePokemon!.CurrentStatuses,
     });

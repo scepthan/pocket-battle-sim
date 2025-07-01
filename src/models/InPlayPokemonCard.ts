@@ -8,6 +8,7 @@ import type {
 
 export type PrimaryStatus = "Asleep" | "Paralyzed" | "Confused";
 export type SecondaryStatus = "Poisoned" | "Burned";
+export type SpecialCondition = PrimaryStatus | SecondaryStatus;
 
 export class InPlayPokemonCard {
   BaseCard: PokemonCard;
