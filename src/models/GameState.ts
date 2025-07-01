@@ -495,16 +495,29 @@ export class GameState {
       }
       this.CanPlaySupporter = false;
     }
+
+    this.AttackingPlayer.Hand.splice(
+      this.AttackingPlayer.Hand.indexOf(card),
+      1
+    );
+    this.ActiveTrainerCard = card;
+
     this.GameLog.addEntry({
       type: "playTrainer",
       player: this.AttackingPlayer.Name,
       cardId: card.ID,
       trainerType: card.CardType,
     });
-    this.ActiveTrainerCard = card;
     await this.useInitialEffect(card.Effect);
+
     this.ActiveTrainerCard = undefined;
-    this.AttackingPlayer.discardCardsFromHand([card]);
+    this.AttackingPlayer.Discard.push(card);
+    this.GameLog.addEntry({
+      type: "discardCards",
+      player: this.AttackingPlayer.Name,
+      source: "hand",
+      cardIds: [card.ID],
+    });
   }
 
   flipCoin(player: Player) {

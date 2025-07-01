@@ -240,6 +240,19 @@ export const useCardParser = () => {
           };
         },
       },
+      {
+        pattern: /^If your opponent's Active Pokémon is Poisoned, (.+?\.)$/i,
+        transform: (_, effectText) => {
+          const conditionalEffect = recursiveParse(effectText);
+
+          return async (game: GameState) => {
+            const defender = game.DefendingPlayer.ActivePokemon!;
+            if (defender.SecondaryStatuses.has("Poisoned"))
+              await conditionalEffect(game);
+            else await defaultEffect(game);
+          };
+        },
+      },
 
       // Damage-determining effects
       {

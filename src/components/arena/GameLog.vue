@@ -275,8 +275,8 @@
         <p>
           {{ entry.cardIds.length }}
           {{ entry.cardIds.length == 1 ? "card" : "cards" }} returned to
-          <b>{{ entry.player }}</b>
-          's {{ entry.type == "returnToHand" ? "hand" : "deck" }}:
+          <b>{{ entry.player }}</b
+          >'s {{ entry.type == "returnToHand" ? "hand" : "deck" }}:
           <span v-for="(cardId, i) in entry.cardIds" :key="i">
             <CardName :card-id="cardId" />{{
               i + 1 === entry.cardIds.length ? "" : ", "
