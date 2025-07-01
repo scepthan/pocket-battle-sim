@@ -1,5 +1,9 @@
 <template>
-  <PlayingField v-if="cardStore.Cards.length > 0" :game="game" />
+  <PlayingField
+    v-if="cardStore.Cards.length > 0"
+    :game="game"
+    :shown-players="['Player']"
+  />
 </template>
 
 <script setup lang="ts">
@@ -80,8 +84,8 @@ onMounted(async () => {
 
   // For testing purposes, you can set playerDeck and opponentDeck to specific deck names
   // Otherwise, they will be selected at random from the available decks
-  const playerDeck: string | undefined = "Zapdos ex";
-  const opponentDeck: string | undefined = "Sabrina";
+  const playerDeck: string | undefined = "Giovanni";
+  const opponentDeck: string | undefined = "Giovanni";
 
   setInterval(() => {
     if (game.value && !game.value.GameOver) return;

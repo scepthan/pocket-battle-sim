@@ -103,11 +103,13 @@ interface DiscardCardsEvent {
 interface ReturnToHandEvent {
   type: "returnToHand";
   player: string;
+  source: "inPlay" | "discard";
   cardIds: string[];
 }
 interface ReturnToDeckEvent {
   type: "returnToDeck";
   player: string;
+  source: "hand" | "inPlay" | "discard";
   cardIds: string[];
 }
 interface ShuffleDeckEvent {

@@ -783,6 +783,17 @@ export const useCardParser = () => {
       },
       {
         pattern:
+          /^Your opponent shuffles their hand into their deck and draws (\d+) cards\.$/,
+        transform: (_, count) => async (game: GameState) => {
+          game.DefendingPlayer.shuffleHandIntoDeck();
+          game.DefendingPlayer.drawCards(
+            Number(count),
+            game.GameRules.MaxHandSize
+          );
+        },
+      },
+      {
+        pattern:
           /^During this turn, attacks used by your Pokémon do \+(\d+) damage to your opponent's Active Pokémon\.$/,
         transform: (_, modifier) => async (game: GameState) => {
           game.increaseAttackModifier(Number(modifier));

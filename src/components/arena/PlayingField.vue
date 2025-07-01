@@ -47,7 +47,7 @@
           >
             <GameLog
               :log-entries="game?.GameLog.entries ?? []"
-              :shown-players="['Celebii']"
+              :shown-players="shownPlayers ?? []"
             />
           </div>
           <div class="d-flex flex-row align-end">
@@ -72,6 +72,7 @@ import type { GameState } from "@/models/GameState";
 
 export interface Props {
   game: GameState | null;
+  shownPlayers?: string[];
 }
 defineProps<Props>();
 </script>

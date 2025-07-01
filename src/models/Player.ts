@@ -120,6 +120,14 @@ export class Player {
   }
 
   shuffleHandIntoDeck(log: boolean = true) {
+    if (log) {
+      this.logger.addEntry({
+        type: "returnToDeck",
+        player: this.Name,
+        source: "hand",
+        cardIds: this.Hand.map((card) => card.ID),
+      });
+    }
     this.Deck = this.Deck.concat(this.Hand);
     this.Hand = [];
     this.shuffleDeck(log);
@@ -485,6 +493,7 @@ export class Player {
     this.logger.addEntry({
       type: "returnToHand",
       player: this.Name,
+      source: "inPlay",
       cardIds: pokemon.InPlayCards.map((card) => card.ID),
     });
 
@@ -506,6 +515,7 @@ export class Player {
     this.logger.addEntry({
       type: "returnToDeck",
       player: this.Name,
+      source: "inPlay",
       cardIds: pokemon.InPlayCards.map((card) => card.ID),
     });
 
