@@ -142,18 +142,20 @@ export class PlayerGameView {
 
   // Action methods
   async attachAvailableEnergy(pokemon: InPlayPokemonCard) {
-    await this.#gameState.delay();
     if (!this.canPlay) return false;
+
     if (this.selfAvailableEnergy) {
+      await this.#gameState.delay();
       this.#player.attachAvailableEnergy(pokemon);
       return true;
     }
     return false;
   }
   async playPokemonToBench(pokemon: PokemonCard, index: number) {
-    await this.#gameState.delay();
     if (!this.canPlay) return false;
+
     if (pokemon.Stage == 0 && this.selfBench[index] == undefined) {
+      await this.#gameState.delay();
       this.#player.putPokemonOnBench(pokemon, index);
       return true;
     }
@@ -163,17 +165,19 @@ export class PlayerGameView {
     pokemon: PokemonCard,
     inPlayPokemon: InPlayPokemonCard
   ) {
-    await this.#gameState.delay();
     if (!this.canPlay) return false;
+
     if (pokemon.EvolvesFrom == inPlayPokemon.Name) {
+      await this.#gameState.delay();
       this.#player.evolvePokemon(inPlayPokemon, pokemon);
       return true;
     }
     return false;
   }
   async useAttack(attack: Attack) {
-    await this.#gameState.delay();
     if (!this.canUseAttack(attack)) return false;
+    await this.#gameState.delay();
+
     await this.#gameState.useAttack(attack);
     return true;
   }
@@ -181,8 +185,8 @@ export class PlayerGameView {
     benchedPokemon: InPlayPokemonCard,
     energy?: Energy[]
   ) {
-    await this.#gameState.delay();
     if (!this.canRetreat()) return false;
+    await this.#gameState.delay();
 
     if (!energy) {
       let retreatCost = this.selfActive!.RetreatCost ?? 0;
@@ -199,14 +203,16 @@ export class PlayerGameView {
     return true;
   }
   async playItemCard(card: ItemCard) {
-    await this.#gameState.delay();
     if (!this.canPlayCard(card)) return false;
+    await this.#gameState.delay();
+
     await this.#gameState.playTrainer(card);
     return true;
   }
   async playSupporterCard(card: SupporterCard) {
-    await this.#gameState.delay();
     if (!this.canPlayCard(card)) return false;
+    await this.#gameState.delay();
+
     await this.#gameState.playTrainer(card);
     return true;
   }
