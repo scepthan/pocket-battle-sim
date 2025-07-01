@@ -26,10 +26,10 @@ export class InPlayPokemonCard {
   CurrentHP: number;
   PrimaryStatus?: PrimaryStatus;
   SecondaryStatuses: Set<SecondaryStatus> = new Set();
-  get CurrentStatuses(): string[] {
-    const statuses: string[] = [...this.SecondaryStatuses];
-    if (this.PrimaryStatus) statuses.unshift(this.PrimaryStatus);
-    return statuses;
+  get CurrentStatuses() {
+    return [this.PrimaryStatus, ...this.SecondaryStatuses].filter(
+      (status) => status !== undefined
+    );
   }
   AttachedEnergy: Energy[] = [];
   InPlayCards: PlayingCard[] = [];

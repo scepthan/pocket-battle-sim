@@ -2,12 +2,12 @@
 
 Backend todo:
 
-- [ ] Parse cards: 316/405 (78.0%)
+- [ ] Parse cards: 329/405 (81.2%)
   - [x] Dragon type
   - [ ] Conditions
     - [ ] Special Conditions
-      - [ ] Asleep
-      - [ ] Paralyzed
+      - [x] Asleep
+      - [x] Paralyzed
       - [ ] Confused
       - [x] Poisoned
       - [ ] Burned

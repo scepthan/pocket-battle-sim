@@ -306,7 +306,7 @@ export class Player {
       cardId: card.ID,
       stage: card.Stage,
     });
-    this.recoverStatusConditions(pokemon);
+    this.recoverAllStatusConditions(pokemon);
   }
 
   attachAvailableEnergy(pokemon: InPlayPokemonCard) {
@@ -399,9 +399,15 @@ export class Player {
     energyToDiscard: Energy[],
     costModifier: number
   ) {
-    const previousActive = this.ActivePokemon;
-    if (!previousActive) {
-      throw new Error("No active Pokemon to retreat");
+    const previousActive = this.ActivePokemon!;
+    if (previousActive.RetreatCost == -1) {
+      throw new Error("This Pokémon cannot retreat");
+    }
+    if (
+      previousActive.PrimaryStatus == "Asleep" ||
+      previousActive.PrimaryStatus == "Paralyzed"
+    ) {
+      throw new Error("Cannot retreat while " + previousActive.PrimaryStatus);
     }
 
     const previousEnergy = previousActive.AttachedEnergy.slice();
@@ -445,12 +451,11 @@ export class Player {
       reason,
     });
 
-    this.recoverStatusConditions(previousActive);
+    this.recoverAllStatusConditions(previousActive);
   }
 
-  recoverStatusConditions(pokemon: InPlayPokemonCard) {
-    const statuses: string[] = [...pokemon.SecondaryStatuses];
-    if (pokemon.PrimaryStatus) statuses.unshift(pokemon.PrimaryStatus);
+  recoverAllStatusConditions(pokemon: InPlayPokemonCard) {
+    const statuses = pokemon.CurrentStatuses;
     if (statuses.length == 0) return;
 
     pokemon.PrimaryStatus = undefined;
@@ -565,6 +570,30 @@ export class Player {
       type: "pokemonStatusApplied",
       player: this.Name,
       statusConditions: ["Poisoned"],
+      targetPokemon: this.pokemonToDescriptor(this.ActivePokemon!),
+      currentStatusList: this.ActivePokemon!.CurrentStatuses,
+    });
+  }
+
+  sleepActivePokemon() {
+    this.ActivePokemon!.PrimaryStatus = "Asleep";
+
+    this.logger.addEntry({
+      type: "pokemonStatusApplied",
+      player: this.Name,
+      statusConditions: ["Asleep"],
+      targetPokemon: this.pokemonToDescriptor(this.ActivePokemon!),
+      currentStatusList: this.ActivePokemon!.CurrentStatuses,
+    });
+  }
+
+  paralyzeActivePokemon() {
+    this.ActivePokemon!.PrimaryStatus = "Paralyzed";
+
+    this.logger.addEntry({
+      type: "pokemonStatusApplied",
+      player: this.Name,
+      statusConditions: ["Paralyzed"],
       targetPokemon: this.pokemonToDescriptor(this.ActivePokemon!),
       currentStatusList: this.ActivePokemon!.CurrentStatuses,
     });

@@ -228,6 +228,11 @@
         </p>
       </div>
 
+      <div v-else-if="entry.type == 'pokemonStatusEffective'">
+        <CardName :card-id="entry.targetPokemon.cardId" /> is
+        {{ entry.statusCondition }} and cannot move!
+      </div>
+
       <div v-else-if="entry.type == 'pokemonStatusEnded'">
         <p v-for="(status, i) in entry.statusConditions" :key="i">
           <CardName :card-id="entry.targetPokemon.cardId" /> recovered from

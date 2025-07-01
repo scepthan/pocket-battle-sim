@@ -128,12 +128,16 @@ export class PlayerGameView {
   canUseAttack(attack: Attack) {
     if (!this.canPlay || !this.selfActive) return false;
     if (!this.selfActive.Attacks.includes(attack)) return false;
+    if (this.selfActive.PrimaryStatus == "Asleep") return false;
+    if (this.selfActive.PrimaryStatus == "Paralyzed") return false;
     return this.selfActive.hasSufficientEnergy(attack.RequiredEnergy);
   }
   canRetreat() {
     if (!this.canPlay || !this.selfActive) return false;
     if (this.selfBenched.length == 0) return false;
     if (this.selfActive.RetreatCost == -1) return false;
+    if (this.selfActive.PrimaryStatus == "Asleep") return false;
+    if (this.selfActive.PrimaryStatus == "Paralyzed") return false;
     return (
       this.selfActive.RetreatCost + this.retreatCostModifier <=
       this.selfActive.AttachedEnergy.length

@@ -189,6 +189,19 @@ export class GameState {
       });
     }
 
+    // Log the Special Conditions that will affect the Active Pokemon
+    const status = this.AttackingPlayer.ActivePokemon!.PrimaryStatus;
+    if (status == "Asleep" || status == "Paralyzed") {
+      this.GameLog.addEntry({
+        type: "pokemonStatusEffective",
+        player: this.AttackingPlayer.Name,
+        targetPokemon: this.AttackingPlayer.pokemonToDescriptor(
+          this.AttackingPlayer.ActivePokemon!
+        ),
+        statusCondition: status,
+      });
+    }
+
     // Draw a card into the attacking player's hand
     this.AttackingPlayer.drawCards(1, this.GameRules.MaxHandSize);
 
@@ -234,6 +247,7 @@ export class GameState {
       type: "pokemonCheckup",
     });
 
+    // Apply poison damage
     for (const player of [this.AttackingPlayer, this.DefendingPlayer]) {
       const pokemon = player.ActivePokemon!;
       if (pokemon.SecondaryStatuses.has("Poisoned")) {
@@ -252,6 +266,37 @@ export class GameState {
           maxHP: pokemon.BaseHP,
         });
       }
+    }
+
+    // Flip to wake up sleeping Pokemon
+    for (const player of [this.AttackingPlayer, this.DefendingPlayer]) {
+      const pokemon = player.ActivePokemon!;
+      if (pokemon.PrimaryStatus == "Asleep") {
+        if (this.flipCoin(player)) {
+          pokemon.PrimaryStatus = undefined;
+          this.GameLog.addEntry({
+            type: "pokemonStatusEnded",
+            player: player.Name,
+            targetPokemon: player.pokemonToDescriptor(pokemon),
+            statusConditions: ["Asleep"],
+            currentStatusList: pokemon.CurrentStatuses,
+          });
+        }
+      }
+    }
+
+    // Remove paralysis status from attacking player's Active Pokemon
+    if (this.AttackingPlayer.ActivePokemon!.PrimaryStatus == "Paralyzed") {
+      this.AttackingPlayer.ActivePokemon!.PrimaryStatus = undefined;
+      this.GameLog.addEntry({
+        type: "pokemonStatusEnded",
+        player: this.AttackingPlayer.Name,
+        targetPokemon: this.AttackingPlayer.pokemonToDescriptor(
+          this.AttackingPlayer.ActivePokemon!
+        ),
+        statusConditions: ["Paralyzed"],
+        currentStatusList: this.AttackingPlayer.ActivePokemon!.CurrentStatuses,
+      });
     }
 
     await this.checkForKnockOuts();

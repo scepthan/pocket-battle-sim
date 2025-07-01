@@ -571,6 +571,20 @@ export const useCardParser = () => {
           game.DefendingPlayer.poisonActivePokemon();
         },
       },
+      {
+        pattern: /^Your opponent's active Pokémon is now Asleep\.$/i,
+        transform: () => async (game: GameState) => {
+          await defaultEffect(game);
+          game.DefendingPlayer.sleepActivePokemon();
+        },
+      },
+      {
+        pattern: /^Your opponent's active Pokémon is now Paralyzed\.$/i,
+        transform: () => async (game: GameState) => {
+          await defaultEffect(game);
+          game.DefendingPlayer.paralyzeActivePokemon();
+        },
+      },
     ];
 
     for (const { pattern, transform } of dictionary) {
