@@ -219,18 +219,42 @@ export class GameState {
 
     // Discard energy if player did not use it
     if (this.AttackingPlayer.AvailableEnergy) {
+      await this.delay();
       this.AttackingPlayer.discardEnergy(
         [this.AttackingPlayer.AvailableEnergy],
         "energyZone"
       );
       this.AttackingPlayer.AvailableEnergy = undefined;
-      await this.delay();
     }
+
+    await this.delay();
 
     // Pokemon Checkup phase
     this.GameLog.addEntry({
       type: "pokemonCheckup",
     });
+
+    for (const player of [this.AttackingPlayer, this.DefendingPlayer]) {
+      const pokemon = player.ActivePokemon!;
+      if (pokemon.SecondaryStatuses.has("Poisoned")) {
+        const initialHP = pokemon.CurrentHP;
+        const damage = 10;
+
+        pokemon.applyDamage(damage);
+        this.GameLog.addEntry({
+          type: "pokemonStatusDamage",
+          player: player.Name,
+          statusCondition: "Poisoned",
+          targetPokemon: player.pokemonToDescriptor(pokemon),
+          initialHP: initialHP,
+          damageDealt: damage,
+          finalHP: pokemon.CurrentHP,
+          maxHP: pokemon.BaseHP,
+        });
+      }
+    }
+
+    await this.checkForKnockOuts();
 
     await this.delay();
 
@@ -249,6 +273,10 @@ export class GameState {
   async useInitialEffect(effect: Effect) {
     await this.useEffect(effect);
 
+    await this.checkForKnockOuts();
+  }
+
+  async checkForKnockOuts() {
     const attackerPrizePoints = this.AttackingPlayer.GamePoints;
     const defenderPrizePoints = this.DefendingPlayer.GamePoints;
 

@@ -206,22 +206,35 @@
       </div>
 
       <div v-else-if="entry.type == 'pokemonStatusApplied'">
-        <p>
+        <p v-for="(status, i) in entry.statusConditions" :key="i">
           <CardName :card-id="entry.targetPokemon.cardId" /> is now
-          {{ entry.statusCondition }}!
+          {{ status }}!
         </p>
-        <p v-if="entry.currentStatusList.length > 0">
+        <p
+          v-if="entry.currentStatusList.length > entry.statusConditions.length"
+        >
           Current status conditions: {{ entry.currentStatusList.join(", ") }}.
         </p>
       </div>
 
-      <div v-else-if="entry.type == 'pokemonStatusEnded'">
+      <div v-else-if="entry.type == 'pokemonStatusDamage'">
         <p>
+          <CardName :card-id="entry.targetPokemon.cardId" /> takes
+          {{ entry.damageDealt }} damage from being {{ entry.statusCondition }}!
+          ({{ entry.initialHP }}/{{ entry.maxHP }} &rarr; {{ entry.finalHP }}/{{
+            entry.maxHP
+          }}
+          HP)
+        </p>
+      </div>
+
+      <div v-else-if="entry.type == 'pokemonStatusEnded'">
+        <p v-for="(status, i) in entry.statusConditions" :key="i">
           <CardName :card-id="entry.targetPokemon.cardId" /> recovered from
-          being {{ entry.statusCondition }}!
+          being {{ status }}!
         </p>
         <p v-if="entry.currentStatusList.length > 0">
-          Current status conditions: {{ entry.currentStatusList.join(", ") }}.
+          Remaining status conditions: {{ entry.currentStatusList.join(", ") }}.
         </p>
       </div>
 

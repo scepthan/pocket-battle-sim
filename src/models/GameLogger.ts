@@ -201,14 +201,14 @@ interface PokemonStatusAppliedEvent {
   type: "pokemonStatusApplied";
   player: string;
   targetPokemon: InPlayPokemonDescriptor;
-  statusCondition: string;
+  statusConditions: string[];
   currentStatusList: string[];
 }
 interface PokemonStatusEndedEvent {
   type: "pokemonStatusEnded";
   player: string;
   targetPokemon: InPlayPokemonDescriptor;
-  statusCondition: string;
+  statusConditions: string[];
   currentStatusList: string[];
 }
 interface PokemonStatusDamageEvent {
@@ -216,6 +216,10 @@ interface PokemonStatusDamageEvent {
   player: string;
   targetPokemon: InPlayPokemonDescriptor;
   statusCondition: string;
+  initialHP: number;
+  damageDealt: number;
+  finalHP: number;
+  maxHP: number;
 }
 interface AttackFailedEvent {
   type: "attackFailed";

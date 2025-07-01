@@ -26,6 +26,11 @@ export class InPlayPokemonCard {
   CurrentHP: number;
   PrimaryStatus?: PrimaryStatus;
   SecondaryStatuses: Set<SecondaryStatus> = new Set();
+  get CurrentStatuses(): string[] {
+    const statuses: string[] = [...this.SecondaryStatuses];
+    if (this.PrimaryStatus) statuses.unshift(this.PrimaryStatus);
+    return statuses;
+  }
   AttachedEnergy: Energy[] = [];
   InPlayCards: PlayingCard[] = [];
   ReadyToEvolve: boolean = false;
@@ -64,9 +69,6 @@ export class InPlayPokemonCard {
     this.PrizePoints = inputCard.PrizePoints;
     this.Attacks = inputCard.Attacks;
     this.Ability = inputCard.Ability;
-
-    this.PrimaryStatus = undefined;
-    this.SecondaryStatuses = new Set();
   }
 
   applyDamage(HP: number) {

@@ -293,8 +293,6 @@ export class Player {
 
     // Save info for logging purposes
     const beforePokemon = this.pokemonToDescriptor(pokemon);
-    const statuses: string[] = [...pokemon.SecondaryStatuses];
-    if (pokemon.PrimaryStatus) statuses.unshift(pokemon.PrimaryStatus);
 
     this.Hand.splice(this.Hand.indexOf(card), 1);
     this.InPlay.push(card);
@@ -308,15 +306,7 @@ export class Player {
       cardId: card.ID,
       stage: card.Stage,
     });
-    for (const status of statuses) {
-      this.logger.addEntry({
-        type: "pokemonStatusEnded",
-        player: this.Name,
-        statusCondition: status,
-        targetPokemon: this.pokemonToDescriptor(pokemon),
-        currentStatusList: [...pokemon.SecondaryStatuses],
-      });
-    }
+    this.recoverStatusConditions(pokemon);
   }
 
   attachAvailableEnergy(pokemon: InPlayPokemonCard) {
@@ -454,6 +444,25 @@ export class Player {
       toPokemon: this.pokemonToDescriptor(pokemon),
       reason,
     });
+
+    this.recoverStatusConditions(previousActive);
+  }
+
+  recoverStatusConditions(pokemon: InPlayPokemonCard) {
+    const statuses: string[] = [...pokemon.SecondaryStatuses];
+    if (pokemon.PrimaryStatus) statuses.unshift(pokemon.PrimaryStatus);
+    if (statuses.length == 0) return;
+
+    pokemon.PrimaryStatus = undefined;
+    pokemon.SecondaryStatuses = new Set();
+
+    this.logger.addEntry({
+      type: "pokemonStatusEnded",
+      player: this.Name,
+      statusConditions: statuses,
+      targetPokemon: this.pokemonToDescriptor(pokemon),
+      currentStatusList: pokemon.CurrentStatuses,
+    });
   }
 
   returnPokemonToHand(pokemon: InPlayPokemonCard) {
@@ -555,9 +564,9 @@ export class Player {
     this.logger.addEntry({
       type: "pokemonStatusApplied",
       player: this.Name,
-      statusCondition: "Poisoned",
+      statusConditions: ["Poisoned"],
       targetPokemon: this.pokemonToDescriptor(this.ActivePokemon!),
-      currentStatusList: [...this.ActivePokemon!.SecondaryStatuses],
+      currentStatusList: this.ActivePokemon!.CurrentStatuses,
     });
   }
 }
