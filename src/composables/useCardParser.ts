@@ -652,6 +652,31 @@ export const useCardParser = () => {
           };
         },
       },
+      {
+        pattern:
+          /take 1 {(\w)} Energy from your Energy Zone and attach it to the {(\w)} Pokémon in the Active Spot\./i,
+        transform: (_, energyType, pokemonType) => {
+          const fullType = parseEnergy(energyType);
+          const pt = parseEnergy(pokemonType);
+
+          ability.Effect = async (game: GameState) => {
+            const pokemon = game.AttackingPlayer.ActivePokemon!;
+            if (pokemon.Type != pt) {
+              game.GameLog.addEntry({
+                type: "actionFailed",
+                player: game.AttackingPlayer.Name,
+                reason: "noValidTargets",
+              });
+              return;
+            }
+            game.AttackingPlayer.attachEnergy(
+              pokemon,
+              [fullType],
+              "energyZone"
+            );
+          };
+        },
+      },
     ];
 
     mainloop: while (abilityText) {
