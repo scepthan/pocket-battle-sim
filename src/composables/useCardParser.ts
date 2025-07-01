@@ -470,6 +470,13 @@ export const useCardParser = () => {
           game.DefendingPlayer.discardRandomFiltered();
         },
       },
+      {
+        pattern: /^Your opponent reveals their hand\.$/,
+        transform: () => async (game: GameState) => {
+          await defaultEffect(game);
+          await game.showCards(game.AttackingPlayer, game.DefendingPlayer.Hand);
+        },
+      },
 
       // Energy effects
       {
@@ -728,6 +735,17 @@ export const useCardParser = () => {
             await game.swapActivePokemon(
               game.DefendingPlayer,
               "opponentEffect"
+            );
+          };
+        },
+      },
+      {
+        pattern: /^look at the top card of your deck\.$/i,
+        transform: () => {
+          ability.Effect = async (game: GameState) => {
+            await game.showCards(
+              game.AttackingPlayer,
+              game.AttackingPlayer.Deck.slice(0, 1)
             );
           };
         },
