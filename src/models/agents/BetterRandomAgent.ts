@@ -211,6 +211,9 @@ export class BetterRandomAgent implements PlayerAgent {
   async choosePokemon(pokemon: InPlayPokemonCard[]) {
     return rand(pokemon);
   }
+  async choose<T>(options: T[]) {
+    return rand(options);
+  }
   async viewCards() {
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }

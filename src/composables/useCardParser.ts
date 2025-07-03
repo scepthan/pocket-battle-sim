@@ -576,6 +576,8 @@ export const useCardParser = () => {
           );
         },
       },
+
+      // Status effects
       {
         pattern: /^Your opponent's active Pokémon is now Poisoned\.$/i,
         transform: () => async (game: GameState) => {
@@ -596,6 +598,13 @@ export const useCardParser = () => {
           await defaultEffect(game);
           game.DefendingPlayer.paralyzeActivePokemon();
         },
+      },
+
+      // Miscellaneous
+      {
+        pattern:
+          /^Choose 1 of your opponent's Pokémon's attacks and use it as this attack\. If this Pokémon doesn't have the necessary Energy to use that attack, this attack does nothing\.$/i,
+        transform: () => async (game: GameState) => {},
       },
     ];
 

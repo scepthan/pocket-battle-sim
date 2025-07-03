@@ -6,7 +6,7 @@
 import { computed } from "vue";
 
 export interface Props {
-  count: Array<any> | number;
+  count: Array<unknown> | number;
   single: string;
   plural?: string;
 }
