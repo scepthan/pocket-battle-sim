@@ -42,7 +42,7 @@ export class GameState {
     TurnLimit: 30,
   };
 
-  DelayPerAction: number = 1000; // milliseconds
+  DelayPerAction: number = 0; // milliseconds
 
   GameOver: boolean = false;
 
@@ -211,7 +211,7 @@ export class GameState {
 
     // Execute the player's turn
     try {
-      await new Promise((resolve) => {
+      await new Promise((resolve, reject) => {
         // Any attack and some other effects will end the turn immediately
         this.endTurnResolve = resolve;
 
@@ -220,7 +220,7 @@ export class GameState {
           .doTurn(new PlayerGameView(this, this.AttackingPlayer))
           .then(resolve)
           .catch((error) => {
-            throw error;
+            reject(error);
           });
       });
     } catch (error) {

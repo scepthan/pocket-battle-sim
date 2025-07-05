@@ -215,7 +215,7 @@ export class BetterRandomAgent implements PlayerAgent {
     return rand(options);
   }
   async viewCards() {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    //await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 
   findPotentialEvolutions(game: PlayerGameView, pokemon: InPlayPokemonCard) {

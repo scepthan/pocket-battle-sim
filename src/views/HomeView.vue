@@ -1,5 +1,14 @@
 <template>
   <h1>Pokemon TCG Pocket Battle Simulator</h1>
-  <RouterLink to="/arena">Arena</RouterLink>
-  <RouterLink to="/builder">Deck Builder</RouterLink>
+  <v-list>
+    <v-list-item>
+      <RouterLink to="/arena">Arena</RouterLink>
+    </v-list-item>
+    <v-list-item>
+      <RouterLink to="/builder">Deck Builder</RouterLink>
+    </v-list-item>
+    <v-list-item>
+      <RouterLink to="/simulator">Mass Simulator</RouterLink>
+    </v-list-item>
+  </v-list>
 </template>
