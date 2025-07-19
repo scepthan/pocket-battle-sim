@@ -9,11 +9,12 @@
 <script setup lang="ts">
 import { GameState } from "@/models/GameState";
 import { BetterRandomAgent, RandomAgent } from "@/models/agents";
-import { usePlayingCardStore } from "@/stores/usePlayingCardStore";
+import { useDeckStore, usePlayingCardStore } from "@/stores";
 import type { DeckInfo } from "@/types";
 import { onMounted, ref } from "vue";
 
 const cardStore = usePlayingCardStore();
+const deckStore = useDeckStore();
 
 const prebuiltDecks: Record<string, DeckInfo> = {
   Celebi1: {
@@ -73,10 +74,8 @@ const opponent = ref<RandomAgent>();
 const game = ref<GameState>();
 
 onMounted(async () => {
-  const importedDecks = (await import("@/assets/decks.json")).default as Record<
-    string,
-    Record<string, DeckInfo>
-  >;
+  await deckStore.ensureDecksLoaded();
+  const importedDecks = deckStore.Decks;
 
   const allDecks = { ...importedDecks.A1, ...prebuiltDecks };
   const deckNames = Object.keys(allDecks) as (keyof typeof allDecks)[];

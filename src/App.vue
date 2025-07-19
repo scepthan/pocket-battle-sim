@@ -8,21 +8,17 @@
 
 <script setup lang="ts">
 import { onMounted } from "vue";
-import { usePlayingCardStore } from "./stores/usePlayingCardStore";
-import type { DeckInfo, InputCard } from "./types";
+import { useDeckStore, usePlayingCardStore } from "./stores";
 
 const cardStore = usePlayingCardStore();
+const deckStore = useDeckStore();
 const debugMultiUseCards = false;
 
 onMounted(async () => {
-  await cardStore.loadCards();
+  await Promise.all([cardStore.loadCards(), deckStore.ensureDecksLoaded()]);
 
-  const decklists = (await import("@/assets/decks.json")).default as Record<
-    string,
-    Record<string, DeckInfo>
-  >;
-
-  const cards = (await import("@/assets/cards.json")).default as InputCard[];
+  const decklists = deckStore.Decks;
+  const cards = cardStore.InputCards;
   const encounteredCards = new Set<string>();
   const rarityIndex = (a: string) =>
     [
