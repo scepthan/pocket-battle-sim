@@ -1,4 +1,4 @@
-import { usePlayingCardStore } from "@/stores/usePlayingCardStore";
+import { useDeckParser } from "@/composables";
 import type {
   DeckInfo,
   Energy,
@@ -20,7 +20,7 @@ export class BetterRandomAgent implements PlayerAgent {
   Deck: PlayingCard[];
 
   constructor(name: string, deck: DeckInfo) {
-    const { parseDeck } = usePlayingCardStore();
+    const { parseDeck } = useDeckParser();
 
     this.Name = name;
     this.EnergyTypes = deck.EnergyTypes;
