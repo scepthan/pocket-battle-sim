@@ -1,3 +1,4 @@
+export type { BattleRecord } from "./BattleRecord";
 export type { Deck, DeckInfo } from "./Deck";
 export { EnergyMap, isEnergy, isEnergyShort, parseEnergy } from "./Energy";
 export type { Energy, EnergyShort } from "./Energy";
