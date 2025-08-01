@@ -47,11 +47,7 @@ export class GameState {
 
   endTurnResolve: (value: unknown) => void = () => {};
 
-  constructor(
-    agent1: PlayerAgent,
-    agent2: PlayerAgent,
-    rules?: Partial<GameRules>
-  ) {
+  constructor(agent1: PlayerAgent, agent2: PlayerAgent, rules?: Partial<GameRules>) {
     Object.assign(this.GameRules, rules);
     this.Agent1 = agent1;
     this.Agent2 = agent2;
@@ -112,9 +108,7 @@ export class GameState {
     }
   }
   findOwner(pokemon: InPlayPokemonCard) {
-    return this.Player1.InPlayPokemon.includes(pokemon)
-      ? this.Player1
-      : this.Player2;
+    return this.Player1.InPlayPokemon.includes(pokemon) ? this.Player1 : this.Player2;
   }
 
   async start() {
@@ -152,10 +146,7 @@ export class GameState {
   async nextTurn() {
     if (this.TurnNumber > 0) {
       // Switch the attacking and defending players
-      [this.AttackingPlayer, this.DefendingPlayer] = [
-        this.DefendingPlayer,
-        this.AttackingPlayer,
-      ];
+      [this.AttackingPlayer, this.DefendingPlayer] = [this.DefendingPlayer, this.AttackingPlayer];
     }
     this.TurnNumber += 1;
 
@@ -200,7 +191,7 @@ export class GameState {
         type: "pokemonStatusEffective",
         player: this.AttackingPlayer.Name,
         targetPokemon: this.AttackingPlayer.pokemonToDescriptor(
-          this.AttackingPlayer.ActivePokemon!
+          this.AttackingPlayer.ActivePokemon!,
         ),
         statusCondition: status,
       });
@@ -237,10 +228,7 @@ export class GameState {
     // Discard energy if player did not use it
     if (this.AttackingPlayer.AvailableEnergy) {
       await this.delay();
-      this.AttackingPlayer.discardEnergy(
-        [this.AttackingPlayer.AvailableEnergy],
-        "energyZone"
-      );
+      this.AttackingPlayer.discardEnergy([this.AttackingPlayer.AvailableEnergy], "energyZone");
       this.AttackingPlayer.AvailableEnergy = undefined;
     }
 
@@ -296,7 +284,7 @@ export class GameState {
         type: "pokemonStatusEnded",
         player: this.AttackingPlayer.Name,
         targetPokemon: this.AttackingPlayer.pokemonToDescriptor(
-          this.AttackingPlayer.ActivePokemon!
+          this.AttackingPlayer.ActivePokemon!,
         ),
         statusConditions: ["Paralyzed"],
         currentStatusList: this.AttackingPlayer.ActivePokemon!.CurrentStatuses,
@@ -386,14 +374,10 @@ export class GameState {
     // Have players choose a new Active Pokemon if their previous one was knocked out
     const promises = [];
     if (this.Player1.ActivePokemon === undefined) {
-      promises[0] = this.Agent1.swapActivePokemon(
-        new PlayerGameView(this, this.Player1)
-      );
+      promises[0] = this.Agent1.swapActivePokemon(new PlayerGameView(this, this.Player1));
     }
     if (this.Player2.ActivePokemon === undefined) {
-      promises[1] = this.Agent2.swapActivePokemon(
-        new PlayerGameView(this, this.Player2)
-      );
+      promises[1] = this.Agent2.swapActivePokemon(new PlayerGameView(this, this.Player2));
     }
     if (promises.length > 0) {
       await this.delay();
@@ -413,7 +397,7 @@ export class GameState {
       player: this.AttackingPlayer.Name,
       attackName: attack.Name,
       attackingPokemon: this.AttackingPlayer.pokemonToDescriptor(
-        this.AttackingPlayer.ActivePokemon!
+        this.AttackingPlayer.ActivePokemon!,
       ),
     });
     await this.useInitialEffect(attack.Effect);
@@ -552,10 +536,7 @@ export class GameState {
       this.CanPlaySupporter = false;
     }
 
-    this.AttackingPlayer.Hand.splice(
-      this.AttackingPlayer.Hand.indexOf(card),
-      1
-    );
+    this.AttackingPlayer.Hand.splice(this.AttackingPlayer.Hand.indexOf(card), 1);
     this.ActiveTrainerCard = card;
 
     this.GameLog.addEntry({
@@ -609,10 +590,7 @@ export class GameState {
     return result;
   }
 
-  async swapActivePokemon(
-    player: Player,
-    reason: "selfEffect" | "opponentEffect"
-  ) {
+  async swapActivePokemon(player: Player, reason: "selfEffect" | "opponentEffect") {
     await this.delay();
     if (!player.Bench.some((x) => x !== undefined)) {
       this.GameLog.addEntry({
@@ -623,9 +601,7 @@ export class GameState {
       return false;
     }
     const agent = player == this.Player1 ? this.Agent1 : this.Agent2;
-    const newActive = await agent.swapActivePokemon(
-      new PlayerGameView(this, player)
-    );
+    const newActive = await agent.swapActivePokemon(new PlayerGameView(this, player));
     player.swapActivePokemon(newActive, reason);
     return true;
   }

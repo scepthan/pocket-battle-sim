@@ -8,9 +8,7 @@
             <v-col v-for="(card, index) in row" :key="index" cols="2">
               <SelectableCard
                 :card="card"
-                :selectable="
-                  selectedCards.filter((x) => x.Name == card.Name).length < 2
-                "
+                :selectable="selectedCards.filter((x) => x.Name == card.Name).length < 2"
                 @click="() => cardClicked(card)"
               />
             </v-col>
@@ -19,9 +17,7 @@
       </v-virtual-scroll>
     </v-col>
     <v-col cols="3">
-      <div class="json-output">
-        Cards: {{ selectedCards.length }}<br />{{ deckJson }}
-      </div>
+      <div class="json-output">Cards: {{ selectedCards.length }}<br />{{ deckJson }}</div>
     </v-col>
   </v-row>
 </template>
@@ -40,8 +36,8 @@ const cardsFiltered = computed(() =>
       searchQuery.value
         .toLowerCase()
         .split(" ")
-        .every((term) => JSON.stringify(card).toLowerCase().includes(term))
-  )
+        .every((term) => JSON.stringify(card).toLowerCase().includes(term)),
+  ),
 );
 
 const cardsPerRow = 6;
@@ -61,7 +57,7 @@ const deckJson = computed(
     `[${selectedCards.value
       .map((card) => `"${card.ID}"`)
       .sort()
-      .join(", ")}]`
+      .join(", ")}]`,
 );
 const cardClicked = (card: PlayingCard) => {
   if (selectedCards.value.filter((x) => x.Name == card.Name).length < 2) {

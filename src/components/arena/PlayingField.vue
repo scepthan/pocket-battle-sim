@@ -28,9 +28,7 @@
           </v-row>
         </div>
 
-        <div
-          class="h-100 d-flex flex-column align-center justify-space-between"
-        >
+        <div class="h-100 d-flex flex-column align-center justify-space-between">
           <div class="d-flex flex-row">
             <div class="d-flex flex-column align-center" style="width: 128px">
               <span>{{ game?.Player2.Name }}</span>
@@ -42,9 +40,7 @@
             </div>
             <PlayerHandHidden :cards="game?.Player2.Hand.length ?? 0" />
           </div>
-          <div
-            class="flex-grow-1 w-100 d-flex flex-column-reverse overflow-y-auto"
-          >
+          <div class="flex-grow-1 w-100 d-flex flex-column-reverse overflow-y-auto">
             <GameLog
               :log-entries="game?.GameLog.entries ?? []"
               :shown-players="shownPlayers ?? []"

@@ -17,18 +17,18 @@
       </div>
 
       <p v-else-if="entry.type == 'drawToHand'">
-        <b>{{ entry.player }}</b> draws
-        <CountDisplay :count="entry.cardIds" single="card" /> to their
+        <b>{{ entry.player }}</b> draws <CountDisplay :count="entry.cardIds" single="card" /> to
+        their
 
         <span v-if="entry.cardIds.length === 0">
           hand ({{
             entry.failureReason == "deckEmpty"
               ? "deck is empty"
               : entry.failureReason == "handFull"
-              ? "hand is full"
-              : entry.failureReason == "noValidCards"
-              ? "no valid cards in deck"
-              : "unknown reason"
+                ? "hand is full"
+                : entry.failureReason == "noValidCards"
+                  ? "no valid cards in deck"
+                  : "unknown reason"
           }}).
         </span>
         <span v-else-if="shownPlayers.includes(entry.player)">
@@ -39,22 +39,20 @@
 
       <div v-else-if="entry.type == 'playToActive'">
         <p>
-          <b>{{ entry.player }}</b> chooses
-          <CardName :card-id="entry.cardId" /> as their Active Pokemon!
+          <b>{{ entry.player }}</b> chooses <CardName :card-id="entry.cardId" /> as their Active
+          Pokemon!
         </p>
       </div>
 
       <div v-else-if="entry.type == 'playToBench'">
         <p>
-          <b>{{ entry.player }}</b> plays
-          <CardName :card-id="entry.cardId" /> to their Bench!
+          <b>{{ entry.player }}</b> plays <CardName :card-id="entry.cardId" /> to their Bench!
         </p>
       </div>
 
       <div v-else-if="entry.type == 'evolvePokemon'">
         <p>
-          <b>{{ entry.player }}</b> evolves
-          <CardName :card-id="entry.fromPokemon.cardId" /> into
+          <b>{{ entry.player }}</b> evolves <CardName :card-id="entry.fromPokemon.cardId" /> into
           <CardName :card-id="entry.cardId" />!
         </p>
       </div>
@@ -74,11 +72,7 @@
             Energy attached to
             <CardName :card-id="entry.targetPokemon.cardId" />:
           </span>
-          <EnergyIcon
-            v-for="(energy, i) in entry.energyTypes"
-            :key="i"
-            :energy="energy"
-          />
+          <EnergyIcon v-for="(energy, i) in entry.energyTypes" :key="i" :energy="energy" />
         </p>
       </div>
 
@@ -101,11 +95,7 @@
         </p>
         <p v-else-if="entry.energyTypes.length > 0">
           Energy discarded:
-          <EnergyIcon
-            v-for="(energy, i) in entry.energyTypes"
-            :key="i"
-            :energy="energy"
-          />
+          <EnergyIcon v-for="(energy, i) in entry.energyTypes" :key="i" :energy="energy" />
         </p>
         <p v-else>No energy could be discarded.</p>
       </div>
@@ -116,12 +106,11 @@
           {{ entry.totalModifier < 0 ? "less" : "more" }} for this turn!
         </p>
         <p v-else-if="entry.attribute == 'activeDamage'">
-          Attacks used this turn do +{{ entry.totalModifier }} damage to your
-          opponent's active Pokemon!
+          Attacks used this turn do +{{ entry.totalModifier }} damage to your opponent's active
+          Pokemon!
         </p>
         <p v-else-if="entry.attribute == 'damageReduction'">
-          Attacks used next turn do -{{ entry.totalModifier }} damage to your
-          Pokemon!
+          Attacks used next turn do -{{ entry.totalModifier }} damage to your Pokemon!
         </p>
         <p v-else>Unknown modifier: {{ entry.attribute }}</p>
       </div>
@@ -146,16 +135,14 @@
 
       <div v-else-if="entry.type == 'useAttack'">
         <p>
-          <CardName :card-id="entry.attackingPokemon.cardId" /> uses
-          <b>{{ entry.attackName }}</b
+          <CardName :card-id="entry.attackingPokemon.cardId" /> uses <b>{{ entry.attackName }}</b
           >!
         </p>
       </div>
 
       <div v-else-if="entry.type == 'useAbility'">
         <p>
-          <CardName :card-id="entry.abilityPokemon.cardId" /> uses
-          <b>{{ entry.abilityName }}</b
+          <CardName :card-id="entry.abilityPokemon.cardId" /> uses <b>{{ entry.abilityName }}</b
           >!
         </p>
       </div>
@@ -166,11 +153,8 @@
 
       <div v-else-if="entry.type == 'coinMultiFlip'">
         <p>
-          Flipping {{ entry.flips }}
-          {{ entry.flips == 1 ? "coin" : "coins" }}...
-          <span v-for="(result, i) in entry.results" :key="i">
-            {{ result }}!
-          </span>
+          Flipping {{ entry.flips }} {{ entry.flips == 1 ? "coin" : "coins" }}...
+          <span v-for="(result, i) in entry.results" :key="i"> {{ result }}! </span>
           (Total: {{ entry.results.filter((x) => x == "Heads").length }} heads)
         </p>
       </div>
@@ -178,9 +162,7 @@
       <div v-else-if="entry.type == 'coinFlipUntilTails'">
         <p>
           Flipping until tails...
-          <span v-for="(result, i) in entry.results" :key="i">
-            {{ result }}!
-          </span>
+          <span v-for="(result, i) in entry.results" :key="i"> {{ result }}! </span>
           (Total: {{ entry.results.filter((x) => x == "Heads").length }} heads)
         </p>
       </div>
@@ -192,10 +174,8 @@
       <div v-else-if="entry.type == 'pokemonHealed'">
         <p>
           <CardName :card-id="entry.targetPokemon.cardId" /> is healed for
-          {{ entry.healingDealt }} damage! ({{ entry.initialHP }}/{{
-            entry.maxHP
-          }}
-          &rarr; {{ entry.finalHP }}/{{ entry.maxHP }}
+          {{ entry.healingDealt }} damage! ({{ entry.initialHP }}/{{ entry.maxHP }} &rarr;
+          {{ entry.finalHP }}/{{ entry.maxHP }}
           HP)
         </p>
       </div>
@@ -204,46 +184,38 @@
         <p v-if="entry.weaknessBoost">It's super effective!</p>
         <p>
           <CardName :card-id="entry.targetPokemon.cardId" /> is hit for
-          {{ entry.damageDealt }} damage! ({{ entry.initialHP }}/{{
-            entry.maxHP
-          }}
-          &rarr; {{ entry.finalHP }}/{{ entry.maxHP }}
+          {{ entry.damageDealt }} damage! ({{ entry.initialHP }}/{{ entry.maxHP }} &rarr;
+          {{ entry.finalHP }}/{{ entry.maxHP }}
           HP)
         </p>
       </div>
 
       <div v-else-if="entry.type == 'pokemonStatusApplied'">
         <p v-for="(status, i) in entry.statusConditions" :key="i">
-          <CardName :card-id="entry.targetPokemon.cardId" /> is now
-          {{ status }}!
+          <CardName :card-id="entry.targetPokemon.cardId" /> is now {{ status }}!
         </p>
-        <p
-          v-if="entry.currentStatusList.length > entry.statusConditions.length"
-        >
+        <p v-if="entry.currentStatusList.length > entry.statusConditions.length">
           Current status conditions: {{ entry.currentStatusList.join(", ") }}.
         </p>
       </div>
 
       <div v-else-if="entry.type == 'pokemonStatusDamage'">
         <p>
-          <CardName :card-id="entry.targetPokemon.cardId" /> takes
-          {{ entry.damageDealt }} damage from being {{ entry.statusCondition }}!
-          ({{ entry.initialHP }}/{{ entry.maxHP }} &rarr; {{ entry.finalHP }}/{{
-            entry.maxHP
-          }}
+          <CardName :card-id="entry.targetPokemon.cardId" /> takes {{ entry.damageDealt }} damage
+          from being {{ entry.statusCondition }}! ({{ entry.initialHP }}/{{ entry.maxHP }} &rarr;
+          {{ entry.finalHP }}/{{ entry.maxHP }}
           HP)
         </p>
       </div>
 
       <div v-else-if="entry.type == 'pokemonStatusEffective'">
-        <CardName :card-id="entry.targetPokemon.cardId" /> is
-        {{ entry.statusCondition }} and cannot move!
+        <CardName :card-id="entry.targetPokemon.cardId" /> is {{ entry.statusCondition }} and cannot
+        move!
       </div>
 
       <div v-else-if="entry.type == 'pokemonStatusEnded'">
         <p v-for="(status, i) in entry.statusConditions" :key="i">
-          <CardName :card-id="entry.targetPokemon.cardId" /> recovered from
-          being {{ status }}!
+          <CardName :card-id="entry.targetPokemon.cardId" /> recovered from being {{ status }}!
         </p>
         <p v-if="entry.currentStatusList.length > 0">
           Remaining status conditions: {{ entry.currentStatusList.join(", ") }}.
@@ -251,18 +223,14 @@
       </div>
 
       <div v-else-if="entry.type == 'pokemonKnockedOut'">
-        <p>
-          <CardName :card-id="entry.targetPokemon.cardId" /> is knocked out!
-        </p>
+        <p><CardName :card-id="entry.targetPokemon.cardId" /> is knocked out!</p>
       </div>
 
       <div v-else-if="entry.type == 'scorePrizePoints'">
         <p>
           <b>{{ entry.player }}</b> scores
-          <CountDisplay
-            :count="entry.prizePointsScored"
-            single="prize point"
-          />! (Total: {{ entry.totalPrizePoints }})
+          <CountDisplay :count="entry.prizePointsScored" single="prize point" />! (Total:
+          {{ entry.totalPrizePoints }})
         </p>
       </div>
 
@@ -273,22 +241,15 @@
         </p>
         <p v-else>
           <b>{{ entry.player }}</b> discards
-          <CountDisplay :count="entry.cardIds" single="card" /> from their
-          {{ entry.source }}!
+          <CountDisplay :count="entry.cardIds" single="card" /> from their {{ entry.source }}!
         </p>
       </div>
 
-      <div
-        v-else-if="entry.type == 'returnToHand' || entry.type == 'returnToDeck'"
-      >
+      <div v-else-if="entry.type == 'returnToHand' || entry.type == 'returnToDeck'">
         <p>
-          <CountDisplay :count="entry.cardIds" single="card" /> returned to
-          <b>{{ entry.player }}</b
+          <CountDisplay :count="entry.cardIds" single="card" /> returned to <b>{{ entry.player }}</b
           >'s {{ entry.type == "returnToHand" ? "hand" : "deck"
-          }}<span
-            v-if="
-              entry.source == 'inPlay' || shownPlayers.includes(entry.player)
-            "
+          }}<span v-if="entry.source == 'inPlay' || shownPlayers.includes(entry.player)"
             >: <CardNameList :card-ids="entry.cardIds" /> </span
           >.
         </p>
@@ -312,9 +273,8 @@
 
       <div v-else-if="entry.type == 'selectActivePokemon'">
         <p>
-          <b>{{ entry.player }}</b> chooses
-          <CardName :card-id="entry.toPokemon.cardId" /> as their next Active
-          Pokemon!
+          <b>{{ entry.player }}</b> chooses <CardName :card-id="entry.toPokemon.cardId" /> as their
+          next Active Pokemon!
         </p>
       </div>
 
@@ -322,9 +282,7 @@
 
       <div v-else-if="entry.type == 'gameOver'">
         <p v-if="entry.winner">
-          Game over: <b>{{ entry.winner }}</b> is victorious! ({{
-            entry.reason
-          }})
+          Game over: <b>{{ entry.winner }}</b> is victorious! ({{ entry.reason }})
         </p>
         <p v-else>Game over: draw... ({{ entry.reason }})</p>
       </div>
@@ -338,10 +296,10 @@
             entry.reason == "notImplemented"
               ? "Effect not implemented"
               : entry.reason == "noBenchedPokemon"
-              ? "Player has no benched Pokemon"
-              : entry.reason == "noValidTargets"
-              ? "effect has no valid targets"
-              : "Unknown reason"
+                ? "Player has no benched Pokemon"
+                : entry.reason == "noValidTargets"
+                  ? "effect has no valid targets"
+                  : "Unknown reason"
           }})
         </p>
       </div>

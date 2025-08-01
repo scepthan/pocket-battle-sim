@@ -23,10 +23,7 @@
     </div>
   </div>
 
-  <div
-    v-else
-    :style="{ ...cardStyle, border: '2px solid #333a', borderRadius: '4px' }"
-  />
+  <div v-else :style="{ ...cardStyle, border: '2px solid #333a', borderRadius: '4px' }" />
 </template>
 
 <script setup lang="ts">
@@ -46,9 +43,7 @@ const height = computed(() => props.heightPx ?? 200);
 const width = computed(() => height.value * ratio);
 
 const hpPercent = computed(() =>
-  props.card && "BaseCard" in props.card
-    ? (props.card.CurrentHP / props.card.BaseHP) * 100
-    : 0
+  props.card && "BaseCard" in props.card ? (props.card.CurrentHP / props.card.BaseHP) * 100 : 0,
 );
 
 const cardStyle = computed(() => ({
@@ -82,9 +77,14 @@ const hpBarPaddingStyle = computed(() => ({
 
   font-weight: bold;
   color: black;
-  text-shadow: 0 0.07em 0.04em white, 0.07em 0.07em 0.04em white,
-    0.07em 0 0.04em white, 0.07em -0.07em 0.04em white, 0 -0.07em 0.04em white,
-    -0.07em -0.07em 0.04em white, -0.07em 0 0.04em white,
+  text-shadow:
+    0 0.07em 0.04em white,
+    0.07em 0.07em 0.04em white,
+    0.07em 0 0.04em white,
+    0.07em -0.07em 0.04em white,
+    0 -0.07em 0.04em white,
+    -0.07em -0.07em 0.04em white,
+    -0.07em 0 0.04em white,
     -0.07em 0.07em 0.04em white;
 }
 

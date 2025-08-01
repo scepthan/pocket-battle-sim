@@ -1,7 +1,4 @@
-import {
-  defineConfigWithVueTs,
-  vueTsConfigs
-} from "@vue/eslint-config-typescript";
+import { defineConfigWithVueTs, vueTsConfigs } from "@vue/eslint-config-typescript";
 import eslintConfigPrettier from "eslint-config-prettier";
 import pluginVue from "eslint-plugin-vue";
 
@@ -12,7 +9,7 @@ export default defineConfigWithVueTs(
   eslintConfigPrettier,
   {
     rules: {
-      "@typescript-eslint/no-floating-promises": "error"
-    }
-  }
+      "@typescript-eslint/no-floating-promises": "error",
+    },
+  },
 );

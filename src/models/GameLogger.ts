@@ -1,9 +1,5 @@
 import type { Energy } from "@/types";
-import type {
-  PrimaryStatus,
-  SecondaryStatus,
-  SpecialCondition,
-} from "./InPlayPokemonCard";
+import type { PrimaryStatus, SecondaryStatus, SpecialCondition } from "./InPlayPokemonCard";
 
 interface ActivePokemonDescriptor {
   cardId: string;
@@ -14,9 +10,7 @@ interface BenchPokemonDescriptor {
   location: "bench";
   index: number;
 }
-export type InPlayPokemonDescriptor =
-  | ActivePokemonDescriptor
-  | BenchPokemonDescriptor;
+export type InPlayPokemonDescriptor = ActivePokemonDescriptor | BenchPokemonDescriptor;
 type CoinFlipResult = "Heads" | "Tails";
 
 // General game format events
@@ -55,11 +49,7 @@ interface GameOverEvent {
 interface ActionFailedEvent {
   type: "actionFailed";
   player: string;
-  reason:
-    | "notImplemented"
-    | "partiallyImplemented"
-    | "noBenchedPokemon"
-    | "noValidTargets";
+  reason: "notImplemented" | "partiallyImplemented" | "noBenchedPokemon" | "noValidTargets";
 }
 interface TurnErrorEvent {
   type: "turnError";

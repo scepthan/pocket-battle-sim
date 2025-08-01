@@ -1,15 +1,5 @@
-import type {
-  Deck,
-  Energy,
-  PlayerGameSetup,
-  PlayingCard,
-  PokemonCard,
-} from "@/types";
-import type {
-  GameLogger,
-  InPlayPokemonDescriptor,
-  LoggedEvent,
-} from "./GameLogger";
+import type { Deck, Energy, PlayerGameSetup, PlayingCard, PokemonCard } from "@/types";
+import type { GameLogger, InPlayPokemonDescriptor, LoggedEvent } from "./GameLogger";
 import { InPlayPokemonCard, type SpecialCondition } from "./InPlayPokemonCard";
 
 export class Player {
@@ -171,9 +161,7 @@ export class Player {
   }
 
   hasBasicPokemon() {
-    return this.Hand.some(
-      (card) => card.CardType == "Pokemon" && card.Stage == 0
-    );
+    return this.Hand.some((card) => card.CardType == "Pokemon" && card.Stage == 0);
   }
 
   setupPokemon(setup: PlayerGameSetup) {
@@ -206,8 +194,7 @@ export class Player {
     const filteredPokemon = this.Deck.filter(predicate);
     const result = [];
     if (filteredPokemon.length > 0) {
-      const card =
-        filteredPokemon[(Math.random() * filteredPokemon.length) | 0];
+      const card = filteredPokemon[(Math.random() * filteredPokemon.length) | 0];
       result.push(card);
       this.Deck.splice(this.Deck.indexOf(card), 1);
       this.Hand.push(card);
@@ -227,9 +214,7 @@ export class Player {
     return;
   }
 
-  discardRandomFiltered(
-    predicate: (card: PlayingCard) => boolean = () => true
-  ) {
+  discardRandomFiltered(predicate: (card: PlayingCard) => boolean = () => true) {
     const filteredCards = this.Hand.filter(predicate);
     const discarded: PlayingCard[] = [];
     if (filteredCards.length > 0) {
@@ -264,11 +249,7 @@ export class Player {
     });
   }
 
-  putPokemonOnBench(
-    card: PokemonCard,
-    index: number,
-    trueCard: PlayingCard = card
-  ) {
+  putPokemonOnBench(card: PokemonCard, index: number, trueCard: PlayingCard = card) {
     if (this.Bench[index]) {
       throw new Error("Bench already has a Pokemon in this slot");
     }
@@ -332,7 +313,7 @@ export class Player {
     pokemon: InPlayPokemonCard,
     energy: Energy[],
     from: "player" | "energyZone" | "discard" | "pokemon",
-    fromPokemon?: InPlayPokemonCard
+    fromPokemon?: InPlayPokemonCard,
   ) {
     pokemon.attachEnergy(energy);
     this.logger.addEntry({
@@ -345,19 +326,12 @@ export class Player {
     });
   }
 
-  transferEnergy(
-    fromPokemon: InPlayPokemonCard,
-    toPokemon: InPlayPokemonCard,
-    energy: Energy[]
-  ) {
+  transferEnergy(fromPokemon: InPlayPokemonCard, toPokemon: InPlayPokemonCard, energy: Energy[]) {
     for (const e of energy) {
       if (!fromPokemon.AttachedEnergy.includes(e)) {
         throw new Error("Energy not attached to fromPokemon");
       }
-      fromPokemon.AttachedEnergy.splice(
-        fromPokemon.AttachedEnergy.indexOf(e),
-        1
-      );
+      fromPokemon.AttachedEnergy.splice(fromPokemon.AttachedEnergy.indexOf(e), 1);
     }
     toPokemon.attachEnergy(energy);
 
@@ -386,12 +360,7 @@ export class Player {
 
   discardEnergy(
     energies: Energy[],
-    source:
-      | "effect"
-      | "retreat"
-      | "knockOut"
-      | "removedFromField"
-      | "energyZone"
+    source: "effect" | "retreat" | "knockOut" | "removedFromField" | "energyZone",
   ) {
     if (energies.length == 0) return;
 
@@ -408,16 +377,13 @@ export class Player {
   retreatActivePokemon(
     benchedPokemon: InPlayPokemonCard,
     energyToDiscard: Energy[],
-    costModifier: number
+    costModifier: number,
   ) {
     const previousActive = this.ActivePokemon!;
     if (previousActive.RetreatCost == -1) {
       throw new Error("This Pokémon cannot retreat");
     }
-    if (
-      previousActive.PrimaryStatus == "Asleep" ||
-      previousActive.PrimaryStatus == "Paralyzed"
-    ) {
+    if (previousActive.PrimaryStatus == "Asleep" || previousActive.PrimaryStatus == "Paralyzed") {
       throw new Error("Cannot retreat while " + previousActive.PrimaryStatus);
     }
 
@@ -436,9 +402,7 @@ export class Player {
       if (!previousEnergy.includes(e)) {
         throw new Error("Energy not attached to active Pokemon");
       }
-      discardedEnergy.push(
-        previousEnergy.splice(previousEnergy.indexOf(e), 1)[0]
-      );
+      discardedEnergy.push(previousEnergy.splice(previousEnergy.indexOf(e), 1)[0]);
     }
     previousActive.AttachedEnergy = previousEnergy;
 
@@ -448,7 +412,7 @@ export class Player {
 
   swapActivePokemon(
     pokemon: InPlayPokemonCard,
-    reason: "retreat" | "selfEffect" | "opponentEffect"
+    reason: "retreat" | "selfEffect" | "opponentEffect",
   ) {
     const previousActive = this.ActivePokemon!;
     this.ActivePokemon = pokemon;

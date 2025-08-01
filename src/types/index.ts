@@ -12,12 +12,7 @@ export type {
   TrainerInputCard,
 } from "./InputCard";
 export type { ParsedResult, ParsedResultOptional } from "./ParsedResult";
-export type {
-  BenchSetup,
-  GameInitState,
-  PlayerAgent,
-  PlayerGameSetup,
-} from "./PlayerAgent";
+export type { BenchSetup, GameInitState, PlayerAgent, PlayerGameSetup } from "./PlayerAgent";
 export type {
   Ability,
   AbilityCondition,

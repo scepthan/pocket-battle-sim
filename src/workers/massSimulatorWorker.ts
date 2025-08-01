@@ -40,8 +40,7 @@ for (const deck1 of deckNames) {
       const game = new GameState(agent1, agent2);
       const first = game.AttackingPlayer.Name;
       const second = game.DefendingPlayer.Name;
-      const matchupName =
-        first == "Player1" ? deck1 + " v. " + deck2 : deck2 + " v. " + deck1;
+      const matchupName = first == "Player1" ? deck1 + " v. " + deck2 : deck2 + " v. " + deck1;
       const matchup = matchupRecords[matchupName];
 
       matchup.gamesPlayed++;

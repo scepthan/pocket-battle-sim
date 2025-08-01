@@ -17,8 +17,7 @@ export const useDeckStore = defineStore("decks", () => {
     loading.value = true;
     promise.value = new Promise(async (resolve, reject) => {
       try {
-        const importedDecks = (await import("@/assets/decks.json"))
-          .default as DeckRecord;
+        const importedDecks = (await import("@/assets/decks.json")).default as DeckRecord;
 
         Decks.value = importedDecks;
         console.log("Decks loaded:", Object.keys(Decks.value).length);

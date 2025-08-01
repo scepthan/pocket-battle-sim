@@ -183,10 +183,7 @@ export class PlayerGameView {
     }
     return false;
   }
-  async playPokemonToEvolve(
-    pokemon: PokemonCard,
-    inPlayPokemon: InPlayPokemonCard
-  ) {
+  async playPokemonToEvolve(pokemon: PokemonCard, inPlayPokemon: InPlayPokemonCard) {
     if (!this.canPlay) return false;
 
     if (pokemon.EvolvesFrom == inPlayPokemon.Name) {
@@ -210,10 +207,7 @@ export class PlayerGameView {
     await this.#gameState.useAttack(attack);
     return true;
   }
-  async retreatActivePokemon(
-    benchedPokemon: InPlayPokemonCard,
-    energy?: Energy[]
-  ) {
+  async retreatActivePokemon(benchedPokemon: InPlayPokemonCard, energy?: Energy[]) {
     if (!this.canRetreat()) return false;
     await this.#gameState.delay();
 
@@ -224,11 +218,7 @@ export class PlayerGameView {
       energy = this.selfActive!.AttachedEnergy.slice(0, retreatCost);
     }
 
-    this.#player.retreatActivePokemon(
-      benchedPokemon,
-      energy,
-      this.#gameState.RetreatCostModifier
-    );
+    this.#player.retreatActivePokemon(benchedPokemon, energy, this.#gameState.RetreatCostModifier);
     return true;
   }
   async playItemCard(card: ItemCard) {

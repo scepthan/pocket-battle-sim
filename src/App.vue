@@ -36,11 +36,7 @@ onMounted(async () => {
 
   const uniqueCards = cards
     .slice()
-    .sort(
-      (a, b) =>
-        rarityIndex(a.Rarity) - rarityIndex(b.Rarity) ||
-        a.ID.localeCompare(b.ID)
-    )
+    .sort((a, b) => rarityIndex(a.Rarity) - rarityIndex(b.Rarity) || a.ID.localeCompare(b.ID))
     .filter((card) => {
       const baseCard = {
         Name: card.Name,
@@ -73,28 +69,26 @@ onMounted(async () => {
     })
     .sort((a, b) => a.ID.localeCompare(b.ID));
 
-  console.log(
-    `Loaded ${uniqueCards.length} unique cards from ${cards.length} total cards.`
-  );
+  console.log(`Loaded ${uniqueCards.length} unique cards from ${cards.length} total cards.`);
 
   const unusedCards = uniqueCards.filter(
     (card) =>
       !Object.values(decklists).some((decks) =>
-        Object.values(decks).some((deck) => deck.Cards.includes(card.ID))
-      )
+        Object.values(decks).some((deck) => deck.Cards.includes(card.ID)),
+      ),
   );
 
   console.log(
     `Found ${unusedCards.length} unused cards:`,
-    unusedCards.map((card) => `${card.ID} (${card.Name})`).join("; ")
+    unusedCards.map((card) => `${card.ID} (${card.Name})`).join("; "),
   );
 
   if (debugMultiUseCards) {
     const multiUseCards = uniqueCards.filter(
       (card) =>
         Object.values(decklists).flatMap((decks) =>
-          Object.values(decks).filter((deck) => deck.Cards.includes(card.ID))
-        ).length > 1
+          Object.values(decks).filter((deck) => deck.Cards.includes(card.ID)),
+        ).length > 1,
     );
 
     console.log(
@@ -105,12 +99,12 @@ onMounted(async () => {
             `${card.ID} (${card.Name}): ${Object.entries(decklists)
               .flatMap(([setName, set]) =>
                 Object.entries(set).flatMap(([deckName, deck]) =>
-                  deck.Cards.includes(card.ID) ? `${deckName} (${setName})` : []
-                )
+                  deck.Cards.includes(card.ID) ? `${deckName} (${setName})` : [],
+                ),
               )
-              .join(", ")}`
+              .join(", ")}`,
         )
-        .join("\n")
+        .join("\n"),
     );
   }
 });

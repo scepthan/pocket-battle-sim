@@ -29,7 +29,7 @@ export class RandomAgent implements PlayerAgent {
 
   async setupPokemon(gameState: GameInitState) {
     const basicPokemon = gameState.hand.filter(
-      (x) => x.CardType == "Pokemon" && x.Stage == 0
+      (x) => x.CardType == "Pokemon" && x.Stage == 0,
     ) as PokemonCard[];
     if (basicPokemon.length === 0) {
       throw new Error("No basic Pokemon in hand");
@@ -43,7 +43,7 @@ export class RandomAgent implements PlayerAgent {
 
   async doTurn(gameState: PlayerGameView) {
     const ownPokemon = [gameState.selfActive, ...gameState.selfBenched].filter(
-      (x) => x !== undefined
+      (x) => x !== undefined,
     );
 
     // Attach energy to random Pokemon if available
@@ -53,7 +53,7 @@ export class RandomAgent implements PlayerAgent {
 
     // Play a random Basic Pokemon to the Bench if available
     const handBasics = gameState.selfHand.filter(
-      (x) => x.CardType == "Pokemon" && x.Stage == 0
+      (x) => x.CardType == "Pokemon" && x.Stage == 0,
     ) as PokemonCard[];
     if (handBasics.length > 0) {
       const randomBasic = rand(handBasics);
@@ -67,9 +67,7 @@ export class RandomAgent implements PlayerAgent {
     }
 
     // Play each held Item card with 50% chance
-    const itemCards = gameState.selfHand.filter(
-      (x) => x.CardType == "Item"
-    ) as ItemCard[];
+    const itemCards = gameState.selfHand.filter((x) => x.CardType == "Item") as ItemCard[];
     for (const card of itemCards) {
       if (Math.random() < 0.5) continue;
       await gameState.playItemCard(card);
@@ -77,7 +75,7 @@ export class RandomAgent implements PlayerAgent {
 
     // Play a random Supporter card if available
     const supporterCards = gameState.selfHand.filter(
-      (x) => x.CardType == "Supporter"
+      (x) => x.CardType == "Supporter",
     ) as SupporterCard[];
     if (supporterCards.length > 0) {
       const randomSupporter = rand(supporterCards);
@@ -88,9 +86,8 @@ export class RandomAgent implements PlayerAgent {
     if (gameState.canRetreat()) {
       if (
         gameState.retreatCostModifier < 0
-          ? (gameState.selfActive!.RetreatCost ?? 0) +
-              gameState.retreatCostModifier <=
-              0 || Math.random() < 0.5
+          ? (gameState.selfActive!.RetreatCost ?? 0) + gameState.retreatCostModifier <= 0 ||
+            Math.random() < 0.5
           : Math.random() < 0.125
       ) {
         const randomBench = rand(gameState.selfBenched);
@@ -104,12 +101,12 @@ export class RandomAgent implements PlayerAgent {
       (x) =>
         x.CardType == "Pokemon" &&
         x.Stage > 0 &&
-        evolveablePokemon.some((y) => y.Name == x.EvolvesFrom)
+        evolveablePokemon.some((y) => y.Name == x.EvolvesFrom),
     ) as PokemonCard[];
     if (pokemonToEvolveWith.length > 0) {
       const randomEvolver = rand(pokemonToEvolveWith);
       const pokemonToEvolveFrom = evolveablePokemon.filter(
-        (x) => x.Name == randomEvolver.EvolvesFrom
+        (x) => x.Name == randomEvolver.EvolvesFrom,
       );
       const randomEvolvee = rand(pokemonToEvolveFrom);
       await gameState.playPokemonToEvolve(randomEvolver, randomEvolvee);

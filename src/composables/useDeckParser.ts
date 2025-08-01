@@ -9,9 +9,7 @@ export const useDeckParser = () => {
     .map((card) => parseCard(card as InputCard).value)
     .filter((x) => x !== undefined);
 
-  const cardLookup = Object.fromEntries(
-    outputCards.map((card) => [card.ID, card])
-  );
+  const cardLookup = Object.fromEntries(outputCards.map((card) => [card.ID, card]));
 
   const parseDeck = (cardIds: string[]) => {
     const deck: PlayingCard[] = [];

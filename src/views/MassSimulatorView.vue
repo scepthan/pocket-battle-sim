@@ -6,9 +6,7 @@
       <v-col cols="2">{{ record.losses }}</v-col>
       <v-col cols="2">{{ record.ties }}</v-col>
       <v-col cols="2">{{ record.gamesPlayed }}</v-col>
-      <v-col cols="1">
-        {{ ((record.wins / record.gamesPlayed) * 100).toFixed(2) }}%
-      </v-col>
+      <v-col cols="1"> {{ ((record.wins / record.gamesPlayed) * 100).toFixed(2) }}% </v-col>
     </v-row>
 
     <hr />
@@ -63,7 +61,7 @@ onMounted(async () => {
       matchup: BattleRecord;
       firstDeck: string;
       secondDeck: string;
-    }>
+    }>,
   ) => {
     console.log("Matchup complete:", event.data);
     const { matchup, firstDeck, secondDeck } = event.data;

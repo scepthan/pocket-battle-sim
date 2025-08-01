@@ -1,9 +1,5 @@
 <template>
-  <PlayingField
-    v-if="cardStore.Cards.length > 0"
-    :game="game"
-    :shown-players="['Player']"
-  />
+  <PlayingField v-if="cardStore.Cards.length > 0" :game="game" :shown-players="['Player']" />
 </template>
 
 <script setup lang="ts">
@@ -91,10 +87,8 @@ onMounted(async () => {
     if (newGameCountdown > 0) return newGameCountdown--;
 
     newGameCountdown = 10;
-    const deck1 =
-      playerDeck || deckNames[Math.floor(Math.random() * deckNames.length)];
-    const deck2 =
-      opponentDeck || deckNames[Math.floor(Math.random() * deckNames.length)];
+    const deck1 = playerDeck || deckNames[Math.floor(Math.random() * deckNames.length)];
+    const deck2 = opponentDeck || deckNames[Math.floor(Math.random() * deckNames.length)];
 
     player.value = new BetterRandomAgent("Player", allDecks[deck1]);
     opponent.value = new BetterRandomAgent("Opponent", allDecks[deck2]);

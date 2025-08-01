@@ -23,9 +23,7 @@ export interface Props {
 const props = defineProps<Props>();
 
 const cardURL = computed(() =>
-  props.card
-    ? `https://static.dotgg.gg/pokepocket/card/${props.card.ID}.webp`
-    : cardBackUrl
+  props.card ? `https://static.dotgg.gg/pokepocket/card/${props.card.ID}.webp` : cardBackUrl,
 );
 
 const ratio = 367 / 512;

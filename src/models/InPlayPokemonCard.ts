@@ -1,10 +1,4 @@
-import type {
-  Ability,
-  Attack,
-  Energy,
-  PlayingCard,
-  PokemonCard,
-} from "@/types";
+import type { Ability, Attack, Energy, PlayingCard, PokemonCard } from "@/types";
 
 export type PrimaryStatus = "Asleep" | "Paralyzed" | "Confused";
 export type SecondaryStatus = "Poisoned" | "Burned";
@@ -28,9 +22,7 @@ export class InPlayPokemonCard {
   PrimaryStatus?: PrimaryStatus;
   SecondaryStatuses: Set<SecondaryStatus> = new Set();
   get CurrentStatuses() {
-    return [this.PrimaryStatus, ...this.SecondaryStatuses].filter(
-      (status) => status !== undefined
-    );
+    return [this.PrimaryStatus, ...this.SecondaryStatuses].filter((status) => status !== undefined);
   }
   AttachedEnergy: Energy[] = [];
   InPlayCards: PlayingCard[] = [];

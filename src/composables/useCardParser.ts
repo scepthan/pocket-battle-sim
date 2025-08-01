@@ -26,9 +26,7 @@ interface AbilityTransformer {
 }
 
 export const useCardParser = () => {
-  const parseCard = (
-    inputCard: InputCard
-  ): ParsedResultOptional<PlayingCard> => {
+  const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCard> => {
     let parseSuccessful = true;
 
     if (inputCard.CardType == "Pokemon") {
@@ -68,10 +66,7 @@ export const useCardParser = () => {
       };
 
       return { value: outputCard, parseSuccessful };
-    } else if (
-      inputCard.CardType == "Item" ||
-      inputCard.CardType == "Supporter"
-    ) {
+    } else if (inputCard.CardType == "Item" || inputCard.CardType == "Supporter") {
       const result = parseTrainerEffect(inputCard.Text);
       if (!result.parseSuccessful) parseSuccessful = false;
 
@@ -116,11 +111,7 @@ export const useCardParser = () => {
         });
       };
 
-      const result = parseAttackEffect(
-        inputAttack.Effect,
-        inputAttack.HP ?? 0,
-        RequiredEnergy
-      );
+      const result = parseAttackEffect(inputAttack.Effect, inputAttack.HP ?? 0, RequiredEnergy);
       if (result.parseSuccessful) {
         parseSuccessful = true;
         Effect = result.value;
@@ -140,7 +131,7 @@ export const useCardParser = () => {
   const parseAttackEffect = (
     effect: string,
     baseAttackHP: number,
-    requiredEnergy: Energy[]
+    requiredEnergy: Energy[],
   ): ParsedResult<Effect> => {
     let parseSuccessful = true;
 
@@ -155,11 +146,7 @@ export const useCardParser = () => {
 
     // A recursive function to parse nested effects, allowing for conditional effects and other complex structures.
     const recursiveParse = (effectText: string) => {
-      const result = parseAttackEffect(
-        effectText,
-        baseAttackHP,
-        requiredEnergy
-      );
+      const result = parseAttackEffect(effectText, baseAttackHP, requiredEnergy);
       if (!result.parseSuccessful) {
         parseSuccessful = false;
       }
@@ -169,15 +156,10 @@ export const useCardParser = () => {
     const dictionary: EffectTransformer[] = [
       // Conditional effects
       {
-        pattern:
-          /^Flip a coin\.(?: If heads, (.+?\.))?(?: If tails, (.+?\.))?$/i,
+        pattern: /^Flip a coin\.(?: If heads, (.+?\.))?(?: If tails, (.+?\.))?$/i,
         transform: (_, headsText, tailsText) => {
-          const headsEffect = headsText
-            ? recursiveParse(headsText)
-            : defaultEffect;
-          const tailsEffect = tailsText
-            ? recursiveParse(tailsText)
-            : defaultEffect;
+          const headsEffect = headsText ? recursiveParse(headsText) : defaultEffect;
+          const tailsEffect = tailsText ? recursiveParse(tailsText) : defaultEffect;
 
           return async (game: GameState) => {
             if (game.flipCoin(game.AttackingPlayer)) {
@@ -201,27 +183,23 @@ export const useCardParser = () => {
         },
       },
       {
-        pattern:
-          /^If this Pokémon has at least (\d+) extra (?:{(\w)} )?Energy attached, (.+?\.)$/i,
+        pattern: /^If this Pokémon has at least (\d+) extra (?:{(\w)} )?Energy attached, (.+?\.)$/i,
         transform: (_, energyCount, energyType, effectText) => {
           const e = parseEnergy(energyType || "C");
           const secondaryRequiredEnergy = requiredEnergy.slice();
-          for (let i = 0; i < Number(energyCount); i++)
-            secondaryRequiredEnergy.push(e);
+          for (let i = 0; i < Number(energyCount); i++) secondaryRequiredEnergy.push(e);
 
           const conditionalEffect = recursiveParse(effectText);
 
           return async (game: GameState) => {
             const active = game.AttackingPlayer.ActivePokemon!;
-            if (active.hasSufficientEnergy(secondaryRequiredEnergy))
-              await conditionalEffect(game);
+            if (active.hasSufficientEnergy(secondaryRequiredEnergy)) await conditionalEffect(game);
             else await defaultEffect(game);
           };
         },
       },
       {
-        pattern:
-          /^If your opponent's Active Pokémon has damage on it, (.+?\.)$/i,
+        pattern: /^If your opponent's Active Pokémon has damage on it, (.+?\.)$/i,
         transform: (_, effectText) => {
           const conditionalEffect = recursiveParse(effectText);
 
@@ -252,8 +230,7 @@ export const useCardParser = () => {
 
           return async (game: GameState) => {
             const defender = game.DefendingPlayer.ActivePokemon!;
-            if (defender.SecondaryStatuses.has("Poisoned"))
-              await conditionalEffect(game);
+            if (defender.SecondaryStatuses.has("Poisoned")) await conditionalEffect(game);
             else await defaultEffect(game);
           };
         },
@@ -261,14 +238,10 @@ export const useCardParser = () => {
 
       // Damage-determining effects
       {
-        pattern:
-          /^Flip (\d+) coins\. This attack does (\d+)( more)? damage for each heads\.$/i,
+        pattern: /^Flip (\d+) coins\. This attack does (\d+)( more)? damage for each heads\.$/i,
         transform: (_, coins, damage, more) => async (game: GameState) => {
           let totalDamage = more ? baseAttackHP : 0;
-          const { heads } = game.flipMultiCoin(
-            game.AttackingPlayer,
-            Number(coins)
-          );
+          const { heads } = game.flipMultiCoin(game.AttackingPlayer, Number(coins));
           totalDamage += heads * Number(damage);
           game.attackActivePokemon(totalDamage);
         },
@@ -289,17 +262,12 @@ export const useCardParser = () => {
           /^Flip a coin for each(?: {(\w)})? Energy attached to this Pokémon\. This attack does (\d+) damage for each heads\.$/i,
         transform: (_, energyType, damage) => {
           const fullType = energyType ? parseEnergy(energyType) : undefined;
-          const predicate = fullType
-            ? (e: Energy) => e == fullType
-            : () => true;
+          const predicate = fullType ? (e: Energy) => e == fullType : () => true;
 
           return async (game: GameState) => {
             const energy = game.AttackingPlayer.ActivePokemon!.AttachedEnergy;
             const totalFlips = energy.filter(predicate).length;
-            const { heads } = game.flipMultiCoin(
-              game.AttackingPlayer,
-              totalFlips
-            );
+            const { heads } = game.flipMultiCoin(game.AttackingPlayer, totalFlips);
             game.attackActivePokemon(heads * Number(damage));
           };
         },
@@ -308,8 +276,7 @@ export const useCardParser = () => {
         pattern:
           /^This attack does (\d+) more damage for each Energy attached to your opponent's Active Pokémon\.$/i,
         transform: (_, extraDamage) => async (game: GameState) => {
-          const energyCount =
-            game.DefendingPlayer.ActivePokemon!.AttachedEnergy.length;
+          const energyCount = game.DefendingPlayer.ActivePokemon!.AttachedEnergy.length;
           const damage = baseAttackHP! + Number(extraDamage) * energyCount;
           game.attackActivePokemon(damage);
         },
@@ -338,9 +305,7 @@ export const useCardParser = () => {
           return async (game: GameState) => {
             let totalDamage = more ? baseAttackHP : 0;
             const bench = game.AttackingPlayer.BenchedPokemon.filter(
-              (p) =>
-                (!e || p.Type == e) &&
-                (pokemon == "Pokémon" || p.Name == pokemon)
+              (p) => (!e || p.Type == e) && (pokemon == "Pokémon" || p.Name == pokemon),
             );
             totalDamage += bench.length * Number(damagePerBench);
             game.attackActivePokemon(totalDamage);
@@ -353,15 +318,11 @@ export const useCardParser = () => {
         transform: (_, times, damage) => async (game: GameState) => {
           const damages = game.DefendingPlayer.InPlayPokemon.map(() => 0);
           for (let i = 0; i < Number(times); i++) {
-            damages[Math.floor(Math.random() * damages.length)] +=
-              Number(damage);
+            damages[Math.floor(Math.random() * damages.length)] += Number(damage);
           }
           for (let i = 0; i < damages.length; i++) {
             if (damages[i] > 0) {
-              game.attackPokemon(
-                game.DefendingPlayer.InPlayPokemon[i],
-                damages[i]
-              );
+              game.attackPokemon(game.DefendingPlayer.InPlayPokemon[i], damages[i]);
             }
           }
         },
@@ -379,14 +340,11 @@ export const useCardParser = () => {
         },
       },
       {
-        pattern:
-          /^This attack does (\d+) damage to 1 of your opponent's( Benched)? Pokémon\.$/i,
+        pattern: /^This attack does (\d+) damage to 1 of your opponent's( Benched)? Pokémon\.$/i,
         transform: (_, damage, benched) => async (game: GameState) => {
           const pokemon = await game.choosePokemon(
             game.AttackingPlayer,
-            benched
-              ? game.DefendingPlayer.BenchedPokemon
-              : game.DefendingPlayer.InPlayPokemon
+            benched ? game.DefendingPlayer.BenchedPokemon : game.DefendingPlayer.InPlayPokemon,
           );
           if (pokemon) {
             game.attackPokemon(pokemon, Number(damage));
@@ -399,21 +357,16 @@ export const useCardParser = () => {
         pattern: /^This Pokémon also does (\d+) damage to itself\.$/i,
         transform: (_, selfDamage) => async (game: GameState) => {
           await defaultEffect(game);
-          game.applyDamage(
-            game.AttackingPlayer.ActivePokemon!,
-            Number(selfDamage),
-            true
-          );
+          game.applyDamage(game.AttackingPlayer.ActivePokemon!, Number(selfDamage), true);
         },
       },
       {
-        pattern:
-          /^This attack also does (\d+) damage to 1 of your Benched Pokémon\.$/i,
+        pattern: /^This attack also does (\d+) damage to 1 of your Benched Pokémon\.$/i,
         transform: (_, damage) => async (game: GameState) => {
           await defaultEffect(game);
           const pokemon = await game.choosePokemon(
             game.AttackingPlayer,
-            game.AttackingPlayer.BenchedPokemon
+            game.AttackingPlayer.BenchedPokemon,
           );
           if (pokemon) {
             game.attackPokemon(pokemon, Number(damage));
@@ -447,14 +400,12 @@ export const useCardParser = () => {
         },
       },
       {
-        pattern:
-          /^Put 1 random(?: \{(\w)\})? Pokémon from your deck into your hand\.$/i,
+        pattern: /^Put 1 random(?: \{(\w)\})? Pokémon from your deck into your hand\.$/i,
         transform: (_, type) => {
           const e = type ? parseEnergy(type) : undefined;
 
           const predicate = e
-            ? (card: PlayingCard) =>
-                card.CardType == "Pokemon" && card.Type == e
+            ? (card: PlayingCard) => card.CardType == "Pokemon" && card.Type == e
             : (card: PlayingCard) => card.CardType == "Pokemon";
 
           return async (game: GameState) => {
@@ -486,11 +437,7 @@ export const useCardParser = () => {
 
           return async (game: GameState) => {
             await defaultEffect(game);
-            game.discardEnergy(
-              game.AttackingPlayer.ActivePokemon!,
-              fullType,
-              Number(count) || 1
-            );
+            game.discardEnergy(game.AttackingPlayer.ActivePokemon!, fullType, Number(count) || 1);
           };
         },
       },
@@ -502,13 +449,10 @@ export const useCardParser = () => {
         },
       },
       {
-        pattern:
-          /^Discard a random Energy from your opponent's Active Pokémon.$/i,
+        pattern: /^Discard a random Energy from your opponent's Active Pokémon.$/i,
         transform: () => async (game: GameState) => {
           await defaultEffect(game);
-          game.DefendingPlayer.discardRandomEnergy(
-            game.DefendingPlayer.ActivePokemon!
-          );
+          game.DefendingPlayer.discardRandomEnergy(game.DefendingPlayer.ActivePokemon!);
         },
       },
       {
@@ -522,7 +466,7 @@ export const useCardParser = () => {
             game.AttackingPlayer.attachEnergy(
               game.AttackingPlayer.ActivePokemon!,
               new Array(count == "a" ? 1 : Number(count)).fill(fullType),
-              "energyZone"
+              "energyZone",
             );
           };
         },
@@ -536,14 +480,9 @@ export const useCardParser = () => {
 
           return async (game: GameState) => {
             const validPokemon = (
-              benched
-                ? game.AttackingPlayer.BenchedPokemon
-                : game.AttackingPlayer.InPlayPokemon
+              benched ? game.AttackingPlayer.BenchedPokemon : game.AttackingPlayer.InPlayPokemon
             ).filter((x) => !pt || x.Type == pt);
-            const pokemon = await game.choosePokemon(
-              game.AttackingPlayer,
-              validPokemon
-            );
+            const pokemon = await game.choosePokemon(game.AttackingPlayer, validPokemon);
             if (pokemon) {
               game.AttackingPlayer.attachEnergy(pokemon, [et], "energyZone");
             }
@@ -567,13 +506,10 @@ export const useCardParser = () => {
         },
       },
       {
-        pattern:
-          /^your opponent shuffles their Active Pokémon back into their deck\./i,
+        pattern: /^your opponent shuffles their Active Pokémon back into their deck\./i,
         transform: () => async (game: GameState) => {
           await defaultEffect(game);
-          game.DefendingPlayer.shufflePokemonIntoDeck(
-            game.DefendingPlayer.ActivePokemon!
-          );
+          game.DefendingPlayer.shufflePokemonIntoDeck(game.DefendingPlayer.ActivePokemon!);
         },
       },
 
@@ -625,9 +561,7 @@ export const useCardParser = () => {
     };
   };
 
-  const parseAbility = (
-    inputAbility: InputCardAbility
-  ): ParsedResult<Ability> => {
+  const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Ability> => {
     const ability: Ability = {
       Name: inputAbility.Name,
       Trigger: "GameRule",
@@ -651,20 +585,12 @@ export const useCardParser = () => {
       },
 
       {
-        pattern:
-          /^take a {(\w)} Energy from your Energy Zone and attach it to this Pokémon\.$/i,
+        pattern: /^take a {(\w)} Energy from your Energy Zone and attach it to this Pokémon\.$/i,
         transform: (_, energyType) => {
           const fullType = parseEnergy(energyType);
 
-          ability.Effect = async (
-            game: GameState,
-            pokemon?: InPlayPokemonCard
-          ) => {
-            game.AttackingPlayer.attachEnergy(
-              pokemon!,
-              [fullType],
-              "energyZone"
-            );
+          ability.Effect = async (game: GameState, pokemon?: InPlayPokemonCard) => {
+            game.AttackingPlayer.attachEnergy(pokemon!, [fullType], "energyZone");
           };
         },
       },
@@ -685,11 +611,7 @@ export const useCardParser = () => {
               });
               return;
             }
-            game.AttackingPlayer.attachEnergy(
-              pokemon,
-              [fullType],
-              "energyZone"
-            );
+            game.AttackingPlayer.attachEnergy(pokemon, [fullType], "energyZone");
           };
         },
       },
@@ -711,7 +633,7 @@ export const useCardParser = () => {
           ability.Effect = async (game: GameState) => {
             const pokemon = await game.choosePokemon(
               game.AttackingPlayer,
-              game.DefendingPlayer.InPlayPokemon
+              game.DefendingPlayer.InPlayPokemon,
             );
             if (pokemon) {
               game.applyDamage(pokemon, Number(damage), false);
@@ -726,8 +648,7 @@ export const useCardParser = () => {
         },
       },
       {
-        pattern:
-          /^flip a coin\. If heads, your opponent's Active Pokémon is now Asleep\.$/i,
+        pattern: /^flip a coin\. If heads, your opponent's Active Pokémon is now Asleep\.$/i,
         transform: () => {
           ability.Effect = async (game: GameState) => {
             if (game.flipCoin(game.AttackingPlayer)) {
@@ -741,10 +662,7 @@ export const useCardParser = () => {
           /^switch out your opponent's Active Pokémon to the Bench\. \(Your opponent chooses the new Active Pokémon\.\)$/i,
         transform: () => {
           ability.Effect = async (game: GameState) => {
-            await game.swapActivePokemon(
-              game.DefendingPlayer,
-              "opponentEffect"
-            );
+            await game.swapActivePokemon(game.DefendingPlayer, "opponentEffect");
           };
         },
       },
@@ -752,10 +670,7 @@ export const useCardParser = () => {
         pattern: /^look at the top card of your deck\.$/i,
         transform: () => {
           ability.Effect = async (game: GameState) => {
-            await game.showCards(
-              game.AttackingPlayer,
-              game.AttackingPlayer.Deck.slice(0, 1)
-            );
+            await game.showCards(game.AttackingPlayer, game.AttackingPlayer.Deck.slice(0, 1));
           };
         },
       },
@@ -792,7 +707,7 @@ export const useCardParser = () => {
         pattern: /^Put 1 random Basic Pokemon from your deck into your hand\.$/,
         transform: () => async (game: GameState) =>
           game.AttackingPlayer.drawRandomFiltered(
-            (card) => card.CardType == "Pokemon" && card.Stage == 0
+            (card) => card.CardType == "Pokemon" && card.Stage == 0,
           ),
       },
       {
@@ -802,21 +717,16 @@ export const useCardParser = () => {
         },
       },
       {
-        pattern:
-          /^During this turn, the Retreat Cost of your Active Pokémon is (\d+) less\.$/,
+        pattern: /^During this turn, the Retreat Cost of your Active Pokémon is (\d+) less\.$/,
         transform: (_, modifier) => async (game: GameState) => {
           game.reduceRetreatCost(Number(modifier));
         },
       },
       {
-        pattern:
-          /^Your opponent shuffles their hand into their deck and draws (\d+) cards\.$/,
+        pattern: /^Your opponent shuffles their hand into their deck and draws (\d+) cards\.$/,
         transform: (_, count) => async (game: GameState) => {
           game.DefendingPlayer.shuffleHandIntoDeck();
-          game.DefendingPlayer.drawCards(
-            Number(count),
-            game.GameRules.MaxHandSize
-          );
+          game.DefendingPlayer.drawCards(Number(count), game.GameRules.MaxHandSize);
         },
       },
       {
@@ -830,7 +740,7 @@ export const useCardParser = () => {
         transform: (_, count) => async (game: GameState) => {
           await game.showCards(
             game.AttackingPlayer,
-            game.AttackingPlayer.Deck.slice(0, Number(count))
+            game.AttackingPlayer.Deck.slice(0, Number(count)),
           );
         },
       },
@@ -852,16 +762,11 @@ export const useCardParser = () => {
         pattern: /^Heal (\d+) damage from 1 of your (?:\{(\w)\} )?Pokémon\.$/,
         transform: (_, modifier, type) => async (game: GameState) => {
           let validPokemon = game.AttackingPlayer.InPlayPokemon.filter(
-            (x) => x.CurrentHP < x.BaseHP
+            (x) => x.CurrentHP < x.BaseHP,
           );
           if (isEnergyShort(type))
-            validPokemon = validPokemon.filter(
-              (x) => x.Type == parseEnergy(type)
-            );
-          const pokemon = await game.choosePokemon(
-            game.AttackingPlayer,
-            validPokemon
-          );
+            validPokemon = validPokemon.filter((x) => x.Type == parseEnergy(type));
+          const pokemon = await game.choosePokemon(game.AttackingPlayer, validPokemon);
           if (pokemon) game.healPokemon(pokemon, Number(modifier));
         },
       },
@@ -873,20 +778,11 @@ export const useCardParser = () => {
           const et = parseEnergy(energyType);
 
           return async (game: GameState) => {
-            const validPokemon = game.AttackingPlayer.InPlayPokemon.filter(
-              (x) => x.Type == pt
-            );
-            const pokemon = await game.choosePokemon(
-              game.AttackingPlayer,
-              validPokemon
-            );
+            const validPokemon = game.AttackingPlayer.InPlayPokemon.filter((x) => x.Type == pt);
+            const pokemon = await game.choosePokemon(game.AttackingPlayer, validPokemon);
             if (pokemon) {
               const { heads } = game.flipCoinUntilTails(game.AttackingPlayer);
-              game.AttackingPlayer.attachEnergy(
-                pokemon,
-                new Array(heads).fill(et),
-                "energyZone"
-              );
+              game.AttackingPlayer.attachEnergy(pokemon, new Array(heads).fill(et), "energyZone");
             }
           };
         },
@@ -911,27 +807,19 @@ export const useCardParser = () => {
         },
       },
       {
-        pattern:
-          /^Take a {(\w)} Energy from your Energy Zone and attach it to (.+?)\.$/,
+        pattern: /^Take a {(\w)} Energy from your Energy Zone and attach it to (.+?)\.$/,
         transform: (_, energyType, pokemon) => {
           const fullType = parseEnergy(energyType);
           const names = parsePokemonNames(pokemon);
 
           return async (game: GameState) => {
-            const validPokemon = game.AttackingPlayer.InPlayPokemon.filter(
-              (x) => names.includes(x.Name)
+            const validPokemon = game.AttackingPlayer.InPlayPokemon.filter((x) =>
+              names.includes(x.Name),
             );
             if (validPokemon.length > 0) {
-              const pokemon = await game.choosePokemon(
-                game.AttackingPlayer,
-                validPokemon
-              );
+              const pokemon = await game.choosePokemon(game.AttackingPlayer, validPokemon);
               if (pokemon) {
-                game.AttackingPlayer.attachEnergy(
-                  pokemon,
-                  [fullType],
-                  "energyZone"
-                );
+                game.AttackingPlayer.attachEnergy(pokemon, [fullType], "energyZone");
               }
             } else {
               game.GameLog.addEntry({
@@ -961,14 +849,12 @@ export const useCardParser = () => {
             }
             for (const pokemon of game.AttackingPlayer.Bench) {
               if (!pokemon) continue;
-              const energyToMove = pokemon.AttachedEnergy.filter(
-                (e) => e == fullType
-              );
+              const energyToMove = pokemon.AttachedEnergy.filter((e) => e == fullType);
               if (energyToMove.length > 0) {
                 game.AttackingPlayer.transferEnergy(
                   pokemon,
                   game.AttackingPlayer.ActivePokemon!,
-                  energyToMove
+                  energyToMove,
                 );
               }
             }

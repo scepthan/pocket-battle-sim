@@ -2,15 +2,8 @@ import type { GameState } from "@/models/GameState";
 import type { InPlayPokemonCard } from "@/models/InPlayPokemonCard";
 import type { Energy } from "./Energy";
 
-export type Effect = (
-  gameState: GameState,
-  pokemon?: InPlayPokemonCard
-) => Promise<void>;
-export type AbilityTrigger =
-  | "OnceDuringTurn"
-  | "ManyDuringTurn"
-  | "OnAttackDamage"
-  | "GameRule";
+export type Effect = (gameState: GameState, pokemon?: InPlayPokemonCard) => Promise<void>;
+export type AbilityTrigger = "OnceDuringTurn" | "ManyDuringTurn" | "OnAttackDamage" | "GameRule";
 export type AbilityCondition = "Active" | "OnBench" | "HasDamage";
 
 export interface Ability {
