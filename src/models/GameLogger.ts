@@ -314,4 +314,15 @@ export class GameLogger {
   addEntry(entry: LoggedEvent) {
     this.entries.push(entry);
   }
+
+  logWinner(winner: string, conditions: string[]) {
+    this.addEntry({
+      type: "gameOver",
+      draw: false,
+      winner,
+      reason: conditions.includes("maxPrizePointsReached")
+        ? "maxPrizePointsReached"
+        : "noPokemonLeft",
+    });
+  }
 }

@@ -259,8 +259,10 @@
       <div v-else-if="entry.type == 'scorePrizePoints'">
         <p>
           <b>{{ entry.player }}</b> scores
-          <CountDisplay :count="entry.totalPrizePoints" single="prize point" />!
-          (Total: {{ entry.totalPrizePoints }})
+          <CountDisplay
+            :count="entry.prizePointsScored"
+            single="prize point"
+          />! (Total: {{ entry.totalPrizePoints }})
         </p>
       </div>
 

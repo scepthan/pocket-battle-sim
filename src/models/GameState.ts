@@ -368,23 +368,9 @@ export class GameState {
     // If either player has reached a win condition, the game is over
     if (player1WinConditions.length > 0 || player2WinConditions.length > 0) {
       if (player1WinConditions.length > player2WinConditions.length) {
-        this.GameLog.addEntry({
-          type: "gameOver",
-          draw: false,
-          winner: this.Player1.Name,
-          reason: player1WinConditions.includes("maxPrizePointsReached")
-            ? "maxPrizePointsReached"
-            : "noPokemonLeft",
-        });
+        this.GameLog.logWinner(this.Player1.Name, player1WinConditions);
       } else if (player1WinConditions.length < player2WinConditions.length) {
-        this.GameLog.addEntry({
-          type: "gameOver",
-          draw: false,
-          winner: this.Player2.Name,
-          reason: player2WinConditions.includes("maxPrizePointsReached")
-            ? "maxPrizePointsReached"
-            : "noPokemonLeft",
-        });
+        this.GameLog.logWinner(this.Player2.Name, player2WinConditions);
       } else {
         this.GameLog.addEntry({
           type: "gameOver",
