@@ -99,7 +99,9 @@ onMounted(async () => {
     player.value = new BetterRandomAgent("Player", allDecks[deck1]);
     opponent.value = new BetterRandomAgent("Opponent", allDecks[deck2]);
 
-    game.value = new GameState(player.value, opponent.value);
+    game.value = new GameState(player.value, opponent.value, {
+      DelayPerAction: 1000,
+    });
 
     setTimeout(async () => {
       if (!game.value) return;

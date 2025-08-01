@@ -5,5 +5,6 @@ export interface GameRules {
   InitialHandSize: number;
   MaxHandSize: number;
   TurnLimit: number;
+  DelayPerAction: number;
   ExtraValidation?: (deck: Deck) => true | string;
 }

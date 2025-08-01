@@ -40,9 +40,8 @@ export class GameState {
     InitialHandSize: 5,
     MaxHandSize: 10,
     TurnLimit: 30,
+    DelayPerAction: 0,
   };
-
-  DelayPerAction: number = 0; // milliseconds
 
   GameOver: boolean = false;
 
@@ -107,8 +106,9 @@ export class GameState {
   }
 
   async delay() {
-    if (this.DelayPerAction) {
-      await new Promise((resolve) => setTimeout(resolve, this.DelayPerAction));
+    const delay = this.GameRules.DelayPerAction;
+    if (delay) {
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
   findOwner(pokemon: InPlayPokemonCard) {
