@@ -133,9 +133,11 @@
         </p>
       </div>
 
-      <div v-else-if="entry.type == 'useAttack'">
+      <div v-else-if="entry.type == 'useAttack' || entry.type == 'copyAttack'">
         <p>
-          <CardName :card-id="entry.attackingPokemon.cardId" /> uses <b>{{ entry.attackName }}</b
+          <CardName :card-id="entry.attackingPokemon.cardId" />
+          {{ entry.type == "copyAttack" ? "copies" : "uses" }}
+          <b>{{ entry.attackName }}</b
           >!
         </p>
       </div>

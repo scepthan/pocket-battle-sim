@@ -551,6 +551,9 @@ export class Game {
     }
   }
 
+  findAgent(player: Player) {
+    return player == this.Player1 ? this.Agent1 : this.Agent2;
+  }
   async swapActivePokemon(player: Player, reason: "selfEffect" | "opponentEffect") {
     await this.delay();
     if (!player.Bench.some((x) => x !== undefined)) {
@@ -561,7 +564,7 @@ export class Game {
       });
       return false;
     }
-    const agent = player == this.Player1 ? this.Agent1 : this.Agent2;
+    const agent = this.findAgent(player);
     const newActive = await agent.swapActivePokemon(new PlayerGameView(this, player));
     player.swapActivePokemon(newActive, reason);
     return true;
@@ -575,10 +578,26 @@ export class Game {
       });
       return;
     }
-    const agent = player == this.Player1 ? this.Agent1 : this.Agent2;
+    const agent = this.findAgent(player);
     const selected = await agent.choosePokemon(validPokemon);
     if (!validPokemon.includes(selected)) {
       throw new Error("Invalid Pokemon selected");
+    }
+    return selected;
+  }
+  async choose<T>(player: Player, options: T[]) {
+    if (options.length == 0) {
+      this.GameLog.addEntry({
+        type: "actionFailed",
+        player: player.Name,
+        reason: "noValidTargets",
+      });
+      return;
+    }
+    const agent = this.findAgent(player);
+    const selected = await agent.choose(options);
+    if (!options.includes(selected)) {
+      throw new Error("Invalid option selected");
     }
     return selected;
   }
@@ -588,7 +607,7 @@ export class Game {
       player: player.Name,
       cardIds: cards.map((card) => card.ID),
     });
-    const agent = player == this.Player1 ? this.Agent1 : this.Agent2;
+    const agent = this.findAgent(player);
     await agent.viewCards(cards);
   }
 

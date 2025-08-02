@@ -173,6 +173,13 @@ interface UseAttackEvent {
   selectedDefendingPokemon?: InPlayPokemonDescriptor[]; // For attacks where the attacker can select one or more targets
   attackName: string;
 }
+interface CopyAttackEvent {
+  type: "copyAttack";
+  player: string;
+  attackingPokemon: InPlayPokemonDescriptor;
+  selectedDefendingPokemon?: InPlayPokemonDescriptor[]; // For attacks where the attacker can select one or more targets
+  attackName: string;
+}
 
 interface PokemonDamagedEvent {
   type: "pokemonDamaged";
@@ -285,6 +292,7 @@ export type LoggedEvent =
   | TriggerAbilityEvent
   | UseAbilityEvent
   | UseAttackEvent
+  | CopyAttackEvent
   | PokemonDamagedEvent
   | PokemonKnockedOutEvent
   | PokemonHealedEvent
