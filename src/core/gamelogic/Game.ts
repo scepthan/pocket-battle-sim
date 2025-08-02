@@ -1,5 +1,6 @@
-import { useCoinFlip, useDeckValidator } from "@/composables";
+import { useCoinFlip } from "@/composables";
 import { GameLogger } from "../logging";
+import { useDeckValidator } from "../parsing";
 import type { Ability, Attack, Effect, Energy, PlayingCard, TrainerCard } from "../types";
 import type { GameRules } from "./GameRules";
 import type { InPlayPokemonCard } from "./InPlayPokemonCard";
