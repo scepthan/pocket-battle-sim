@@ -1,4 +1,5 @@
-import type { Energy, PlayingCard, PokemonCard } from "../types";
+import { parseDeck } from "../parsing";
+import type { DeckInfo, Energy, PlayingCard, PokemonCard } from "../types";
 import type { InPlayPokemonCard } from "./InPlayPokemonCard";
 import type { PlayerGameView } from "./PlayerGameView";
 
@@ -13,15 +14,21 @@ export interface GameInitState {
   firstEnergy: Energy;
 }
 
-export interface PlayerAgent {
+export abstract class PlayerAgent {
   Name: string;
   EnergyTypes: Energy[];
   Deck: PlayingCard[];
 
-  setupPokemon: (gameState: GameInitState) => Promise<PlayerGameSetup>;
-  doTurn: (gameState: PlayerGameView) => Promise<void>;
-  swapActivePokemon: (gameState: PlayerGameView) => Promise<InPlayPokemonCard>;
-  choosePokemon: (pokemon: InPlayPokemonCard[]) => Promise<InPlayPokemonCard>;
-  choose: <T>(options: T[]) => Promise<T>;
-  viewCards: (cards: PlayingCard[]) => Promise<void>;
+  constructor(name: string, deck: DeckInfo) {
+    this.Name = name;
+    this.EnergyTypes = deck.EnergyTypes;
+    this.Deck = parseDeck(deck.Cards);
+  }
+
+  abstract setupPokemon(gameState: GameInitState): Promise<PlayerGameSetup>;
+  abstract doTurn(gameState: PlayerGameView): Promise<void>;
+  abstract swapActivePokemon(gameState: PlayerGameView): Promise<InPlayPokemonCard>;
+  abstract choosePokemon(pokemon: InPlayPokemonCard[]): Promise<InPlayPokemonCard>;
+  abstract choose<T>(options: T[]): Promise<T>;
+  abstract viewCards(cards: PlayingCard[]): Promise<void>;
 }

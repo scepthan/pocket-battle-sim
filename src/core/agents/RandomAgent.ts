@@ -1,23 +1,14 @@
-import { useDeckParser } from "@/composables";
-
-import type { GameInitState, InPlayPokemonCard, PlayerAgent, PlayerGameView } from "../gamelogic";
-import type { DeckInfo, Energy, ItemCard, PlayingCard, PokemonCard, SupporterCard } from "../types";
+import {
+  PlayerAgent,
+  type GameInitState,
+  type InPlayPokemonCard,
+  type PlayerGameView,
+} from "../gamelogic";
+import type { ItemCard, PokemonCard, SupporterCard } from "../types";
 
 const rand = <T>(arr: T[]) => arr[(Math.random() * arr.length) | 0];
 
-export class RandomAgent implements PlayerAgent {
-  Name: string = "Random Agent";
-  EnergyTypes: Energy[];
-  Deck: PlayingCard[];
-
-  constructor(name: string, deck: DeckInfo) {
-    const { parseDeck } = useDeckParser();
-
-    this.Name = name;
-    this.EnergyTypes = deck.EnergyTypes;
-    this.Deck = parseDeck(deck.Cards);
-  }
-
+export class RandomAgent extends PlayerAgent {
   async setupPokemon(gameState: GameInitState) {
     const basicPokemon = gameState.hand.filter(
       (x) => x.CardType == "Pokemon" && x.Stage == 0
