@@ -1,4 +1,4 @@
-export const useCoinFlip = () => {
+export const useCoinFlipper = () => {
   const coinFlip = () => Math.random() >= 0.5;
 
   const multiCoinFlip = (count: number) => {

@@ -1,4 +1,3 @@
-import { useCoinFlip } from "@/composables";
 import { GameLogger } from "../logging";
 import { useDeckValidator } from "../parsing";
 import type { Ability, Attack, Effect, Energy, PlayingCard, TrainerCard } from "../types";
@@ -6,8 +5,9 @@ import type { InPlayPokemonCard } from "./InPlayPokemonCard";
 import { Player } from "./Player";
 import { PlayerGameView } from "./PlayerGameView";
 import type { GameRules, PlayerAgent } from "./types";
+import { useCoinFlipper } from "./useCoinFlipper";
 
-const { coinFlip, multiCoinFlip, untilTailsCoinFlip } = useCoinFlip();
+const { coinFlip, multiCoinFlip, untilTailsCoinFlip } = useCoinFlipper();
 
 export class Game {
   Agent1: PlayerAgent;
