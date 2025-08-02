@@ -30,7 +30,13 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       },
     },
     {
-      pattern: /^Once during your turn, if this Pokémon is in the active spot, you may /i,
+      pattern: /^If this Pokémon is in the Active Spot, /i,
+      transform: () => {
+        ability.Conditions.push("Active");
+      },
+    },
+    {
+      pattern: /^Once during your turn, if this Pokémon is in the Active Spot, you may /i,
       transform: () => {
         ability.Trigger = "OnceDuringTurn";
         ability.Conditions.push("Active");
@@ -132,6 +138,30 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       transform: () => {
         ability.Effect = async (game: Game) => {
           game.DefendingPlayer.poisonActivePokemon();
+        };
+      },
+    },
+    {
+      pattern: /^switch in 1 of your opponent's Benched Basic Pokémon to the Active Spot\.$/i,
+      transform: () => {
+        ability.Effect = async (game: Game) => {
+          const benchedBasics = game.DefendingPlayer.BenchedPokemon.filter((p) => p.Stage === 0);
+          if (benchedBasics.length === 0) {
+            game.GameLog.addEntry({
+              type: "actionFailed",
+              player: game.AttackingPlayer.Name,
+              reason: "noValidTargets",
+            });
+            return;
+          }
+          const chosenPokemon = await game.choosePokemon(game.AttackingPlayer, benchedBasics);
+          if (chosenPokemon) {
+            game.DefendingPlayer.swapActivePokemon(
+              chosenPokemon,
+              "opponentEffect",
+              game.AttackingPlayer.Name
+            );
+          }
         };
       },
     },

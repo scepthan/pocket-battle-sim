@@ -127,7 +127,7 @@ export const parseAttackEffect = (
     },
     {
       pattern:
-        /^Flip a coin until you get tails\. This attack does (\d+)(?: more)? damage for each heads\.$/i,
+        /^Flip a coin until you get tails\. This attack does (\d+)( more)? damage for each heads\.$/i,
       transform: (_, damage, more) => async (game: Game) => {
         let totalDamage = more ? baseAttackHP : 0;
         const { heads } = game.AttackingPlayer.flipUntilTails();
@@ -356,6 +356,7 @@ export const parseAttackEffect = (
         const pt = pokemonType ? parseEnergy(pokemonType) : undefined;
 
         return async (game: Game) => {
+          await defaultEffect(game);
           const validPokemon = (
             benched ? game.AttackingPlayer.BenchedPokemon : game.AttackingPlayer.InPlayPokemon
           ).filter((x) => !pt || x.Type == pt);

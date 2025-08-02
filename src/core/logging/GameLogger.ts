@@ -115,6 +115,7 @@ interface ViewCardsEvent {
 interface SwapActivePokemonEvent {
   type: "swapActivePokemon";
   player: string;
+  choosingPlayer?: string;
   reason: "retreat" | "selfEffect" | "opponentEffect";
   fromPokemon: InPlayPokemonDescriptor;
   toPokemon: InPlayPokemonDescriptor;

@@ -417,7 +417,8 @@ export class Player {
 
   swapActivePokemon(
     pokemon: InPlayPokemonCard,
-    reason: "retreat" | "selfEffect" | "opponentEffect"
+    reason: "retreat" | "selfEffect" | "opponentEffect",
+    choosingPlayer?: string
   ) {
     const previousActive = this.ActivePokemon!;
     this.ActivePokemon = pokemon;
@@ -426,6 +427,7 @@ export class Player {
     this.logger.addEntry({
       type: "swapActivePokemon",
       player: this.Name,
+      choosingPlayer,
       fromPokemon: this.pokemonToDescriptor(previousActive),
       toPokemon: this.pokemonToDescriptor(pokemon),
       reason,

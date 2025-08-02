@@ -121,6 +121,10 @@
           <CardName :card-id="entry.fromPokemon.cardId" /> and puts in
           <CardName :card-id="entry.toPokemon.cardId" />!
         </p>
+        <p v-else-if="entry.choosingPlayer && entry.choosingPlayer != entry.player">
+          <b>{{ entry.choosingPlayer }}</b> switches <b>{{ entry.player }}</b
+          >'s active Pokemon to <CardName :card-id="entry.toPokemon.cardId" />!
+        </p>
         <p v-else>
           <b>{{ entry.player }}</b> switches their active Pokemon to
           <CardName :card-id="entry.toPokemon.cardId" />!
