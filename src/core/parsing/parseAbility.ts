@@ -29,6 +29,13 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         ability.Trigger = "OnceDuringTurn";
       },
     },
+    {
+      pattern: /^Once during your turn, if this Pokémon is in the active spot, you may /i,
+      transform: () => {
+        ability.Trigger = "OnceDuringTurn";
+        ability.Conditions.push("Active");
+      },
+    },
 
     {
       pattern: /^take a {(\w)} Energy from your Energy Zone and attach it to this Pokémon\.$/i,
@@ -117,6 +124,14 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       transform: () => {
         ability.Effect = async (game: Game) => {
           await game.showCards(game.AttackingPlayer, game.AttackingPlayer.Deck.slice(0, 1));
+        };
+      },
+    },
+    {
+      pattern: /^make your opponent's Active Pokémon Poisoned\.$/i,
+      transform: () => {
+        ability.Effect = async (game: Game) => {
+          game.DefendingPlayer.poisonActivePokemon();
         };
       },
     },

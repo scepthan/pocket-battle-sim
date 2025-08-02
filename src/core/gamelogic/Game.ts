@@ -404,6 +404,9 @@ export class Game {
       }
       this.UsedAbilities.add(pokemon);
     }
+    if (ability.Conditions.includes("Active") && this.AttackingPlayer.ActivePokemon !== pokemon) {
+      throw new Error("Ability can only be used if the Pokemon is Active");
+    }
 
     this.GameLog.addEntry({
       type: "useAbility",
@@ -556,7 +559,7 @@ export class Game {
   }
   async swapActivePokemon(player: Player, reason: "selfEffect" | "opponentEffect") {
     await this.delay();
-    if (!player.Bench.some((x) => x !== undefined)) {
+    if (player.BenchedPokemon.length == 0) {
       this.GameLog.addEntry({
         type: "actionFailed",
         player: player.Name,
