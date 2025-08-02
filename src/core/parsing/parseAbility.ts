@@ -97,7 +97,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       pattern: /^flip a coin\. If heads, your opponent's Active Pokémon is now Asleep\.$/i,
       transform: () => {
         ability.Effect = async (game: Game) => {
-          if (game.flipCoin(game.AttackingPlayer)) {
+          if (game.AttackingPlayer.flipCoin()) {
             game.DefendingPlayer.sleepActivePokemon();
           }
         };

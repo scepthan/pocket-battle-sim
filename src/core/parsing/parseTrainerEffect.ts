@@ -89,7 +89,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<Effect> => {
           const validPokemon = game.AttackingPlayer.InPlayPokemon.filter((x) => x.Type == pt);
           const pokemon = await game.choosePokemon(game.AttackingPlayer, validPokemon);
           if (pokemon) {
-            const { heads } = game.flipCoinUntilTails(game.AttackingPlayer);
+            const { heads } = game.AttackingPlayer.flipUntilTails();
             game.AttackingPlayer.attachEnergy(pokemon, new Array(heads).fill(et), "energyZone");
           }
         };

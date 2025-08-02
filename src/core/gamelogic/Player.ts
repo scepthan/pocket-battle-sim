@@ -1,6 +1,8 @@
 import type { GameLogger, InPlayPokemonDescriptor, LoggedEvent } from "../logging";
 import type { Deck, Energy, PlayingCard, PokemonCard } from "../types";
-import { InPlayPokemonCard, type SpecialCondition } from "./InPlayPokemonCard";
+import { CoinFlipper } from "./CoinFlipper";
+import { InPlayPokemonCard } from "./InPlayPokemonCard";
+import type { SpecialCondition } from "./types";
 import type { PlayerGameSetup } from "./types/PlayerAgent";
 
 export class Player {
@@ -19,6 +21,7 @@ export class Player {
   NextEnergy: Energy = "Colorless"; // The next energy type to be used for attaching to Pokémon, set when the game starts
 
   logger: GameLogger;
+  private flipper: CoinFlipper;
 
   get InPlayPokemon() {
     return [this.ActivePokemon, ...this.Bench].filter((x) => x !== undefined);
@@ -32,6 +35,7 @@ export class Player {
     this.EnergyTypes = deck.EnergyTypes;
     this.Deck = deck.Cards;
     this.logger = logger;
+    this.flipper = new CoinFlipper({ logger, name });
   }
 
   pokemonToDescriptor(pokemon: InPlayPokemonCard): InPlayPokemonDescriptor {
@@ -565,5 +569,15 @@ export class Player {
       targetPokemon: this.pokemonToDescriptor(this.ActivePokemon!),
       currentStatusList: this.ActivePokemon!.CurrentStatuses,
     });
+  }
+
+  flipCoin() {
+    return this.flipper.singleCoinFlip();
+  }
+  flipMultiCoins(coins: number) {
+    return this.flipper.multiCoinFlip(coins);
+  }
+  flipUntilTails() {
+    return this.flipper.untilTailsCoinFlip();
   }
 }

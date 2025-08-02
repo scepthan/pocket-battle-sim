@@ -41,7 +41,7 @@ export const parseAttackEffect = (
         const tailsEffect = tailsText ? recursiveParse(tailsText) : defaultEffect;
 
         return async (game: Game) => {
-          if (game.flipCoin(game.AttackingPlayer)) {
+          if (game.AttackingPlayer.flipCoin()) {
             await headsEffect(game);
           } else {
             await tailsEffect(game);
@@ -55,7 +55,7 @@ export const parseAttackEffect = (
         const conditionalEffect = recursiveParse(effectText);
 
         return async (game: Game) => {
-          const { heads } = game.flipMultiCoin(game.AttackingPlayer, 2);
+          const { heads } = game.AttackingPlayer.flipMultiCoins(2);
           if (heads == 2) await conditionalEffect(game);
           else await defaultEffect(game);
         };
@@ -120,7 +120,7 @@ export const parseAttackEffect = (
       pattern: /^Flip (\d+) coins\. This attack does (\d+)( more)? damage for each heads\.$/i,
       transform: (_, coins, damage, more) => async (game: Game) => {
         let totalDamage = more ? baseAttackHP : 0;
-        const { heads } = game.flipMultiCoin(game.AttackingPlayer, Number(coins));
+        const { heads } = game.AttackingPlayer.flipMultiCoins(Number(coins));
         totalDamage += heads * Number(damage);
         game.attackActivePokemon(totalDamage);
       },
@@ -130,9 +130,8 @@ export const parseAttackEffect = (
         /^Flip a coin until you get tails\. This attack does (\d+)(?: more)? damage for each heads\.$/i,
       transform: (_, damage, more) => async (game: Game) => {
         let totalDamage = more ? baseAttackHP : 0;
-        while (game.flipCoin(game.AttackingPlayer)) {
-          totalDamage += Number(damage);
-        }
+        const { heads } = game.AttackingPlayer.flipUntilTails();
+        totalDamage += heads * Number(damage);
         game.attackActivePokemon(totalDamage);
       },
     },
@@ -146,7 +145,7 @@ export const parseAttackEffect = (
         return async (game: Game) => {
           const energy = game.AttackingPlayer.ActivePokemon!.AttachedEnergy;
           const totalFlips = energy.filter(predicate).length;
-          const { heads } = game.flipMultiCoin(game.AttackingPlayer, totalFlips);
+          const { heads } = game.AttackingPlayer.flipMultiCoins(totalFlips);
           game.attackActivePokemon(heads * Number(damage));
         };
       },

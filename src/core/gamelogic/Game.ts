@@ -5,9 +5,6 @@ import type { InPlayPokemonCard } from "./InPlayPokemonCard";
 import { Player } from "./Player";
 import { PlayerGameView } from "./PlayerGameView";
 import type { GameRules, PlayerAgent } from "./types";
-import { useCoinFlipper } from "./useCoinFlipper";
-
-const { coinFlip, multiCoinFlip, untilTailsCoinFlip } = useCoinFlipper();
 
 export class Game {
   Agent1: PlayerAgent;
@@ -79,7 +76,7 @@ export class Game {
 
     // Randomize who goes first based on a coin flip
     const players = [this.Player1, this.Player2];
-    if (coinFlip()) {
+    if (Math.random() >= 0.5) {
       players.reverse();
     }
     this.GameLog.addEntry({
@@ -257,7 +254,7 @@ export class Game {
     for (const player of [this.AttackingPlayer, this.DefendingPlayer]) {
       const pokemon = player.ActivePokemon!;
       if (pokemon.PrimaryStatus == "Asleep") {
-        if (this.flipCoin(player)) {
+        if (player.flipCoin()) {
           pokemon.PrimaryStatus = undefined;
           this.GameLog.addEntry({
             type: "pokemonStatusEnded",
@@ -552,35 +549,6 @@ export class Game {
         cardIds: [card.ID],
       });
     }
-  }
-
-  flipCoin(player: Player) {
-    const result = coinFlip();
-    this.GameLog.addEntry({
-      type: "coinFlip",
-      player: player.Name,
-      result: result ? "Heads" : "Tails",
-    });
-    return result;
-  }
-  flipMultiCoin(player: Player, count: number) {
-    const result = multiCoinFlip(count);
-    this.GameLog.addEntry({
-      type: "coinMultiFlip",
-      player: player.Name,
-      flips: count,
-      results: result.results.map((x) => (x ? "Heads" : "Tails")),
-    });
-    return result;
-  }
-  flipCoinUntilTails(player: Player) {
-    const result = untilTailsCoinFlip();
-    this.GameLog.addEntry({
-      type: "coinFlipUntilTails",
-      player: player.Name,
-      results: result.results.map((x) => (x ? "Heads" : "Tails")),
-    });
-    return result;
   }
 
   async swapActivePokemon(player: Player, reason: "selfEffect" | "opponentEffect") {
