@@ -1,5 +1,4 @@
-import { useCardParser } from "@/composables/useCardParser";
-import type { InputCard, PlayingCard } from "@/core";
+import { parseCard, type InputCard, type PlayingCard } from "@/core";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
@@ -10,8 +9,6 @@ export const usePlayingCardStore = defineStore("playing-cards", () => {
 
   const loading = ref(false);
   const promise = ref<Promise<void> | null>(null);
-
-  const { parseCard } = useCardParser();
 
   const loadCards = async () => {
     if (promise.value) {

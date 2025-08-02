@@ -1,2 +1,2 @@
-export * from "./InputCard";
-export * from "./ParsedResult";
+export { parseCard } from "./parseCard";
+export * from "./types";
