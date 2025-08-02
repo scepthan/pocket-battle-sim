@@ -1,8 +1,5 @@
 import type { Ability, Attack, Energy, PlayingCard, PokemonCard } from "../types";
-
-export type PrimaryStatus = "Asleep" | "Paralyzed" | "Confused";
-export type SecondaryStatus = "Poisoned" | "Burned";
-export type SpecialCondition = PrimaryStatus | SecondaryStatus;
+import type { PrimaryCondition, SecondaryCondition } from "./types";
 
 export class InPlayPokemonCard {
   BaseCard: PokemonCard;
@@ -19,8 +16,8 @@ export class InPlayPokemonCard {
   Ability?: Ability;
 
   CurrentHP: number;
-  PrimaryStatus?: PrimaryStatus;
-  SecondaryStatuses: Set<SecondaryStatus> = new Set();
+  PrimaryStatus?: PrimaryCondition;
+  SecondaryStatuses: Set<SecondaryCondition> = new Set();
   get CurrentStatuses() {
     return [this.PrimaryStatus, ...this.SecondaryStatuses].filter((status) => status !== undefined);
   }

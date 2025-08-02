@@ -1,7 +1,7 @@
 import type { GameLogger, InPlayPokemonDescriptor, LoggedEvent } from "../logging";
 import type { Deck, Energy, PlayingCard, PokemonCard } from "../types";
 import { InPlayPokemonCard, type SpecialCondition } from "./InPlayPokemonCard";
-import type { PlayerGameSetup } from "./PlayerAgent";
+import type { PlayerGameSetup } from "./types/PlayerAgent";
 
 export class Player {
   Name: string;

@@ -1,7 +1,7 @@
-import { parseDeck } from "../parsing";
-import type { DeckInfo, Energy, PlayingCard, PokemonCard } from "../types";
-import type { InPlayPokemonCard } from "./InPlayPokemonCard";
-import type { PlayerGameView } from "./PlayerGameView";
+import { parseDeck } from "../../parsing";
+import type { DeckInfo, Energy, PlayingCard, PokemonCard } from "../../types";
+import type { InPlayPokemonCard } from "../InPlayPokemonCard";
+import type { PlayerGameView } from "../PlayerGameView";
 
 export type BenchSetup = (PokemonCard | undefined)[];
 export interface PlayerGameSetup {

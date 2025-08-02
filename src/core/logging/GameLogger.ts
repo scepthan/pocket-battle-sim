@@ -1,4 +1,4 @@
-import type { PrimaryStatus, SecondaryStatus, SpecialCondition } from "../gamelogic";
+import type { PrimaryCondition, SecondaryCondition, SpecialCondition } from "../gamelogic";
 import type { Energy } from "../types";
 
 interface ActivePokemonDescriptor {
@@ -217,7 +217,7 @@ interface PokemonStatusDamageEvent {
   type: "pokemonStatusDamage";
   player: string;
   targetPokemon: InPlayPokemonDescriptor;
-  statusCondition: SecondaryStatus;
+  statusCondition: SecondaryCondition;
   initialHP: number;
   damageDealt: number;
   finalHP: number;
@@ -227,7 +227,7 @@ interface PokemonStatusEffectiveEvent {
   type: "pokemonStatusEffective";
   player: string;
   targetPokemon: InPlayPokemonDescriptor;
-  statusCondition: PrimaryStatus;
+  statusCondition: PrimaryCondition;
 }
 interface AttackFailedEvent {
   type: "attackFailed";

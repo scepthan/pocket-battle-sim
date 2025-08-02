@@ -1,4 +1,4 @@
-import type { Deck } from "../types";
+import type { Deck } from "../../types";
 
 export interface GameRules {
   DeckSize: number;
