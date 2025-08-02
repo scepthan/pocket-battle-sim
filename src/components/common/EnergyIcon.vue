@@ -3,9 +3,9 @@
 </template>
 
 <script setup lang="ts">
-import type { Energy } from "@/types/Energy";
-import { computed } from "vue";
 import * as Energies from "@/assets/img/energy";
+import type { Energy } from "@/core";
+import { computed } from "vue";
 
 export interface Props {
   energy: Energy;

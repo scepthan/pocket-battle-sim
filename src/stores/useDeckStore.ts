@@ -1,4 +1,4 @@
-import type { DeckInfo } from "@/types";
+import type { DeckInfo } from "@/core";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 

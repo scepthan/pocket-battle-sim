@@ -25,10 +25,10 @@
             entry.failureReason == "deckEmpty"
               ? "deck is empty"
               : entry.failureReason == "handFull"
-                ? "hand is full"
-                : entry.failureReason == "noValidCards"
-                  ? "no valid cards in deck"
-                  : "unknown reason"
+              ? "hand is full"
+              : entry.failureReason == "noValidCards"
+              ? "no valid cards in deck"
+              : "unknown reason"
           }}).
         </span>
         <span v-else-if="shownPlayers.includes(entry.player)">
@@ -296,10 +296,10 @@
             entry.reason == "notImplemented"
               ? "Effect not implemented"
               : entry.reason == "noBenchedPokemon"
-                ? "Player has no benched Pokemon"
-                : entry.reason == "noValidTargets"
-                  ? "effect has no valid targets"
-                  : "Unknown reason"
+              ? "Player has no benched Pokemon"
+              : entry.reason == "noValidTargets"
+              ? "effect has no valid targets"
+              : "Unknown reason"
           }})
         </p>
       </div>
@@ -311,10 +311,10 @@
 
 <script setup lang="ts">
 import CardName from "@/components/common/CardName.vue";
+import CardNameList from "@/components/common/CardNameList.vue";
+import CountDisplay from "@/components/common/CountDisplay.vue";
 import EnergyIcon from "@/components/common/EnergyIcon.vue";
-import type { LoggedEvent } from "@/models/GameLogger";
-import CardNameList from "../common/CardNameList.vue";
-import CountDisplay from "../common/CountDisplay.vue";
+import type { LoggedEvent } from "@/core";
 
 export interface Props {
   logEntries: readonly LoggedEvent[];

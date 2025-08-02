@@ -1,6 +1,7 @@
-import type { Deck, Energy, PlayerGameSetup, PlayingCard, PokemonCard } from "@/types";
-import type { GameLogger, InPlayPokemonDescriptor, LoggedEvent } from "./GameLogger";
+import type { GameLogger, InPlayPokemonDescriptor, LoggedEvent } from "../logging";
+import type { Deck, Energy, PlayingCard, PokemonCard } from "../types";
 import { InPlayPokemonCard, type SpecialCondition } from "./InPlayPokemonCard";
+import type { PlayerGameSetup } from "./PlayerAgent";
 
 export class Player {
   Name: string;
@@ -313,7 +314,7 @@ export class Player {
     pokemon: InPlayPokemonCard,
     energy: Energy[],
     from: "player" | "energyZone" | "discard" | "pokemon",
-    fromPokemon?: InPlayPokemonCard,
+    fromPokemon?: InPlayPokemonCard
   ) {
     pokemon.attachEnergy(energy);
     this.logger.addEntry({
@@ -360,7 +361,7 @@ export class Player {
 
   discardEnergy(
     energies: Energy[],
-    source: "effect" | "retreat" | "knockOut" | "removedFromField" | "energyZone",
+    source: "effect" | "retreat" | "knockOut" | "removedFromField" | "energyZone"
   ) {
     if (energies.length == 0) return;
 
@@ -377,7 +378,7 @@ export class Player {
   retreatActivePokemon(
     benchedPokemon: InPlayPokemonCard,
     energyToDiscard: Energy[],
-    costModifier: number,
+    costModifier: number
   ) {
     const previousActive = this.ActivePokemon!;
     if (previousActive.RetreatCost == -1) {
@@ -412,7 +413,7 @@ export class Player {
 
   swapActivePokemon(
     pokemon: InPlayPokemonCard,
-    reason: "retreat" | "selfEffect" | "opponentEffect",
+    reason: "retreat" | "selfEffect" | "opponentEffect"
   ) {
     const previousActive = this.ActivePokemon!;
     this.ActivePokemon = pokemon;

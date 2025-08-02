@@ -6,18 +6,18 @@ import type {
   PlayingCard,
   PokemonCard,
   SupporterCard,
-} from "@/types";
-import type { GameState } from "./GameState";
+} from "../types";
+import type { Game } from "./Game";
 import type { InPlayPokemonCard } from "./InPlayPokemonCard";
 import type { Player } from "./Player";
 
 export class PlayerGameView {
-  #gameState: GameState;
+  #gameState: Game;
   #turnNumber: number;
   #player: Player;
   #opponent: Player;
 
-  constructor(gameState: GameState, player: Player) {
+  constructor(gameState: Game, player: Player) {
     this.#gameState = gameState;
     this.#turnNumber = gameState.TurnNumber;
     this.#player = player;

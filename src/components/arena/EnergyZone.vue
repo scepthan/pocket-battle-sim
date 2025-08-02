@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Energy } from "@/types";
+import type { Energy } from "@/core";
 
 export interface Props {
   currentEnergy: Energy | null;

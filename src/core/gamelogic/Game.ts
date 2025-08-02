@@ -1,22 +1,15 @@
 import { useCoinFlip, useDeckValidator } from "@/composables";
-import type {
-  Ability,
-  Attack,
-  Effect,
-  Energy,
-  GameRules,
-  PlayerAgent,
-  PlayingCard,
-  TrainerCard,
-} from "@/types";
-import { GameLogger } from "./GameLogger";
-import { InPlayPokemonCard } from "./InPlayPokemonCard";
+import { GameLogger } from "../logging";
+import type { Ability, Attack, Effect, Energy, PlayingCard, TrainerCard } from "../types";
+import type { GameRules } from "./GameRules";
+import type { InPlayPokemonCard } from "./InPlayPokemonCard";
 import { Player } from "./Player";
+import type { PlayerAgent } from "./PlayerAgent";
 import { PlayerGameView } from "./PlayerGameView";
 
 const { coinFlip, multiCoinFlip, untilTailsCoinFlip } = useCoinFlip();
 
-export class GameState {
+export class Game {
   Agent1: PlayerAgent;
   Agent2: PlayerAgent;
   Player1: Player;
@@ -191,7 +184,7 @@ export class GameState {
         type: "pokemonStatusEffective",
         player: this.AttackingPlayer.Name,
         targetPokemon: this.AttackingPlayer.pokemonToDescriptor(
-          this.AttackingPlayer.ActivePokemon!,
+          this.AttackingPlayer.ActivePokemon!
         ),
         statusCondition: status,
       });
@@ -284,7 +277,7 @@ export class GameState {
         type: "pokemonStatusEnded",
         player: this.AttackingPlayer.Name,
         targetPokemon: this.AttackingPlayer.pokemonToDescriptor(
-          this.AttackingPlayer.ActivePokemon!,
+          this.AttackingPlayer.ActivePokemon!
         ),
         statusConditions: ["Paralyzed"],
         currentStatusList: this.AttackingPlayer.ActivePokemon!.CurrentStatuses,
@@ -397,7 +390,7 @@ export class GameState {
       player: this.AttackingPlayer.Name,
       attackName: attack.Name,
       attackingPokemon: this.AttackingPlayer.pokemonToDescriptor(
-        this.AttackingPlayer.ActivePokemon!,
+        this.AttackingPlayer.ActivePokemon!
       ),
     });
     await this.useInitialEffect(attack.Effect);

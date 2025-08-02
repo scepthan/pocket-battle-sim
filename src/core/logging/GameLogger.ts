@@ -1,5 +1,5 @@
-import type { Energy } from "@/types";
-import type { PrimaryStatus, SecondaryStatus, SpecialCondition } from "./InPlayPokemonCard";
+import type { PrimaryStatus, SecondaryStatus, SpecialCondition } from "../gamelogic";
+import type { Energy } from "../types";
 
 interface ActivePokemonDescriptor {
   cardId: string;

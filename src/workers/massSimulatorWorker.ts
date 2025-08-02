@@ -1,6 +1,5 @@
-import { BetterRandomAgent } from "@/models/agents";
-import { GameState } from "@/models/GameState";
-import type { BattleRecord, DeckInfo } from "@/types";
+import { BetterRandomAgent, Game, type DeckInfo } from "@/core";
+import type { BattleRecord } from "@/types";
 
 const newBattleRecord = (firstDeck: string, secondDeck: string) => ({
   firstDeck,
@@ -37,7 +36,7 @@ for (const deck1 of deckNames) {
 
     const startTime = new Date().valueOf();
     for (let i = 0; i < loops; i++) {
-      const game = new GameState(agent1, agent2);
+      const game = new Game(agent1, agent2);
       const first = game.AttackingPlayer.Name;
       const second = game.DefendingPlayer.Name;
       const matchupName = first == "Player1" ? deck1 + " v. " + deck2 : deck2 + " v. " + deck1;

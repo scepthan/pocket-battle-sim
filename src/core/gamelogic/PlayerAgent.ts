@@ -1,7 +1,6 @@
-import type { InPlayPokemonCard } from "@/models/InPlayPokemonCard";
-import type { PlayerGameView } from "@/models/PlayerGameView";
-import type { Energy } from "./Energy";
-import type { PlayingCard, PokemonCard } from "./PlayingCard";
+import type { Energy, PlayingCard, PokemonCard } from "../types";
+import type { InPlayPokemonCard } from "./InPlayPokemonCard";
+import type { PlayerGameView } from "./PlayerGameView";
 
 export type BenchSetup = (PokemonCard | undefined)[];
 export interface PlayerGameSetup {

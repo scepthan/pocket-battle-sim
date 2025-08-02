@@ -64,10 +64,10 @@
 </template>
 
 <script setup lang="ts">
-import type { GameState } from "@/models/GameState";
+import type { Game } from "@/core";
 
 export interface Props {
-  game: GameState | null;
+  game: Game | null;
   shownPlayers?: string[];
 }
 defineProps<Props>();

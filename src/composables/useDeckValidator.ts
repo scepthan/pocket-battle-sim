@@ -1,4 +1,4 @@
-import type { Attack, Deck, Energy, GameRules, PokemonCard } from "@/types";
+import type { Attack, Deck, Energy, GameRules, PokemonCard } from "@/core";
 
 export const useDeckValidator = (rules: GameRules) => {
   const hasCorrectAmountOfCards = (deck: Deck) => deck.Cards.length == rules.DeckSize;
@@ -18,7 +18,7 @@ export const useDeckValidator = (rules: GameRules) => {
     card.Attacks.some((attack) => canUseAttack(attack, energyTypes));
   const anyCanUseAnyAttack = (deck: Deck) =>
     deck.Cards.some(
-      (card) => card.CardType == "Pokemon" && canUseAnyAttack(card, deck.EnergyTypes),
+      (card) => card.CardType == "Pokemon" && canUseAnyAttack(card, deck.EnergyTypes)
     );
 
   const validateDeck = (deck: Deck) => {

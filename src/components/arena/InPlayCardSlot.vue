@@ -27,10 +27,10 @@
 </template>
 
 <script setup lang="ts">
-import type { InPlayPokemonCard } from "@/models/InPlayPokemonCard";
-import { computed } from "vue";
 import EnergyIcon from "@/components/common/EnergyIcon.vue";
 import PlayingCard from "@/components/common/PlayingCard.vue";
+import type { InPlayPokemonCard } from "@/core/gamelogic/InPlayPokemonCard";
+import { computed } from "vue";
 
 export interface Props {
   heightPx?: number;
@@ -43,7 +43,7 @@ const height = computed(() => props.heightPx ?? 200);
 const width = computed(() => height.value * ratio);
 
 const hpPercent = computed(() =>
-  props.card && "BaseCard" in props.card ? (props.card.CurrentHP / props.card.BaseHP) * 100 : 0,
+  props.card && "BaseCard" in props.card ? (props.card.CurrentHP / props.card.BaseHP) * 100 : 0
 );
 
 const cardStyle = computed(() => ({
@@ -77,15 +77,9 @@ const hpBarPaddingStyle = computed(() => ({
 
   font-weight: bold;
   color: black;
-  text-shadow:
-    0 0.07em 0.04em white,
-    0.07em 0.07em 0.04em white,
-    0.07em 0 0.04em white,
-    0.07em -0.07em 0.04em white,
-    0 -0.07em 0.04em white,
-    -0.07em -0.07em 0.04em white,
-    -0.07em 0 0.04em white,
-    -0.07em 0.07em 0.04em white;
+  text-shadow: 0 0.07em 0.04em white, 0.07em 0.07em 0.04em white, 0.07em 0 0.04em white,
+    0.07em -0.07em 0.04em white, 0 -0.07em 0.04em white, -0.07em -0.07em 0.04em white,
+    -0.07em 0 0.04em white, -0.07em 0.07em 0.04em white;
 }
 
 .hp-bar-container {

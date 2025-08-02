@@ -1,10 +1,10 @@
 import inputCards from "@/assets/cards.json";
-import type { InputCard, PlayingCard } from "@/types";
+import type { InputCard, PlayingCard } from "@/core";
 import { useCardParser } from "./useCardParser";
 
-const { parseCard } = useCardParser();
-
 export const useDeckParser = () => {
+  const { parseCard } = useCardParser();
+
   const outputCards = inputCards
     .map((card) => parseCard(card as InputCard).value)
     .filter((x) => x !== undefined);

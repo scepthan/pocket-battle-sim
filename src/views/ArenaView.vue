@@ -3,10 +3,8 @@
 </template>
 
 <script setup lang="ts">
-import { GameState } from "@/models/GameState";
-import { BetterRandomAgent, RandomAgent } from "@/models/agents";
+import { BetterRandomAgent, Game, RandomAgent, type DeckInfo } from "@/core";
 import { useDeckStore, usePlayingCardStore } from "@/stores";
-import type { DeckInfo } from "@/types";
 import { onMounted, ref } from "vue";
 
 const cardStore = usePlayingCardStore();
@@ -67,7 +65,7 @@ const prebuiltDecks: Record<string, DeckInfo> = {
 
 const player = ref<RandomAgent>();
 const opponent = ref<RandomAgent>();
-const game = ref<GameState>();
+const game = ref<Game>();
 
 onMounted(async () => {
   await deckStore.ensureDecksLoaded();
@@ -93,7 +91,7 @@ onMounted(async () => {
     player.value = new BetterRandomAgent("Player", allDecks[deck1]);
     opponent.value = new BetterRandomAgent("Opponent", allDecks[deck2]);
 
-    game.value = new GameState(player.value, opponent.value, {
+    game.value = new Game(player.value, opponent.value, {
       DelayPerAction: 1000,
     });
 

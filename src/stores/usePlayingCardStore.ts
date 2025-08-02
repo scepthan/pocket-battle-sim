@@ -1,5 +1,5 @@
 import { useCardParser } from "@/composables/useCardParser";
-import type { InputCard, PlayingCard } from "@/types";
+import type { InputCard, PlayingCard } from "@/core";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
@@ -42,7 +42,7 @@ export const usePlayingCardStore = defineStore("playing-cards", () => {
         }
       }
       console.log(
-        `${inputCards.length} cards found: ${successCount} successfully parsed, ${softFailCount} soft failed`,
+        `${inputCards.length} cards found: ${successCount} successfully parsed, ${softFailCount} soft failed`
       );
       console.log(outputCards);
       Cards.value = outputCards;

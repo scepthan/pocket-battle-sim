@@ -1,16 +1,7 @@
 import { useDeckParser } from "@/composables";
-import type {
-  DeckInfo,
-  Energy,
-  GameInitState,
-  ItemCard,
-  PlayerAgent,
-  PlayingCard,
-  PokemonCard,
-  SupporterCard,
-} from "@/types";
-import type { InPlayPokemonCard } from "../InPlayPokemonCard";
-import type { PlayerGameView } from "../PlayerGameView";
+
+import type { GameInitState, InPlayPokemonCard, PlayerAgent, PlayerGameView } from "../gamelogic";
+import type { DeckInfo, Energy, ItemCard, PlayingCard, PokemonCard, SupporterCard } from "../types";
 
 const rand = <T>(arr: T[]) => arr[(Math.random() * arr.length) | 0];
 
@@ -29,7 +20,7 @@ export class RandomAgent implements PlayerAgent {
 
   async setupPokemon(gameState: GameInitState) {
     const basicPokemon = gameState.hand.filter(
-      (x) => x.CardType == "Pokemon" && x.Stage == 0,
+      (x) => x.CardType == "Pokemon" && x.Stage == 0
     ) as PokemonCard[];
     if (basicPokemon.length === 0) {
       throw new Error("No basic Pokemon in hand");
@@ -43,7 +34,7 @@ export class RandomAgent implements PlayerAgent {
 
   async doTurn(gameState: PlayerGameView) {
     const ownPokemon = [gameState.selfActive, ...gameState.selfBenched].filter(
-      (x) => x !== undefined,
+      (x) => x !== undefined
     );
 
     // Attach energy to random Pokemon if available
@@ -53,7 +44,7 @@ export class RandomAgent implements PlayerAgent {
 
     // Play a random Basic Pokemon to the Bench if available
     const handBasics = gameState.selfHand.filter(
-      (x) => x.CardType == "Pokemon" && x.Stage == 0,
+      (x) => x.CardType == "Pokemon" && x.Stage == 0
     ) as PokemonCard[];
     if (handBasics.length > 0) {
       const randomBasic = rand(handBasics);
@@ -75,7 +66,7 @@ export class RandomAgent implements PlayerAgent {
 
     // Play a random Supporter card if available
     const supporterCards = gameState.selfHand.filter(
-      (x) => x.CardType == "Supporter",
+      (x) => x.CardType == "Supporter"
     ) as SupporterCard[];
     if (supporterCards.length > 0) {
       const randomSupporter = rand(supporterCards);
@@ -101,12 +92,12 @@ export class RandomAgent implements PlayerAgent {
       (x) =>
         x.CardType == "Pokemon" &&
         x.Stage > 0 &&
-        evolveablePokemon.some((y) => y.Name == x.EvolvesFrom),
+        evolveablePokemon.some((y) => y.Name == x.EvolvesFrom)
     ) as PokemonCard[];
     if (pokemonToEvolveWith.length > 0) {
       const randomEvolver = rand(pokemonToEvolveWith);
       const pokemonToEvolveFrom = evolveablePokemon.filter(
-        (x) => x.Name == randomEvolver.EvolvesFrom,
+        (x) => x.Name == randomEvolver.EvolvesFrom
       );
       const randomEvolvee = rand(pokemonToEvolveFrom);
       await gameState.playPokemonToEvolve(randomEvolver, randomEvolvee);
