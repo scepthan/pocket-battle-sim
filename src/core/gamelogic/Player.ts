@@ -303,7 +303,7 @@ export class Player {
       cardId: card.ID,
       stage: card.Stage,
     });
-    this.recoverAllStatusConditions(pokemon);
+    this.recoverAllSpecialConditions(pokemon);
   }
 
   attachAvailableEnergy(pokemon: InPlayPokemonCard) {
@@ -388,8 +388,11 @@ export class Player {
     if (previousActive.RetreatCost == -1) {
       throw new Error("This Pokémon cannot retreat");
     }
-    if (previousActive.PrimaryStatus == "Asleep" || previousActive.PrimaryStatus == "Paralyzed") {
-      throw new Error("Cannot retreat while " + previousActive.PrimaryStatus);
+    if (
+      previousActive.PrimaryCondition == "Asleep" ||
+      previousActive.PrimaryCondition == "Paralyzed"
+    ) {
+      throw new Error("Cannot retreat while " + previousActive.PrimaryCondition);
     }
 
     const previousEnergy = previousActive.AttachedEnergy.slice();
@@ -433,22 +436,22 @@ export class Player {
       reason,
     });
 
-    this.recoverAllStatusConditions(previousActive);
+    this.recoverAllSpecialConditions(previousActive);
   }
 
-  recoverAllStatusConditions(pokemon: InPlayPokemonCard) {
-    const statuses = pokemon.CurrentStatuses;
-    if (statuses.length == 0) return;
+  recoverAllSpecialConditions(pokemon: InPlayPokemonCard) {
+    const conditions = pokemon.CurrentConditions;
+    if (conditions.length == 0) return;
 
-    pokemon.PrimaryStatus = undefined;
-    pokemon.SecondaryStatuses = new Set();
+    pokemon.PrimaryCondition = undefined;
+    pokemon.SecondaryConditions = new Set();
 
     this.logger.addEntry({
-      type: "pokemonStatusEnded",
+      type: "specialConditionEnded",
       player: this.Name,
-      statusConditions: statuses,
+      specialConditions: conditions,
       targetPokemon: this.pokemonToDescriptor(pokemon),
-      currentStatusList: pokemon.CurrentStatuses,
+      currentConditionList: pokemon.CurrentConditions,
     });
   }
 
@@ -549,27 +552,27 @@ export class Player {
   }
 
   poisonActivePokemon() {
-    this.ActivePokemon!.SecondaryStatuses.add("Poisoned");
-    this.logNewActiveStatus("Poisoned");
+    this.ActivePokemon!.SecondaryConditions.add("Poisoned");
+    this.logNewActiveCondition("Poisoned");
   }
 
   sleepActivePokemon() {
-    this.ActivePokemon!.PrimaryStatus = "Asleep";
-    this.logNewActiveStatus("Asleep");
+    this.ActivePokemon!.PrimaryCondition = "Asleep";
+    this.logNewActiveCondition("Asleep");
   }
 
   paralyzeActivePokemon() {
-    this.ActivePokemon!.PrimaryStatus = "Paralyzed";
-    this.logNewActiveStatus("Paralyzed");
+    this.ActivePokemon!.PrimaryCondition = "Paralyzed";
+    this.logNewActiveCondition("Paralyzed");
   }
 
-  logNewActiveStatus(status: SpecialCondition) {
+  logNewActiveCondition(condition: SpecialCondition) {
     this.logger.addEntry({
-      type: "pokemonStatusApplied",
+      type: "specialConditionApplied",
       player: this.Name,
-      statusConditions: [status],
+      specialConditions: [condition],
       targetPokemon: this.pokemonToDescriptor(this.ActivePokemon!),
-      currentStatusList: this.ActivePokemon!.CurrentStatuses,
+      currentConditionList: this.ActivePokemon!.CurrentConditions,
     });
   }
 

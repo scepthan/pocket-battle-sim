@@ -109,7 +109,7 @@ export const parseAttackEffect = (
 
         return async (game: Game) => {
           const defender = game.DefendingPlayer.ActivePokemon!;
-          if (defender.SecondaryStatuses.has("Poisoned")) await conditionalEffect(game);
+          if (defender.SecondaryConditions.has("Poisoned")) await conditionalEffect(game);
           else await defaultEffect(game);
         };
       },
@@ -391,7 +391,7 @@ export const parseAttackEffect = (
       },
     },
 
-    // Status effects
+    // Special Condition effects
     {
       pattern: /^Your opponent's active Pokémon is now Poisoned\.$/i,
       transform: () => async (game: Game) => {

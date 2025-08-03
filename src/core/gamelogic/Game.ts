@@ -175,15 +175,15 @@ export class Game {
     }
 
     // Log the Special Conditions that will affect the Active Pokemon
-    const status = this.AttackingPlayer.ActivePokemon!.PrimaryStatus;
+    const status = this.AttackingPlayer.ActivePokemon!.PrimaryCondition;
     if (status == "Asleep" || status == "Paralyzed") {
       this.GameLog.addEntry({
-        type: "pokemonStatusEffective",
+        type: "specialConditionEffective",
         player: this.AttackingPlayer.Name,
         targetPokemon: this.AttackingPlayer.pokemonToDescriptor(
           this.AttackingPlayer.ActivePokemon!
         ),
-        statusCondition: status,
+        specialCondition: status,
       });
     }
 
@@ -232,15 +232,15 @@ export class Game {
     // Apply poison damage
     for (const player of [this.AttackingPlayer, this.DefendingPlayer]) {
       const pokemon = player.ActivePokemon!;
-      if (pokemon.SecondaryStatuses.has("Poisoned")) {
+      if (pokemon.SecondaryConditions.has("Poisoned")) {
         const initialHP = pokemon.CurrentHP;
         const damage = 10;
 
         pokemon.applyDamage(damage);
         this.GameLog.addEntry({
-          type: "pokemonStatusDamage",
+          type: "specialConditionDamage",
           player: player.Name,
-          statusCondition: "Poisoned",
+          specialCondition: "Poisoned",
           targetPokemon: player.pokemonToDescriptor(pokemon),
           initialHP: initialHP,
           damageDealt: damage,
@@ -253,31 +253,31 @@ export class Game {
     // Flip to wake up sleeping Pokemon
     for (const player of [this.AttackingPlayer, this.DefendingPlayer]) {
       const pokemon = player.ActivePokemon!;
-      if (pokemon.PrimaryStatus == "Asleep") {
+      if (pokemon.PrimaryCondition == "Asleep") {
         if (player.flipCoin()) {
-          pokemon.PrimaryStatus = undefined;
+          pokemon.PrimaryCondition = undefined;
           this.GameLog.addEntry({
-            type: "pokemonStatusEnded",
+            type: "specialConditionEnded",
             player: player.Name,
             targetPokemon: player.pokemonToDescriptor(pokemon),
-            statusConditions: ["Asleep"],
-            currentStatusList: pokemon.CurrentStatuses,
+            specialConditions: ["Asleep"],
+            currentConditionList: pokemon.CurrentConditions,
           });
         }
       }
     }
 
     // Remove paralysis status from attacking player's Active Pokemon
-    if (this.AttackingPlayer.ActivePokemon!.PrimaryStatus == "Paralyzed") {
-      this.AttackingPlayer.ActivePokemon!.PrimaryStatus = undefined;
+    if (this.AttackingPlayer.ActivePokemon!.PrimaryCondition == "Paralyzed") {
+      this.AttackingPlayer.ActivePokemon!.PrimaryCondition = undefined;
       this.GameLog.addEntry({
-        type: "pokemonStatusEnded",
+        type: "specialConditionEnded",
         player: this.AttackingPlayer.Name,
         targetPokemon: this.AttackingPlayer.pokemonToDescriptor(
           this.AttackingPlayer.ActivePokemon!
         ),
-        statusConditions: ["Paralyzed"],
-        currentStatusList: this.AttackingPlayer.ActivePokemon!.CurrentStatuses,
+        specialConditions: ["Paralyzed"],
+        currentConditionList: this.AttackingPlayer.ActivePokemon!.CurrentConditions,
       });
     }
 

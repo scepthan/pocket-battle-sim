@@ -196,35 +196,35 @@
         </p>
       </div>
 
-      <div v-else-if="entry.type == 'pokemonStatusApplied'">
-        <p v-for="(status, i) in entry.statusConditions" :key="i">
-          <CardName :card-id="entry.targetPokemon.cardId" /> is now {{ status }}!
+      <div v-else-if="entry.type == 'specialConditionApplied'">
+        <p v-for="(condition, i) in entry.specialConditions" :key="i">
+          <CardName :card-id="entry.targetPokemon.cardId" /> is now {{ condition }}!
         </p>
-        <p v-if="entry.currentStatusList.length > entry.statusConditions.length">
-          Current status conditions: {{ entry.currentStatusList.join(", ") }}.
+        <p v-if="entry.currentConditionList.length > entry.specialConditions.length">
+          Current special conditions: {{ entry.currentConditionList.join(", ") }}.
         </p>
       </div>
 
-      <div v-else-if="entry.type == 'pokemonStatusDamage'">
+      <div v-else-if="entry.type == 'specialConditionDamage'">
         <p>
           <CardName :card-id="entry.targetPokemon.cardId" /> takes {{ entry.damageDealt }} damage
-          from being {{ entry.statusCondition }}! ({{ entry.initialHP }}/{{ entry.maxHP }} &rarr;
+          from being {{ entry.specialCondition }}! ({{ entry.initialHP }}/{{ entry.maxHP }} &rarr;
           {{ entry.finalHP }}/{{ entry.maxHP }}
           HP)
         </p>
       </div>
 
-      <div v-else-if="entry.type == 'pokemonStatusEffective'">
-        <CardName :card-id="entry.targetPokemon.cardId" /> is {{ entry.statusCondition }} and cannot
-        move!
+      <div v-else-if="entry.type == 'specialConditionEffective'">
+        <CardName :card-id="entry.targetPokemon.cardId" /> is {{ entry.specialCondition }} and
+        cannot move!
       </div>
 
-      <div v-else-if="entry.type == 'pokemonStatusEnded'">
-        <p v-for="(status, i) in entry.statusConditions" :key="i">
-          <CardName :card-id="entry.targetPokemon.cardId" /> recovered from being {{ status }}!
+      <div v-else-if="entry.type == 'specialConditionEnded'">
+        <p v-for="(condition, i) in entry.specialConditions" :key="i">
+          <CardName :card-id="entry.targetPokemon.cardId" /> recovered from being {{ condition }}!
         </p>
-        <p v-if="entry.currentStatusList.length > 0">
-          Remaining status conditions: {{ entry.currentStatusList.join(", ") }}.
+        <p v-if="entry.currentConditionList.length > 0">
+          Remaining special conditions: {{ entry.currentConditionList.join(", ") }}.
         </p>
       </div>
 

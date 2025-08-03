@@ -207,35 +207,35 @@ interface PokemonHealedEvent {
   finalHP: number;
   maxHP: number;
 }
-interface PokemonStatusAppliedEvent {
-  type: "pokemonStatusApplied";
+interface SpecialConditionAppliedEvent {
+  type: "specialConditionApplied";
   player: string;
   targetPokemon: InPlayPokemonDescriptor;
-  statusConditions: SpecialCondition[];
-  currentStatusList: SpecialCondition[];
+  specialConditions: SpecialCondition[];
+  currentConditionList: SpecialCondition[];
 }
-interface PokemonStatusEndedEvent {
-  type: "pokemonStatusEnded";
+interface SpecialConditionEndedEvent {
+  type: "specialConditionEnded";
   player: string;
   targetPokemon: InPlayPokemonDescriptor;
-  statusConditions: SpecialCondition[];
-  currentStatusList: SpecialCondition[];
+  specialConditions: SpecialCondition[];
+  currentConditionList: SpecialCondition[];
 }
-interface PokemonStatusDamageEvent {
-  type: "pokemonStatusDamage";
+interface SpecialConditionDamageEvent {
+  type: "specialConditionDamage";
   player: string;
   targetPokemon: InPlayPokemonDescriptor;
-  statusCondition: SecondaryCondition;
+  specialCondition: SecondaryCondition;
   initialHP: number;
   damageDealt: number;
   finalHP: number;
   maxHP: number;
 }
-interface PokemonStatusEffectiveEvent {
-  type: "pokemonStatusEffective";
+interface SpecialConditionEffectiveEvent {
+  type: "specialConditionEffective";
   player: string;
   targetPokemon: InPlayPokemonDescriptor;
-  statusCondition: PrimaryCondition;
+  specialCondition: PrimaryCondition;
 }
 interface AttackFailedEvent {
   type: "attackFailed";
@@ -297,10 +297,10 @@ export type LoggedEvent =
   | PokemonDamagedEvent
   | PokemonKnockedOutEvent
   | PokemonHealedEvent
-  | PokemonStatusAppliedEvent
-  | PokemonStatusEndedEvent
-  | PokemonStatusDamageEvent
-  | PokemonStatusEffectiveEvent
+  | SpecialConditionAppliedEvent
+  | SpecialConditionEndedEvent
+  | SpecialConditionDamageEvent
+  | SpecialConditionEffectiveEvent
   | AttackFailedEvent
   | ApplyModifierEvent
   | CoinFlipEvent

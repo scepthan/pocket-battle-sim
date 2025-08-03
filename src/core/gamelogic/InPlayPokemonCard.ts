@@ -16,10 +16,12 @@ export class InPlayPokemonCard {
   Ability?: Ability;
 
   CurrentHP: number;
-  PrimaryStatus?: PrimaryCondition;
-  SecondaryStatuses: Set<SecondaryCondition> = new Set();
-  get CurrentStatuses() {
-    return [this.PrimaryStatus, ...this.SecondaryStatuses].filter((status) => status !== undefined);
+  PrimaryCondition?: PrimaryCondition;
+  SecondaryConditions: Set<SecondaryCondition> = new Set();
+  get CurrentConditions() {
+    return [this.PrimaryCondition, ...this.SecondaryConditions].filter(
+      (condition) => condition !== undefined
+    );
   }
   AttachedEnergy: Energy[] = [];
   InPlayCards: PlayingCard[] = [];
