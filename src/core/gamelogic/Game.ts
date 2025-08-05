@@ -1,6 +1,14 @@
 import { GameLogger } from "../logging";
 import { useDeckValidator } from "../parsing";
-import type { Ability, Attack, Effect, Energy, PlayingCard, TrainerCard } from "../types";
+import type {
+  Ability,
+  Attack,
+  Effect,
+  Energy,
+  PlayingCard,
+  PokemonCard,
+  TrainerCard,
+} from "../types";
 import type { InPlayPokemonCard } from "./InPlayPokemonCard";
 import { Player } from "./Player";
 import { PlayerGameView } from "./PlayerGameView";
@@ -197,7 +205,7 @@ export class Game {
         this.endTurnResolve = resolve;
 
         // Otherwise, the turn will end when the agent returns
-        (this.AttackingPlayer == this.Player1 ? this.Agent1 : this.Agent2)
+        this.findAgent(this.AttackingPlayer)
           .doTurn(new PlayerGameView(this, this.AttackingPlayer))
           .then(resolve)
           .catch((error) => {
@@ -303,6 +311,10 @@ export class Game {
     await this.checkForKnockOuts();
   }
 
+  async useEffect(effect: Effect, pokemon?: InPlayPokemonCard) {
+    await effect(this, pokemon);
+  }
+
   async checkForKnockOuts() {
     const attackerPrizePoints = this.AttackingPlayer.GamePoints;
     const defenderPrizePoints = this.DefendingPlayer.GamePoints;
@@ -377,10 +389,7 @@ export class Game {
     }
   }
 
-  async useEffect(effect: Effect, pokemon?: InPlayPokemonCard) {
-    await effect(this, pokemon);
-  }
-
+  // Methods to cover any action a player can take and execute the proper follow-up effects
   async useAttack(attack: Attack) {
     this.GameLog.addEntry({
       type: "useAttack",
@@ -418,6 +427,67 @@ export class Game {
     await this.useInitialEffect(ability.Effect, pokemon);
   }
 
+  async attachAvailableEnergy(pokemon: InPlayPokemonCard) {
+    await this.useInitialEffect(async (game) =>
+      game.AttackingPlayer.attachAvailableEnergy(pokemon)
+    );
+  }
+
+  async putPokemonOnBench(pokemon: PokemonCard, index: number) {
+    await this.useInitialEffect(async (game) =>
+      game.AttackingPlayer.putPokemonOnBench(pokemon, index)
+    );
+  }
+
+  async evolvePokemon(inPlayPokemon: InPlayPokemonCard, pokemon: PokemonCard) {
+    await this.useInitialEffect(async (game) =>
+      game.AttackingPlayer.evolvePokemon(inPlayPokemon, pokemon)
+    );
+  }
+
+  async retreatActivePokemon(benchedPokemon: InPlayPokemonCard, energy: Energy[]) {
+    await this.useInitialEffect(async (game) =>
+      game.AttackingPlayer.retreatActivePokemon(benchedPokemon, energy, this.RetreatCostModifier)
+    );
+  }
+
+  async playTrainer(card: TrainerCard) {
+    if (!this.AttackingPlayer.Hand.includes(card)) {
+      throw new Error("Card not in hand");
+    }
+    if (card.CardType == "Supporter") {
+      if (!this.CanPlaySupporter) {
+        throw new Error("Cannot play supporter card currently");
+      }
+      this.CanPlaySupporter = false;
+    }
+
+    this.AttackingPlayer.Hand.splice(this.AttackingPlayer.Hand.indexOf(card), 1);
+    this.ActiveTrainerCard = card;
+
+    this.GameLog.addEntry({
+      type: "playTrainer",
+      player: this.AttackingPlayer.Name,
+      cardId: card.ID,
+      trainerType: card.CardType,
+    });
+    await this.useInitialEffect(card.Effect);
+
+    this.ActiveTrainerCard = undefined;
+    // Workaround for fossils being put into play by their effect
+    // Otherwise we could always push to discard
+    if (!this.AttackingPlayer.InPlay.includes(card)) {
+      this.AttackingPlayer.Discard.push(card);
+      this.GameLog.addEntry({
+        type: "discardCards",
+        player: this.AttackingPlayer.Name,
+        source: "hand",
+        cardIds: [card.ID],
+      });
+    }
+  }
+
+  //
   drawCards(count: number) {
     this.AttackingPlayer.drawCards(count, this.GameRules.MaxHandSize);
   }
@@ -516,42 +586,6 @@ export class Game {
     pokemon.AttachedEnergy = [];
 
     this.findOwner(pokemon).discardEnergy(discardedEnergy, "effect");
-  }
-
-  async playTrainer(card: TrainerCard) {
-    if (!this.AttackingPlayer.Hand.includes(card)) {
-      throw new Error("Card not in hand");
-    }
-    if (card.CardType == "Supporter") {
-      if (!this.CanPlaySupporter) {
-        throw new Error("Cannot play supporter card currently");
-      }
-      this.CanPlaySupporter = false;
-    }
-
-    this.AttackingPlayer.Hand.splice(this.AttackingPlayer.Hand.indexOf(card), 1);
-    this.ActiveTrainerCard = card;
-
-    this.GameLog.addEntry({
-      type: "playTrainer",
-      player: this.AttackingPlayer.Name,
-      cardId: card.ID,
-      trainerType: card.CardType,
-    });
-    await this.useInitialEffect(card.Effect);
-
-    this.ActiveTrainerCard = undefined;
-    // Workaround for fossils being put into play by their effect
-    // Otherwise we could always push to discard
-    if (!this.AttackingPlayer.InPlay.includes(card)) {
-      this.AttackingPlayer.Discard.push(card);
-      this.GameLog.addEntry({
-        type: "discardCards",
-        player: this.AttackingPlayer.Name,
-        source: "hand",
-        cardIds: [card.ID],
-      });
-    }
   }
 
   findAgent(player: Player) {

@@ -12,34 +12,32 @@ import type { InPlayPokemonCard } from "./InPlayPokemonCard";
 import type { Player } from "./Player";
 
 export class PlayerGameView {
-  #gameState: Game;
+  #game: Game;
   #turnNumber: number;
   #player: Player;
   #opponent: Player;
 
-  constructor(gameState: Game, player: Player) {
-    this.#gameState = gameState;
-    this.#turnNumber = gameState.TurnNumber;
+  constructor(game: Game, player: Player) {
+    this.#game = game;
+    this.#turnNumber = game.TurnNumber;
     this.#player = player;
-    if (player == gameState.Player1) {
-      this.#opponent = gameState.Player2;
+    if (player == game.Player1) {
+      this.#opponent = game.Player2;
     } else {
-      this.#opponent = gameState.Player1;
+      this.#opponent = game.Player1;
     }
   }
 
   // Game attributes
   get currentTurnNumber() {
-    return this.#gameState.TurnNumber;
+    return this.#game.TurnNumber;
   }
   get isSelfTurn() {
-    return this.#gameState.AttackingPlayer == this.#player;
+    return this.#game.AttackingPlayer == this.#player;
   }
   get canPlay() {
     return (
-      this.isSelfTurn &&
-      this.#gameState.TurnNumber > 0 &&
-      this.#gameState.TurnNumber == this.#turnNumber
+      this.isSelfTurn && this.#game.TurnNumber > 0 && this.#game.TurnNumber == this.#turnNumber
     );
   }
 
@@ -97,10 +95,10 @@ export class PlayerGameView {
   }
 
   get canPlaySupporter() {
-    return this.#gameState.CanPlaySupporter;
+    return this.#game.CanPlaySupporter;
   }
   get retreatCostModifier() {
-    return this.#gameState.RetreatCostModifier;
+    return this.#game.RetreatCostModifier;
   }
 
   // Helper methods
@@ -137,7 +135,7 @@ export class PlayerGameView {
     if (!this.canPlay || !this.selfActive) return false;
     if (pokemon.Ability !== ability) return false;
     if (ability.Trigger == "OnceDuringTurn") {
-      if (this.#gameState.UsedAbilities.has(pokemon)) return false;
+      if (this.#game.UsedAbilities.has(pokemon)) return false;
     }
     if (ability.Conditions.includes("Active")) {
       if (pokemon != this.selfActive) return false;
@@ -167,8 +165,8 @@ export class PlayerGameView {
     if (!this.canPlay) return false;
 
     if (this.selfAvailableEnergy) {
-      await this.#gameState.delay();
-      this.#player.attachAvailableEnergy(pokemon);
+      await this.#game.delay();
+      await this.#game.attachAvailableEnergy(pokemon);
       return true;
     }
     return false;
@@ -177,8 +175,8 @@ export class PlayerGameView {
     if (!this.canPlay) return false;
 
     if (pokemon.Stage == 0 && this.selfBench[index] == undefined) {
-      await this.#gameState.delay();
-      this.#player.putPokemonOnBench(pokemon, index);
+      await this.#game.delay();
+      await this.#game.putPokemonOnBench(pokemon, index);
       return true;
     }
     return false;
@@ -187,29 +185,29 @@ export class PlayerGameView {
     if (!this.canPlay) return false;
 
     if (pokemon.EvolvesFrom == inPlayPokemon.Name) {
-      await this.#gameState.delay();
-      this.#player.evolvePokemon(inPlayPokemon, pokemon);
+      await this.#game.delay();
+      await this.#game.evolvePokemon(inPlayPokemon, pokemon);
       return true;
     }
     return false;
   }
   async useAbility(pokemon: InPlayPokemonCard, ability: Ability) {
     if (!this.canUseAbility(pokemon, ability)) return false;
-    await this.#gameState.delay();
+    await this.#game.delay();
 
-    await this.#gameState.useAbility(pokemon, ability);
+    await this.#game.useAbility(pokemon, ability);
     return true;
   }
   async useAttack(attack: Attack) {
     if (!this.canUseAttack(attack)) return false;
-    await this.#gameState.delay();
+    await this.#game.delay();
 
-    await this.#gameState.useAttack(attack);
+    await this.#game.useAttack(attack);
     return true;
   }
   async retreatActivePokemon(benchedPokemon: InPlayPokemonCard, energy?: Energy[]) {
     if (!this.canRetreat()) return false;
-    await this.#gameState.delay();
+    await this.#game.delay();
 
     if (!energy) {
       let retreatCost = this.selfActive!.RetreatCost ?? 0;
@@ -218,21 +216,21 @@ export class PlayerGameView {
       energy = this.selfActive!.AttachedEnergy.slice(0, retreatCost);
     }
 
-    this.#player.retreatActivePokemon(benchedPokemon, energy, this.#gameState.RetreatCostModifier);
+    await this.#game.retreatActivePokemon(benchedPokemon, energy);
     return true;
   }
   async playItemCard(card: ItemCard) {
     if (!this.canPlayCard(card)) return false;
-    await this.#gameState.delay();
+    await this.#game.delay();
 
-    await this.#gameState.playTrainer(card);
+    await this.#game.playTrainer(card);
     return true;
   }
   async playSupporterCard(card: SupporterCard) {
     if (!this.canPlayCard(card)) return false;
-    await this.#gameState.delay();
+    await this.#game.delay();
 
-    await this.#gameState.playTrainer(card);
+    await this.#game.playTrainer(card);
     return true;
   }
 }
