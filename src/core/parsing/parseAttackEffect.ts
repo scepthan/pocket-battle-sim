@@ -162,10 +162,7 @@ export const parseAttackEffect = (
     {
       pattern: /^this attack does nothing\.$/i,
       transform: () => async (game: Game) => {
-        game.GameLog.addEntry({
-          type: "attackFailed",
-          player: game.AttackingPlayer.Name,
-        });
+        game.GameLog.attackFailed(game.AttackingPlayer);
       },
     },
     {
@@ -424,38 +421,22 @@ export const parseAttackEffect = (
           game.DefendingPlayer.InPlayPokemon
         );
         if (!chosenPokemon) {
-          game.GameLog.addEntry({
-            type: "attackFailed",
-            player: game.AttackingPlayer.Name,
-          });
+          game.GameLog.attackFailed(game.AttackingPlayer);
           return;
         }
         const chosenAttack = await game.choose(game.AttackingPlayer, chosenPokemon.Attacks);
         if (!chosenAttack) {
-          game.GameLog.addEntry({
-            type: "attackFailed",
-            player: game.AttackingPlayer.Name,
-          });
+          game.GameLog.attackFailed(game.AttackingPlayer);
           return;
         }
-        game.GameLog.addEntry({
-          type: "copyAttack",
-          player: game.AttackingPlayer.Name,
-          attackName: chosenAttack.Name,
-          attackingPokemon: game.AttackingPlayer.pokemonToDescriptor(
-            game.AttackingPlayer.ActivePokemon!
-          ),
-        });
+        game.GameLog.copyAttack(game.AttackingPlayer, chosenAttack.Name);
         if (
           game.AttackingPlayer.ActivePokemon!.hasSufficientEnergy(chosenAttack.RequiredEnergy) &&
           !chosenAttack.Text?.includes("use it as this attack")
         ) {
           await game.useEffect(chosenAttack.Effect);
         } else {
-          game.GameLog.addEntry({
-            type: "attackFailed",
-            player: game.AttackingPlayer.Name,
-          });
+          game.GameLog.attackFailed(game.AttackingPlayer);
         }
       },
     },

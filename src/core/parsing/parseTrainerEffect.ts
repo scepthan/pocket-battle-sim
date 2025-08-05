@@ -105,11 +105,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<Effect> => {
           if (active && names.includes(active.Name)) {
             game.AttackingPlayer.returnPokemonToHand(active);
           } else {
-            game.GameLog.addEntry({
-              type: "actionFailed",
-              player: game.AttackingPlayer.Name,
-              reason: "noValidTargets",
-            });
+            game.GameLog.noValidTargets(game.AttackingPlayer);
           }
         };
       },
@@ -130,11 +126,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<Effect> => {
               game.AttackingPlayer.attachEnergy(pokemon, [fullType], "energyZone");
             }
           } else {
-            game.GameLog.addEntry({
-              type: "actionFailed",
-              player: game.AttackingPlayer.Name,
-              reason: "noValidTargets",
-            });
+            game.GameLog.noValidTargets(game.AttackingPlayer);
           }
         };
       },
@@ -148,11 +140,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<Effect> => {
 
         return async (game: Game) => {
           if (!names.includes(game.AttackingPlayer.ActivePokemon!.Name)) {
-            game.GameLog.addEntry({
-              type: "actionFailed",
-              player: game.AttackingPlayer.Name,
-              reason: "noValidTargets",
-            });
+            game.GameLog.noValidTargets(game.AttackingPlayer);
             return;
           }
           for (const pokemon of game.AttackingPlayer.Bench) {
@@ -180,11 +168,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<Effect> => {
           let benchIndex = 0;
           while (game.AttackingPlayer.Bench[benchIndex]) benchIndex++;
           if (benchIndex >= 3) {
-            game.GameLog.addEntry({
-              type: "actionFailed",
-              player: game.AttackingPlayer.Name,
-              reason: "noValidTargets",
-            });
+            game.GameLog.noValidTargets(game.AttackingPlayer);
             return;
           }
 
@@ -221,11 +205,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<Effect> => {
   return {
     parseSuccessful: false,
     value: async (game: Game) => {
-      game.GameLog.addEntry({
-        type: "actionFailed",
-        player: game.AttackingPlayer.Name,
-        reason: "notImplemented",
-      });
+      game.GameLog.notImplemented(game.AttackingPlayer);
     },
   };
 };

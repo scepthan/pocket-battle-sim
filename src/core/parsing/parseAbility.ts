@@ -13,11 +13,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     Trigger: "GameRule",
     Conditions: [],
     Effect: async (game: Game) => {
-      game.GameLog.addEntry({
-        type: "actionFailed",
-        player: game.AttackingPlayer.Name,
-        reason: "notImplemented",
-      });
+      game.GameLog.notImplemented(game.AttackingPlayer);
     },
   };
   let abilityText = inputAbility.Effect;
@@ -63,11 +59,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         ability.Effect = async (game: Game) => {
           const pokemon = game.AttackingPlayer.ActivePokemon!;
           if (pokemon.Type != pt) {
-            game.GameLog.addEntry({
-              type: "actionFailed",
-              player: game.AttackingPlayer.Name,
-              reason: "noValidTargets",
-            });
+            game.GameLog.noValidTargets(game.AttackingPlayer);
             return;
           }
           game.AttackingPlayer.attachEnergy(pokemon, [fullType], "energyZone");
@@ -97,11 +89,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           if (pokemon) {
             game.applyDamage(pokemon, Number(damage), false);
           } else {
-            game.GameLog.addEntry({
-              type: "actionFailed",
-              player: game.AttackingPlayer.Name,
-              reason: "noValidTargets",
-            });
+            game.GameLog.noValidTargets(game.AttackingPlayer);
           }
         };
       },
@@ -147,11 +135,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         ability.Effect = async (game: Game) => {
           const benchedBasics = game.DefendingPlayer.BenchedPokemon.filter((p) => p.Stage === 0);
           if (benchedBasics.length === 0) {
-            game.GameLog.addEntry({
-              type: "actionFailed",
-              player: game.AttackingPlayer.Name,
-              reason: "noValidTargets",
-            });
+            game.GameLog.noValidTargets(game.AttackingPlayer);
             return;
           }
           const chosenPokemon = await game.choosePokemon(game.AttackingPlayer, benchedBasics);

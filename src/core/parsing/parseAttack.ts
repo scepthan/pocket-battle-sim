@@ -22,12 +22,12 @@ export const parseAttack = (inputAttack: InputCardAttack): ParsedResult<Attack> 
     const damaging = !!inputAttack.HP;
     let parseSuccessful = false;
     let Effect = async (game: Game) => {
-      if (damaging) await defaultEffect(game);
-      game.GameLog.addEntry({
-        type: "actionFailed",
-        player: game.AttackingPlayer.Name,
-        reason: damaging ? "partiallyImplemented" : "notImplemented",
-      });
+      if (damaging) {
+        await defaultEffect(game);
+        game.GameLog.partiallyImplemented(game.AttackingPlayer);
+      } else {
+        game.GameLog.notImplemented(game.AttackingPlayer);
+      }
     };
 
     const result = parseAttackEffect(inputAttack.Effect, inputAttack.HP ?? 0, RequiredEnergy);

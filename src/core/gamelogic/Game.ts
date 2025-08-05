@@ -87,11 +87,7 @@ export class Game {
     if (Math.random() >= 0.5) {
       players.reverse();
     }
-    this.GameLog.addEntry({
-      type: "startGame",
-      firstPlayer: players[0].Name,
-      secondPlayer: players[1].Name,
-    });
+    this.GameLog.startGame(players[0], players[1]);
     this.AttackingPlayer = players[0];
     this.DefendingPlayer = players[1];
 
@@ -123,11 +119,8 @@ export class Game {
         await this.nextTurn();
       } catch (error) {
         console.error("Error during turn:", error);
-        this.GameLog.addEntry({
-          type: "gameOver",
-          draw: true,
-          reason: "invalidGameState",
-        });
+        this.GameLog.invalidGameState();
+        this.GameOver = true;
         break;
       }
     }
@@ -163,36 +156,19 @@ export class Game {
     }
 
     // Log the turn change
-    this.GameLog.addEntry({
-      type: "nextTurn",
-      turnNumber: this.TurnNumber,
-      attackingPlayer: this.AttackingPlayer.Name,
-      defendingPlayer: this.DefendingPlayer.Name,
-    });
+    this.GameLog.nextTurn(this.TurnNumber, this.AttackingPlayer, this.DefendingPlayer);
 
     // Generate next energy for the attacking player
     if (this.TurnNumber > 1) {
       this.AttackingPlayer.AvailableEnergy = this.AttackingPlayer.NextEnergy; // Set the available energy for the attacking player
       this.AttackingPlayer.chooseNextEnergy();
-      this.GameLog.addEntry({
-        type: "generateNextEnergy",
-        player: this.AttackingPlayer.Name,
-        currentEnergy: this.AttackingPlayer.AvailableEnergy,
-        nextEnergy: this.AttackingPlayer.NextEnergy,
-      });
+      this.GameLog.generateNextEnergy(this.AttackingPlayer);
     }
 
     // Log the Special Conditions that will affect the Active Pokemon
     const status = this.AttackingPlayer.ActivePokemon!.PrimaryCondition;
     if (status == "Asleep" || status == "Paralyzed") {
-      this.GameLog.addEntry({
-        type: "specialConditionEffective",
-        player: this.AttackingPlayer.Name,
-        targetPokemon: this.AttackingPlayer.pokemonToDescriptor(
-          this.AttackingPlayer.ActivePokemon!
-        ),
-        specialCondition: status,
-      });
+      this.GameLog.specialConditionEffective(this.AttackingPlayer);
     }
 
     // Draw a card into the attacking player's hand
@@ -214,11 +190,7 @@ export class Game {
       });
     } catch (error) {
       console.error("Error during turn:", error);
-      this.GameLog.addEntry({
-        type: "turnError",
-        player: this.AttackingPlayer.Name,
-        error: String(error),
-      });
+      this.GameLog.turnError(this.AttackingPlayer, String(error));
     }
 
     if (this.GameOver) return;
@@ -233,60 +205,43 @@ export class Game {
     await this.delay();
 
     // Pokemon Checkup phase
-    this.GameLog.addEntry({
-      type: "pokemonCheckup",
-    });
+    this.GameLog.pokemonCheckup();
+
+    const attacker = this.AttackingPlayer.ActivePokemon;
+    const defender = this.DefendingPlayer.ActivePokemon;
+    if (attacker == undefined || defender == undefined) {
+      this.GameLog.invalidGameState();
+      this.GameOver = true;
+      return;
+    }
 
     // Apply poison damage
-    for (const player of [this.AttackingPlayer, this.DefendingPlayer]) {
-      const pokemon = player.ActivePokemon!;
+    for (const pokemon of [attacker, defender]) {
       if (pokemon.SecondaryConditions.has("Poisoned")) {
         const initialHP = pokemon.CurrentHP;
         const damage = 10;
+        const player = this.findOwner(pokemon);
 
         pokemon.applyDamage(damage);
-        this.GameLog.addEntry({
-          type: "specialConditionDamage",
-          player: player.Name,
-          specialCondition: "Poisoned",
-          targetPokemon: player.pokemonToDescriptor(pokemon),
-          initialHP: initialHP,
-          damageDealt: damage,
-          finalHP: pokemon.CurrentHP,
-          maxHP: pokemon.BaseHP,
-        });
+        this.GameLog.specialConditionDamage(player, "Poisoned", initialHP, damage);
       }
     }
 
     // Flip to wake up sleeping Pokemon
-    for (const player of [this.AttackingPlayer, this.DefendingPlayer]) {
-      const pokemon = player.ActivePokemon!;
+    for (const pokemon of [attacker, defender]) {
       if (pokemon.PrimaryCondition == "Asleep") {
+        const player = this.findOwner(pokemon);
         if (player.flipCoin()) {
           pokemon.PrimaryCondition = undefined;
-          this.GameLog.addEntry({
-            type: "specialConditionEnded",
-            player: player.Name,
-            targetPokemon: player.pokemonToDescriptor(pokemon),
-            specialConditions: ["Asleep"],
-            currentConditionList: pokemon.CurrentConditions,
-          });
+          this.GameLog.specialConditionEnded(player, ["Asleep"]);
         }
       }
     }
 
     // Remove paralysis status from attacking player's Active Pokemon
-    if (this.AttackingPlayer.ActivePokemon!.PrimaryCondition == "Paralyzed") {
-      this.AttackingPlayer.ActivePokemon!.PrimaryCondition = undefined;
-      this.GameLog.addEntry({
-        type: "specialConditionEnded",
-        player: this.AttackingPlayer.Name,
-        targetPokemon: this.AttackingPlayer.pokemonToDescriptor(
-          this.AttackingPlayer.ActivePokemon!
-        ),
-        specialConditions: ["Paralyzed"],
-        currentConditionList: this.AttackingPlayer.ActivePokemon!.CurrentConditions,
-      });
+    if (attacker.PrimaryCondition == "Paralyzed") {
+      attacker.PrimaryCondition = undefined;
+      this.GameLog.specialConditionEnded(this.AttackingPlayer, ["Paralyzed"]);
     }
 
     await this.checkForKnockOuts();
@@ -294,11 +249,7 @@ export class Game {
     await this.delay();
 
     if (this.TurnNumber >= this.GameRules.TurnLimit) {
-      this.GameLog.addEntry({
-        type: "gameOver",
-        draw: true,
-        reason: "maxTurnNumberReached",
-      });
+      this.GameLog.maxTurnNumberReached();
       this.GameOver = true;
       return;
     }
@@ -362,11 +313,7 @@ export class Game {
       } else if (player1WinConditions.length < player2WinConditions.length) {
         this.GameLog.logWinner(this.Player2.Name, player2WinConditions);
       } else {
-        this.GameLog.addEntry({
-          type: "gameOver",
-          draw: true,
-          reason: "bothPlayersGameOver",
-        });
+        this.GameLog.bothPlayersGameOver();
       }
 
       this.GameOver = true;
@@ -391,14 +338,8 @@ export class Game {
 
   // Methods to cover any action a player can take and execute the proper follow-up effects
   async useAttack(attack: Attack) {
-    this.GameLog.addEntry({
-      type: "useAttack",
-      player: this.AttackingPlayer.Name,
-      attackName: attack.Name,
-      attackingPokemon: this.AttackingPlayer.pokemonToDescriptor(
-        this.AttackingPlayer.ActivePokemon!
-      ),
-    });
+    this.GameLog.useAttack(this.AttackingPlayer, attack.Name);
+
     await this.useInitialEffect(attack.Effect);
     this.endTurnResolve(true);
   }
@@ -417,12 +358,7 @@ export class Game {
       throw new Error("Ability can only be used if the Pokemon is Active");
     }
 
-    this.GameLog.addEntry({
-      type: "useAbility",
-      player: this.AttackingPlayer.Name,
-      abilityName: ability.Name,
-      abilityPokemon: this.AttackingPlayer.pokemonToDescriptor(pokemon),
-    });
+    this.GameLog.useAbility(this.AttackingPlayer, pokemon, ability.Name);
 
     await this.useInitialEffect(ability.Effect, pokemon);
   }
@@ -465,12 +401,8 @@ export class Game {
     this.AttackingPlayer.Hand.splice(this.AttackingPlayer.Hand.indexOf(card), 1);
     this.ActiveTrainerCard = card;
 
-    this.GameLog.addEntry({
-      type: "playTrainer",
-      player: this.AttackingPlayer.Name,
-      cardId: card.ID,
-      trainerType: card.CardType,
-    });
+    this.GameLog.playTrainer(this.AttackingPlayer, card);
+
     await this.useInitialEffect(card.Effect);
 
     this.ActiveTrainerCard = undefined;
@@ -478,12 +410,7 @@ export class Game {
     // Otherwise we could always push to discard
     if (!this.AttackingPlayer.InPlay.includes(card)) {
       this.AttackingPlayer.Discard.push(card);
-      this.GameLog.addEntry({
-        type: "discardCards",
-        player: this.AttackingPlayer.Name,
-        source: "hand",
-        cardIds: [card.ID],
-      });
+      this.GameLog.discardFromHand(this.AttackingPlayer, [card]);
     }
   }
 
@@ -500,10 +427,11 @@ export class Game {
   attackPokemon(defender: InPlayPokemonCard, HP: number) {
     const type = this.AttackingPlayer.ActivePokemon!.Type;
     const initialHP = defender.CurrentHP;
+    const owner = this.DefendingPlayer;
 
     let totalDamage = HP;
     let weaknessBoost = false;
-    if (totalDamage > 0 && defender == this.DefendingPlayer.ActivePokemon) {
+    if (totalDamage > 0 && defender == owner.ActivePokemon) {
       totalDamage += this.ActivePokemonDamageBoost;
       if (type == defender.Weakness) {
         totalDamage += 20;
@@ -515,17 +443,7 @@ export class Game {
 
     defender.applyDamage(totalDamage);
 
-    this.GameLog.addEntry({
-      type: "pokemonDamaged",
-      player: this.DefendingPlayer.Name,
-      targetPokemon: this.DefendingPlayer.pokemonToDescriptor(defender),
-      fromAttack: true,
-      damageDealt: totalDamage,
-      initialHP,
-      finalHP: defender.CurrentHP,
-      maxHP: defender.BaseHP,
-      weaknessBoost,
-    });
+    this.GameLog.attackDamage(owner, defender, initialHP, totalDamage, weaknessBoost);
 
     return totalDamage;
   }
@@ -536,16 +454,7 @@ export class Game {
 
     target.applyDamage(HP);
 
-    this.GameLog.addEntry({
-      type: "pokemonDamaged",
-      player: owner.Name,
-      targetPokemon: owner.pokemonToDescriptor(target),
-      fromAttack,
-      damageDealt: HP,
-      initialHP,
-      finalHP: target.CurrentHP,
-      maxHP: target.BaseHP,
-    });
+    this.GameLog.pokemonDamaged(owner, target, initialHP, HP, fromAttack);
   }
 
   knockOutPokemon(player: Player, pokemon: InPlayPokemonCard) {
@@ -557,18 +466,11 @@ export class Game {
 
   healPokemon(target: InPlayPokemonCard, HP: number) {
     const initialHP = target.CurrentHP;
+    const owner = this.findOwner(target);
 
     target.healDamage(HP);
 
-    this.GameLog.addEntry({
-      type: "pokemonHealed",
-      player: this.AttackingPlayer.Name,
-      targetPokemon: this.AttackingPlayer.pokemonToDescriptor(target),
-      initialHP,
-      healingDealt: HP,
-      finalHP: target.CurrentHP,
-      maxHP: target.BaseHP,
-    });
+    this.GameLog.pokemonHealed(owner, target, initialHP, HP);
   }
 
   discardEnergy(pokemon: InPlayPokemonCard, type: Energy, count: number) {
@@ -594,11 +496,7 @@ export class Game {
   async swapActivePokemon(player: Player, reason: "selfEffect" | "opponentEffect") {
     await this.delay();
     if (player.BenchedPokemon.length == 0) {
-      this.GameLog.addEntry({
-        type: "actionFailed",
-        player: player.Name,
-        reason: "noBenchedPokemon",
-      });
+      this.GameLog.noBenchedPokemon(player);
       return false;
     }
     const agent = this.findAgent(player);
@@ -608,11 +506,7 @@ export class Game {
   }
   async choosePokemon(player: Player, validPokemon: InPlayPokemonCard[]) {
     if (validPokemon.length == 0) {
-      this.GameLog.addEntry({
-        type: "actionFailed",
-        player: player.Name,
-        reason: "noValidTargets",
-      });
+      this.GameLog.noValidTargets(player);
       return;
     }
     const agent = this.findAgent(player);
@@ -624,11 +518,7 @@ export class Game {
   }
   async choose<T>(player: Player, options: T[]) {
     if (options.length == 0) {
-      this.GameLog.addEntry({
-        type: "actionFailed",
-        player: player.Name,
-        reason: "noValidTargets",
-      });
+      this.GameLog.noValidTargets(player);
       return;
     }
     const agent = this.findAgent(player);
@@ -639,43 +529,25 @@ export class Game {
     return selected;
   }
   async showCards(player: Player, cards: PlayingCard[]) {
-    this.GameLog.addEntry({
-      type: "viewCards",
-      player: player.Name,
-      cardIds: cards.map((card) => card.ID),
-    });
+    const cardIds = cards.map((card) => card.ID);
+    this.GameLog.viewCards(player, cardIds);
     const agent = this.findAgent(player);
     await agent.viewCards(cards);
   }
 
   reduceRetreatCost(modifier: number) {
     this.RetreatCostModifier -= modifier;
-    this.GameLog.addEntry({
-      type: "applyModifier",
-      attribute: "retreatCost",
-      player: this.AttackingPlayer.Name,
-      newModifier: -modifier,
-      totalModifier: this.RetreatCostModifier,
-    });
+    const player = this.AttackingPlayer;
+    this.GameLog.applyModifier(player, "retreatCost", modifier, this.RetreatCostModifier);
   }
   increaseAttackModifier(modifier: number) {
     this.ActivePokemonDamageBoost += modifier;
-    this.GameLog.addEntry({
-      type: "applyModifier",
-      attribute: "activeDamage",
-      player: this.AttackingPlayer.Name,
-      newModifier: modifier,
-      totalModifier: this.ActivePokemonDamageBoost,
-    });
+    const player = this.AttackingPlayer;
+    this.GameLog.applyModifier(player, "activeDamage", modifier, this.RetreatCostModifier);
   }
   increaseDefenseModifier(modifier: number) {
     this.NextTurnDamageReduction += modifier;
-    this.GameLog.addEntry({
-      type: "applyModifier",
-      attribute: "damageReduction",
-      player: this.AttackingPlayer.Name,
-      newModifier: modifier,
-      totalModifier: this.NextTurnDamageReduction,
-    });
+    const player = this.AttackingPlayer;
+    this.GameLog.applyModifier(player, "damageReduction", modifier, this.RetreatCostModifier);
   }
 }

@@ -1,8 +1,12 @@
-import type { GameLogger, InPlayPokemonDescriptor, LoggedEvent } from "../logging";
+import type {
+  AttachEnergySource,
+  DiscardEnergySource,
+  GameLogger,
+  InPlayPokemonDescriptor,
+} from "../logging";
 import type { Deck, Energy, PlayingCard, PokemonCard } from "../types";
 import { CoinFlipper } from "./CoinFlipper";
 import { InPlayPokemonCard } from "./InPlayPokemonCard";
-import type { SpecialCondition } from "./types";
 import type { PlayerGameSetup } from "./types/PlayerAgent";
 
 export class Player {
@@ -35,7 +39,7 @@ export class Player {
     this.EnergyTypes = deck.EnergyTypes;
     this.Deck = deck.Cards;
     this.logger = logger;
-    this.flipper = new CoinFlipper({ logger, name });
+    this.flipper = new CoinFlipper(this);
   }
 
   pokemonToDescriptor(pokemon: InPlayPokemonCard): InPlayPokemonDescriptor {
@@ -57,12 +61,7 @@ export class Player {
     this.drawInitialHand(handSize);
 
     this.chooseNextEnergy();
-    this.logger.addEntry({
-      type: "generateNextEnergy",
-      player: this.Name,
-      currentEnergy: "none",
-      nextEnergy: this.NextEnergy,
-    });
+    this.logger.generateNextEnergy(this);
   }
 
   reset() {
@@ -87,13 +86,7 @@ export class Player {
       this.shuffleHandIntoDeck(false);
     }
 
-    this.logger.addEntry({
-      type: "drawToHand",
-      player: this.Name,
-      attempted: handSize,
-      cardIds: this.Hand.map((card) => card.ID),
-      success: true,
-    });
+    this.logger.drawToHand(this, handSize, this.Hand);
   }
 
   shuffleDeck(log: boolean = true) {
@@ -106,23 +99,12 @@ export class Player {
 
     this.Deck = newDeck;
 
-    if (log) {
-      this.logger.addEntry({
-        type: "shuffleDeck",
-        player: this.Name,
-      });
-    }
+    if (log) this.logger.shuffleDeck(this);
   }
 
   shuffleHandIntoDeck(log: boolean = true) {
-    if (log) {
-      this.logger.addEntry({
-        type: "returnToDeck",
-        player: this.Name,
-        source: "hand",
-        cardIds: this.Hand.map((card) => card.ID),
-      });
-    }
+    if (log) this.logger.returnHandToDeck(this, this.Hand);
+
     this.Deck = this.Deck.concat(this.Hand);
     this.Hand = [];
     this.shuffleDeck(log);
@@ -130,29 +112,14 @@ export class Player {
 
   drawCards(count: number, maxHandSize: number, log: boolean = true) {
     const cardsDrawn: PlayingCard[] = [];
-    const logEntry: LoggedEvent = {
-      type: "drawToHand",
-      player: this.Name,
-      attempted: count,
-      cardIds: [],
-      success: true,
-    };
     while (cardsDrawn.length < count) {
-      if (this.Deck.length == 0) {
-        logEntry.success = false;
-        logEntry.failureReason = "deckEmpty";
-        break;
-      }
-      if (this.Hand.length >= maxHandSize) {
-        logEntry.success = false;
-        logEntry.failureReason = "handFull";
-        break;
-      }
+      if (this.Deck.length == 0 || this.Hand.length >= maxHandSize) break;
+
       cardsDrawn.push(this.Deck.shift()!);
     }
+    if (log) this.logger.drawToHand(this, count, cardsDrawn);
+
     this.Hand.push(...cardsDrawn);
-    logEntry.cardIds = cardsDrawn.map((card) => card.ID);
-    if (log) this.logger?.addEntry(logEntry);
   }
 
   chooseNextEnergy() {
@@ -182,11 +149,7 @@ export class Player {
     this.InPlay.push(setup.active);
     this.Hand.splice(this.Hand.indexOf(setup.active), 1);
 
-    this.logger.addEntry({
-      type: "playToActive",
-      player: this.Name,
-      cardId: setup.active.ID,
-    });
+    this.logger.playToActive(this, setup.active);
 
     // Set up the bench Pokémon
     setup.bench.forEach((card, i) => {
@@ -196,27 +159,17 @@ export class Player {
   }
 
   drawRandomFiltered(predicate: (card: PlayingCard) => boolean) {
-    const filteredPokemon = this.Deck.filter(predicate);
-    const result = [];
-    if (filteredPokemon.length > 0) {
-      const card = filteredPokemon[(Math.random() * filteredPokemon.length) | 0];
-      result.push(card);
+    const filteredCards = this.Deck.filter(predicate);
+    let card = undefined;
+    if (filteredCards.length > 0) {
+      card = filteredCards[(Math.random() * filteredCards.length) | 0];
       this.Deck.splice(this.Deck.indexOf(card), 1);
       this.Hand.push(card);
     }
 
-    this.logger.addEntry({
-      type: "drawToHand",
-      player: this.Name,
-      attempted: 1,
-      cardIds: result.map((card) => card.ID),
-      success: result.length > 0,
-      failureReason: result.length == 0 ? "noValidCards" : undefined,
-    });
+    this.logger.drawRandomFiltered(this, card);
 
     this.shuffleDeck();
-
-    return;
   }
 
   discardRandomFiltered(predicate: (card: PlayingCard) => boolean = () => true) {
@@ -230,12 +183,7 @@ export class Player {
       this.Discard.push(card);
     }
 
-    this.logger.addEntry({
-      type: "discardCards",
-      player: this.Name,
-      source: "hand",
-      cardIds: discarded.map((card) => card.ID),
-    });
+    this.logger.discardFromHand(this, discarded);
 
     return discarded;
   }
@@ -247,11 +195,7 @@ export class Player {
     this.ActivePokemon = pokemon;
     this.Bench[this.Bench.indexOf(pokemon)] = undefined;
 
-    this.logger.addEntry({
-      type: "selectActivePokemon",
-      player: this.Name,
-      toPokemon: this.pokemonToDescriptor(pokemon),
-    });
+    this.logger.selectActivePokemon(this);
   }
 
   putPokemonOnBench(card: PokemonCard, index: number, trueCard: PlayingCard = card) {
@@ -269,12 +213,7 @@ export class Player {
       this.Hand.splice(this.Hand.indexOf(trueCard), 1);
     }
 
-    this.logger.addEntry({
-      type: "playToBench",
-      player: this.Name,
-      cardId: card.ID,
-      benchIndex: index,
-    });
+    this.logger.playToBench(this, card, index);
   }
 
   evolvePokemon(pokemon: InPlayPokemonCard, card: PokemonCard) {
@@ -288,21 +227,12 @@ export class Player {
       throw new Error("Pokemon is not ready to evolve");
     }
 
-    // Save info for logging purposes
-    const beforePokemon = this.pokemonToDescriptor(pokemon);
-
     this.Hand.splice(this.Hand.indexOf(card), 1);
     this.InPlay.push(card);
 
+    this.logger.evolvePokemon(this, pokemon, card);
     pokemon.evolveInto(card);
 
-    this.logger.addEntry({
-      type: "evolvePokemon",
-      player: this.Name,
-      fromPokemon: beforePokemon,
-      cardId: card.ID,
-      stage: card.Stage,
-    });
     this.recoverAllSpecialConditions(pokemon);
   }
 
@@ -317,18 +247,11 @@ export class Player {
   attachEnergy(
     pokemon: InPlayPokemonCard,
     energy: Energy[],
-    from: "player" | "energyZone" | "discard" | "pokemon",
+    from: AttachEnergySource,
     fromPokemon?: InPlayPokemonCard
   ) {
     pokemon.attachEnergy(energy);
-    this.logger.addEntry({
-      type: "attachEnergy",
-      player: this.Name,
-      energyTypes: energy,
-      from,
-      targetPokemon: this.pokemonToDescriptor(pokemon),
-      fromPokemon: fromPokemon && this.pokemonToDescriptor(fromPokemon),
-    });
+    this.logger.attachEnergy(this, pokemon, energy, from, fromPokemon);
   }
 
   transferEnergy(fromPokemon: InPlayPokemonCard, toPokemon: InPlayPokemonCard, energy: Energy[]) {
@@ -340,14 +263,7 @@ export class Player {
     }
     toPokemon.attachEnergy(energy);
 
-    this.logger.addEntry({
-      type: "attachEnergy",
-      player: this.Name,
-      targetPokemon: this.pokemonToDescriptor(toPokemon),
-      energyTypes: energy,
-      from: "pokemon",
-      fromPokemon: this.pokemonToDescriptor(fromPokemon),
-    });
+    this.logger.attachEnergy(this, toPokemon, energy, "pokemon", fromPokemon);
   }
 
   discardRandomEnergy(pokemon: InPlayPokemonCard, count: number = 1) {
@@ -363,20 +279,12 @@ export class Player {
     this.discardEnergy(discarded, "effect");
   }
 
-  discardEnergy(
-    energies: Energy[],
-    source: "effect" | "retreat" | "knockOut" | "removedFromField" | "energyZone"
-  ) {
+  discardEnergy(energies: Energy[], source: DiscardEnergySource) {
     if (energies.length == 0) return;
 
     this.DiscardedEnergy.push(...energies);
 
-    this.logger.addEntry({
-      type: "discardEnergy",
-      player: this.Name,
-      source: source,
-      energyTypes: energies,
-    });
+    this.logger.discardEnergy(this, energies, source);
   }
 
   retreatActivePokemon(
@@ -427,14 +335,7 @@ export class Player {
     this.ActivePokemon = pokemon;
     this.Bench[this.Bench.indexOf(pokemon)] = previousActive;
 
-    this.logger.addEntry({
-      type: "swapActivePokemon",
-      player: this.Name,
-      choosingPlayer,
-      fromPokemon: this.pokemonToDescriptor(previousActive),
-      toPokemon: this.pokemonToDescriptor(pokemon),
-      reason,
-    });
+    this.logger.swapActivePokemon(this, previousActive, pokemon, reason, choosingPlayer);
 
     this.recoverAllSpecialConditions(previousActive);
   }
@@ -446,13 +347,7 @@ export class Player {
     pokemon.PrimaryCondition = undefined;
     pokemon.SecondaryConditions = new Set();
 
-    this.logger.addEntry({
-      type: "specialConditionEnded",
-      player: this.Name,
-      specialConditions: conditions,
-      targetPokemon: this.pokemonToDescriptor(pokemon),
-      currentConditionList: pokemon.CurrentConditions,
-    });
+    this.logger.specialConditionEnded(this, conditions);
   }
 
   returnPokemonToHand(pokemon: InPlayPokemonCard) {
@@ -467,12 +362,7 @@ export class Player {
       this.Hand.push(card);
     }
 
-    this.logger.addEntry({
-      type: "returnToHand",
-      player: this.Name,
-      source: "inPlay",
-      cardIds: pokemon.InPlayCards.map((card) => card.ID),
-    });
+    this.logger.returnInPlayPokemonToHand(this, pokemon);
 
     this.discardEnergy(pokemon.AttachedEnergy, "removedFromField");
   }
@@ -489,12 +379,7 @@ export class Player {
       this.Deck.push(card);
     }
 
-    this.logger.addEntry({
-      type: "returnToDeck",
-      player: this.Name,
-      source: "inPlay",
-      cardIds: pokemon.InPlayCards.map((card) => card.ID),
-    });
+    this.logger.returnInPlayPokemonToDeck(this, pokemon);
 
     this.discardEnergy(pokemon.AttachedEnergy, "removedFromField");
 
@@ -502,21 +387,14 @@ export class Player {
   }
 
   knockOutPokemon(pokemon: InPlayPokemonCard) {
-    this.logger.addEntry({
-      type: "pokemonKnockedOut",
-      player: this.Name,
-      targetPokemon: this.pokemonToDescriptor(pokemon),
-    });
+    this.logger.pokemonKnockedOut(this, pokemon);
+
     for (const card of pokemon.InPlayCards) {
       this.InPlay.splice(this.InPlay.indexOf(card), 1);
       this.Discard.push(card);
     }
-    this.logger.addEntry({
-      type: "discardCards",
-      player: this.Name,
-      source: "inPlay",
-      cardIds: pokemon.InPlayCards.map((card) => card.ID),
-    });
+    this.logger.discardFromPlay(this, pokemon.InPlayCards);
+
     this.discardEnergy(pokemon.AttachedEnergy, "knockOut");
 
     if (this.ActivePokemon == pokemon) {
@@ -528,12 +406,7 @@ export class Player {
 
   checkPrizePointsChange(previousPoints: number) {
     if (this.GamePoints > previousPoints) {
-      this.logger.addEntry({
-        type: "scorePrizePoints",
-        player: this.Name,
-        prizePointsScored: this.GamePoints - previousPoints,
-        totalPrizePoints: this.GamePoints,
-      });
+      this.logger.scorePrizePoints(this, this.GamePoints - previousPoints);
     }
   }
 
@@ -543,37 +416,22 @@ export class Player {
 
     this.Hand = this.Hand.filter((card) => !cards.includes(card));
     this.Discard.push(...cards);
-    this.logger.addEntry({
-      type: "discardCards",
-      player: this.Name,
-      source: "hand",
-      cardIds: cards.map((card) => card.ID),
-    });
+    this.logger.discardFromHand(this, cards);
   }
 
   poisonActivePokemon() {
     this.ActivePokemon!.SecondaryConditions.add("Poisoned");
-    this.logNewActiveCondition("Poisoned");
+    this.logger.specialConditionApplied(this, "Poisoned");
   }
 
   sleepActivePokemon() {
     this.ActivePokemon!.PrimaryCondition = "Asleep";
-    this.logNewActiveCondition("Asleep");
+    this.logger.specialConditionApplied(this, "Asleep");
   }
 
   paralyzeActivePokemon() {
     this.ActivePokemon!.PrimaryCondition = "Paralyzed";
-    this.logNewActiveCondition("Paralyzed");
-  }
-
-  logNewActiveCondition(condition: SpecialCondition) {
-    this.logger.addEntry({
-      type: "specialConditionApplied",
-      player: this.Name,
-      specialConditions: [condition],
-      targetPokemon: this.pokemonToDescriptor(this.ActivePokemon!),
-      currentConditionList: this.ActivePokemon!.CurrentConditions,
-    });
+    this.logger.specialConditionApplied(this, "Paralyzed");
   }
 
   flipCoin() {

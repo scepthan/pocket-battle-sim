@@ -13,7 +13,7 @@ import type { Player } from "./Player";
 
 export class PlayerGameView {
   #game: Game;
-  #turnNumber: number;
+  #turnNumber: number; // Safeguard to prevent actions from being executed after the turn has ended
   #player: Player;
   #opponent: Player;
 

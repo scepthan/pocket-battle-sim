@@ -1,26 +1,22 @@
 import type { GameLogger } from "../logging";
-
-interface LogSetup {
-  logger: GameLogger;
-  name: string;
-}
+import type { Player } from "./Player";
 
 export class CoinFlipper {
-  private setup?: LogSetup;
+  private player?: Player;
+  private logger?: GameLogger;
 
-  constructor(setup?: LogSetup) {
-    this.setup = setup;
+  constructor(player?: Player) {
+    if (player) {
+      this.player = player;
+      this.logger = player.logger;
+    }
   }
 
   private coinFlip = () => Math.random() >= 0.5;
 
   singleCoinFlip = () => {
     const result = this.coinFlip();
-    this.setup?.logger.addEntry({
-      type: "coinFlip",
-      player: this.setup.name,
-      result: result ? "Heads" : "Tails",
-    });
+    this.logger?.coinFlip(this.player!, result);
     return result;
   };
 
@@ -34,12 +30,7 @@ export class CoinFlipper {
       heads += +result;
     }
 
-    this.setup?.logger.addEntry({
-      type: "coinMultiFlip",
-      player: this.setup.name,
-      flips: count,
-      results: results.map((x) => (x ? "Heads" : "Tails")),
-    });
+    this.logger?.coinMultiFlip(this.player!, results);
 
     return { heads, results };
   };
@@ -55,11 +46,7 @@ export class CoinFlipper {
       heads++;
     }
 
-    this.setup?.logger.addEntry({
-      type: "coinFlipUntilTails",
-      player: this.setup.name,
-      results: results.map((x) => (x ? "Heads" : "Tails")),
-    });
+    this.logger?.coinFlipUntilTails(this.player!, results);
 
     return { heads, results };
   };
