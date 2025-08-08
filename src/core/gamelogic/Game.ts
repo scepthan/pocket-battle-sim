@@ -444,7 +444,8 @@ export class Game {
   }
 
   attackPokemon(defender: InPlayPokemonCard, HP: number) {
-    const type = this.AttackingPlayer.ActivePokemon!.Type;
+    const attacker = this.AttackingPlayer.ActivePokemon!;
+    const type = attacker.Type;
     const initialHP = defender.CurrentHP;
     const owner = this.DefendingPlayer;
 
@@ -462,6 +463,11 @@ export class Game {
 
     // Then: damage reduction
     totalDamage -= this.CurrentDamageReduction;
+    for (const status of attacker.PokemonStatuses) {
+      if (status.type == "ReduceAttack") {
+        totalDamage -= status.amount;
+      }
+    }
     for (const status of defender.PokemonStatuses) {
       if (status.type == "ReduceDamage") {
         totalDamage -= status.amount;

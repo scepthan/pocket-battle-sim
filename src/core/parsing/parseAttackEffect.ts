@@ -426,6 +426,20 @@ export const parseAttackEffect = (
         });
       },
     },
+    {
+      pattern:
+        /^During your opponent's next turn, attacks used by the Defending Pokémon do -(\d+) damage\.$/i,
+      transform: (_, damageReduction) => async (game: Game) => {
+        await defaultEffect(game);
+        game.DefendingPlayer.applyPokemonStatus(game.DefendingPlayer.ActivePokemon!, {
+          type: "ReduceAttack",
+          amount: Number(damageReduction),
+          source: "Effect",
+          condition: "none",
+          keepNextTurn: true,
+        });
+      },
+    },
 
     // Miscellaneous
     {

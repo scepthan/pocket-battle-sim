@@ -242,6 +242,12 @@
           }}
           damage from attacks<span v-if="entry.status.source == 'Effect'"> next turn</span>!
         </p>
+        <p v-else-if="entry.status.type == 'ReduceAttack'">
+          <CardName :card-id="entry.targetPokemon.cardId" /> will attack for &minus;{{
+            entry.status.amount
+          }}
+          damage<span v-if="entry.status.source == 'Effect'"> next turn</span>!
+        </p>
         <p v-else>Unknown status type: {{ entry.status.type }}</p>
       </div>
 
