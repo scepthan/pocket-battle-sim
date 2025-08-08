@@ -127,6 +127,8 @@ export class PlayerGameView {
     if (!this.selfActive.Attacks.includes(attack)) return false;
     if (this.selfActive.PrimaryCondition == "Asleep") return false;
     if (this.selfActive.PrimaryCondition == "Paralyzed") return false;
+    if (this.selfActive.PokemonStatuses.some((status) => status.type == "CannotAttack"))
+      return false;
     return this.selfActive.hasSufficientEnergy(attack.RequiredEnergy);
   }
   canUseAbility(pokemon: InPlayPokemonCard, ability: Ability) {

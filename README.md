@@ -2,7 +2,7 @@
 
 Backend todo:
 
-- [ ] Parse cards: 358/405 (88.4%)
+- [ ] Parse cards: 360/405 (88.9%)
   - [x] Dragon type
   - [ ] Conditions
     - [ ] Special Conditions
@@ -17,7 +17,7 @@ Backend todo:
   - [ ] Abilities
     - [x] Once during your turn
     - [ ] As often as you like during your turn
-    - [ ] Damage reduction
+    - [x] Damage reduction
     - [ ] Attack retaliation
   - [ ] A1 effects
     - [x] Misty

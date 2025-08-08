@@ -464,6 +464,10 @@ export class Player {
     this.logger.specialConditionApplied(this, "Paralyzed");
   }
 
+  applyActivePokemonStatus(status: PokemonStatus) {
+    this.applyPokemonStatus(this.ActivePokemon!, status);
+  }
+
   applyPokemonStatus(pokemon: InPlayPokemonCard, status: PokemonStatus) {
     pokemon.PokemonStatuses.push(status);
     this.logger.applyPokemonStatus(this, pokemon, status);

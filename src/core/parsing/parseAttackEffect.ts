@@ -417,7 +417,7 @@ export const parseAttackEffect = (
         /^During your opponent's next turn, this Pokémon takes -(\d+) damage from attacks\.$/i,
       transform: (_, damageReduction) => async (game: Game) => {
         await defaultEffect(game);
-        game.AttackingPlayer.applyPokemonStatus(game.AttackingPlayer.ActivePokemon!, {
+        game.AttackingPlayer.applyActivePokemonStatus({
           type: "ReduceDamage",
           amount: Number(damageReduction),
           source: "Effect",
@@ -431,9 +431,23 @@ export const parseAttackEffect = (
         /^During your opponent's next turn, attacks used by the Defending Pokémon do -(\d+) damage\.$/i,
       transform: (_, damageReduction) => async (game: Game) => {
         await defaultEffect(game);
-        game.DefendingPlayer.applyPokemonStatus(game.DefendingPlayer.ActivePokemon!, {
+        game.DefendingPlayer.applyActivePokemonStatus({
           type: "ReduceAttack",
           amount: Number(damageReduction),
+          source: "Effect",
+          condition: "none",
+          keepNextTurn: true,
+        });
+      },
+    },
+    {
+      // Vulpix and Omastar have the same phrase in opposite order, so we account for both arrangements
+      pattern:
+        /^(?:the Defending Pokémon can't attack ?|during your opponent's next turn(?:, )?){2}\.$/i,
+      transform: () => async (game: Game) => {
+        await defaultEffect(game);
+        game.DefendingPlayer.applyActivePokemonStatus({
+          type: "CannotAttack",
           source: "Effect",
           condition: "none",
           keepNextTurn: true,

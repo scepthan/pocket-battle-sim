@@ -248,7 +248,14 @@
           }}
           damage<span v-if="entry.status.source == 'Effect'"> next turn</span>!
         </p>
-        <p v-else>Unknown status type: {{ entry.status.type }}</p>
+        <p v-else-if="entry.status.type == 'CannotAttack'">
+          <CardName :card-id="entry.targetPokemon.cardId" />
+          cannot attack<span v-if="entry.status.source == 'Effect'"> next turn</span>!
+        </p>
+        <p v-else>
+          Unknown status type applied to <CardName :card-id="entry.targetPokemon.cardId" />:
+          {{ entry.status.type }}
+        </p>
       </div>
 
       <div v-else-if="entry.type == 'pokemonKnockedOut'">
