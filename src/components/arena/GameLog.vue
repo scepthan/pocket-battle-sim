@@ -153,6 +153,13 @@
         </p>
       </div>
 
+      <div v-else-if="entry.type == 'triggerAbility'">
+        <p>
+          <CardName :card-id="entry.abilityPokemon.cardId" />'s <b>{{ entry.abilityName }}</b> is
+          activated!
+        </p>
+      </div>
+
       <div v-else-if="entry.type == 'coinFlip'">
         <p>Flipping a coin... {{ entry.result }}!</p>
       </div>
@@ -226,6 +233,16 @@
         <p v-if="entry.currentConditionList.length > 0">
           Remaining special conditions: {{ entry.currentConditionList.join(", ") }}.
         </p>
+      </div>
+
+      <div v-else-if="entry.type == 'applyPokemonStatus'">
+        <p v-if="entry.status.type == 'ReduceDamage'">
+          <CardName :card-id="entry.targetPokemon.cardId" /> will take &minus;{{
+            entry.status.amount
+          }}
+          damage from attacks<span v-if="entry.status.source == 'Effect'"> next turn</span>!
+        </p>
+        <p v-else>Unknown status type: {{ entry.status.type }}</p>
       </div>
 
       <div v-else-if="entry.type == 'pokemonKnockedOut'">

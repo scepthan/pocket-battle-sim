@@ -1,4 +1,9 @@
-import type { PrimaryCondition, SecondaryCondition, SpecialCondition } from "../../gamelogic";
+import type {
+  PokemonStatus,
+  PrimaryCondition,
+  SecondaryCondition,
+  SpecialCondition,
+} from "../../gamelogic";
 import type { Energy } from "../../types";
 import type { InPlayPokemonDescriptor } from "./InPlayPokemonDescriptor";
 
@@ -236,6 +241,12 @@ interface SpecialConditionEffectiveEvent {
   targetPokemon: InPlayPokemonDescriptor;
   specialCondition: PrimaryCondition;
 }
+interface PokemonStatusAppliedEvent {
+  type: "applyPokemonStatus";
+  player: string;
+  targetPokemon: InPlayPokemonDescriptor;
+  status: PokemonStatus;
+}
 interface AttackFailedEvent {
   type: "attackFailed";
   player: string;
@@ -301,6 +312,7 @@ export type LoggedEvent =
   | SpecialConditionEndedEvent
   | SpecialConditionDamageEvent
   | SpecialConditionEffectiveEvent
+  | PokemonStatusAppliedEvent
   | AttackFailedEvent
   | ApplyModifierEvent
   | CoinFlipEvent

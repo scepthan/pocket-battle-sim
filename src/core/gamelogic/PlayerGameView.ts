@@ -111,11 +111,9 @@ export class PlayerGameView {
 
     if (card.CardType == "Pokemon") {
       if (card.Stage == 0) {
-        const bench = this.selfBenched;
-        return !bench[0] || !bench[1] || !bench[2];
+        return this.selfBenched.length < 3;
       } else {
-        const currPokemon = [this.selfActive, ...this.selfBenched];
-        return currPokemon.some((pokemon) => card.EvolvesFrom == pokemon?.Name);
+        return this.selfBenched.some((pokemon) => card.EvolvesFrom == pokemon?.Name);
       }
     } else if (card.CardType == "Supporter") {
       return this.canPlaySupporter;
@@ -134,6 +132,7 @@ export class PlayerGameView {
   canUseAbility(pokemon: InPlayPokemonCard, ability: Ability) {
     if (!this.canPlay || !this.selfActive) return false;
     if (pokemon.Ability !== ability) return false;
+    if (!["OnceDuringTurn", "ManyDuringTurn"].includes(ability.Trigger)) return false;
     if (ability.Trigger == "OnceDuringTurn") {
       if (this.#game.UsedAbilities.has(pokemon)) return false;
     }

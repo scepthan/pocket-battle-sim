@@ -6,8 +6,10 @@ import type {
 } from "../logging";
 import type { Deck, Energy, PlayingCard, PokemonCard } from "../types";
 import { CoinFlipper } from "./CoinFlipper";
+import type { Game } from "./Game";
 import { InPlayPokemonCard } from "./InPlayPokemonCard";
 import type { PlayerGameSetup } from "./types/PlayerAgent";
+import type { PokemonStatus } from "./types/Status";
 
 export class Player {
   Name: string;
@@ -24,6 +26,7 @@ export class Player {
   AvailableEnergy?: Energy; // The energy type available for use this turn, if any (not used in all game modes)
   NextEnergy: Energy = "Colorless"; // The next energy type to be used for attaching to Pokémon, set when the game starts
 
+  game: Game;
   logger: GameLogger;
   private flipper: CoinFlipper;
 
@@ -34,11 +37,12 @@ export class Player {
     return this.Bench.filter((x) => x !== undefined);
   }
 
-  constructor(name: string, deck: Deck, logger: GameLogger) {
+  constructor(name: string, deck: Deck, game: Game) {
     this.Name = name;
     this.EnergyTypes = deck.EnergyTypes;
     this.Deck = deck.Cards;
-    this.logger = logger;
+    this.game = game;
+    this.logger = game.GameLog;
     this.flipper = new CoinFlipper(this);
   }
 
@@ -136,7 +140,7 @@ export class Player {
     return this.Hand.some((card) => card.CardType == "Pokemon" && card.Stage == 0);
   }
 
-  setupPokemon(setup: PlayerGameSetup) {
+  async setupPokemon(setup: PlayerGameSetup) {
     // Set up the active Pokémon
     if (!this.Hand.includes(setup.active)) {
       throw new Error("Card not in hand");
@@ -145,17 +149,23 @@ export class Player {
       throw new Error("Can only play Basic Pokemon at game start");
     }
 
-    this.ActivePokemon = new InPlayPokemonCard(setup.active);
+    const pokemon = new InPlayPokemonCard(setup.active);
+    this.ActivePokemon = pokemon;
     this.InPlay.push(setup.active);
     this.Hand.splice(this.Hand.indexOf(setup.active), 1);
 
     this.logger.playToActive(this, setup.active);
 
+    if (pokemon.Ability?.Trigger == "OnEnterPlay") {
+      await this.triggerAbility(pokemon);
+    }
+
     // Set up the bench Pokémon
-    setup.bench.forEach((card, i) => {
+    for (const i in setup.bench) {
+      const card = setup.bench[i];
       if (!card) return;
-      this.putPokemonOnBench(card, i);
-    });
+      await this.putPokemonOnBench(card, +i);
+    }
   }
 
   drawRandomFiltered(predicate: (card: PlayingCard) => boolean) {
@@ -198,7 +208,7 @@ export class Player {
     this.logger.selectActivePokemon(this);
   }
 
-  putPokemonOnBench(card: PokemonCard, index: number, trueCard: PlayingCard = card) {
+  async putPokemonOnBench(card: PokemonCard, index: number, trueCard: PlayingCard = card) {
     if (this.Bench[index]) {
       throw new Error("Bench already has a Pokemon in this slot");
     }
@@ -206,7 +216,8 @@ export class Player {
       throw new Error("Can only play Basic Pokemon to bench");
     }
 
-    this.Bench[index] = new InPlayPokemonCard(card);
+    const pokemon = new InPlayPokemonCard(card);
+    this.Bench[index] = pokemon;
     this.InPlay.push(trueCard);
     // Needs to be optional because fossils are currently removed from hand before this method is called
     if (this.Hand.includes(trueCard)) {
@@ -214,9 +225,13 @@ export class Player {
     }
 
     this.logger.playToBench(this, card, index);
+
+    if (pokemon.Ability?.Trigger == "OnEnterPlay") {
+      await this.triggerAbility(pokemon);
+    }
   }
 
-  evolvePokemon(pokemon: InPlayPokemonCard, card: PokemonCard) {
+  async evolvePokemon(pokemon: InPlayPokemonCard, card: PokemonCard) {
     if (!this.Hand.includes(card)) {
       throw new Error("Card not in hand");
     }
@@ -234,6 +249,19 @@ export class Player {
     pokemon.evolveInto(card);
 
     this.recoverAllSpecialConditions(pokemon);
+
+    if (pokemon.Ability?.Trigger == "OnEnterPlay") {
+      await this.triggerAbility(pokemon);
+    }
+  }
+
+  async triggerAbility(pokemon: InPlayPokemonCard) {
+    if (!pokemon.Ability) {
+      throw new Error("Pokemon has no ability");
+    }
+
+    this.logger.triggerAbility(this, pokemon, pokemon.Ability.Name);
+    await this.game.useEffect(pokemon.Ability.Effect, pokemon);
   }
 
   attachAvailableEnergy(pokemon: InPlayPokemonCard) {
@@ -432,6 +460,11 @@ export class Player {
   paralyzeActivePokemon() {
     this.ActivePokemon!.PrimaryCondition = "Paralyzed";
     this.logger.specialConditionApplied(this, "Paralyzed");
+  }
+
+  applyPokemonStatus(pokemon: InPlayPokemonCard, status: PokemonStatus) {
+    pokemon.PokemonStatuses.push(status);
+    this.logger.applyPokemonStatus(this, pokemon, status);
   }
 
   flipCoin() {

@@ -1,5 +1,6 @@
 import type { Ability, Attack, Energy, PlayingCard, PokemonCard } from "../types";
 import type { PrimaryCondition, SecondaryCondition } from "./types";
+import type { PokemonStatus } from "./types/Status";
 
 export class InPlayPokemonCard {
   BaseCard: PokemonCard;
@@ -23,6 +24,7 @@ export class InPlayPokemonCard {
       (condition) => condition !== undefined
     );
   }
+  PokemonStatuses: PokemonStatus[] = [];
   AttachedEnergy: Energy[] = [];
   InPlayCards: PlayingCard[] = [];
   ReadyToEvolve: boolean = false;

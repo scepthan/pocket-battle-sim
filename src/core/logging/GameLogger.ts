@@ -1,4 +1,5 @@
 import type { InPlayPokemonCard, Player, SecondaryCondition, SpecialCondition } from "../gamelogic";
+import type { PokemonStatus } from "../gamelogic/types/Status";
 import type { Energy, PlayingCard, PokemonCard, TrainerCard } from "../types";
 import type {
   ApplyModifierAttribute,
@@ -293,6 +294,15 @@ export class GameLogger {
     });
   }
 
+  triggerAbility(player: Player, pokemon: InPlayPokemonCard, ability: string) {
+    this.addEntry({
+      type: "triggerAbility",
+      player: player.Name,
+      abilityName: ability,
+      abilityPokemon: player.pokemonToDescriptor(pokemon),
+    });
+  }
+
   playTrainer(player: Player, card: TrainerCard) {
     this.addEntry({
       type: "playTrainer",
@@ -374,6 +384,15 @@ export class GameLogger {
       attribute,
       newModifier,
       totalModifier,
+    });
+  }
+
+  applyPokemonStatus(player: Player, pokemon: InPlayPokemonCard, status: PokemonStatus) {
+    this.addEntry({
+      type: "applyPokemonStatus",
+      player: player.Name,
+      targetPokemon: player.pokemonToDescriptor(pokemon),
+      status,
     });
   }
 

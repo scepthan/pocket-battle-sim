@@ -2,7 +2,12 @@ import type { Game, InPlayPokemonCard } from "../gamelogic";
 import type { Energy } from "./Energy";
 
 export type Effect = (game: Game, pokemon?: InPlayPokemonCard) => Promise<void>;
-export type AbilityTrigger = "OnceDuringTurn" | "ManyDuringTurn" | "OnAttackDamage" | "GameRule";
+export type AbilityTrigger =
+  | "OnceDuringTurn"
+  | "ManyDuringTurn"
+  | "OnAttackDamage"
+  | "OnEnterPlay"
+  | "GameRule";
 export type AbilityCondition = "Active" | "OnBench" | "HasDamage";
 
 export interface Ability {

@@ -63,7 +63,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<Effect> => {
     },
     {
       pattern:
-        /^During your opponent's next turn, all of your Pokémon take −(\d+) damage from attacks from your opponent's Pokémon\.$/,
+        /^During your opponent's next turn, all of your Pokémon take -(\d+) damage from attacks from your opponent's Pokémon\.$/,
       transform: (_, modifier) => async (game: Game) => {
         game.increaseDefenseModifier(Number(modifier));
       },
@@ -185,7 +185,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<Effect> => {
             Attacks: [],
           };
 
-          game.AttackingPlayer.putPokemonOnBench(pokemon, benchIndex, card);
+          await game.AttackingPlayer.putPokemonOnBench(pokemon, benchIndex, card);
         };
       },
     },

@@ -13,6 +13,7 @@ import type { InPlayPokemonCard } from "./InPlayPokemonCard";
 import { Player } from "./Player";
 import { PlayerGameView } from "./PlayerGameView";
 import type { GameRules, PlayerAgent } from "./types";
+import type { PokemonStatus } from "./types/Status";
 
 export class Game {
   Agent1: PlayerAgent;
@@ -79,8 +80,8 @@ export class Game {
       agent2.Name = `${name2} (2)`;
     }
 
-    this.Player1 = new Player(name1, deck1, this.GameLog);
-    this.Player2 = new Player(name2, deck2, this.GameLog);
+    this.Player1 = new Player(name1, deck1, this);
+    this.Player2 = new Player(name2, deck2, this);
 
     // Randomize who goes first based on a coin flip
     const players = [this.Player1, this.Player2];
@@ -111,8 +112,8 @@ export class Game {
       this.startPlayer(this.Agent2, this.Player2),
     ]);
 
-    this.Player1.setupPokemon(setup1);
-    this.Player2.setupPokemon(setup2);
+    await this.Player1.setupPokemon(setup1);
+    await this.Player2.setupPokemon(setup2);
 
     while (this.TurnNumber < this.GameRules.TurnLimit && !this.GameOver) {
       try {
@@ -370,14 +371,14 @@ export class Game {
   }
 
   async putPokemonOnBench(pokemon: PokemonCard, index: number) {
-    await this.useInitialEffect(async (game) =>
-      game.AttackingPlayer.putPokemonOnBench(pokemon, index)
+    await this.useInitialEffect(
+      async (game) => await game.AttackingPlayer.putPokemonOnBench(pokemon, index)
     );
   }
 
   async evolvePokemon(inPlayPokemon: InPlayPokemonCard, pokemon: PokemonCard) {
-    await this.useInitialEffect(async (game) =>
-      game.AttackingPlayer.evolvePokemon(inPlayPokemon, pokemon)
+    await this.useInitialEffect(
+      async (game) => await game.AttackingPlayer.evolvePokemon(inPlayPokemon, pokemon)
     );
   }
 
@@ -430,6 +431,8 @@ export class Game {
     const owner = this.DefendingPlayer;
 
     let totalDamage = HP;
+
+    // First: weakness
     let weaknessBoost = false;
     if (totalDamage > 0 && defender == owner.ActivePokemon) {
       totalDamage += this.ActivePokemonDamageBoost;
@@ -438,7 +441,16 @@ export class Game {
         weaknessBoost = true;
       }
     }
+
+    // Then: damage reduction
     totalDamage -= this.CurrentDamageReduction;
+    for (const status of defender.PokemonStatuses) {
+      if (status.type == "ReduceDamage") {
+        totalDamage -= status.amount;
+      }
+    }
+
+    // Finally, set a floor of 0 damage to avoid accidental healing
     if (totalDamage < 0) totalDamage = 0;
 
     defender.applyDamage(totalDamage);
@@ -488,6 +500,11 @@ export class Game {
     pokemon.AttachedEnergy = [];
 
     this.findOwner(pokemon).discardEnergy(discardedEnergy, "effect");
+  }
+
+  applyPokemonStatus(pokemon: InPlayPokemonCard, status: PokemonStatus) {
+    const player = this.findOwner(pokemon);
+    player.applyPokemonStatus(pokemon, status);
   }
 
   findAgent(player: Player) {

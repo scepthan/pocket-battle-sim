@@ -38,6 +38,12 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         ability.Conditions.push("Active");
       },
     },
+    {
+      pattern: /^As often as you like during your turn, you may /i,
+      transform: () => {
+        ability.Trigger = "ManyDuringTurn";
+      },
+    },
 
     {
       pattern: /^take a {(\w)} Energy from your Energy Zone and attach it to this Pokémon\.$/i,
@@ -146,6 +152,23 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
               game.AttackingPlayer.Name
             );
           }
+        };
+      },
+    },
+
+    {
+      pattern: /^This Pokémon takes -(\d+) damage from attacks\.$/i,
+      transform: (_, amount) => {
+        const reduceAmount = Number(amount);
+        ability.Trigger = "OnEnterPlay";
+        ability.Effect = async (game: Game, pokemon?: InPlayPokemonCard) => {
+          if (!pokemon) return;
+          game.applyPokemonStatus(pokemon, {
+            type: "ReduceDamage",
+            amount: reduceAmount,
+            source: "Ability",
+            condition: "none",
+          });
         };
       },
     },
