@@ -411,6 +411,22 @@ export const parseAttackEffect = (
       },
     },
 
+    // Other status effects
+    {
+      pattern:
+        /^During your opponent's next turn, this Pokémon takes -(\d+) damage from attacks\.$/i,
+      transform: (_, damageReduction) => async (game: Game) => {
+        await defaultEffect(game);
+        game.AttackingPlayer.applyPokemonStatus(game.AttackingPlayer.ActivePokemon!, {
+          type: "ReduceDamage",
+          amount: Number(damageReduction),
+          source: "Effect",
+          condition: "none",
+          keepNextTurn: true,
+        });
+      },
+    },
+
     // Miscellaneous
     {
       pattern:

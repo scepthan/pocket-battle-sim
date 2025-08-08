@@ -2,7 +2,7 @@
 
 Backend todo:
 
-- [ ] Parse cards: 353/405 (87.2%)
+- [ ] Parse cards: 355/405 (87.7%)
   - [x] Dragon type
   - [ ] Conditions
     - [ ] Special Conditions

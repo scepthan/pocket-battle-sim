@@ -375,6 +375,8 @@ export class Player {
     pokemon.PrimaryCondition = undefined;
     pokemon.SecondaryConditions = new Set();
 
+    pokemon.PokemonStatuses = pokemon.PokemonStatuses.filter((status) => status.source != "Effect");
+
     this.logger.specialConditionEnded(this, conditions);
   }
 

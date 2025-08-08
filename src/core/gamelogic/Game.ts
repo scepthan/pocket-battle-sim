@@ -245,6 +245,24 @@ export class Game {
       this.GameLog.specialConditionEnded(this.AttackingPlayer, ["Paralyzed"]);
     }
 
+    // Check for Pokemon statuses and remove if expired
+    for (const player of [this.AttackingPlayer, this.DefendingPlayer]) {
+      for (const pokemon of player.InPlayPokemon) {
+        const newStatuses: PokemonStatus[] = [];
+        for (const status of pokemon.PokemonStatuses) {
+          if (status.source == "Effect") {
+            if (status.keepNextTurn) {
+              status.keepNextTurn = false;
+              newStatuses.push(status);
+            }
+          } else {
+            newStatuses.push(status);
+          }
+        }
+        pokemon.PokemonStatuses = newStatuses;
+      }
+    }
+
     await this.checkForKnockOuts();
 
     await this.delay();
