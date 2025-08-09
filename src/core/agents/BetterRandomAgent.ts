@@ -44,7 +44,10 @@ export class BetterRandomAgent extends PlayerAgent {
 
     // Play any Poke Balls
     let pokeBall;
-    while ((pokeBall = game.selfHand.find((x) => x.Name == "Poké Ball"))) {
+    while (
+      (pokeBall = game.selfHand.find((x) => x.Name == "Poké Ball")) &&
+      game.canPlayCard(pokeBall)
+    ) {
       await game.playItemCard(pokeBall as ItemCard);
     }
 
