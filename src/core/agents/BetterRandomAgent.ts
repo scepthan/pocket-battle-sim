@@ -68,9 +68,9 @@ export class BetterRandomAgent extends PlayerAgent {
     if (game.canRetreat()) {
       if (
         game.retreatCostModifier < 0
-          ? (game.selfActive!.RetreatCost ?? 0) + game.retreatCostModifier <= 0 ||
+          ? (game.selfActive.RetreatCost ?? 0) + game.retreatCostModifier <= 0 ||
             Math.random() < 0.5
-          : Math.random() < Math.pow(0.5, (game.selfActive!.RetreatCost ?? 0) + 2)
+          : Math.random() < Math.pow(0.5, (game.selfActive.RetreatCost ?? 0) + 2)
       ) {
         const randomBench = rand(game.selfBenched);
         await game.retreatActivePokemon(randomBench);

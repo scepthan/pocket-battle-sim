@@ -155,7 +155,7 @@ export const parseAttackEffect = (
         /^This attack does (\d+) more damage for each Energy attached to your opponent's Active Pokémon\.$/i,
       transform: (_, extraDamage) => async (game: Game) => {
         const energyCount = game.DefendingPlayer.activeOrThrow().AttachedEnergy.length;
-        const damage = baseAttackHP! + Number(extraDamage) * energyCount;
+        const damage = baseAttackHP + Number(extraDamage) * energyCount;
         game.attackActivePokemon(damage);
       },
     },

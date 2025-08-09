@@ -66,7 +66,7 @@ export class RandomAgent extends PlayerAgent {
     if (game.canRetreat()) {
       if (
         game.retreatCostModifier < 0
-          ? (game.selfActive!.RetreatCost ?? 0) + game.retreatCostModifier <= 0 ||
+          ? (game.selfActive.RetreatCost ?? 0) + game.retreatCostModifier <= 0 ||
             Math.random() < 0.5
           : Math.random() < 0.125
       ) {
