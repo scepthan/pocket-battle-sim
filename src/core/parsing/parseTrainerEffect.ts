@@ -97,20 +97,34 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     },
     {
       pattern:
-        /^During this turn, attacks used by your Pokémon do \+(\d+) damage to your opponent's Active Pokémon\.$/,
-      transform: (_, modifier) => ({
-        type: "Conditional",
-        condition: () => true,
-        effect: async (game: Game) => {
-          game.AttackingPlayer.applyStatus({
-            type: "IncreaseAttack",
-            category: "Pokemon",
-            appliesToPokemon: () => true,
-            source: "Effect",
-            amount: Number(modifier),
-          });
-        },
-      }),
+        /^During this turn, attacks used by your (.+?) do \+(\d+) damage to your opponent's Active Pokémon\.$/,
+      transform: (_, specifier, modifier) => {
+        let appliesToPokemon: (pokemon: InPlayPokemonCard) => boolean = () => false;
+        let descriptor: string | undefined;
+
+        if (specifier === "Pokémon") {
+          appliesToPokemon = () => true;
+        } else {
+          descriptor = specifier;
+          const names = parsePokemonNames(specifier);
+          appliesToPokemon = (pokemon: InPlayPokemonCard) => names.includes(pokemon.Name);
+        }
+
+        return {
+          type: "Conditional",
+          condition: () => true,
+          effect: async (game: Game) => {
+            game.AttackingPlayer.applyStatus({
+              type: "IncreaseAttack",
+              category: "Pokemon",
+              appliesToPokemon,
+              descriptor,
+              source: "Effect",
+              amount: Number(modifier),
+            });
+          },
+        };
+      },
     },
     {
       pattern:
