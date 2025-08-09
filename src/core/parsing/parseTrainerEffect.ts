@@ -102,7 +102,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<Effect> => {
 
         return async (game: Game) => {
           const active = game.AttackingPlayer.ActivePokemon;
-          if (active && names.includes(active.Name)) {
+          if (active.isPokemon && names.includes(active.Name)) {
             game.AttackingPlayer.returnPokemonToHand(active);
           } else {
             game.GameLog.noValidTargets(game.AttackingPlayer);
@@ -139,17 +139,16 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<Effect> => {
         const names = parsePokemonNames(pokemonNames);
 
         return async (game: Game) => {
-          if (!names.includes(game.AttackingPlayer.ActivePokemon!.Name)) {
+          if (!names.includes(game.AttackingPlayer.activeOrThrow().Name)) {
             game.GameLog.noValidTargets(game.AttackingPlayer);
             return;
           }
-          for (const pokemon of game.AttackingPlayer.Bench) {
-            if (!pokemon) continue;
+          for (const pokemon of game.AttackingPlayer.BenchedPokemon) {
             const energyToMove = pokemon.AttachedEnergy.filter((e) => e == fullType);
             if (energyToMove.length > 0) {
               game.AttackingPlayer.transferEnergy(
                 pokemon,
-                game.AttackingPlayer.ActivePokemon!,
+                game.AttackingPlayer.activeOrThrow(),
                 energyToMove
               );
             }

@@ -21,7 +21,7 @@ export class BetterRandomAgent extends PlayerAgent {
   }
 
   async doTurn(game: PlayerGameView) {
-    let ownPokemon = [game.selfActive, ...game.selfBenched].filter((x) => x !== undefined);
+    let ownPokemon = game.selfInPlayPokemon;
 
     // Play Professor's Research if available
     const professor = game.selfHand.find((x) => x.Name == "Professor's Research");
@@ -50,7 +50,7 @@ export class BetterRandomAgent extends PlayerAgent {
     ) as PokemonCard[];
     const bench = game.selfBench;
     for (let i = 0; i < 3 && handBasics.length > 0; i++) {
-      if (bench[i] == undefined) {
+      if (!bench[i].isPokemon) {
         const randomBasic = rand(handBasics);
         await game.playPokemonToBench(randomBasic, i);
         handBasics.splice(handBasics.indexOf(randomBasic), 1);
@@ -68,9 +68,9 @@ export class BetterRandomAgent extends PlayerAgent {
     if (game.canRetreat()) {
       if (
         game.retreatCostModifier < 0
-          ? (game.selfActive!.RetreatCost ?? 0) + game.retreatCostModifier <= 0 ||
+          ? (game.selfActive.RetreatCost ?? 0) + game.retreatCostModifier <= 0 ||
             Math.random() < 0.5
-          : Math.random() < Math.pow(0.5, (game.selfActive!.RetreatCost ?? 0) + 2)
+          : Math.random() < Math.pow(0.5, (game.selfActive.RetreatCost ?? 0) + 2)
       ) {
         const randomBench = rand(game.selfBenched);
         await game.retreatActivePokemon(randomBench);
@@ -94,7 +94,7 @@ export class BetterRandomAgent extends PlayerAgent {
       await game.playPokemonToEvolve(randomEvolver, randomEvolvee);
     }
 
-    ownPokemon = [game.selfActive, ...game.selfBenched].filter((x) => x !== undefined);
+    ownPokemon = game.selfInPlayPokemon;
 
     // If any Pokemon has a usable Ability, use it
     const pokemonWithAbilities = ownPokemon.filter(
@@ -104,16 +104,19 @@ export class BetterRandomAgent extends PlayerAgent {
       await game.useAbility(pokemon, pokemon.Ability!);
     }
 
+    const active = game.selfActive;
+    if (!active.isPokemon) return;
+
     // Play energy
     if (
-      game.selfActive!.Attacks.some((a) =>
-        this.findRemainingEnergy(game.selfActive!, a.RequiredEnergy).some(
+      active.Attacks.some((a) =>
+        this.findRemainingEnergy(active, a.RequiredEnergy).some(
           (e) => e == game.selfAvailableEnergy || e == "Colorless"
         )
       )
     ) {
       // If the active Pokemon needs the available energy for any attack, attach it
-      await game.attachAvailableEnergy(game.selfActive!);
+      await game.attachAvailableEnergy(active);
     } else {
       // Otherwise, check the energy needs of all Pokemon on the field and their evolutions
       const pokemonEnergyRequirements = ownPokemon.map((p) => {
@@ -143,7 +146,7 @@ export class BetterRandomAgent extends PlayerAgent {
         // This way we don't waste energy on Pokemon that will be able to attack on the turn they switch in
         if (pokemonNeedingExtraEnergy.some((x) => x.pokemon == game.selfActive)) {
           // If the active Pokemon needs extra energy, attach to it first
-          await game.attachAvailableEnergy(game.selfActive!);
+          await game.attachAvailableEnergy(active);
         } else {
           const randomPokemon = rand(pokemonNeedingExtraEnergy).pokemon;
           await game.attachAvailableEnergy(randomPokemon);
@@ -154,13 +157,13 @@ export class BetterRandomAgent extends PlayerAgent {
         await game.attachAvailableEnergy(randomPokemon);
       } else {
         // If no Pokemon need energy, attach to the active Pokemon
-        await game.attachAvailableEnergy(game.selfActive!);
+        await game.attachAvailableEnergy(active);
       }
     }
 
     // End turn with a random attack
     const attacks = [];
-    for (const attack of game.selfActive?.Attacks ?? []) {
+    for (const attack of active.Attacks ?? []) {
       if (game.canUseAttack(attack)) attacks.push(attack);
     }
     if (attacks.length > 0) {

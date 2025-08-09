@@ -8,9 +8,12 @@ import type {
   SupporterCard,
 } from "../types";
 import type { Game } from "./Game";
-import type { InPlayPokemonCard } from "./InPlayPokemonCard";
+import { InPlayPokemonCard } from "./InPlayPokemonCard";
 import type { Player } from "./Player";
 
+interface PlayerGameViewWithActivePokemon {
+  selfActive: InPlayPokemonCard;
+}
 export class PlayerGameView {
   #game: Game;
   #turnNumber: number; // Safeguard to prevent actions from being executed after the turn has ended
@@ -37,7 +40,10 @@ export class PlayerGameView {
   }
   get canPlay() {
     return (
-      this.isSelfTurn && this.#game.TurnNumber > 0 && this.#game.TurnNumber == this.#turnNumber
+      this.isSelfTurn &&
+      this.#game.TurnNumber > 0 &&
+      this.#game.TurnNumber == this.#turnNumber &&
+      !this.#game.GameOver
     );
   }
 
@@ -50,6 +56,9 @@ export class PlayerGameView {
   }
   get selfBenched() {
     return this.#player.BenchedPokemon;
+  }
+  get selfInPlayPokemon() {
+    return this.#player.InPlayPokemon;
   }
   get selfHand() {
     return this.#player.Hand.slice();
@@ -77,6 +86,9 @@ export class PlayerGameView {
   get opponentBenched() {
     return this.#opponent.BenchedPokemon;
   }
+  get opponentInPlayPokemon() {
+    return this.#opponent.InPlayPokemon;
+  }
   get opponentHandSize() {
     return this.#opponent.Hand.length;
   }
@@ -102,6 +114,9 @@ export class PlayerGameView {
   }
 
   // Helper methods
+  hasActivePokemon(): this is PlayerGameViewWithActivePokemon {
+    return this.selfActive.isPokemon;
+  }
   canPlayCard(card: PlayingCard) {
     if (!this.canPlay) return false;
 
@@ -122,8 +137,8 @@ export class PlayerGameView {
       return true;
     }
   }
-  canUseAttack(attack: Attack) {
-    if (!this.canPlay || !this.selfActive) return false;
+  canUseAttack(attack: Attack): this is PlayerGameViewWithActivePokemon {
+    if (!this.canPlay || !this.hasActivePokemon()) return false;
     if (!this.selfActive.Attacks.includes(attack)) return false;
     if (this.selfActive.PrimaryCondition == "Asleep") return false;
     if (this.selfActive.PrimaryCondition == "Paralyzed") return false;
@@ -132,7 +147,7 @@ export class PlayerGameView {
     return this.selfActive.hasSufficientEnergy(attack.RequiredEnergy);
   }
   canUseAbility(pokemon: InPlayPokemonCard, ability: Ability) {
-    if (!this.canPlay || !this.selfActive) return false;
+    if (!this.canPlay) return false;
     if (pokemon.Ability !== ability) return false;
     if (!["OnceDuringTurn", "ManyDuringTurn"].includes(ability.Trigger)) return false;
     if (ability.Trigger == "OnceDuringTurn") {
@@ -149,8 +164,8 @@ export class PlayerGameView {
     }
     return true;
   }
-  canRetreat() {
-    if (!this.canPlay || !this.selfActive) return false;
+  canRetreat(): this is PlayerGameViewWithActivePokemon {
+    if (!this.canPlay || !this.hasActivePokemon()) return false;
     if (this.selfBenched.length == 0) return false;
     if (this.selfActive.RetreatCost == -1) return false;
     if (this.selfActive.PrimaryCondition == "Asleep") return false;
@@ -175,7 +190,7 @@ export class PlayerGameView {
   async playPokemonToBench(pokemon: PokemonCard, index: number) {
     if (!this.canPlay) return false;
 
-    if (pokemon.Stage == 0 && this.selfBench[index] == undefined) {
+    if (pokemon.Stage == 0 && !this.selfBench[index].isPokemon) {
       await this.#game.delay();
       await this.#game.putPokemonOnBench(pokemon, index);
       return true;
@@ -211,10 +226,10 @@ export class PlayerGameView {
     await this.#game.delay();
 
     if (!energy) {
-      let retreatCost = this.selfActive!.RetreatCost ?? 0;
+      let retreatCost = this.selfActive.RetreatCost ?? 0;
       retreatCost += this.retreatCostModifier;
       if (retreatCost < 0) retreatCost = 0;
-      energy = this.selfActive!.AttachedEnergy.slice(0, retreatCost);
+      energy = this.selfActive.AttachedEnergy.slice(0, retreatCost);
     }
 
     await this.#game.retreatActivePokemon(benchedPokemon, energy);

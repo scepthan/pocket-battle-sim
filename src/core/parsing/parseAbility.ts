@@ -63,7 +63,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         const pt = parseEnergy(pokemonType);
 
         ability.Effect = async (game: Game) => {
-          const pokemon = game.AttackingPlayer.ActivePokemon!;
+          const pokemon = game.AttackingPlayer.activeOrThrow();
           if (pokemon.Type != pt) {
             game.GameLog.noValidTargets(game.AttackingPlayer);
             return;

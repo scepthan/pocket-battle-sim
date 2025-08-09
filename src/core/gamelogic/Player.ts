@@ -8,6 +8,7 @@ import type { Deck, Energy, PlayingCard, PokemonCard } from "../types";
 import { CoinFlipper } from "./CoinFlipper";
 import type { Game } from "./Game";
 import { InPlayPokemonCard } from "./InPlayPokemonCard";
+import { EmptyCardSlot } from "./types/EmptyCardSlot";
 import type { PlayerGameSetup } from "./types/PlayerAgent";
 import type { PokemonStatus } from "./types/Status";
 
@@ -21,8 +22,8 @@ export class Player {
   DiscardedEnergy: Energy[] = []; // Energy that has been discarded during the game
   GamePoints: number = 0; // The number of prize cards the player has taken (for winning the game)
 
-  ActivePokemon?: InPlayPokemonCard; // The active Pokémon card (undefined only for setup phase)
-  Bench: (InPlayPokemonCard | undefined)[] = []; // Pokémon cards on the bench, undefined if no Pokémon is in a slot
+  ActivePokemon: InPlayPokemonCard | EmptyCardSlot; // The active Pokémon card (EmptyCardSlot during setup phase and when active is knocked out)
+  Bench: (InPlayPokemonCard | EmptyCardSlot)[]; // Pokémon cards on the bench, EmptyCardSlot if no Pokémon is in a slot
   AvailableEnergy?: Energy; // The energy type available for use this turn, if any (not used in all game modes)
   NextEnergy: Energy = "Colorless"; // The next energy type to be used for attaching to Pokémon, set when the game starts
 
@@ -31,10 +32,10 @@ export class Player {
   private flipper: CoinFlipper;
 
   get InPlayPokemon() {
-    return [this.ActivePokemon, ...this.Bench].filter((x) => x !== undefined);
+    return [this.ActivePokemon, ...this.Bench].filter((x) => x.isPokemon);
   }
   get BenchedPokemon() {
-    return this.Bench.filter((x) => x !== undefined);
+    return this.Bench.filter((x) => x.isPokemon);
   }
 
   constructor(name: string, deck: Deck, game: Game) {
@@ -44,6 +45,12 @@ export class Player {
     this.game = game;
     this.logger = game.GameLog;
     this.flipper = new CoinFlipper(this);
+
+    this.ActivePokemon = EmptyCardSlot.Active();
+    this.Bench = [];
+    for (let i = 0; i < 3; i++) {
+      this.Bench.push(EmptyCardSlot.Bench(i));
+    }
   }
 
   pokemonToDescriptor(pokemon: InPlayPokemonCard): InPlayPokemonDescriptor {
@@ -69,8 +76,11 @@ export class Player {
   }
 
   reset() {
-    this.ActivePokemon = undefined;
+    this.ActivePokemon = EmptyCardSlot.Active();
     this.Bench = [];
+    for (let i = 0; i < 3; i++) {
+      this.Bench.push(EmptyCardSlot.Bench(i));
+    }
 
     this.Deck = this.Deck.concat(this.Hand, this.InPlay, this.Discard);
     this.Hand = [];
@@ -203,13 +213,14 @@ export class Player {
       throw new Error("Pokemon not on bench");
     }
     this.ActivePokemon = pokemon;
-    this.Bench[this.Bench.indexOf(pokemon)] = undefined;
+    const index = this.Bench.indexOf(pokemon);
+    this.Bench[index] = EmptyCardSlot.Bench(index);
 
     this.logger.selectActivePokemon(this);
   }
 
   async putPokemonOnBench(card: PokemonCard, index: number, trueCard: PlayingCard = card) {
-    if (this.Bench[index]) {
+    if (this.Bench[index].isPokemon) {
       throw new Error("Bench already has a Pokemon in this slot");
     }
     if (card.Stage != 0) {
@@ -315,24 +326,31 @@ export class Player {
     this.logger.discardEnergy(this, energies, source);
   }
 
+  activeOrThrow(): InPlayPokemonCard {
+    if (!this.ActivePokemon.isPokemon) {
+      throw new Error("No active Pokemon");
+    }
+    return this.ActivePokemon;
+  }
+
   retreatActivePokemon(
-    benchedPokemon: InPlayPokemonCard,
+    newActive: InPlayPokemonCard,
     energyToDiscard: Energy[],
     costModifier: number
   ) {
-    const previousActive = this.ActivePokemon!;
-    if (previousActive.RetreatCost == -1) {
+    const currentActive = this.activeOrThrow();
+    if (currentActive.RetreatCost == -1) {
       throw new Error("This Pokémon cannot retreat");
     }
     if (
-      previousActive.PrimaryCondition == "Asleep" ||
-      previousActive.PrimaryCondition == "Paralyzed"
+      currentActive.PrimaryCondition == "Asleep" ||
+      currentActive.PrimaryCondition == "Paralyzed"
     ) {
-      throw new Error("Cannot retreat while " + previousActive.PrimaryCondition);
+      throw new Error("Cannot retreat while " + currentActive.PrimaryCondition);
     }
 
-    const previousEnergy = previousActive.AttachedEnergy.slice();
-    const modifiedCost = (previousActive.RetreatCost ?? 0) + costModifier;
+    const previousEnergy = currentActive.AttachedEnergy.slice();
+    const modifiedCost = (currentActive.RetreatCost ?? 0) + costModifier;
 
     if (modifiedCost > previousEnergy.length) {
       throw new Error("Not enough energy to retreat");
@@ -348,24 +366,24 @@ export class Player {
       }
       discardedEnergy.push(previousEnergy.splice(previousEnergy.indexOf(e), 1)[0]);
     }
-    previousActive.AttachedEnergy = previousEnergy;
+    currentActive.AttachedEnergy = previousEnergy;
 
-    this.swapActivePokemon(benchedPokemon, "retreat");
+    this.swapActivePokemon(newActive, "retreat");
     this.discardEnergy(discardedEnergy, "retreat");
   }
 
   swapActivePokemon(
-    pokemon: InPlayPokemonCard,
+    newActive: InPlayPokemonCard,
     reason: "retreat" | "selfEffect" | "opponentEffect",
     choosingPlayer?: string
   ) {
-    const previousActive = this.ActivePokemon!;
-    this.ActivePokemon = pokemon;
-    this.Bench[this.Bench.indexOf(pokemon)] = previousActive;
+    const currentActive = this.activeOrThrow();
+    this.ActivePokemon = newActive;
+    this.Bench[this.Bench.indexOf(newActive)] = currentActive;
 
-    this.logger.swapActivePokemon(this, previousActive, pokemon, reason, choosingPlayer);
+    this.logger.swapActivePokemon(this, currentActive, newActive, reason, choosingPlayer);
 
-    this.recoverAllSpecialConditions(previousActive);
+    this.recoverAllSpecialConditions(currentActive);
   }
 
   recoverAllSpecialConditions(pokemon: InPlayPokemonCard) {
@@ -380,12 +398,17 @@ export class Player {
     this.logger.specialConditionEnded(this, conditions);
   }
 
-  returnPokemonToHand(pokemon: InPlayPokemonCard) {
+  removePokemonFromField(pokemon: InPlayPokemonCard) {
     if (pokemon == this.ActivePokemon) {
-      this.ActivePokemon = undefined;
+      this.ActivePokemon = EmptyCardSlot.Active();
     } else {
-      this.Bench[this.Bench.indexOf(pokemon)] = undefined;
+      const index = this.Bench.indexOf(pokemon);
+      this.Bench[index] = EmptyCardSlot.Bench(index);
     }
+  }
+
+  returnPokemonToHand(pokemon: InPlayPokemonCard) {
+    this.removePokemonFromField(pokemon);
 
     for (const card of pokemon.InPlayCards) {
       this.InPlay.splice(this.InPlay.indexOf(card), 1);
@@ -398,11 +421,7 @@ export class Player {
   }
 
   shufflePokemonIntoDeck(pokemon: InPlayPokemonCard) {
-    if (pokemon == this.ActivePokemon) {
-      this.ActivePokemon = undefined;
-    } else {
-      this.Bench[this.Bench.indexOf(pokemon)] = undefined;
-    }
+    this.removePokemonFromField(pokemon);
 
     for (const card of pokemon.InPlayCards) {
       this.InPlay.splice(this.InPlay.indexOf(card), 1);
@@ -427,11 +446,7 @@ export class Player {
 
     this.discardEnergy(pokemon.AttachedEnergy, "knockOut");
 
-    if (this.ActivePokemon == pokemon) {
-      this.ActivePokemon = undefined;
-    } else {
-      this.Bench[this.Bench.indexOf(pokemon)] = undefined;
-    }
+    this.removePokemonFromField(pokemon);
   }
 
   checkPrizePointsChange(previousPoints: number) {
@@ -450,22 +465,22 @@ export class Player {
   }
 
   poisonActivePokemon() {
-    this.ActivePokemon!.SecondaryConditions.add("Poisoned");
+    this.activeOrThrow().SecondaryConditions.add("Poisoned");
     this.logger.specialConditionApplied(this, "Poisoned");
   }
 
   sleepActivePokemon() {
-    this.ActivePokemon!.PrimaryCondition = "Asleep";
+    this.activeOrThrow().PrimaryCondition = "Asleep";
     this.logger.specialConditionApplied(this, "Asleep");
   }
 
   paralyzeActivePokemon() {
-    this.ActivePokemon!.PrimaryCondition = "Paralyzed";
+    this.activeOrThrow().PrimaryCondition = "Paralyzed";
     this.logger.specialConditionApplied(this, "Paralyzed");
   }
 
   applyActivePokemonStatus(status: PokemonStatus) {
-    this.applyPokemonStatus(this.ActivePokemon!, status);
+    this.applyPokemonStatus(this.activeOrThrow(), status);
   }
 
   applyPokemonStatus(pokemon: InPlayPokemonCard, status: PokemonStatus) {

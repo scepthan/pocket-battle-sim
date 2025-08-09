@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import { usePlayingCardStore } from "@/stores/usePlayingCardStore";
+import { usePlayingCardStore } from "@/stores";
 import { computed } from "vue";
 
 export interface Props {

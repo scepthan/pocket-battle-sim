@@ -7,22 +7,22 @@
             <InPlayCardSlot
               v-for="i in 3"
               :key="i"
-              :card="game?.Player2.Bench[i - 1]"
+              :card="game?.Player2.Bench[i - 1] ?? EmptyCardSlot.Bench(i - 1)"
               :height-px="140"
             />
           </v-row>
           <v-row no-gutters class="align-center">
-            <InPlayCardSlot :card="game?.Player2.ActivePokemon" />
+            <InPlayCardSlot :card="game?.Player2.ActivePokemon ?? EmptyCardSlot.Active()" />
           </v-row>
 
           <v-row no-gutters class="align-center">
-            <InPlayCardSlot :card="game?.Player1.ActivePokemon" />
+            <InPlayCardSlot :card="game?.Player1.ActivePokemon ?? EmptyCardSlot.Active()" />
           </v-row>
           <v-row no-gutters class="align-center ga-1">
             <InPlayCardSlot
               v-for="i in 3"
               :key="i"
-              :card="game?.Player1.Bench[i - 1]"
+              :card="game?.Player1.Bench[i - 1] ?? EmptyCardSlot.Bench(i - 1)"
               :height-px="140"
             />
           </v-row>
@@ -65,9 +65,15 @@
 
 <script setup lang="ts">
 import type { Game } from "@/core";
+import { EmptyCardSlot } from "@/core/gamelogic/types/EmptyCardSlot";
+import EnergyZone from "./EnergyZone.vue";
+import GameLog from "./GameLog.vue";
+import InPlayCardSlot from "./InPlayCardSlot.vue";
+import PlayerHandHidden from "./PlayerHandHidden.vue";
+import PlayerHandVisible from "./PlayerHandVisible.vue";
 
 export interface Props {
-  game: Game | null;
+  game: Game | undefined;
   shownPlayers?: string[];
 }
 defineProps<Props>();

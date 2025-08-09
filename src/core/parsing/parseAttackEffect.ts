@@ -71,7 +71,7 @@ export const parseAttackEffect = (
         const conditionalEffect = recursiveParse(effectText);
 
         return async (game: Game) => {
-          const active = game.AttackingPlayer.ActivePokemon!;
+          const active = game.AttackingPlayer.activeOrThrow();
           if (active.hasSufficientEnergy(secondaryRequiredEnergy)) await conditionalEffect(game);
           else await defaultEffect(game);
         };
@@ -83,7 +83,7 @@ export const parseAttackEffect = (
         const conditionalEffect = recursiveParse(effectText);
 
         return async (game: Game) => {
-          const active = game.DefendingPlayer.ActivePokemon!;
+          const active = game.DefendingPlayer.activeOrThrow();
           // TODO: need to implement a separate "MaxHP" property for capes
           if (active.CurrentHP < active.BaseHP) await conditionalEffect(game);
           else await defaultEffect(game);
@@ -96,7 +96,7 @@ export const parseAttackEffect = (
         const conditionalEffect = recursiveParse(effectText);
 
         return async (game: Game) => {
-          const active = game.AttackingPlayer.ActivePokemon!;
+          const active = game.AttackingPlayer.activeOrThrow();
           if (active.CurrentHP < active.BaseHP) await conditionalEffect(game);
           else await defaultEffect(game);
         };
@@ -108,7 +108,7 @@ export const parseAttackEffect = (
         const conditionalEffect = recursiveParse(effectText);
 
         return async (game: Game) => {
-          const defender = game.DefendingPlayer.ActivePokemon!;
+          const defender = game.DefendingPlayer.activeOrThrow();
           if (defender.SecondaryConditions.has("Poisoned")) await conditionalEffect(game);
           else await defaultEffect(game);
         };
@@ -143,7 +143,7 @@ export const parseAttackEffect = (
         const predicate = fullType ? (e: Energy) => e == fullType : () => true;
 
         return async (game: Game) => {
-          const energy = game.AttackingPlayer.ActivePokemon!.AttachedEnergy;
+          const energy = game.AttackingPlayer.activeOrThrow().AttachedEnergy;
           const totalFlips = energy.filter(predicate).length;
           const { heads } = game.AttackingPlayer.flipMultiCoins(totalFlips);
           game.attackActivePokemon(heads * Number(damage));
@@ -154,8 +154,8 @@ export const parseAttackEffect = (
       pattern:
         /^This attack does (\d+) more damage for each Energy attached to your opponent's Active Pokémon\.$/i,
       transform: (_, extraDamage) => async (game: Game) => {
-        const energyCount = game.DefendingPlayer.ActivePokemon!.AttachedEnergy.length;
-        const damage = baseAttackHP! + Number(extraDamage) * energyCount;
+        const energyCount = game.DefendingPlayer.activeOrThrow().AttachedEnergy.length;
+        const damage = baseAttackHP + Number(extraDamage) * energyCount;
         game.attackActivePokemon(damage);
       },
     },
@@ -231,7 +231,7 @@ export const parseAttackEffect = (
       pattern: /^This Pokémon also does (\d+) damage to itself\.$/i,
       transform: (_, selfDamage) => async (game: Game) => {
         await defaultEffect(game);
-        game.applyDamage(game.AttackingPlayer.ActivePokemon!, Number(selfDamage), true);
+        game.applyDamage(game.AttackingPlayer.activeOrThrow(), Number(selfDamage), true);
       },
     },
     {
@@ -253,7 +253,7 @@ export const parseAttackEffect = (
       pattern: /^Heal (\d+) damage from this Pokémon\.$/,
       transform: (_, HP) => async (game: Game) => {
         await defaultEffect(game);
-        game.healPokemon(game.AttackingPlayer.ActivePokemon!, Number(HP));
+        game.healPokemon(game.AttackingPlayer.activeOrThrow(), Number(HP));
       },
     },
     {
@@ -261,7 +261,7 @@ export const parseAttackEffect = (
         /^Heal from this Pokémon the same amount of damage you did to your opponent's Active Pokémon\.$/i,
       transform: () => async (game: Game) => {
         const damageDealt = game.attackActivePokemon(baseAttackHP);
-        game.healPokemon(game.AttackingPlayer.ActivePokemon!, damageDealt);
+        game.healPokemon(game.AttackingPlayer.activeOrThrow(), damageDealt);
       },
     },
 
@@ -311,7 +311,7 @@ export const parseAttackEffect = (
 
         return async (game: Game) => {
           await defaultEffect(game);
-          game.discardEnergy(game.AttackingPlayer.ActivePokemon!, fullType, Number(count) || 1);
+          game.discardEnergy(game.AttackingPlayer.activeOrThrow(), fullType, Number(count) || 1);
         };
       },
     },
@@ -319,14 +319,14 @@ export const parseAttackEffect = (
       pattern: /^Discard all Energy from this Pokémon\.$/i,
       transform: () => async (game: Game) => {
         await defaultEffect(game);
-        game.discardAllEnergy(game.AttackingPlayer.ActivePokemon!);
+        game.discardAllEnergy(game.AttackingPlayer.activeOrThrow());
       },
     },
     {
       pattern: /^Discard a random Energy from your opponent's Active Pokémon.$/i,
       transform: () => async (game: Game) => {
         await defaultEffect(game);
-        game.DefendingPlayer.discardRandomEnergy(game.DefendingPlayer.ActivePokemon!);
+        game.DefendingPlayer.discardRandomEnergy(game.DefendingPlayer.activeOrThrow());
       },
     },
     {
@@ -338,7 +338,7 @@ export const parseAttackEffect = (
         return async (game: Game) => {
           await defaultEffect(game);
           game.AttackingPlayer.attachEnergy(
-            game.AttackingPlayer.ActivePokemon!,
+            game.AttackingPlayer.activeOrThrow(),
             new Array(count == "a" ? 1 : Number(count)).fill(fullType),
             "energyZone"
           );
@@ -384,7 +384,7 @@ export const parseAttackEffect = (
       pattern: /^your opponent shuffles their Active Pokémon back into their deck\./i,
       transform: () => async (game: Game) => {
         await defaultEffect(game);
-        game.DefendingPlayer.shufflePokemonIntoDeck(game.DefendingPlayer.ActivePokemon!);
+        game.DefendingPlayer.shufflePokemonIntoDeck(game.DefendingPlayer.activeOrThrow());
       },
     },
 
@@ -475,7 +475,7 @@ export const parseAttackEffect = (
         }
         game.GameLog.copyAttack(game.AttackingPlayer, chosenAttack.Name);
         if (
-          game.AttackingPlayer.ActivePokemon!.hasSufficientEnergy(chosenAttack.RequiredEnergy) &&
+          game.AttackingPlayer.activeOrThrow().hasSufficientEnergy(chosenAttack.RequiredEnergy) &&
           !chosenAttack.Text?.includes("use it as this attack")
         ) {
           await game.useEffect(chosenAttack.Effect);

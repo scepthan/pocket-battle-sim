@@ -24,7 +24,7 @@ export class RandomAgent extends PlayerAgent {
   }
 
   async doTurn(game: PlayerGameView) {
-    const ownPokemon = [game.selfActive, ...game.selfBenched].filter((x) => x !== undefined);
+    const ownPokemon = game.selfInPlayPokemon;
 
     // Attach energy to random Pokemon if available
     if (game.selfAvailableEnergy) {
@@ -39,7 +39,7 @@ export class RandomAgent extends PlayerAgent {
       const randomBasic = rand(handBasics);
       const bench = game.selfBench;
       for (let i = 0; i < 3; i++) {
-        if (bench[i] == undefined) {
+        if (!bench[i].isPokemon) {
           await game.playPokemonToBench(randomBasic, i);
           break;
         }
@@ -66,7 +66,7 @@ export class RandomAgent extends PlayerAgent {
     if (game.canRetreat()) {
       if (
         game.retreatCostModifier < 0
-          ? (game.selfActive!.RetreatCost ?? 0) + game.retreatCostModifier <= 0 ||
+          ? (game.selfActive.RetreatCost ?? 0) + game.retreatCostModifier <= 0 ||
             Math.random() < 0.5
           : Math.random() < 0.125
       ) {
@@ -92,9 +92,12 @@ export class RandomAgent extends PlayerAgent {
       await game.playPokemonToEvolve(randomEvolver, randomEvolvee);
     }
 
+    const active = game.selfActive;
+    if (!active.isPokemon) return;
+
     // End turn with a random attack
     const attacks = [];
-    for (const attack of game.selfActive?.Attacks ?? []) {
+    for (const attack of active.Attacks ?? []) {
       if (game.canUseAttack(attack)) attacks.push(attack);
     }
     if (attacks.length > 0) {
