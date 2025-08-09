@@ -39,7 +39,7 @@ export class RandomAgent extends PlayerAgent {
       const randomBasic = rand(handBasics);
       const bench = game.selfBench;
       for (let i = 0; i < 3; i++) {
-        if (bench[i] == undefined) {
+        if (!bench[i].isPokemon) {
           await game.playPokemonToBench(randomBasic, i);
           break;
         }

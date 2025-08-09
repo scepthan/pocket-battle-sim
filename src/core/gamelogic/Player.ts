@@ -22,8 +22,8 @@ export class Player {
   DiscardedEnergy: Energy[] = []; // Energy that has been discarded during the game
   GamePoints: number = 0; // The number of prize cards the player has taken (for winning the game)
 
-  ActivePokemon: InPlayPokemonCard | EmptyCardSlot; // The active Pokémon card (undefined only for setup phase)
-  Bench: (InPlayPokemonCard | EmptyCardSlot)[]; // Pokémon cards on the bench, undefined if no Pokémon is in a slot
+  ActivePokemon: InPlayPokemonCard | EmptyCardSlot; // The active Pokémon card (EmptyCardSlot during setup phase and when active is knocked out)
+  Bench: (InPlayPokemonCard | EmptyCardSlot)[]; // Pokémon cards on the bench, EmptyCardSlot if no Pokémon is in a slot
   AvailableEnergy?: Energy; // The energy type available for use this turn, if any (not used in all game modes)
   NextEnergy: Energy = "Colorless"; // The next energy type to be used for attaching to Pokémon, set when the game starts
 

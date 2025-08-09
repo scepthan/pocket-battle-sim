@@ -187,7 +187,7 @@ export class PlayerGameView {
   async playPokemonToBench(pokemon: PokemonCard, index: number) {
     if (!this.canPlay) return false;
 
-    if (pokemon.Stage == 0 && this.selfBench[index] == undefined) {
+    if (pokemon.Stage == 0 && !this.selfBench[index].isPokemon) {
       await this.#game.delay();
       await this.#game.putPokemonOnBench(pokemon, index);
       return true;

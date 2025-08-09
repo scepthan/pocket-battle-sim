@@ -50,7 +50,7 @@ export class BetterRandomAgent extends PlayerAgent {
     ) as PokemonCard[];
     const bench = game.selfBench;
     for (let i = 0; i < 3 && handBasics.length > 0; i++) {
-      if (bench[i] == undefined) {
+      if (!bench[i].isPokemon) {
         const randomBasic = rand(handBasics);
         await game.playPokemonToBench(randomBasic, i);
         handBasics.splice(handBasics.indexOf(randomBasic), 1);
