@@ -40,7 +40,10 @@ export class PlayerGameView {
   }
   get canPlay() {
     return (
-      this.isSelfTurn && this.#game.TurnNumber > 0 && this.#game.TurnNumber == this.#turnNumber
+      this.isSelfTurn &&
+      this.#game.TurnNumber > 0 &&
+      this.#game.TurnNumber == this.#turnNumber &&
+      !this.#game.GameOver
     );
   }
 
