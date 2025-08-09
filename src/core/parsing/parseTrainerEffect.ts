@@ -27,10 +27,11 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
       transform: () => ({
         type: "Conditional",
         condition: (game: Game) => game.AttackingPlayer.canDraw(),
-        effect: async (game: Game) =>
+        effect: async (game: Game) => {
           game.AttackingPlayer.drawRandomFiltered(
             (card) => card.CardType == "Pokemon" && card.Stage == 0
-          ),
+          );
+        },
       }),
     },
     {
@@ -269,6 +270,6 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
   };
 };
 
-const parsePokemonNames = (nameString: string) => {
+export const parsePokemonNames = (nameString: string) => {
   return nameString.split(/, or | or |, /);
 };

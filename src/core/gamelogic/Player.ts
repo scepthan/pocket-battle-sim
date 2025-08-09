@@ -194,6 +194,8 @@ export class Player {
     this.logger.drawRandomFiltered(this, card);
 
     this.shuffleDeck();
+
+    return card;
   }
 
   discardRandomFiltered(predicate: (card: PlayingCard) => boolean = () => true) {

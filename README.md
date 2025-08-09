@@ -2,7 +2,7 @@
 
 Backend todo:
 
-- [ ] Parse cards: 368/405 (90.9%)
+- [ ] Parse cards: 370/405 (91.4%)
   - [x] Dragon type
   - [ ] Conditions
     - [ ] Special Conditions
@@ -25,7 +25,7 @@ Backend todo:
     - [x] Choose a mon to attack
     - [x] Shuffle mon into deck
     - [x] Viewing own deck or opponent's cards
-    - [ ] Draw mon onto Bench
+    - [x] Draw mon onto Bench
     - [x] Distribute energy among Benched mon
     - [x] Use opposing mon's attack
   - [ ] A1a effects

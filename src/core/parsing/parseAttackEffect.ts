@@ -1,5 +1,12 @@
 import type { Game } from "../gamelogic";
-import { type BasicEffect, type Energy, parseEnergy, type PlayingCard } from "../types";
+import {
+  type BasicEffect,
+  type Energy,
+  parseEnergy,
+  type PlayingCard,
+  type PokemonCard,
+} from "../types";
+import { parsePokemonNames } from "./parseTrainerEffect";
 import type { ParsedResult } from "./types";
 
 interface EffectTransformer {
@@ -285,6 +292,34 @@ export const parseAttackEffect = (
         return async (game: Game) => {
           await defaultEffect(game);
           game.AttackingPlayer.drawRandomFiltered(predicate);
+        };
+      },
+    },
+    {
+      pattern: /^Put 1 random (.+?) from your deck onto your bench\.$/i,
+      transform: (_, pokemon) => {
+        const pokemonNames = parsePokemonNames(pokemon);
+        const predicate =
+          pokemon == "Basic Pokémon"
+            ? (card: PlayingCard) => card.CardType == "Pokemon" && card.Stage == 0
+            : (card: PlayingCard) => card.CardType == "Pokemon" && pokemonNames.includes(card.Name);
+
+        return async (game: Game) => {
+          await defaultEffect(game);
+
+          const benchSlot = game.AttackingPlayer.Bench.find((s) => !s.isPokemon);
+          if (benchSlot === undefined) {
+            game.GameLog.benchFull(game.AttackingPlayer);
+            return;
+          }
+
+          const card = game.AttackingPlayer.drawRandomFiltered(predicate);
+          if (card === undefined) {
+            game.GameLog.noValidCards(game.AttackingPlayer);
+            return;
+          }
+
+          await game.AttackingPlayer.putPokemonOnBench(card as PokemonCard, benchSlot.index);
         };
       },
     },

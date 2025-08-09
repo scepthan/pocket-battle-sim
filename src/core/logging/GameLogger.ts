@@ -444,6 +444,22 @@ export class GameLogger {
     });
   }
 
+  benchFull(player: Player) {
+    this.addEntry({
+      type: "actionFailed",
+      player: player.Name,
+      reason: "benchFull",
+    });
+  }
+
+  noValidCards(player: Player) {
+    this.addEntry({
+      type: "actionFailed",
+      player: player.Name,
+      reason: "noValidCards",
+    });
+  }
+
   notImplemented(player: Player) {
     this.addEntry({
       type: "actionFailed",

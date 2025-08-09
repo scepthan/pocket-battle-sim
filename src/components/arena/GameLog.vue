@@ -344,8 +344,12 @@
               ? "Effect not implemented"
               : entry.reason == "noBenchedPokemon"
               ? "Player has no benched Pokemon"
+              : entry.reason == "benchFull"
+              ? "Player's bench is full"
               : entry.reason == "noValidTargets"
-              ? "effect has no valid targets"
+              ? "Effect has no valid targets"
+              : entry.reason == "noValidCards"
+              ? "No valid cards"
               : "Unknown reason"
           }})
         </p>
