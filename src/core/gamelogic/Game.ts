@@ -13,8 +13,7 @@ import type {
 import type { InPlayPokemonCard } from "./InPlayPokemonCard";
 import { Player } from "./Player";
 import { PlayerGameView } from "./PlayerGameView";
-import type { GameRules, PlayerAgent } from "./types";
-import type { PokemonStatus } from "./types/Status";
+import type { GameRules, PlayerAgent, PokemonStatus } from "./types";
 
 export class Game {
   Agent1: PlayerAgent;

@@ -1,5 +1,10 @@
-import type { InPlayPokemonCard, Player, SecondaryCondition, SpecialCondition } from "../gamelogic";
-import type { PokemonStatus } from "../gamelogic/types/Status";
+import type {
+  InPlayPokemonCard,
+  Player,
+  PokemonStatus,
+  SecondaryCondition,
+  SpecialCondition,
+} from "../gamelogic";
 import type { Energy, PlayingCard, PokemonCard, TrainerCard } from "../types";
 import type {
   ApplyModifierAttribute,

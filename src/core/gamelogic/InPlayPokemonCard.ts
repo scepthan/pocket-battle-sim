@@ -1,6 +1,5 @@
 import type { Ability, Attack, Energy, PlayingCard, PokemonCard } from "../types";
-import type { PrimaryCondition, SecondaryCondition } from "./types";
-import type { PokemonStatus } from "./types/Status";
+import type { PokemonStatus, PrimaryCondition, SecondaryCondition } from "./types";
 
 export class InPlayPokemonCard {
   BaseCard: PokemonCard;

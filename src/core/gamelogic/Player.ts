@@ -6,11 +6,10 @@ import type {
 } from "../logging";
 import type { Deck, Energy, PlayingCard, PokemonCard } from "../types";
 import { CoinFlipper } from "./CoinFlipper";
+import { EmptyCardSlot } from "./EmptyCardSlot";
 import type { Game } from "./Game";
 import { InPlayPokemonCard } from "./InPlayPokemonCard";
-import { EmptyCardSlot } from "./types/EmptyCardSlot";
-import type { PlayerGameSetup } from "./types/PlayerAgent";
-import type { PokemonStatus } from "./types/Status";
+import type { PlayerGameSetup, PlayerStatus, PokemonStatus } from "./types";
 
 export class Player {
   Name: string;
@@ -26,6 +25,7 @@ export class Player {
   Bench: (InPlayPokemonCard | EmptyCardSlot)[]; // Pokémon cards on the bench, EmptyCardSlot if no Pokémon is in a slot
   AvailableEnergy?: Energy; // The energy type available for use this turn, if any (not used in all game modes)
   NextEnergy: Energy = "Colorless"; // The next energy type to be used for attaching to Pokémon, set when the game starts
+  PlayerStatuses: Set<PlayerStatus> = new Set(); // Status effects that apply to the player (e.g., cannot play supporter cards)
 
   game: Game;
   logger: GameLogger;

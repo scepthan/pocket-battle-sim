@@ -64,8 +64,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Game } from "@/core";
-import { EmptyCardSlot } from "@/core/gamelogic/types/EmptyCardSlot";
+import { EmptyCardSlot, type Game } from "@/core";
 import EnergyZone from "./EnergyZone.vue";
 import GameLog from "./GameLog.vue";
 import InPlayCardSlot from "./InPlayCardSlot.vue";

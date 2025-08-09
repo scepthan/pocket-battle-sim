@@ -1,3 +1,4 @@
+export * from "./EmptyCardSlot";
 export * from "./Game";
 export * from "./InPlayPokemonCard";
 export * from "./Player";
