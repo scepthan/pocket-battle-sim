@@ -439,6 +439,19 @@ export class Player {
     this.shuffleDeck();
   }
 
+  discardPokemonFromPlay(pokemon: InPlayPokemonCard) {
+    this.removePokemonFromField(pokemon);
+
+    for (const card of pokemon.InPlayCards) {
+      this.InPlay.splice(this.InPlay.indexOf(card), 1);
+      this.Discard.push(card);
+    }
+
+    this.logger.discardFromPlay(this, pokemon.InPlayCards);
+
+    this.discardEnergy(pokemon.AttachedEnergy, "removedFromField");
+  }
+
   knockOutPokemon(pokemon: InPlayPokemonCard) {
     this.logger.pokemonKnockedOut(this, pokemon);
 

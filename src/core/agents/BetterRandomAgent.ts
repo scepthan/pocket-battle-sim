@@ -109,6 +109,8 @@ export class BetterRandomAgent extends PlayerAgent {
       (x) => x.Ability && game.canUseAbility(x, x.Ability)
     );
     for (const pokemon of pokemonWithAbilities) {
+      // Fossils are given a pseudo-Ability to discard themselves; don't use it unless in the Active Spot
+      if (pokemon.RetreatCost === -1 && pokemon != game.selfActive) continue;
       await game.useAbility(pokemon, pokemon.Ability!);
     }
 

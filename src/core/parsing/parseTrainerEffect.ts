@@ -1,4 +1,4 @@
-import { Game } from "../gamelogic";
+import { Game, InPlayPokemonCard } from "../gamelogic";
 import {
   isEnergyShort,
   parseEnergy,
@@ -228,6 +228,15 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
               Weakness: "",
               PrizePoints: 1,
               Attacks: [],
+              Ability: {
+                Name: "Discard",
+                Trigger: "OnceDuringTurn",
+                Conditions: [],
+                Text: "Discard this Pokémon from play.",
+                Effect: async (game: Game, self: InPlayPokemonCard) => {
+                  game.AttackingPlayer.discardPokemonFromPlay(self);
+                },
+              },
             };
 
             await game.AttackingPlayer.putPokemonOnBench(pokemon, benchSlot.index, card);
