@@ -25,10 +25,11 @@ export abstract class PlayerAgent {
     this.Deck = parseDeck(deck.Cards);
   }
 
-  abstract setupPokemon(gameState: GameInitState): Promise<PlayerGameSetup>;
-  abstract doTurn(gameState: PlayerGameView): Promise<void>;
-  abstract swapActivePokemon(gameState: PlayerGameView): Promise<InPlayPokemonCard>;
+  abstract setupPokemon(game: GameInitState): Promise<PlayerGameSetup>;
+  abstract doTurn(game: PlayerGameView): Promise<void>;
+  abstract swapActivePokemon(game: PlayerGameView): Promise<InPlayPokemonCard>;
   abstract choosePokemon(pokemon: InPlayPokemonCard[]): Promise<InPlayPokemonCard>;
   abstract choose<T>(options: T[]): Promise<T>;
   abstract viewCards(cards: PlayingCard[]): Promise<void>;
+  abstract distributeEnergy(pokemon: InPlayPokemonCard[], energy: Energy[]): Promise<Energy[][]>;
 }

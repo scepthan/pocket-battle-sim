@@ -364,6 +364,32 @@ export const parseAttackEffect = (
         };
       },
     },
+    {
+      pattern:
+        /^Flip (\d+) coins\. Take an amount of \{(\w)\} Energy from your Energy Zone equal to the number of heads and attach it to your Benched(?: \{(\w)\})? Pokémon in any way you like\.$/i,
+      transform: (_, coins, energyType, pokemonType) => {
+        const et = parseEnergy(energyType);
+        const pt = pokemonType ? parseEnergy(pokemonType) : undefined;
+
+        return async (game: Game) => {
+          await defaultEffect(game);
+          const { heads } = game.AttackingPlayer.flipMultiCoins(Number(coins));
+          if (heads == 0) return;
+          const validPokemon = game.AttackingPlayer.BenchedPokemon.filter(
+            (x) => !pt || x.Type == pt
+          );
+          if (validPokemon.length == 0) {
+            game.GameLog.noValidTargets(game.AttackingPlayer);
+            return;
+          }
+          await game.distributeEnergy(
+            game.AttackingPlayer,
+            new Array(heads).fill(et),
+            validPokemon
+          );
+        };
+      },
+    },
 
     // Switching effects
     {

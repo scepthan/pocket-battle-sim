@@ -4,13 +4,13 @@ import {
   type InPlayPokemonCard,
   type PlayerGameView,
 } from "../gamelogic";
-import type { CardSlot, PokemonCard } from "../types";
+import type { CardSlot, Energy, PokemonCard } from "../types";
 
 const rand = <T>(arr: T[]) => arr[(Math.random() * arr.length) | 0];
 
 export class RandomAgent extends PlayerAgent {
-  async setupPokemon(gameState: GameInitState) {
-    const basicPokemon = gameState.hand.filter(
+  async setupPokemon(game: GameInitState) {
+    const basicPokemon = game.hand.filter(
       (x) => x.CardType == "Pokemon" && x.Stage == 0
     ) as PokemonCard[];
     if (basicPokemon.length === 0) {
@@ -115,8 +115,8 @@ export class RandomAgent extends PlayerAgent {
     return;
   }
 
-  async swapActivePokemon(gameState: PlayerGameView) {
-    const bench = gameState.selfBenched;
+  async swapActivePokemon(game: PlayerGameView) {
+    const bench = game.selfBenched;
     return rand(bench);
   }
   async choosePokemon(pokemon: InPlayPokemonCard[]) {
@@ -127,5 +127,14 @@ export class RandomAgent extends PlayerAgent {
   }
   async viewCards() {
     await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+  async distributeEnergy(pokemon: InPlayPokemonCard[], energy: Energy[]): Promise<Energy[][]> {
+    const distribution: Energy[][] = pokemon.map(() => []);
+    for (const en of energy) {
+      const chosenPokemon = rand(pokemon);
+      const index = pokemon.indexOf(chosenPokemon);
+      distribution[index].push(en);
+    }
+    return distribution;
   }
 }

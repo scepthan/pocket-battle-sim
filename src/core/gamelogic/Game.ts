@@ -118,6 +118,8 @@ export class Game {
     await this.Player1.setupPokemon(setup1);
     await this.Player2.setupPokemon(setup2);
 
+    await this.delay();
+
     while (this.TurnNumber < this.GameRules.TurnLimit && !this.GameOver) {
       try {
         await this.nextTurn();
@@ -634,6 +636,19 @@ export class Game {
     const agent = this.findAgent(player);
     await agent.viewCards(cards);
   }
+  async distributeEnergy(player: Player, energy: Energy[], validPokemon: InPlayPokemonCard[]) {
+    const agent = this.findAgent(player);
+    const distribution = await agent.distributeEnergy(validPokemon, energy);
+    const sorted = distribution.flat().sort().join(",");
+    if (sorted !== energy.slice().sort().join(",")) throw new Error("Invalid energy distribution");
+
+    for (const i in distribution) {
+      if (+i >= validPokemon.length) throw new Error("Invalid energy distribution");
+      if (distribution[i].length == 0) continue;
+      const pokemon = validPokemon[i];
+      player.attachEnergy(pokemon, distribution[i], "energyZone");
+    }
+  }
 
   reduceRetreatCost(modifier: number) {
     this.RetreatCostModifier -= modifier;
@@ -643,11 +658,11 @@ export class Game {
   increaseAttackModifier(modifier: number) {
     this.ActivePokemonDamageBoost += modifier;
     const player = this.AttackingPlayer;
-    this.GameLog.applyModifier(player, "activeDamage", modifier, this.RetreatCostModifier);
+    this.GameLog.applyModifier(player, "activeDamage", modifier, this.ActivePokemonDamageBoost);
   }
   increaseDefenseModifier(modifier: number) {
     this.NextTurnDamageReduction += modifier;
     const player = this.AttackingPlayer;
-    this.GameLog.applyModifier(player, "damageReduction", modifier, this.RetreatCostModifier);
+    this.GameLog.applyModifier(player, "damageReduction", modifier, this.NextTurnDamageReduction);
   }
 }
