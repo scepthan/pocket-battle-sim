@@ -19,7 +19,7 @@ export type TrainerEffect = ConditionalTrainerEffect | TargetedTrainerEffect<Car
 export type AbilityTrigger =
   | "OnceDuringTurn"
   | "ManyDuringTurn"
-  | "OnAttackDamage"
+  | "AfterAttackDamage"
   | "OnEnterPlay"
   | "GameRule";
 export type AbilityCondition = "Active" | "OnBench" | "HasDamage";

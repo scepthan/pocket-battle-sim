@@ -237,11 +237,11 @@ export const parseAttackEffect = (
     {
       pattern: /^This attack also does (\d+) damage to 1 of your Benched Pokémon\.$/i,
       transform: (_, damage) => async (game: Game) => {
-        await defaultEffect(game);
         const pokemon = await game.choosePokemon(
           game.AttackingPlayer,
           game.AttackingPlayer.BenchedPokemon
         );
+        await defaultEffect(game);
         if (pokemon) {
           game.attackPokemon(pokemon, Number(damage));
         }

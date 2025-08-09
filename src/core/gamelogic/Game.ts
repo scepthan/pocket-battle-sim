@@ -34,6 +34,7 @@ export class Game {
   CurrentDamageReduction: number = 0;
   ActiveTrainerCard?: TrainerCard;
   UsedAbilities: Set<InPlayPokemonCard> = new Set();
+  AttackDamagedPokemon: Set<InPlayPokemonCard> = new Set();
 
   GameRules: GameRules = {
     DeckSize: 20,
@@ -151,6 +152,7 @@ export class Game {
     this.CurrentDamageReduction = this.NextTurnDamageReduction;
     this.NextTurnDamageReduction = 0;
     this.UsedAbilities = new Set();
+    this.AttackDamagedPokemon = new Set();
     if (this.TurnNumber > 2) {
       for (const pokemon of this.AttackingPlayer.InPlayPokemon) {
         pokemon.ReadyToEvolve = true;
@@ -278,6 +280,17 @@ export class Game {
   // Methods to do things during turns
   async useInitialEffect(effect: BasicEffect) {
     await this.useEffect(effect);
+
+    for (const pokemon of this.AttackDamagedPokemon) {
+      if (pokemon.Ability?.Trigger == "AfterAttackDamage") {
+        if (
+          pokemon.Ability.Conditions.includes("Active") &&
+          this.DefendingPlayer.ActivePokemon !== pokemon
+        )
+          continue;
+        await this.findOwner(pokemon).triggerAbility(pokemon);
+      }
+    }
 
     await this.checkForKnockOuts();
   }
@@ -500,6 +513,10 @@ export class Game {
     defender.applyDamage(totalDamage);
 
     this.GameLog.attackDamage(owner, defender, initialHP, totalDamage, weaknessBoost);
+
+    if (totalDamage > 0) {
+      this.AttackDamagedPokemon.add(defender);
+    }
 
     return totalDamage;
   }

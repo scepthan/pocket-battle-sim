@@ -45,6 +45,14 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         ability.Trigger = "ManyDuringTurn";
       },
     },
+    {
+      pattern:
+        /^If this Pokémon is in the Active Spot and is damaged by an attack from your opponent's Pokémon, /i,
+      transform: () => {
+        ability.Trigger = "AfterAttackDamage";
+        ability.Conditions.push("Active");
+      },
+    },
 
     {
       pattern: /^take a {(\w)} Energy from your Energy Zone and attach it to this Pokémon\.$/i,
@@ -82,6 +90,14 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
               game.healPokemon(pokemon, Number(healing));
             }
           }
+        };
+      },
+    },
+    {
+      pattern: /do (\d+) damage to the Attacking Pokémon\.$/i,
+      transform: (_, damage) => {
+        ability.Effect = async (game: Game) => {
+          game.applyDamage(game.AttackingPlayer.activeOrThrow(), Number(damage), false);
         };
       },
     },
