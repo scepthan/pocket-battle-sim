@@ -69,7 +69,7 @@ export class GameLogger {
     this.addEntry({
       type: "selectActivePokemon",
       player: player.Name,
-      toPokemon: player.pokemonToDescriptor(player.ActivePokemon!),
+      toPokemon: player.pokemonToDescriptor(player.activeOrThrow()),
     });
   }
 
@@ -207,8 +207,8 @@ export class GameLogger {
       type: "specialConditionApplied",
       player: player.Name,
       specialConditions: [condition],
-      targetPokemon: player.pokemonToDescriptor(player.ActivePokemon!),
-      currentConditionList: player.ActivePokemon!.CurrentConditions,
+      targetPokemon: player.pokemonToDescriptor(player.activeOrThrow()),
+      currentConditionList: player.activeOrThrow().CurrentConditions,
     });
   }
 
@@ -216,8 +216,8 @@ export class GameLogger {
     this.addEntry({
       type: "specialConditionEffective",
       player: player.Name,
-      targetPokemon: player.pokemonToDescriptor(player.ActivePokemon!),
-      specialCondition: player.ActivePokemon!.PrimaryCondition!,
+      targetPokemon: player.pokemonToDescriptor(player.activeOrThrow()),
+      specialCondition: player.activeOrThrow().PrimaryCondition!,
     });
   }
 
@@ -227,7 +227,7 @@ export class GameLogger {
     initialHP: number,
     damage: number
   ) {
-    const pokemon = player.ActivePokemon!;
+    const pokemon = player.activeOrThrow();
     this.addEntry({
       type: "specialConditionDamage",
       player: player.Name,
@@ -241,7 +241,7 @@ export class GameLogger {
   }
 
   specialConditionEnded(player: Player, conditions: SpecialCondition[]) {
-    const pokemon = player.ActivePokemon!;
+    const pokemon = player.activeOrThrow();
     this.addEntry({
       type: "specialConditionEnded",
       player: player.Name,
@@ -281,7 +281,7 @@ export class GameLogger {
       type: "useAttack",
       player: player.Name,
       attackName,
-      attackingPokemon: player.pokemonToDescriptor(player.ActivePokemon!),
+      attackingPokemon: player.pokemonToDescriptor(player.activeOrThrow()),
     });
   }
 
@@ -317,7 +317,7 @@ export class GameLogger {
       type: "copyAttack",
       player: player.Name,
       attackName,
-      attackingPokemon: player.pokemonToDescriptor(player.ActivePokemon!),
+      attackingPokemon: player.pokemonToDescriptor(player.activeOrThrow()),
     });
   }
 

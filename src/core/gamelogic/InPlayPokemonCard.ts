@@ -29,6 +29,8 @@ export class InPlayPokemonCard {
   InPlayCards: PlayingCard[] = [];
   ReadyToEvolve: boolean = false;
 
+  isPokemon = true as const;
+
   constructor(inputCard: PokemonCard) {
     this.BaseCard = inputCard;
     this.InPlayCards.push(inputCard);

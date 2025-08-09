@@ -167,7 +167,7 @@ export class Game {
     }
 
     // Log the Special Conditions that will affect the Active Pokemon
-    const status = this.AttackingPlayer.ActivePokemon!.PrimaryCondition;
+    const status = this.AttackingPlayer.activeOrThrow().PrimaryCondition;
     if (status == "Asleep" || status == "Paralyzed") {
       this.GameLog.specialConditionEffective(this.AttackingPlayer);
     }
@@ -210,7 +210,7 @@ export class Game {
 
     const attacker = this.AttackingPlayer.ActivePokemon;
     const defender = this.DefendingPlayer.ActivePokemon;
-    if (attacker == undefined || defender == undefined) {
+    if (!attacker.isPokemon || !defender.isPokemon) {
       this.GameLog.invalidGameState();
       this.GameOver = true;
       return;
@@ -439,12 +439,12 @@ export class Game {
   }
 
   attackActivePokemon(HP: number) {
-    const defender = this.DefendingPlayer.ActivePokemon!;
+    const defender = this.DefendingPlayer.activeOrThrow();
     return this.attackPokemon(defender, HP);
   }
 
   attackPokemon(defender: InPlayPokemonCard, HP: number) {
-    const attacker = this.AttackingPlayer.ActivePokemon!;
+    const attacker = this.AttackingPlayer.activeOrThrow();
     const type = attacker.Type;
     const initialHP = defender.CurrentHP;
     const owner = this.DefendingPlayer;
