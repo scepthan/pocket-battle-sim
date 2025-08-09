@@ -310,6 +310,8 @@ export class Player {
   }
 
   discardRandomEnergy(pokemon: InPlayPokemonCard, count: number = 1) {
+    if (this.game.shouldPreventDamage(pokemon)) return;
+
     const energies = pokemon.AttachedEnergy;
 
     const discarded: Energy[] = [];
@@ -382,6 +384,8 @@ export class Player {
     choosingPlayer?: string
   ) {
     const currentActive = this.activeOrThrow();
+    if (this.game.shouldPreventDamage(currentActive)) return;
+
     this.ActivePokemon = newActive;
     this.Bench[this.Bench.indexOf(newActive)] = currentActive;
 
@@ -403,6 +407,8 @@ export class Player {
   }
 
   removePokemonFromField(pokemon: InPlayPokemonCard) {
+    if (this.game.shouldPreventDamage(pokemon)) return;
+
     if (pokemon == this.ActivePokemon) {
       this.ActivePokemon = EmptyCardSlot.Active();
     } else {
@@ -412,6 +418,8 @@ export class Player {
   }
 
   returnPokemonToHand(pokemon: InPlayPokemonCard) {
+    if (this.game.shouldPreventDamage(pokemon)) return;
+
     this.removePokemonFromField(pokemon);
 
     for (const card of pokemon.InPlayCards) {
@@ -425,6 +433,8 @@ export class Player {
   }
 
   shufflePokemonIntoDeck(pokemon: InPlayPokemonCard) {
+    if (this.game.shouldPreventDamage(pokemon)) return;
+
     this.removePokemonFromField(pokemon);
 
     for (const card of pokemon.InPlayCards) {
@@ -482,17 +492,26 @@ export class Player {
   }
 
   poisonActivePokemon() {
-    this.activeOrThrow().SecondaryConditions.add("Poisoned");
+    const pokemon = this.activeOrThrow();
+    if (this.game.shouldPreventDamage(pokemon)) return;
+
+    pokemon.SecondaryConditions.add("Poisoned");
     this.logger.specialConditionApplied(this, "Poisoned");
   }
 
   sleepActivePokemon() {
-    this.activeOrThrow().PrimaryCondition = "Asleep";
+    const pokemon = this.activeOrThrow();
+    if (this.game.shouldPreventDamage(pokemon)) return;
+
+    pokemon.PrimaryCondition = "Asleep";
     this.logger.specialConditionApplied(this, "Asleep");
   }
 
   paralyzeActivePokemon() {
-    this.activeOrThrow().PrimaryCondition = "Paralyzed";
+    const pokemon = this.activeOrThrow();
+    if (this.game.shouldPreventDamage(pokemon)) return;
+
+    pokemon.PrimaryCondition = "Paralyzed";
     this.logger.specialConditionApplied(this, "Paralyzed");
   }
 
@@ -501,6 +520,8 @@ export class Player {
   }
 
   applyPokemonStatus(pokemon: InPlayPokemonCard, status: PokemonStatus) {
+    if (this.game.shouldPreventDamage(pokemon)) return;
+
     pokemon.PokemonStatuses.push(status);
     this.logger.applyPokemonStatus(this, pokemon, status);
   }

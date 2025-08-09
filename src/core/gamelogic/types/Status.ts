@@ -13,6 +13,9 @@ export interface ReduceDamagePokemonStatus extends BasePokemonStatus {
   type: "ReduceDamage";
   amount: number;
 }
+export interface PreventDamagePokemonStatus extends BasePokemonStatus {
+  type: "PreventDamage";
+}
 export interface ReduceAttackPokemonStatus extends BasePokemonStatus {
   type: "ReduceAttack";
   amount: number;
@@ -26,5 +29,6 @@ export type PokemonStatus =
   | CannotAttackPokemonStatus
   | CannotRetreatPokemonStatus
   | ReduceDamagePokemonStatus
+  | PreventDamagePokemonStatus
   | ReduceAttackPokemonStatus
   | CounterAttackPokemonStatus;

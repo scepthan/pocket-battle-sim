@@ -251,6 +251,11 @@ interface AttackFailedEvent {
   type: "attackFailed";
   player: string;
 }
+interface DamagePreventedEvent {
+  type: "damagePrevented";
+  player: string;
+  targetPokemon: InPlayPokemonDescriptor;
+}
 
 export type ApplyModifierAttribute = "retreatCost" | "activeDamage" | "damageReduction";
 interface ApplyModifierEvent {
@@ -314,6 +319,7 @@ export type LoggedEvent =
   | SpecialConditionEffectiveEvent
   | PokemonStatusAppliedEvent
   | AttackFailedEvent
+  | DamagePreventedEvent
   | ApplyModifierEvent
   | CoinFlipEvent
   | CoinMultiFlipEvent

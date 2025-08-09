@@ -180,6 +180,13 @@
         </p>
       </div>
 
+      <div v-else-if="entry.type == 'damagePrevented'">
+        <p>
+          <CardName :card-id="entry.targetPokemon.cardId" /> prevented damage and effects of the
+          attack!
+        </p>
+      </div>
+
       <div v-else-if="entry.type == 'attackFailed'">
         <p>The attack did nothing...</p>
       </div>
@@ -241,6 +248,10 @@
             entry.status.amount
           }}
           damage from attacks<span v-if="entry.status.source == 'Effect'"> next turn</span>!
+        </p>
+        <p v-else-if="entry.status.type == 'PreventDamage'">
+          <CardName :card-id="entry.targetPokemon.cardId" /> cannot be affected by attacks next
+          turn!
         </p>
         <p v-else-if="entry.status.type == 'ReduceAttack'">
           <CardName :card-id="entry.targetPokemon.cardId" /> will attack for &minus;{{

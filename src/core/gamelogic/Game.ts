@@ -33,6 +33,7 @@ export class Game {
   NextTurnDamageReduction: number = 0;
   CurrentDamageReduction: number = 0;
   ActiveTrainerCard?: TrainerCard;
+  CurrentlyAttacking: boolean = false;
   UsedAbilities: Set<InPlayPokemonCard> = new Set();
   AttackDamagedPokemon: Set<InPlayPokemonCard> = new Set();
 
@@ -373,7 +374,10 @@ export class Game {
   async useAttack(attack: Attack) {
     this.GameLog.useAttack(this.AttackingPlayer, attack.Name);
 
+    this.CurrentlyAttacking = true;
     await this.useInitialEffect(attack.Effect);
+    this.CurrentlyAttacking = false;
+
     this.endTurnResolve(true);
   }
 
@@ -466,6 +470,12 @@ export class Game {
     }
   }
 
+  shouldPreventDamage(pokemon: InPlayPokemonCard): boolean {
+    if (!this.CurrentlyAttacking) return false;
+    if (!this.DefendingPlayer.InPlayPokemon.includes(pokemon)) return false;
+    return pokemon.PokemonStatuses.some((status) => status.type === "PreventDamage");
+  }
+
   //
   drawCards(count: number) {
     this.AttackingPlayer.drawCards(count, this.GameRules.MaxHandSize);
@@ -476,7 +486,12 @@ export class Game {
     return this.attackPokemon(defender, HP);
   }
 
-  attackPokemon(defender: InPlayPokemonCard, HP: number) {
+  attackPokemon(defender: InPlayPokemonCard, HP: number): number {
+    if (this.shouldPreventDamage(defender)) {
+      this.GameLog.damagePrevented(this.DefendingPlayer, defender);
+      return 0;
+    }
+
     const attacker = this.AttackingPlayer.activeOrThrow();
     const type = attacker.Type;
     const initialHP = defender.CurrentHP;
@@ -531,6 +546,10 @@ export class Game {
   }
 
   knockOutPokemon(player: Player, pokemon: InPlayPokemonCard) {
+    if (this.shouldPreventDamage(pokemon)) {
+      this.GameLog.damagePrevented(player, pokemon);
+      return;
+    }
     player.knockOutPokemon(pokemon);
 
     const opposingPlayer = player == this.Player1 ? this.Player2 : this.Player1;
@@ -547,6 +566,7 @@ export class Game {
   }
 
   discardEnergy(pokemon: InPlayPokemonCard, type: Energy, count: number) {
+    if (this.shouldPreventDamage(pokemon)) return;
     const discardedEnergy: Energy[] = [];
     while (pokemon.AttachedEnergy.includes(type) && count > 0) {
       discardedEnergy.push(type);
@@ -557,6 +577,7 @@ export class Game {
     this.findOwner(pokemon).discardEnergy(discardedEnergy, "effect");
   }
   discardAllEnergy(pokemon: InPlayPokemonCard) {
+    if (this.shouldPreventDamage(pokemon)) return;
     const discardedEnergy = pokemon.AttachedEnergy.slice();
     pokemon.AttachedEnergy = [];
 
@@ -564,6 +585,7 @@ export class Game {
   }
 
   applyPokemonStatus(pokemon: InPlayPokemonCard, status: PokemonStatus) {
+    if (this.shouldPreventDamage(pokemon)) return;
     const player = this.findOwner(pokemon);
     player.applyPokemonStatus(pokemon, status);
   }

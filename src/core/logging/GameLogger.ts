@@ -413,6 +413,14 @@ export class GameLogger {
     });
   }
 
+  damagePrevented(player: Player, pokemon: InPlayPokemonCard) {
+    this.addEntry({
+      type: "damagePrevented",
+      player: player.Name,
+      targetPokemon: player.pokemonToDescriptor(pokemon),
+    });
+  }
+
   attackFailed(player: Player) {
     this.addEntry({
       type: "attackFailed",

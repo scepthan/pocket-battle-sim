@@ -428,6 +428,19 @@ export const parseAttackEffect = (
     },
     {
       pattern:
+        /^during your opponent's next turn, prevent all damage from—and effects of—attacks done to this Pokémon\.$/i,
+      transform: () => async (game: Game) => {
+        await defaultEffect(game);
+        game.AttackingPlayer.applyActivePokemonStatus({
+          type: "PreventDamage",
+          source: "Effect",
+          condition: "none",
+          keepNextTurn: true,
+        });
+      },
+    },
+    {
+      pattern:
         /^During your opponent's next turn, attacks used by the Defending Pokémon do -(\d+) damage\.$/i,
       transform: (_, damageReduction) => async (game: Game) => {
         await defaultEffect(game);
