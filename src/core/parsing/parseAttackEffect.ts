@@ -528,6 +528,18 @@ export const parseAttackEffect = (
         });
       },
     },
+    {
+      pattern: /^During your opponent's next turn, the Defending Pokémon can't retreat\.$/i,
+      transform: () => async (game: Game) => {
+        await defaultEffect(game);
+        game.DefendingPlayer.applyActivePokemonStatus({
+          type: "CannotRetreat",
+          source: "Effect",
+          condition: "none",
+          keepNextTurn: true,
+        });
+      },
+    },
 
     // Miscellaneous
     {

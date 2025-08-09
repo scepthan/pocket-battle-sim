@@ -263,6 +263,10 @@
           <CardName :card-id="entry.targetPokemon.cardId" />
           cannot attack<span v-if="entry.status.source == 'Effect'"> next turn</span>!
         </p>
+        <p v-else-if="entry.status.type == 'CannotRetreat'">
+          <CardName :card-id="entry.targetPokemon.cardId" />
+          cannot retreat<span v-if="entry.status.source == 'Effect'"> next turn</span>!
+        </p>
         <p v-else>
           Unknown status type applied to <CardName :card-id="entry.targetPokemon.cardId" />:
           {{ entry.status.type }}

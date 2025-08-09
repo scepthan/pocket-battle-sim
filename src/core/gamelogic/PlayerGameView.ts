@@ -183,6 +183,8 @@ export class PlayerGameView {
     if (this.selfActive.RetreatCost == -1) return false;
     if (this.selfActive.PrimaryCondition == "Asleep") return false;
     if (this.selfActive.PrimaryCondition == "Paralyzed") return false;
+    if (this.selfActive.PokemonStatuses.some((status) => status.type == "CannotRetreat"))
+      return false;
     return (
       this.selfActive.RetreatCost + this.retreatCostModifier <=
       this.selfActive.AttachedEnergy.length

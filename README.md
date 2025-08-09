@@ -2,7 +2,7 @@
 
 Backend todo:
 
-- [ ] Parse cards: 370/405 (91.4%)
+- [ ] Parse cards: 372/405 (91.9%)
   - [x] Dragon type
   - [ ] Conditions
     - [ ] Special Conditions
@@ -11,10 +11,10 @@ Backend todo:
       - [ ] Confused
       - [x] Poisoned
       - [ ] Burned
-    - [ ] Other active mon conditions
+    - [x] Other active mon conditions
     - [ ] Global conditions
   - [x] Fossils
-  - [ ] Abilities
+  - [x] Abilities
     - [x] Once during your turn
     - [x] As often as you like during your turn
     - [x] Damage reduction
