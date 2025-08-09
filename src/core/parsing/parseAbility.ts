@@ -12,6 +12,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     Name: inputAbility.Name,
     Trigger: "GameRule",
     Conditions: [],
+    Text: inputAbility.Effect,
     Effect: async (game: Game) => {
       game.GameLog.notImplemented(game.AttackingPlayer);
     },

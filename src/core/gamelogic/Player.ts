@@ -124,6 +124,10 @@ export class Player {
     this.shuffleDeck(log);
   }
 
+  canDraw() {
+    return this.Deck.length > 0 && this.Hand.length < this.game.GameRules.MaxHandSize;
+  }
+
   drawCards(count: number, maxHandSize: number, log: boolean = true) {
     const cardsDrawn: PlayingCard[] = [];
     while (cardsDrawn.length < count) {
@@ -272,7 +276,7 @@ export class Player {
     }
 
     this.logger.triggerAbility(this, pokemon, pokemon.Ability.Name);
-    await this.game.useEffect(pokemon.Ability.Effect, pokemon);
+    await pokemon.Ability.Effect(this.game, pokemon);
   }
 
   attachAvailableEnergy(pokemon: InPlayPokemonCard) {

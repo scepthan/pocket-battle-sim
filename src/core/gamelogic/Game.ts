@@ -3,7 +3,8 @@ import { useDeckValidator } from "../parsing";
 import type {
   Ability,
   Attack,
-  Effect,
+  BasicEffect,
+  CardSlot,
   Energy,
   PlayingCard,
   PokemonCard,
@@ -275,14 +276,14 @@ export class Game {
   }
 
   // Methods to do things during turns
-  async useInitialEffect(effect: Effect, pokemon?: InPlayPokemonCard) {
-    await this.useEffect(effect, pokemon);
+  async useInitialEffect(effect: BasicEffect) {
+    await this.useEffect(effect);
 
     await this.checkForKnockOuts();
   }
 
-  async useEffect(effect: Effect, pokemon?: InPlayPokemonCard) {
-    await effect(this, pokemon);
+  async useEffect(effect: BasicEffect) {
+    await effect(this);
   }
 
   async checkForKnockOuts() {
@@ -379,7 +380,9 @@ export class Game {
 
     this.GameLog.useAbility(this.AttackingPlayer, pokemon, ability.Name);
 
-    await this.useInitialEffect(ability.Effect, pokemon);
+    await ability.Effect(this, pokemon);
+
+    await this.checkForKnockOuts();
   }
 
   async attachAvailableEnergy(pokemon: InPlayPokemonCard) {
@@ -406,7 +409,7 @@ export class Game {
     );
   }
 
-  async playTrainer(card: TrainerCard) {
+  async playTrainer(card: TrainerCard, target?: CardSlot) {
     if (!this.AttackingPlayer.Hand.includes(card)) {
       throw new Error("Card not in hand");
     }
@@ -422,7 +425,24 @@ export class Game {
 
     this.GameLog.playTrainer(this.AttackingPlayer, card);
 
-    await this.useInitialEffect(card.Effect);
+    if (card.Effect.type === "Targeted") {
+      if (!target) {
+        throw new Error("Targeted effect requires a target");
+      }
+      const targetedEffect = card.Effect;
+      const validTargets = targetedEffect.validTargets(this);
+      if (!validTargets.includes(target)) {
+        throw new Error("Invalid target for targeted effect");
+      }
+      await targetedEffect.effect(this, target);
+    } else if (card.Effect.type === "Conditional") {
+      const conditionalEffect = card.Effect;
+      if (conditionalEffect.condition(this, this.AttackingPlayer)) {
+        await conditionalEffect.effect(this);
+      }
+    }
+
+    await this.checkForKnockOuts();
 
     this.ActiveTrainerCard = undefined;
     // Workaround for fossils being put into play by their effect

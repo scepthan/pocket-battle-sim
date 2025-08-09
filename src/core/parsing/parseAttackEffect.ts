@@ -1,17 +1,17 @@
 import type { Game } from "../gamelogic";
-import { type Effect, type Energy, parseEnergy, type PlayingCard } from "../types";
+import { type BasicEffect, type Energy, parseEnergy, type PlayingCard } from "../types";
 import type { ParsedResult } from "./types";
 
 interface EffectTransformer {
   pattern: RegExp;
-  transform: (...args: string[]) => Effect;
+  transform: (...args: string[]) => BasicEffect;
 }
 
 export const parseAttackEffect = (
   effect: string,
   baseAttackHP: number,
   requiredEnergy: Energy[]
-): ParsedResult<Effect> => {
+): ParsedResult<BasicEffect> => {
   let parseSuccessful = true;
 
   // A shorthand for applying the base attack damage (as specified by the number next to the attack on the card).

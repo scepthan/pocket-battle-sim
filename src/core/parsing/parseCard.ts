@@ -52,6 +52,7 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
       ID: inputCard.ID,
       Name: inputCard.Name,
       CardType: inputCard.CardType,
+      Text: inputCard.Text,
       Effect: result.value,
     };
 

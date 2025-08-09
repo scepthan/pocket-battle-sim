@@ -1,6 +1,7 @@
 import type {
   Ability,
   Attack,
+  CardSlot,
   Energy,
   ItemCard,
   PlayingCard,
@@ -131,9 +132,21 @@ export class PlayerGameView {
         return this.selfBenched.some((pokemon) => card.EvolvesFrom == pokemon?.Name);
       }
     } else if (card.CardType == "Supporter") {
-      return this.canPlaySupporter;
+      if (!this.canPlaySupporter) return false;
+      if (card.Effect.type == "Targeted") {
+        const validTargets = card.Effect.validTargets(this.#game);
+        if (validTargets.length == 0) return false;
+      } else if (card.Effect.type == "Conditional") {
+        if (!card.Effect.condition(this.#game, this.#player)) return false;
+      }
+      return true;
     } else if (card.CardType == "Item") {
-      // There are definitely special cases but I haven't decided how these cards will work yet so
+      if (card.Effect.type == "Targeted") {
+        const validTargets = card.Effect.validTargets(this.#game);
+        if (validTargets.length == 0) return false;
+      } else if (card.Effect.type == "Conditional") {
+        if (!card.Effect.condition(this.#game, this.#player)) return false;
+      }
       return true;
     }
   }
@@ -174,6 +187,12 @@ export class PlayerGameView {
       this.selfActive.RetreatCost + this.retreatCostModifier <=
       this.selfActive.AttachedEnergy.length
     );
+  }
+  validTargets(card: ItemCard | SupporterCard): CardSlot[] {
+    if (card.Effect.type == "Targeted") {
+      return card.Effect.validTargets(this.#game);
+    }
+    return [];
   }
 
   // Action methods
@@ -235,18 +254,24 @@ export class PlayerGameView {
     await this.#game.retreatActivePokemon(benchedPokemon, energy);
     return true;
   }
-  async playItemCard(card: ItemCard) {
+  async playItemCard(card: ItemCard, target?: CardSlot) {
     if (!this.canPlayCard(card)) return false;
+    if (card.Effect.type === "Targeted") {
+      if (!target || !card.Effect.validTargets(this.#game).includes(target)) return false;
+    }
     await this.#game.delay();
 
-    await this.#game.playTrainer(card);
+    await this.#game.playTrainer(card, target);
     return true;
   }
-  async playSupporterCard(card: SupporterCard) {
+  async playSupporterCard(card: SupporterCard, target?: CardSlot) {
     if (!this.canPlayCard(card)) return false;
+    if (card.Effect.type === "Targeted") {
+      if (!target || !card.Effect.validTargets(this.#game).includes(target)) return false;
+    }
     await this.#game.delay();
 
-    await this.#game.playTrainer(card);
+    await this.#game.playTrainer(card, target);
     return true;
   }
 }

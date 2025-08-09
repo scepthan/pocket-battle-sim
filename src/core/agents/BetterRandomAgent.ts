@@ -4,7 +4,7 @@ import {
   type InPlayPokemonCard,
   type PlayerGameView,
 } from "../gamelogic";
-import type { Energy, ItemCard, PokemonCard, SupporterCard } from "../types";
+import type { CardSlot, Energy, ItemCard, PokemonCard, SupporterCard } from "../types";
 
 const rand = <T>(arr: T[]) => arr[(Math.random() * arr.length) | 0];
 
@@ -30,11 +30,15 @@ export class BetterRandomAgent extends PlayerAgent {
     } else if (Math.random() > 0.5) {
       // Play a random Supporter card if available
       const supporterCards = game.selfHand.filter(
-        (x) => x.CardType == "Supporter"
+        (x) => x.CardType == "Supporter" && game.canPlayCard(x)
       ) as SupporterCard[];
       if (supporterCards.length > 0) {
-        const randomSupporter = rand(supporterCards);
-        await game.playSupporterCard(randomSupporter);
+        const card = rand(supporterCards);
+        let target: CardSlot | undefined;
+        if (card.Effect.type === "Targeted") {
+          target = rand(game.validTargets(card));
+        }
+        await game.playSupporterCard(card, target);
       }
     }
 
@@ -58,10 +62,14 @@ export class BetterRandomAgent extends PlayerAgent {
     }
 
     // Play each held Item card with 50% chance
-    const itemCards = game.selfHand.filter((x) => x.CardType == "Item") as ItemCard[];
+    const itemCards = game.selfHand.filter((x) => x.CardType == "Item");
     for (const card of itemCards) {
-      if (Math.random() < 0.5) continue;
-      await game.playItemCard(card);
+      if (!game.canPlayCard(card) || Math.random() < 0.5) continue;
+      let target: CardSlot | undefined;
+      if (card.Effect.type === "Targeted") {
+        target = rand(game.validTargets(card));
+      }
+      await game.playItemCard(card, target);
     }
 
     // Retreat with 100% chance if retreat cost is 0; 50% chance if cost is reduced; 12.5% chance if cost is normal
