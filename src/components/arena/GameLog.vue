@@ -100,19 +100,29 @@
         <p v-else>No energy could be discarded.</p>
       </div>
 
-      <div v-else-if="entry.type == 'applyModifier'">
-        <p v-if="entry.attribute == 'retreatCost'">
-          Retreat cost is now {{ Math.abs(entry.totalModifier) }}
-          {{ entry.totalModifier < 0 ? "less" : "more" }} for this turn!
+      <div v-else-if="entry.type == 'applyPlayerStatus'">
+        <p v-if="entry.status.type == 'DecreaseRetreatCost'">
+          Retreat cost is {{ entry.status.amount }} less<span
+            v-if="entry.status.source == 'Effect'"
+          >
+            for this turn</span
+          >!
         </p>
-        <p v-else-if="entry.attribute == 'activeDamage'">
-          Attacks used this turn do +{{ entry.totalModifier }} damage to your opponent's active
-          Pokemon!
+        <p v-else-if="entry.status.type == 'IncreaseAttack'">
+          Attacks used<span v-if="entry.status.descriptor"> by {{ entry.status.descriptor }}</span
+          ><span v-if="entry.status.source == 'Effect'"> this turn</span> do +{{
+            entry.status.amount
+          }}
+          damage to the opponent's Active Pokemon!
         </p>
-        <p v-else-if="entry.attribute == 'damageReduction'">
-          Attacks used next turn do -{{ entry.totalModifier }} damage to your Pokemon!
+        <p v-else-if="entry.status.type == 'IncreaseDefense'">
+          Attacks used<span v-if="entry.status.source == 'Effect'"> next turn</span> do -{{
+            entry.status.amount
+          }}
+          damage to <b>{{ entry.player }}</b
+          >'s {{ entry.status.descriptor ?? "Pokemon" }}!
         </p>
-        <p v-else>Unknown modifier: {{ entry.attribute }}</p>
+        <p v-else>Unknown player status: {{ entry.status.type }}</p>
       </div>
 
       <div v-else-if="entry.type == 'swapActivePokemon'">

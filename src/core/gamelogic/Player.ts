@@ -25,7 +25,7 @@ export class Player {
   Bench: (InPlayPokemonCard | EmptyCardSlot)[]; // Pokémon cards on the bench, EmptyCardSlot if no Pokémon is in a slot
   AvailableEnergy?: Energy; // The energy type available for use this turn, if any (not used in all game modes)
   NextEnergy: Energy = "Colorless"; // The next energy type to be used for attaching to Pokémon, set when the game starts
-  PlayerStatuses: Set<PlayerStatus> = new Set(); // Status effects that apply to the player (e.g., cannot play supporter cards)
+  PlayerStatuses: PlayerStatus[] = []; // Status effects that apply to the player (e.g., cannot play supporter cards)
 
   game: Game;
   logger: GameLogger;
@@ -341,11 +341,7 @@ export class Player {
     return this.ActivePokemon;
   }
 
-  retreatActivePokemon(
-    newActive: InPlayPokemonCard,
-    energyToDiscard: Energy[],
-    costModifier: number
-  ) {
+  retreatActivePokemon(newActive: InPlayPokemonCard, energyToDiscard: Energy[]) {
     const currentActive = this.activeOrThrow();
     if (currentActive.RetreatCost == -1) {
       throw new Error("This Pokémon cannot retreat");
@@ -358,7 +354,12 @@ export class Player {
     }
 
     const previousEnergy = currentActive.AttachedEnergy.slice();
-    const modifiedCost = (currentActive.RetreatCost ?? 0) + costModifier;
+
+    let modifiedCost = currentActive.RetreatCost;
+    for (const status of this.PlayerStatuses) {
+      if (status.type === "DecreaseRetreatCost") modifiedCost -= status.amount;
+    }
+    if (modifiedCost < 0) modifiedCost = 0;
 
     if (modifiedCost > previousEnergy.length) {
       throw new Error("Not enough energy to retreat");
@@ -526,6 +527,11 @@ export class Player {
 
     pokemon.PokemonStatuses.push(status);
     this.logger.applyPokemonStatus(this, pokemon, status);
+  }
+
+  applyStatus(status: PlayerStatus) {
+    this.PlayerStatuses.push(status);
+    this.logger.applyPlayerStatus(this, status);
   }
 
   flipCoin() {

@@ -1,4 +1,5 @@
 import type {
+  PlayerStatus,
   PokemonStatus,
   PrimaryCondition,
   SecondaryCondition,
@@ -253,6 +254,11 @@ interface PokemonStatusAppliedEvent {
   targetPokemon: InPlayPokemonDescriptor;
   status: PokemonStatus;
 }
+interface PlayerStatusAppliedEvent {
+  type: "applyPlayerStatus";
+  player: string;
+  status: PlayerStatus;
+}
 interface AttackFailedEvent {
   type: "attackFailed";
   player: string;
@@ -261,15 +267,6 @@ interface DamagePreventedEvent {
   type: "damagePrevented";
   player: string;
   targetPokemon: InPlayPokemonDescriptor;
-}
-
-export type ApplyModifierAttribute = "retreatCost" | "activeDamage" | "damageReduction";
-interface ApplyModifierEvent {
-  type: "applyModifier";
-  attribute: ApplyModifierAttribute;
-  player: string;
-  newModifier: number;
-  totalModifier: number;
 }
 
 interface CoinFlipEvent {
@@ -324,9 +321,9 @@ export type LoggedEvent =
   | SpecialConditionDamageEvent
   | SpecialConditionEffectiveEvent
   | PokemonStatusAppliedEvent
+  | PlayerStatusAppliedEvent
   | AttackFailedEvent
   | DamagePreventedEvent
-  | ApplyModifierEvent
   | CoinFlipEvent
   | CoinMultiFlipEvent
   | CoinFlipUntilTailsEvent;

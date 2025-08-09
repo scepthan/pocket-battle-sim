@@ -1,13 +1,13 @@
 import type {
   InPlayPokemonCard,
   Player,
+  PlayerStatus,
   PokemonStatus,
   SecondaryCondition,
   SpecialCondition,
 } from "../gamelogic";
 import type { Energy, PlayingCard, PokemonCard, TrainerCard } from "../types";
 import type {
-  ApplyModifierAttribute,
   AttachEnergySource,
   DiscardEnergySource,
   LoggedEvent,
@@ -377,26 +377,19 @@ export class GameLogger {
     });
   }
 
-  applyModifier(
-    player: Player,
-    attribute: ApplyModifierAttribute,
-    newModifier: number,
-    totalModifier: number
-  ) {
-    this.addEntry({
-      type: "applyModifier",
-      player: player.Name,
-      attribute,
-      newModifier,
-      totalModifier,
-    });
-  }
-
   applyPokemonStatus(player: Player, pokemon: InPlayPokemonCard, status: PokemonStatus) {
     this.addEntry({
       type: "applyPokemonStatus",
       player: player.Name,
       targetPokemon: player.pokemonToDescriptor(pokemon),
+      status,
+    });
+  }
+
+  applyPlayerStatus(player: Player, status: PlayerStatus) {
+    this.addEntry({
+      type: "applyPlayerStatus",
+      player: player.Name,
       status,
     });
   }

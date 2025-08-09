@@ -111,7 +111,10 @@ export class PlayerGameView {
     return this.#game.CanPlaySupporter;
   }
   get retreatCostModifier() {
-    return this.#game.RetreatCostModifier;
+    return this.#player.PlayerStatuses.reduce(
+      (sum, status) => (status.type === "DecreaseRetreatCost" ? sum - status.amount : sum),
+      0
+    );
   }
 
   // Helper methods

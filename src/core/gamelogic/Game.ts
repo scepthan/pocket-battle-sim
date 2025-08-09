@@ -13,7 +13,7 @@ import type {
 import type { InPlayPokemonCard } from "./InPlayPokemonCard";
 import { Player } from "./Player";
 import { PlayerGameView } from "./PlayerGameView";
-import type { GameRules, PlayerAgent, PokemonStatus } from "./types";
+import type { GameRules, PlayerAgent, PlayerStatus, PokemonStatus } from "./types";
 
 export class Game {
   Agent1: PlayerAgent;
@@ -27,10 +27,6 @@ export class Game {
   DefendingPlayer: Player;
   CanRetreat: boolean = true;
   CanPlaySupporter: boolean = true;
-  RetreatCostModifier: number = 0;
-  ActivePokemonDamageBoost: number = 0;
-  NextTurnDamageReduction: number = 0;
-  CurrentDamageReduction: number = 0;
   ActiveTrainerCard?: TrainerCard;
   CurrentlyAttacking: boolean = false;
   UsedAbilities: Set<InPlayPokemonCard> = new Set();
@@ -149,10 +145,6 @@ export class Game {
     // Reset turn-based flags
     this.CanRetreat = true;
     this.CanPlaySupporter = true;
-    this.RetreatCostModifier = 0;
-    this.ActivePokemonDamageBoost = 0;
-    this.CurrentDamageReduction = this.NextTurnDamageReduction;
-    this.NextTurnDamageReduction = 0;
     this.UsedAbilities = new Set();
     this.AttackDamagedPokemon = new Set();
     if (this.TurnNumber > 2) {
@@ -250,8 +242,21 @@ export class Game {
       this.GameLog.specialConditionEnded(this.AttackingPlayer, ["Paralyzed"]);
     }
 
-    // Check for Pokemon statuses and remove if expired
+    // Check for player and Pokemon statuses and remove if expired
     for (const player of [this.AttackingPlayer, this.DefendingPlayer]) {
+      const newStatuses: PlayerStatus[] = [];
+      for (const status of player.PlayerStatuses) {
+        if (status.source == "Effect") {
+          if (status.keepNextTurn) {
+            status.keepNextTurn = false;
+            newStatuses.push(status);
+          }
+        } else {
+          newStatuses.push(status);
+        }
+      }
+      player.PlayerStatuses = newStatuses;
+
       for (const pokemon of player.InPlayPokemon) {
         const newStatuses: PokemonStatus[] = [];
         for (const status of pokemon.PokemonStatuses) {
@@ -423,7 +428,7 @@ export class Game {
 
   async retreatActivePokemon(benchedPokemon: InPlayPokemonCard, energy: Energy[]) {
     await this.useInitialEffect(async (game) =>
-      game.AttackingPlayer.retreatActivePokemon(benchedPokemon, energy, this.RetreatCostModifier)
+      game.AttackingPlayer.retreatActivePokemon(benchedPokemon, energy)
     );
   }
 
@@ -503,7 +508,10 @@ export class Game {
     // First: weakness
     let weaknessBoost = false;
     if (totalDamage > 0 && defender == owner.ActivePokemon) {
-      totalDamage += this.ActivePokemonDamageBoost;
+      for (const status of this.AttackingPlayer.PlayerStatuses) {
+        if (status.type === "IncreaseAttack" && status.appliesToPokemon(attacker, this))
+          totalDamage += status.amount;
+      }
       if (type == defender.Weakness) {
         totalDamage += 20;
         weaknessBoost = true;
@@ -511,7 +519,10 @@ export class Game {
     }
 
     // Then: damage reduction
-    totalDamage -= this.CurrentDamageReduction;
+    for (const status of this.DefendingPlayer.PlayerStatuses) {
+      if (status.type === "IncreaseDefense" && status.appliesToPokemon(attacker, this))
+        totalDamage -= status.amount;
+    }
     for (const status of attacker.PokemonStatuses) {
       if (status.type == "ReduceAttack") {
         totalDamage -= status.amount;
@@ -647,21 +658,5 @@ export class Game {
       const pokemon = validPokemon[i];
       player.attachEnergy(pokemon, distribution[i], "energyZone");
     }
-  }
-
-  reduceRetreatCost(modifier: number) {
-    this.RetreatCostModifier -= modifier;
-    const player = this.AttackingPlayer;
-    this.GameLog.applyModifier(player, "retreatCost", modifier, this.RetreatCostModifier);
-  }
-  increaseAttackModifier(modifier: number) {
-    this.ActivePokemonDamageBoost += modifier;
-    const player = this.AttackingPlayer;
-    this.GameLog.applyModifier(player, "activeDamage", modifier, this.ActivePokemonDamageBoost);
-  }
-  increaseDefenseModifier(modifier: number) {
-    this.NextTurnDamageReduction += modifier;
-    const player = this.AttackingPlayer;
-    this.GameLog.applyModifier(player, "damageReduction", modifier, this.NextTurnDamageReduction);
   }
 }
