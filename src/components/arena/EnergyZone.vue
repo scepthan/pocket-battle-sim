@@ -14,8 +14,8 @@
 import type { Energy } from "@/core";
 
 export interface Props {
-  currentEnergy: Energy | null;
-  nextEnergy: Energy | null;
+  currentEnergy: Energy | undefined;
+  nextEnergy: Energy | undefined;
 }
 defineProps<Props>();
 </script>

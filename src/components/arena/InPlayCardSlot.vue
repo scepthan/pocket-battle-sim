@@ -1,5 +1,5 @@
 <template>
-  <div v-if="card" class="stacked" :style="cardStyle">
+  <div v-if="card?.isPokemon" class="stacked" :style="cardStyle">
     <PlayingCard :card="card.BaseCard" :height-px="heightPx" />
 
     <div class="card-hp d-flex flex-column align-end">
@@ -29,12 +29,12 @@
 <script setup lang="ts">
 import EnergyIcon from "@/components/common/EnergyIcon.vue";
 import PlayingCard from "@/components/common/PlayingCard.vue";
-import type { InPlayPokemonCard } from "@/core/gamelogic/InPlayPokemonCard";
+import type { EmptyCardSlot, InPlayPokemonCard } from "@/core";
 import { computed } from "vue";
 
 export interface Props {
   heightPx?: number;
-  card?: InPlayPokemonCard;
+  card?: InPlayPokemonCard | EmptyCardSlot;
 }
 const props = defineProps<Props>();
 
