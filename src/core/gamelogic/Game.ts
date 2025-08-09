@@ -341,10 +341,10 @@ export class Game {
 
     // Have players choose a new Active Pokemon if their previous one was knocked out
     const promises = [];
-    if (this.Player1.ActivePokemon === undefined) {
+    if (!this.Player1.ActivePokemon.isPokemon) {
       promises[0] = this.Agent1.swapActivePokemon(new PlayerGameView(this, this.Player1));
     }
-    if (this.Player2.ActivePokemon === undefined) {
+    if (!this.Player2.ActivePokemon.isPokemon) {
       promises[1] = this.Agent2.swapActivePokemon(new PlayerGameView(this, this.Player2));
     }
     if (promises.length > 0) {
