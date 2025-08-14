@@ -1,12 +1,15 @@
 import type {
+  Energy,
   InPlayPokemonCard,
   Player,
   PlayerStatus,
+  PlayingCard,
+  PokemonCard,
   PokemonStatus,
   SecondaryCondition,
   SpecialCondition,
+  TrainerCard,
 } from "../gamelogic";
-import type { Energy, PlayingCard, PokemonCard, TrainerCard } from "../types";
 import type {
   AttachEnergySource,
   DiscardEnergySource,

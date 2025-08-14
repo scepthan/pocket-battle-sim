@@ -1,4 +1,4 @@
-import { type Ability, type Energy, isEnergy, type PlayingCard } from "../types";
+import { isEnergy, type Ability, type Energy, type PlayingCard } from "../gamelogic";
 import { parseAbility } from "./parseAbility";
 import { parseAttack } from "./parseAttack";
 import { parseTrainerEffect } from "./parseTrainerEffect";
@@ -14,10 +14,10 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
       return result.value;
     });
 
-    let Ability: Ability | undefined;
+    let ability: Ability | undefined;
     if (inputCard.Ability) {
       const result = parseAbility(inputCard.Ability);
-      Ability = result.value;
+      ability = result.value;
       if (!result.parseSuccessful) parseSuccessful = false;
     }
 
@@ -40,7 +40,7 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
       Weakness: inputCard.Weakness,
       PrizePoints: inputCard.Name.endsWith(" ex") ? 2 : 1,
       Attacks,
-      Ability,
+      Ability: ability,
     };
 
     return { value: outputCard, parseSuccessful };

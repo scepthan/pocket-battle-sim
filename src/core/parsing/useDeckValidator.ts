@@ -1,4 +1,4 @@
-import type { Attack, Deck, Energy, GameRules, PokemonCard } from "@/core";
+import type { Attack, Deck, Energy, GameRules, PokemonCard } from "../gamelogic";
 
 export const useDeckValidator = (rules: GameRules) => {
   const hasCorrectAmountOfCards = (deck: Deck) => deck.Cards.length == rules.DeckSize;

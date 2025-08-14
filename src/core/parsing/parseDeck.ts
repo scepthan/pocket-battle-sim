@@ -1,5 +1,7 @@
 import inputCards from "@/assets/cards.json";
-import { parseCard, type InputCard, type PlayingCard } from "@/core";
+import type { PlayingCard } from "../gamelogic";
+import { parseCard } from "./parseCard";
+import type { InputCard } from "./types";
 
 const outputCards: Record<string, PlayingCard> = {};
 

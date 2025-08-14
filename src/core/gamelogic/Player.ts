@@ -4,12 +4,19 @@ import type {
   GameLogger,
   InPlayPokemonDescriptor,
 } from "../logging";
-import type { Deck, Energy, PlayingCard, PokemonCard } from "../types";
 import { CoinFlipper } from "./CoinFlipper";
 import { EmptyCardSlot } from "./EmptyCardSlot";
 import type { Game } from "./Game";
 import { InPlayPokemonCard } from "./InPlayPokemonCard";
-import type { PlayerGameSetup, PlayerStatus, PokemonStatus } from "./types";
+import type {
+  Deck,
+  Energy,
+  PlayerGameSetup,
+  PlayerStatus,
+  PlayingCard,
+  PokemonCard,
+  PokemonStatus,
+} from "./types";
 
 export class Player {
   Name: string;

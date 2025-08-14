@@ -1,5 +1,4 @@
-import type { Game } from "../gamelogic";
-import { type Attack, type Energy, isEnergyShort, parseEnergy } from "../types";
+import { isEnergyShort, parseEnergy, type Attack, type Energy, type Game } from "../gamelogic";
 import { parseAttackEffect } from "./parseAttackEffect";
 import type { InputCardAttack, ParsedResult } from "./types";
 

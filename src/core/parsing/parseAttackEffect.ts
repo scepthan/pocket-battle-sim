@@ -1,11 +1,11 @@
-import type { Game } from "../gamelogic";
 import {
+  parseEnergy,
   type BasicEffect,
   type Energy,
-  parseEnergy,
+  type Game,
   type PlayingCard,
   type PokemonCard,
-} from "../types";
+} from "../gamelogic";
 import { parsePokemonNames } from "./parseTrainerEffect";
 import type { ParsedResult } from "./types";
 

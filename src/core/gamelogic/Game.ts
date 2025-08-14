@@ -1,19 +1,23 @@
 import { GameLogger } from "../logging";
 import { useDeckValidator } from "../parsing";
+
+import type { InPlayPokemonCard } from "./InPlayPokemonCard";
+import { Player } from "./Player";
+import { PlayerGameView } from "./PlayerGameView";
 import type {
   Ability,
   Attack,
   BasicEffect,
   CardSlot,
   Energy,
+  GameRules,
+  PlayerAgent,
+  PlayerStatus,
   PlayingCard,
   PokemonCard,
+  PokemonStatus,
   TrainerCard,
-} from "../types";
-import type { InPlayPokemonCard } from "./InPlayPokemonCard";
-import { Player } from "./Player";
-import { PlayerGameView } from "./PlayerGameView";
-import type { GameRules, PlayerAgent, PlayerStatus, PokemonStatus } from "./types";
+} from "./types";
 
 export class Game {
   Agent1: PlayerAgent;

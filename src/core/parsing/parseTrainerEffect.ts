@@ -1,11 +1,13 @@
-import { Game, InPlayPokemonCard } from "../gamelogic";
 import {
+  Game,
+  InPlayPokemonCard,
   isEnergyShort,
   parseEnergy,
   type CardSlot,
   type PlayingCard,
   type TrainerEffect,
-} from "../types";
+} from "../gamelogic";
+
 import type { ParsedResult } from "./types";
 
 interface EffectTransformer {
