@@ -1,3 +1,4 @@
+import { default as allCards } from "@/assets/cards.json";
 import {
   Game,
   InPlayPokemonCard,
@@ -7,8 +8,7 @@ import {
   type PlayingCard,
   type TrainerEffect,
 } from "../gamelogic";
-
-import type { ParsedResult } from "./types";
+import type { InputCard, ParsedResult } from "./types";
 
 interface EffectTransformer {
   pattern: RegExp;
@@ -307,5 +307,13 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
 };
 
 export const parsePokemonNames = (nameString: string) => {
-  return nameString.split(/, or | or |, /);
+  const names = nameString.split(/, or | or |, /);
+
+  const unknownNames = names.filter(
+    (name) => !(allCards as InputCard[]).some((card) => card.Name === name)
+  );
+  if (unknownNames.length > 0)
+    console.warn(`Unknown Pokémon names in card effect: ${unknownNames.join(", ")}`);
+
+  return names;
 };
