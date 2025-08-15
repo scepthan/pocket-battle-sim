@@ -540,6 +540,19 @@ export const parseAttackEffect = (
         });
       },
     },
+    {
+      pattern:
+        /^Your opponent can't use any Supporter cards from their hand during their next turn\.$/i,
+      transform: () => async (game: Game) => {
+        await defaultEffect(game);
+        game.DefendingPlayer.applyStatus({
+          type: "CannotUseSupporter",
+          source: "Effect",
+          category: "GameRule",
+          keepNextTurn: true,
+        });
+      },
+    },
 
     // Miscellaneous
     {

@@ -122,6 +122,13 @@
           damage to <b>{{ entry.player }}</b
           >'s {{ entry.status.descriptor ?? "Pokemon" }}!
         </p>
+        <p v-else-if="entry.status.type == 'CannotUseSupporter'">
+          <b>{{ entry.player }}</b> cannot use Supporter cards from their hand<span
+            v-if="entry.status.source == 'Effect'"
+          >
+            next turn</span
+          >!
+        </p>
         <p v-else>Unknown player status: {{ entry.status.type }}</p>
       </div>
 

@@ -108,7 +108,10 @@ export class PlayerGameView {
   }
 
   get canPlaySupporter() {
-    return this.#game.CanPlaySupporter;
+    return (
+      this.#game.CanPlaySupporter &&
+      !this.#player.PlayerStatuses.some((status) => status.type == "CannotUseSupporter")
+    );
   }
   get retreatCostModifier() {
     return this.#player.PlayerStatuses.reduce(
