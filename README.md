@@ -2,24 +2,22 @@
 
 Backend todo:
 
-- [ ] Parse cards: 376/405 (92.8%)
-  - [x] Dragon type
-  - [ ] Conditions
-    - [ ] Special Conditions
-      - [x] Asleep
-      - [x] Paralyzed
-      - [ ] Confused
-      - [x] Poisoned
-      - [ ] Burned
-    - [x] Other active mon conditions
-    - [ ] Global conditions
-  - [x] Fossils
-  - [x] Abilities
-    - [x] Once during your turn
-    - [x] As often as you like during your turn
-    - [x] Damage reduction
-    - [x] Attack retaliation
-  - [ ] A1 effects
+- [x] Parse cards
+  - [x] A1: 226/226 (100%)
+    - [x] Dragon type
+    - [x] Conditions
+      - [x] Special Conditions
+        - [x] Asleep
+        - [x] Paralyzed
+        - [x] Poisoned
+      - [x] Other active mon conditions
+      - [x] Global conditions
+    - [x] Fossils
+    - [x] Abilities
+      - [x] Once during your turn
+      - [x] As often as you like during your turn
+      - [x] Damage reduction
+      - [x] Attack retaliation
     - [x] Misty
     - [x] Supporters that affect specific mon
     - [x] Choose a mon to attack
@@ -28,11 +26,13 @@ Backend todo:
     - [x] Draw mon onto Bench
     - [x] Distribute energy among Benched mon
     - [x] Use opposing mon's attack
-  - [ ] A1a effects
+  - [ ] A1a: 53/68 (77.9%)
+    - [ ] Confused
+    - [ ] Burned
 - [ ] Bring in newer sets
 - [x] Single battle simulation
 - [ ] Basic logic-based AI opponent (at least as competitive as Auto Mode)
-- [ ] Mass battle simulation
+- [x] Mass battle simulation
 - [ ] Deck fine-tuning via iteration
 
 Frontend todo:
@@ -41,10 +41,18 @@ Frontend todo:
   - [ ] Collapse energy icons when at 5 or more
   - [ ] Display game points somewhere
   - [ ] Display discard somewhere
-  - [ ] Display deck somewhere
+  - [ ] Display deck size and opponent hand size
+  - [ ] Display statuses and Special Conditions
 - [ ] Allow user control of one or both players in battle simulator
 - [ ] Deck builder UI
+  - [ ] Display cards currently in deck
+  - [ ] Display count on card and allow +/-/x
+  - [ ] Add ability to save decks and edit existing decks
 
 Other todo:
 
-- [ ] Deck library
+- [x] Deck library
+  - [x] A1 official
+  - [x] A1 unofficial
+  - [ ] A1a official
+  - [ ] A1a unofficial

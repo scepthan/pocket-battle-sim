@@ -1,4 +1,10 @@
-import { parseEnergy, type Ability, type Game, type InPlayPokemonCard } from "../gamelogic";
+import {
+  parseEnergy,
+  type Ability,
+  type Game,
+  type InPlayPokemonCard,
+  type PlayerStatus,
+} from "../gamelogic";
 import type { InputCardAbility, ParsedResult } from "./types";
 
 interface AbilityTransformer {
@@ -50,6 +56,12 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       transform: () => {
         ability.Trigger = "AfterAttackDamage";
         ability.Conditions.push("Active");
+      },
+    },
+    {
+      pattern: /^As long as this Pokémon is in the Active Spot, /i,
+      transform: () => {
+        ability.Trigger = "OnEnterActive";
       },
     },
 
@@ -162,7 +174,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           }
           const chosenPokemon = await game.choosePokemon(game.AttackingPlayer, benchedBasics);
           if (chosenPokemon) {
-            game.DefendingPlayer.swapActivePokemon(
+            await game.DefendingPlayer.swapActivePokemon(
               chosenPokemon,
               "opponentEffect",
               game.AttackingPlayer.Name
@@ -188,6 +200,22 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         };
       },
     },
+    {
+      pattern: /^your opponent can't use any Supporter cards from their hand\.$/i,
+      transform: () => {
+        ability.Effect = async (game: Game, pokemon: InPlayPokemonCard) => {
+          const opponent = game.findOwner(pokemon) == game.Player1 ? game.Player2 : game.Player1;
+          const status: PlayerStatus = {
+            category: "GameRule",
+            type: "CannotUseSupporter",
+            source: "Ability",
+          };
+          pokemon.ActivePlayerStatuses.push(status);
+          opponent.applyStatus(status);
+        };
+        ability.UndoEffect = undoPlayerStatus("CannotUseSupporter", true);
+      },
+    },
   ];
 
   mainloop: while (abilityText) {
@@ -209,3 +237,16 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     value: ability,
   };
 };
+
+const undoPlayerStatus =
+  (statusType: string, isOpponent: boolean) => async (game: Game, pokemon: InPlayPokemonCard) => {
+    const status = pokemon.ActivePlayerStatuses.find((s) => s.type === statusType);
+    if (!status) return;
+    pokemon.ActivePlayerStatuses = pokemon.ActivePlayerStatuses.filter((s) => s !== status);
+
+    const owner = game.findOwner(pokemon);
+    const player = isOpponent ? (owner == game.Player1 ? game.Player2 : game.Player1) : owner;
+    const index = player.PlayerStatuses.indexOf(status);
+    if (index === -1) return;
+    player.PlayerStatuses.splice(index, 1);
+  };

@@ -3,6 +3,7 @@ import type {
   Ability,
   Attack,
   Energy,
+  PlayerStatus,
   PlayingCard,
   PokemonCard,
   PokemonStatus,
@@ -36,6 +37,7 @@ export class InPlayPokemonCard {
   AttachedEnergy: Energy[] = [];
   InPlayCards: PlayingCard[] = [];
   ReadyToEvolve: boolean = false;
+  ActivePlayerStatuses: PlayerStatus[] = [];
 
   isPokemon = true as const;
 
