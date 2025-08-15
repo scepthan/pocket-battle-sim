@@ -1,11 +1,11 @@
 import type {
+  Energy,
   PlayerStatus,
   PokemonStatus,
   PrimaryCondition,
   SecondaryCondition,
   SpecialCondition,
 } from "../../gamelogic";
-import type { Energy } from "../../types";
 import type { InPlayPokemonDescriptor } from "./InPlayPokemonDescriptor";
 
 type CoinFlipResult = "Heads" | "Tails";

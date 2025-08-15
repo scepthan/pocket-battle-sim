@@ -1,19 +1,23 @@
 import { GameLogger } from "../logging";
 import { useDeckValidator } from "../parsing";
+
+import type { InPlayPokemonCard } from "./InPlayPokemonCard";
+import { Player } from "./Player";
+import { PlayerGameView } from "./PlayerGameView";
 import type {
   Ability,
   Attack,
   BasicEffect,
   CardSlot,
   Energy,
+  GameRules,
+  PlayerAgent,
+  PlayerStatus,
   PlayingCard,
   PokemonCard,
+  PokemonStatus,
   TrainerCard,
-} from "../types";
-import type { InPlayPokemonCard } from "./InPlayPokemonCard";
-import { Player } from "./Player";
-import { PlayerGameView } from "./PlayerGameView";
-import type { GameRules, PlayerAgent, PlayerStatus, PokemonStatus } from "./types";
+} from "./types";
 
 export class Game {
   Agent1: PlayerAgent;
@@ -289,14 +293,7 @@ export class Game {
     await this.useEffect(effect);
 
     for (const pokemon of this.AttackDamagedPokemon) {
-      if (pokemon.Ability?.Trigger == "AfterAttackDamage") {
-        if (
-          pokemon.Ability.Conditions.includes("Active") &&
-          this.DefendingPlayer.ActivePokemon !== pokemon
-        )
-          continue;
-        await this.findOwner(pokemon).triggerAbility(pokemon);
-      }
+      await pokemon.onAttackDamage(this);
     }
 
     await this.checkForKnockOuts();
@@ -314,7 +311,7 @@ export class Game {
     for (const player of [this.DefendingPlayer, this.AttackingPlayer]) {
       for (const pokemon of player.InPlayPokemon) {
         if (pokemon.CurrentHP <= 0) {
-          this.knockOutPokemon(player, pokemon);
+          await this.knockOutPokemon(player, pokemon);
         }
       }
     }
@@ -371,8 +368,8 @@ export class Game {
     if (promises.length > 0) {
       await this.delay();
       const newActive = await Promise.all(promises);
-      if (newActive[0]) this.Player1.setNewActivePokemon(newActive[0]);
-      if (newActive[1]) this.Player2.setNewActivePokemon(newActive[1]);
+      if (newActive[0]) await this.Player1.setNewActivePokemon(newActive[0]);
+      if (newActive[1]) await this.Player2.setNewActivePokemon(newActive[1]);
     }
   }
 
@@ -427,8 +424,8 @@ export class Game {
   }
 
   async retreatActivePokemon(benchedPokemon: InPlayPokemonCard, energy: Energy[]) {
-    await this.useInitialEffect(async (game) =>
-      game.AttackingPlayer.retreatActivePokemon(benchedPokemon, energy)
+    await this.useInitialEffect(
+      async (game) => await game.AttackingPlayer.retreatActivePokemon(benchedPokemon, energy)
     );
   }
 
@@ -557,12 +554,12 @@ export class Game {
     this.GameLog.pokemonDamaged(owner, target, initialHP, HP, fromAttack);
   }
 
-  knockOutPokemon(player: Player, pokemon: InPlayPokemonCard) {
+  async knockOutPokemon(player: Player, pokemon: InPlayPokemonCard) {
     if (this.shouldPreventDamage(pokemon)) {
       this.GameLog.damagePrevented(player, pokemon);
       return;
     }
-    player.knockOutPokemon(pokemon);
+    await player.knockOutPokemon(pokemon);
 
     const opposingPlayer = player == this.Player1 ? this.Player2 : this.Player1;
     opposingPlayer.GamePoints += pokemon.PrizePoints;
@@ -613,7 +610,7 @@ export class Game {
     }
     const agent = this.findAgent(player);
     const newActive = await agent.swapActivePokemon(new PlayerGameView(this, player));
-    player.swapActivePokemon(newActive, reason);
+    await player.swapActivePokemon(newActive, reason);
     return true;
   }
   async choosePokemon(player: Player, validPokemon: InPlayPokemonCard[]) {

@@ -1,11 +1,11 @@
-import type { Game } from "../gamelogic";
 import {
+  parseEnergy,
   type BasicEffect,
   type Energy,
-  parseEnergy,
+  type Game,
   type PlayingCard,
   type PokemonCard,
-} from "../types";
+} from "../gamelogic";
 import { parsePokemonNames } from "./parseTrainerEffect";
 import type { ParsedResult } from "./types";
 
@@ -445,7 +445,7 @@ export const parseAttackEffect = (
       pattern: /^your opponent shuffles their Active Pokémon back into their deck\./i,
       transform: () => async (game: Game) => {
         await defaultEffect(game);
-        game.DefendingPlayer.shufflePokemonIntoDeck(game.DefendingPlayer.activeOrThrow());
+        await game.DefendingPlayer.shufflePokemonIntoDeck(game.DefendingPlayer.activeOrThrow());
       },
     },
 

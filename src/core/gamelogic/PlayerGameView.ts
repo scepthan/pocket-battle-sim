@@ -1,3 +1,6 @@
+import type { Game } from "./Game";
+import { InPlayPokemonCard } from "./InPlayPokemonCard";
+import type { Player } from "./Player";
 import type {
   Ability,
   Attack,
@@ -7,10 +10,7 @@ import type {
   PlayingCard,
   PokemonCard,
   SupporterCard,
-} from "../types";
-import type { Game } from "./Game";
-import { InPlayPokemonCard } from "./InPlayPokemonCard";
-import type { Player } from "./Player";
+} from "./types";
 
 interface PlayerGameViewWithActivePokemon {
   selfActive: InPlayPokemonCard;

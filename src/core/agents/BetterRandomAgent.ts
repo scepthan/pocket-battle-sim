@@ -1,10 +1,14 @@
-import {
-  PlayerAgent,
-  type GameInitState,
-  type InPlayPokemonCard,
-  type PlayerGameView,
+import type {
+  CardSlot,
+  Energy,
+  GameInitState,
+  InPlayPokemonCard,
+  ItemCard,
+  PlayerGameView,
+  PokemonCard,
+  SupporterCard,
 } from "../gamelogic";
-import type { CardSlot, Energy, ItemCard, PokemonCard, SupporterCard } from "../types";
+import { PlayerAgent } from "../gamelogic";
 
 const rand = <T>(arr: T[]) => arr[(Math.random() * arr.length) | 0];
 

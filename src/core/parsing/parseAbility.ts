@@ -1,5 +1,4 @@
-import type { Game, InPlayPokemonCard } from "../gamelogic";
-import { parseEnergy, type Ability } from "../types";
+import { parseEnergy, type Ability, type Game, type InPlayPokemonCard } from "../gamelogic";
 import type { InputCardAbility, ParsedResult } from "./types";
 
 interface AbilityTransformer {

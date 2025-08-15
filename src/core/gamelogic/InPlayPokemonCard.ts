@@ -1,5 +1,14 @@
-import type { Ability, Attack, Energy, PlayingCard, PokemonCard } from "../types";
-import type { PokemonStatus, PrimaryCondition, SecondaryCondition } from "./types";
+import type { Game } from "./Game";
+import type {
+  Ability,
+  Attack,
+  Energy,
+  PlayingCard,
+  PokemonCard,
+  PokemonStatus,
+  PrimaryCondition,
+  SecondaryCondition,
+} from "./types";
 
 export class InPlayPokemonCard {
   BaseCard: PokemonCard;
@@ -96,5 +105,47 @@ export class InPlayPokemonCard {
       }
     }
     return true;
+  }
+
+  async onEnterPlay(game: Game) {
+    if (this.Ability?.Trigger === "OnEnterPlay") {
+      await game.findOwner(this).triggerAbility(this);
+    }
+  }
+
+  async onEnterActive(game: Game) {
+    if (this.Ability?.Trigger === "OnEnterActive") {
+      await game.findOwner(this).triggerAbility(this);
+    }
+  }
+
+  async onLeaveActive(game: Game) {
+    if (this.Ability?.Trigger === "OnEnterActive" && this.Ability.UndoEffect) {
+      await this.Ability.UndoEffect(game, this);
+    }
+  }
+
+  async onEnterBench(game: Game) {
+    if (this.Ability?.Trigger === "OnEnterBench") {
+      await game.findOwner(this).triggerAbility(this);
+    }
+  }
+
+  async onLeaveBench(game: Game) {
+    if (this.Ability?.Trigger === "OnEnterBench" && this.Ability.UndoEffect) {
+      await this.Ability.UndoEffect(game, this);
+    }
+  }
+
+  async onAttackDamage(game: Game) {
+    if (this.Ability?.Trigger === "AfterAttackDamage") {
+      if (this.Ability.Conditions.includes("Active")) {
+        if (game.DefendingPlayer.ActivePokemon === this)
+          await game.findOwner(this).triggerAbility(this);
+      } else if (this.Ability.Conditions.includes("OnBench")) {
+        if (game.DefendingPlayer.BenchedPokemon.includes(this))
+          await game.findOwner(this).triggerAbility(this);
+      }
+    }
   }
 }

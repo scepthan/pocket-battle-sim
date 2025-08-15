@@ -1,11 +1,13 @@
-import { Game, InPlayPokemonCard } from "../gamelogic";
 import {
+  Game,
+  InPlayPokemonCard,
   isEnergyShort,
   parseEnergy,
   type CardSlot,
   type PlayingCard,
   type TrainerEffect,
-} from "../types";
+} from "../gamelogic";
+
 import type { ParsedResult } from "./types";
 
 interface EffectTransformer {
@@ -191,7 +193,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
             return active.isPokemon && names.includes(active.Name);
           },
           effect: async (game: Game) => {
-            game.AttackingPlayer.returnPokemonToHand(game.AttackingPlayer.activeOrThrow());
+            await game.AttackingPlayer.returnPokemonToHand(game.AttackingPlayer.activeOrThrow());
           },
         };
       },
@@ -269,7 +271,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
                 Conditions: [],
                 Text: "Discard this Pokémon from play.",
                 Effect: async (game: Game, self: InPlayPokemonCard) => {
-                  game.AttackingPlayer.discardPokemonFromPlay(self);
+                  await game.AttackingPlayer.discardPokemonFromPlay(self);
                 },
               },
             };

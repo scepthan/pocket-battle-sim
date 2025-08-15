@@ -1,4 +1,4 @@
-import { type Ability, type Energy, isEnergy, type PlayingCard } from "../types";
+import { isEnergy, type Ability, type Energy, type PlayingCard } from "../gamelogic";
 import { parseAbility } from "./parseAbility";
 import { parseAttack } from "./parseAttack";
 import { parseTrainerEffect } from "./parseTrainerEffect";
