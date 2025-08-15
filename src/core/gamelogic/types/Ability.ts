@@ -6,6 +6,8 @@ export type AbilityTrigger =
   | "ManyDuringTurn"
   | "AfterAttackDamage"
   | "OnEnterPlay"
+  | "OnEnterActive"
+  | "OnEnterBench"
   | "GameRule";
 export type AbilityCondition = "Active" | "OnBench" | "HasDamage";
 
@@ -15,4 +17,5 @@ export interface Ability {
   Conditions: AbilityCondition[];
   Text: string;
   Effect: AbilityEffect;
+  UndoEffect?: AbilityEffect;
 }

@@ -445,7 +445,7 @@ export const parseAttackEffect = (
       pattern: /^your opponent shuffles their Active Pokémon back into their deck\./i,
       transform: () => async (game: Game) => {
         await defaultEffect(game);
-        game.DefendingPlayer.shufflePokemonIntoDeck(game.DefendingPlayer.activeOrThrow());
+        await game.DefendingPlayer.shufflePokemonIntoDeck(game.DefendingPlayer.activeOrThrow());
       },
     },
 

@@ -14,10 +14,10 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
       return result.value;
     });
 
-    let ability: Ability | undefined;
+    let Ability: Ability | undefined;
     if (inputCard.Ability) {
       const result = parseAbility(inputCard.Ability);
-      ability = result.value;
+      Ability = result.value;
       if (!result.parseSuccessful) parseSuccessful = false;
     }
 
@@ -40,7 +40,7 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
       Weakness: inputCard.Weakness,
       PrizePoints: inputCard.Name.endsWith(" ex") ? 2 : 1,
       Attacks,
-      Ability: ability,
+      Ability,
     };
 
     return { value: outputCard, parseSuccessful };

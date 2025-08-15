@@ -179,7 +179,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
             return active.isPokemon && names.includes(active.Name);
           },
           effect: async (game: Game) => {
-            game.AttackingPlayer.returnPokemonToHand(game.AttackingPlayer.activeOrThrow());
+            await game.AttackingPlayer.returnPokemonToHand(game.AttackingPlayer.activeOrThrow());
           },
         };
       },
@@ -257,7 +257,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
                 Conditions: [],
                 Text: "Discard this Pokémon from play.",
                 Effect: async (game: Game, self: InPlayPokemonCard) => {
-                  game.AttackingPlayer.discardPokemonFromPlay(self);
+                  await game.AttackingPlayer.discardPokemonFromPlay(self);
                 },
               },
             };
