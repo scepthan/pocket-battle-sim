@@ -4,6 +4,7 @@ import type {
   GameLogger,
   InPlayPokemonDescriptor,
 } from "../logging";
+import { randomElement, removeElement } from "../util";
 import { CoinFlipper } from "./CoinFlipper";
 import { EmptyCardSlot } from "./EmptyCardSlot";
 import type { Game } from "./Game";
@@ -152,8 +153,7 @@ export class Player {
     if (length == 1) {
       this.NextEnergy = this.EnergyTypes[0];
     } else {
-      const randomIndex = Math.floor(Math.random() * length);
-      this.NextEnergy = this.EnergyTypes[randomIndex];
+      this.NextEnergy = randomElement(this.EnergyTypes);
     }
   }
 
@@ -173,7 +173,7 @@ export class Player {
     const pokemon = new InPlayPokemonCard(setup.active);
     this.ActivePokemon = pokemon;
     this.InPlay.push(setup.active);
-    this.Hand.splice(this.Hand.indexOf(setup.active), 1);
+    removeElement(this.Hand, setup.active);
 
     this.logger.playToActive(this, setup.active);
 
@@ -193,8 +193,8 @@ export class Player {
     const filteredCards = this.Deck.filter(predicate);
     let card = undefined;
     if (filteredCards.length > 0) {
-      card = filteredCards[(Math.random() * filteredCards.length) | 0];
-      this.Deck.splice(this.Deck.indexOf(card), 1);
+      card = randomElement(filteredCards);
+      removeElement(this.Deck, card);
       this.Hand.push(card);
     }
 
@@ -209,10 +209,9 @@ export class Player {
     const filteredCards = this.Hand.filter(predicate);
     const discarded: PlayingCard[] = [];
     if (filteredCards.length > 0) {
-      const index = Math.floor(Math.random() * filteredCards.length);
-      const card = filteredCards[index];
+      const card = randomElement(filteredCards);
       discarded.push(card);
-      this.Hand.splice(this.Hand.indexOf(card), 1);
+      removeElement(this.Hand, card);
       this.Discard.push(card);
     }
 
@@ -241,12 +240,12 @@ export class Player {
       throw new Error("Can only play Basic Pokemon to bench");
     }
 
-    const pokemon = new InPlayPokemonCard(card);
+    const pokemon = new InPlayPokemonCard(card, trueCard);
     this.Bench[index] = pokemon;
     this.InPlay.push(trueCard);
     // Needs to be optional because fossils are currently removed from hand before this method is called
     if (this.Hand.includes(trueCard)) {
-      this.Hand.splice(this.Hand.indexOf(trueCard), 1);
+      removeElement(this.Hand, trueCard);
     }
 
     this.logger.playToBench(this, card, index);
@@ -266,7 +265,7 @@ export class Player {
       throw new Error("Pokemon is not ready to evolve");
     }
 
-    this.Hand.splice(this.Hand.indexOf(card), 1);
+    removeElement(this.Hand, card);
     this.InPlay.push(card);
 
     this.logger.evolvePokemon(this, pokemon, card);
@@ -311,7 +310,7 @@ export class Player {
       if (!fromPokemon.AttachedEnergy.includes(e)) {
         throw new Error("Energy not attached to fromPokemon");
       }
-      fromPokemon.AttachedEnergy.splice(fromPokemon.AttachedEnergy.indexOf(e), 1);
+      removeElement(fromPokemon.AttachedEnergy, e);
     }
     toPokemon.attachEnergy(energy);
 
@@ -326,8 +325,8 @@ export class Player {
     const discarded: Energy[] = [];
     for (let i = 0; i < count; i++) {
       if (energies.length == 0) break;
-      const index = Math.floor(Math.random() * energies.length);
-      discarded.push(energies.splice(index, 1)[0]);
+      const energy = randomElement(energies);
+      discarded.push(removeElement(energies, energy));
     }
 
     this.discardEnergy(discarded, "effect");
@@ -380,7 +379,7 @@ export class Player {
       if (!previousEnergy.includes(e)) {
         throw new Error("Energy not attached to active Pokemon");
       }
-      discardedEnergy.push(previousEnergy.splice(previousEnergy.indexOf(e), 1)[0]);
+      discardedEnergy.push(removeElement(previousEnergy, e));
     }
     currentActive.AttachedEnergy = previousEnergy;
 
@@ -439,7 +438,7 @@ export class Player {
     await this.removePokemonFromField(pokemon);
 
     for (const card of pokemon.InPlayCards) {
-      this.InPlay.splice(this.InPlay.indexOf(card), 1);
+      removeElement(this.InPlay, card);
       this.Hand.push(card);
     }
 
@@ -454,7 +453,7 @@ export class Player {
     await this.removePokemonFromField(pokemon);
 
     for (const card of pokemon.InPlayCards) {
-      this.InPlay.splice(this.InPlay.indexOf(card), 1);
+      removeElement(this.InPlay, card);
       this.Deck.push(card);
     }
 
@@ -469,7 +468,7 @@ export class Player {
     await this.removePokemonFromField(pokemon);
 
     for (const card of pokemon.InPlayCards) {
-      this.InPlay.splice(this.InPlay.indexOf(card), 1);
+      removeElement(this.InPlay, card);
       this.Discard.push(card);
     }
 
@@ -482,7 +481,8 @@ export class Player {
     this.logger.pokemonKnockedOut(this, pokemon);
 
     for (const card of pokemon.InPlayCards) {
-      this.InPlay.splice(this.InPlay.indexOf(card), 1);
+      if (!this.InPlay.includes(card)) console.log("Card not in play:", card);
+      removeElement(this.InPlay, card);
       this.Discard.push(card);
     }
     this.logger.discardFromPlay(this, pokemon.InPlayCards);

@@ -6,6 +6,7 @@ import {
   type PlayingCard,
   type PokemonCard,
 } from "../gamelogic";
+import { randomElement } from "../util";
 import { parsePokemonNames } from "./parseTrainerEffect";
 import type { ParsedResult } from "./types";
 
@@ -198,13 +199,13 @@ export const parseAttackEffect = (
       pattern:
         /^1 of your opponent's Pokémon is chosen at random (\d+) times\. For each time a Pokémon was chosen, do (\d+) damage to it\.$/i,
       transform: (_, times, damage) => async (game: Game) => {
-        const damages = game.DefendingPlayer.InPlayPokemon.map(() => 0);
+        const damages = game.DefendingPlayer.InPlayPokemon.map(() => ({ damage: 0 }));
         for (let i = 0; i < Number(times); i++) {
-          damages[Math.floor(Math.random() * damages.length)] += Number(damage);
+          randomElement(damages).damage += Number(damage);
         }
         for (let i = 0; i < damages.length; i++) {
-          if (damages[i] > 0) {
-            game.attackPokemon(game.DefendingPlayer.InPlayPokemon[i], damages[i]);
+          if (damages[i].damage > 0) {
+            game.attackPokemon(game.DefendingPlayer.InPlayPokemon[i], damages[i].damage);
           }
         }
       },

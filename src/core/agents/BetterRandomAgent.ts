@@ -9,8 +9,7 @@ import type {
   SupporterCard,
 } from "../gamelogic";
 import { PlayerAgent } from "../gamelogic";
-
-const rand = <T>(arr: T[]) => arr[(Math.random() * arr.length) | 0];
+import { randomElement as rand, removeElement } from "../util";
 
 export class BetterRandomAgent extends PlayerAgent {
   async setupPokemon(game: GameInitState) {
@@ -64,7 +63,7 @@ export class BetterRandomAgent extends PlayerAgent {
       if (!bench[i].isPokemon) {
         const randomBasic = rand(handBasics);
         await game.playPokemonToBench(randomBasic, i);
-        handBasics.splice(handBasics.indexOf(randomBasic), 1);
+        removeElement(handBasics, randomBasic);
       }
     }
 

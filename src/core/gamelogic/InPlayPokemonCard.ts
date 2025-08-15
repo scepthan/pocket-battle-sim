@@ -1,3 +1,4 @@
+import { removeElement } from "../util";
 import type { Game } from "./Game";
 import type {
   Ability,
@@ -41,9 +42,9 @@ export class InPlayPokemonCard {
 
   isPokemon = true as const;
 
-  constructor(inputCard: PokemonCard) {
+  constructor(inputCard: PokemonCard, trueCard: PlayingCard = inputCard) {
     this.BaseCard = inputCard;
-    this.InPlayCards.push(inputCard);
+    this.InPlayCards.push(trueCard);
 
     this.ID = inputCard.ID;
     this.Name = inputCard.Name;
@@ -101,7 +102,7 @@ export class InPlayPokemonCard {
       if (energy === "Colorless" && energyAvailable.length > 0) {
         energyAvailable.pop();
       } else if (energyAvailable.includes(energy)) {
-        energyAvailable.splice(energyAvailable.indexOf(energy), 1);
+        removeElement(energyAvailable, energy);
       } else {
         return false;
       }

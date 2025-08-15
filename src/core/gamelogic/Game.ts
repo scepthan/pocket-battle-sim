@@ -1,5 +1,6 @@
 import { GameLogger } from "../logging";
 import { useDeckValidator } from "../parsing";
+import { removeElement } from "../util";
 
 import type { InPlayPokemonCard } from "./InPlayPokemonCard";
 import { Player } from "./Player";
@@ -123,7 +124,8 @@ export class Game {
       try {
         await this.nextTurn();
       } catch (error) {
-        console.error("Error during turn:", error);
+        const outError = error instanceof Error ? error.stack ?? error.message : String(error);
+        console.error("Error during turn:", outError);
         this.GameLog.invalidGameState();
         this.GameOver = true;
         break;
@@ -191,7 +193,8 @@ export class Game {
           });
       });
     } catch (error) {
-      console.error("Error during turn:", error);
+      const outError = error instanceof Error ? error.stack ?? error.message : String(error);
+      console.error("Error during turn:", outError);
       this.GameLog.turnError(this.AttackingPlayer, String(error));
     }
 
@@ -440,7 +443,7 @@ export class Game {
       this.CanPlaySupporter = false;
     }
 
-    this.AttackingPlayer.Hand.splice(this.AttackingPlayer.Hand.indexOf(card), 1);
+    removeElement(this.AttackingPlayer.Hand, card);
     this.ActiveTrainerCard = card;
 
     this.GameLog.playTrainer(this.AttackingPlayer, card);
@@ -579,7 +582,7 @@ export class Game {
     const discardedEnergy: Energy[] = [];
     while (pokemon.AttachedEnergy.includes(type) && count > 0) {
       discardedEnergy.push(type);
-      pokemon.AttachedEnergy.splice(pokemon.AttachedEnergy.indexOf(type), 1);
+      removeElement(pokemon.AttachedEnergy, type);
       count--;
     }
 

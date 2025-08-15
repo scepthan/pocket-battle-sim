@@ -7,8 +7,7 @@ import type {
   PokemonCard,
 } from "../gamelogic";
 import { PlayerAgent } from "../gamelogic";
-
-const rand = <T>(arr: T[]) => arr[(Math.random() * arr.length) | 0];
+import { randomElement as rand } from "../util";
 
 export class RandomAgent extends PlayerAgent {
   async setupPokemon(game: GameInitState) {

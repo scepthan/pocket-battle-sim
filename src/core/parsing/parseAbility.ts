@@ -5,6 +5,7 @@ import {
   type InPlayPokemonCard,
   type PlayerStatus,
 } from "../gamelogic";
+import { removeElement } from "../util";
 import type { InputCardAbility, ParsedResult } from "./types";
 
 interface AbilityTransformer {
@@ -246,7 +247,5 @@ const undoPlayerStatus =
 
     const owner = game.findOwner(pokemon);
     const player = isOpponent ? (owner == game.Player1 ? game.Player2 : game.Player1) : owner;
-    const index = player.PlayerStatuses.indexOf(status);
-    if (index === -1) return;
-    player.PlayerStatuses.splice(index, 1);
+    removeElement(player.PlayerStatuses, status);
   };

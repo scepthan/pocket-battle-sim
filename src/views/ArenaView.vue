@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { BetterRandomAgent, Game, RandomAgent, type DeckInfo } from "@/core";
+import { BetterRandomAgent, Game, RandomAgent, randomElement, type DeckInfo } from "@/core";
 import { useDeckStore, usePlayingCardStore } from "@/stores";
 import { onMounted, ref } from "vue";
 
@@ -85,8 +85,8 @@ onMounted(async () => {
     if (newGameCountdown > 0) return newGameCountdown--;
 
     newGameCountdown = 10;
-    const deck1 = playerDeck || deckNames[Math.floor(Math.random() * deckNames.length)];
-    const deck2 = opponentDeck || deckNames[Math.floor(Math.random() * deckNames.length)];
+    const deck1 = playerDeck || randomElement(deckNames);
+    const deck2 = opponentDeck || randomElement(deckNames);
 
     player.value = new BetterRandomAgent("Player", allDecks[deck1]);
     opponent.value = new BetterRandomAgent("Opponent", allDecks[deck2]);
