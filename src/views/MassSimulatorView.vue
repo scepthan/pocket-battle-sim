@@ -39,10 +39,8 @@ const deckStore = useDeckStore();
 const matchupRecords = reactive<Record<string, BattleRecord>>({});
 const overallRecords = reactive<Record<string, DeckRecord>>({});
 
-onMounted(async () => {
-  await deckStore.ensureDecksLoaded();
-
-  const allDecks = { ...deckStore.Decks.A1 };
+onMounted(() => {
+  const allDecks = deckStore.AllDecks;
 
   Object.keys(allDecks).forEach((deck) => {
     overallRecords[deck] = {
@@ -61,7 +59,7 @@ onMounted(async () => {
       matchup: BattleRecord;
       firstDeck: string;
       secondDeck: string;
-    }>,
+    }>
   ) => {
     console.log("Matchup complete:", event.data);
     const { matchup, firstDeck, secondDeck } = event.data;

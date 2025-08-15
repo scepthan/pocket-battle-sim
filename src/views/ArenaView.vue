@@ -3,75 +3,19 @@
 </template>
 
 <script setup lang="ts">
-import { BetterRandomAgent, Game, RandomAgent, randomElement, type DeckInfo } from "@/core";
+import { BetterRandomAgent, Game, RandomAgent, randomElement } from "@/core";
 import { useDeckStore, usePlayingCardStore } from "@/stores";
 import { onMounted, ref } from "vue";
 
 const cardStore = usePlayingCardStore();
 const deckStore = useDeckStore();
 
-const prebuiltDecks: Record<string, DeckInfo> = {
-  Celebi1: {
-    Cards: [
-      "A1a-004",
-      "A1a-004",
-      "A1a-005",
-      "A1a-005",
-      "A1a-009",
-      "A1a-070",
-      "A1a-070",
-      "A1a-075",
-      "A1a-085",
-      "PROMO-001",
-      "PROMO-002",
-      "PROMO-005",
-      "PROMO-005",
-      "PROMO-007",
-      "PROMO-007",
-      "A1-219",
-      "A1-219",
-      "A1-225",
-      "A1a-068",
-      "A1a-081",
-    ],
-    EnergyTypes: ["Grass"],
-  },
-  Alakazam1: {
-    Cards: [
-      "A1-115",
-      "A1-115",
-      "A1-130",
-      "A1-116",
-      "A1-116",
-      "A1-131",
-      "A1a-033",
-      "A1-132",
-      "A1-236",
-      "A1-236",
-      "PROMO-001",
-      "PROMO-002",
-      "PROMO-002",
-      "PROMO-005",
-      "PROMO-005",
-      "PROMO-007",
-      "PROMO-007",
-      "A1-223",
-      "A1-225",
-      "A1a-081",
-    ],
-    EnergyTypes: ["Psychic"],
-  },
-};
-
 const player = ref<RandomAgent>();
 const opponent = ref<RandomAgent>();
 const game = ref<Game>();
 
-onMounted(async () => {
-  await deckStore.ensureDecksLoaded();
-  const importedDecks = deckStore.Decks;
-
-  const allDecks = { ...importedDecks.A1, ...prebuiltDecks };
+onMounted(() => {
+  const allDecks = deckStore.AllDecks;
   const deckNames = Object.keys(allDecks) as (keyof typeof allDecks)[];
   let newGameCountdown = 0;
 

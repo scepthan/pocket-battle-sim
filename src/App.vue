@@ -14,9 +14,7 @@ const cardStore = usePlayingCardStore();
 const deckStore = useDeckStore();
 const debugMultiUseCards = false;
 
-onMounted(async () => {
-  await Promise.all([cardStore.loadCards(), deckStore.ensureDecksLoaded()]);
-
+onMounted(() => {
   const decklists = deckStore.Decks;
   const cards = cardStore.InputCards;
   const encounteredCards = new Set<string>();
@@ -74,21 +72,21 @@ onMounted(async () => {
   const unusedCards = uniqueCards.filter(
     (card) =>
       !Object.values(decklists).some((decks) =>
-        Object.values(decks).some((deck) => deck.Cards.includes(card.ID)),
-      ),
+        Object.values(decks).some((deck) => deck.Cards.includes(card.ID))
+      )
   );
 
   console.log(
     `Found ${unusedCards.length} unused cards:`,
-    unusedCards.map((card) => `${card.ID} (${card.Name})`).join("; "),
+    unusedCards.map((card) => `${card.ID} (${card.Name})`).join("; ")
   );
 
   if (debugMultiUseCards) {
     const multiUseCards = uniqueCards.filter(
       (card) =>
         Object.values(decklists).flatMap((decks) =>
-          Object.values(decks).filter((deck) => deck.Cards.includes(card.ID)),
-        ).length > 1,
+          Object.values(decks).filter((deck) => deck.Cards.includes(card.ID))
+        ).length > 1
     );
 
     console.log(
@@ -99,12 +97,12 @@ onMounted(async () => {
             `${card.ID} (${card.Name}): ${Object.entries(decklists)
               .flatMap(([setName, set]) =>
                 Object.entries(set).flatMap(([deckName, deck]) =>
-                  deck.Cards.includes(card.ID) ? `${deckName} (${setName})` : [],
-                ),
+                  deck.Cards.includes(card.ID) ? `${deckName} (${setName})` : []
+                )
               )
-              .join(", ")}`,
+              .join(", ")}`
         )
-        .join("\n"),
+        .join("\n")
     );
   }
 });

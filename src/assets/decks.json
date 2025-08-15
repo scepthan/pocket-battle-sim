@@ -1,5 +1,5 @@
 {
-    "A1": {
+    "A1 Official": {
         "Venusaur ex": {
             "Cards": ["A1-001", "A1-001", "A1-002", "A1-002", "A1-004", "A1-021", "A1-021", "A1-022", "A1-031", "A1-031", "A1-032", "A1-189", "A1-189", "A1-190", "A1-219", "PROMO-001", "PROMO-005", "PROMO-005", "PROMO-007", "PROMO-007"],
             "EnergyTypes": ["Grass"]
@@ -47,8 +47,9 @@
         "Kanto Fossils": {
             "Cards": ["A1-081", "A1-081", "A1-082", "A1-158", "A1-158", "A1-159", "A1-202", "A1-203", "A1-204", "A1-210", "A1-216", "A1-216", "A1-217", "A1-217", "A1-218", "A1-218", "PROMO-002", "PROMO-004", "PROMO-007", "PROMO-007"],
             "EnergyTypes": ["Water", "Fighting"]
-        },
-
+        }
+    },
+    "A1 Expanded": {
         "Butterfree & Beedrill": {
             "Cards": ["A1-005", "A1-005", "A1-006", "A1-006", "A1-007", "A1-008", "A1-008", "A1-009", "A1-009", "A1-010", "A1-021", "A1-021", "A1-022", "A1-025", "A1-219", "PROMO-001", "PROMO-005", "PROMO-005", "PROMO-007", "PROMO-007"],
             "EnergyTypes": ["Grass"]

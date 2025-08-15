@@ -1,7 +1,6 @@
-import inputCards from "@/assets/cards.json";
+import { cards as inputCards } from "@/assets";
 import type { PlayingCard } from "../gamelogic";
 import { parseCard } from "./parseCard";
-import type { InputCard } from "./types";
 
 const outputCards: Record<string, PlayingCard> = {};
 
@@ -11,16 +10,12 @@ export const parseDeck = (cardIds: string[]) => {
   for (const cardId of cardIds) {
     if (!(cardId in outputCards)) {
       const inputCard = inputCards.find((card) => card.ID == cardId);
-      if (inputCard) {
-        const card = parseCard(inputCard as InputCard).value;
-        if (card !== undefined) {
-          outputCards[cardId] = card;
-        } else {
-          throw new Error("Could not parse card with ID " + cardId);
-        }
-      } else {
-        throw new Error("Could not find card with ID " + cardId);
-      }
+      if (!inputCard) throw new Error("Could not find card with ID " + cardId);
+
+      const card = parseCard(inputCard).value;
+      if (card === undefined) throw new Error("Could not parse card with ID " + cardId);
+
+      outputCards[cardId] = card;
     }
 
     deck.push(Object.assign({}, outputCards[cardId]));

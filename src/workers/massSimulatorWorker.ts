@@ -1,4 +1,5 @@
-import { BetterRandomAgent, Game, type DeckInfo } from "@/core";
+import { allDecks } from "@/assets";
+import { BetterRandomAgent, Game } from "@/core";
 import type { BattleRecord } from "@/types";
 
 const newBattleRecord = (firstDeck: string, secondDeck: string) => ({
@@ -12,12 +13,6 @@ const newBattleRecord = (firstDeck: string, secondDeck: string) => ({
 
 const matchupRecords: Record<string, BattleRecord> = {};
 
-const importedDecks = (await import("@/assets/decks.json")).default as Record<
-  string,
-  Record<string, DeckInfo>
->;
-
-const allDecks = { ...importedDecks.A1 };
 const deckNames = Object.keys(allDecks) as string[];
 
 const timeLimit = 5 * 1e3;
