@@ -37,7 +37,10 @@
                 :current-energy="game?.Player2.AvailableEnergy"
                 :next-energy="game?.Player2.NextEnergy"
               />
-              <PlayerDeck :cards="game?.Player2.Deck ?? []" />
+              <PlayerDeck
+                :cards="game?.Player2.Deck.concat(game.Player2.Hand) ?? []"
+                :count="game?.Player2.Deck.length"
+              />
             </div>
             <PlayerHandHidden :cards="game?.Player2.Hand.length ?? 0" />
           </div>
@@ -49,7 +52,7 @@
           </div>
           <div class="d-flex flex-row align-end">
             <div class="d-flex flex-column align-center ga-2" style="width: 128px">
-              <PlayerDeck :cards="game?.Player1.Deck ?? []" />
+              <PlayerDeck :cards="game?.Player1.Deck.slice() ?? []" />
               <EnergyZone
                 class="ml-5"
                 :current-energy="game?.Player1.AvailableEnergy"
