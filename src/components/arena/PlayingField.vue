@@ -1,6 +1,6 @@
 <template>
   <v-container fluid>
-    <div class="d-flex" style="width: 1004px; height: 704px">
+    <div class="d-flex" style="width: 1056px; height: 704px">
       <div class="d-flex w-100 justify-center flex-row">
         <div class="d-flex flex-column align-center ga-2">
           <v-row no-gutters class="align-center ga-1">
@@ -30,17 +30,20 @@
 
         <div class="h-100 d-flex flex-column align-center justify-space-between">
           <div class="d-flex flex-row">
-            <div class="d-flex flex-column align-center ga-2" style="width: 128px">
+            <div class="d-flex flex-column align-center ga-2" style="width: 180px">
               <span>{{ game?.Player2.Name }}</span>
               <EnergyZone
                 class="ml-5"
                 :current-energy="game?.Player2.AvailableEnergy"
                 :next-energy="game?.Player2.NextEnergy"
               />
-              <PlayerDeck
-                :cards="game?.Player2.Deck.concat(game.Player2.Hand) ?? []"
-                :count="game?.Player2.Deck.length"
-              />
+              <div class="d-flex flex-row ga-2">
+                <PlayerDeck
+                  :cards="game?.Player2.Deck.concat(game.Player2.Hand) ?? []"
+                  :count="game?.Player2.Deck.length"
+                />
+                <PlayerDiscard :cards="game?.Player2.Discard.slice().reverse() ?? []" />
+              </div>
             </div>
             <PlayerHandHidden :cards="game?.Player2.Hand.length ?? 0" />
           </div>
@@ -51,8 +54,11 @@
             />
           </div>
           <div class="d-flex flex-row align-end">
-            <div class="d-flex flex-column align-center ga-2" style="width: 128px">
-              <PlayerDeck :cards="game?.Player1.Deck.slice() ?? []" />
+            <div class="d-flex flex-column align-center ga-2" style="width: 180px">
+              <div class="d-flex flex-row ga-2">
+                <PlayerDeck :cards="game?.Player1.Deck.slice() ?? []" />
+                <PlayerDiscard :cards="game?.Player1.Discard.slice().reverse() ?? []" />
+              </div>
               <EnergyZone
                 class="ml-5"
                 :current-energy="game?.Player1.AvailableEnergy"
@@ -74,6 +80,7 @@ import EnergyZone from "./EnergyZone.vue";
 import GameLog from "./GameLog.vue";
 import InPlayCardSlot from "./InPlayCardSlot.vue";
 import PlayerDeck from "./PlayerDeck.vue";
+import PlayerDiscard from "./PlayerDiscard.vue";
 import PlayerHandHidden from "./PlayerHandHidden.vue";
 import PlayerHandVisible from "./PlayerHandVisible.vue";
 

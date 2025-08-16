@@ -7,6 +7,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    CardDisplayDialog: typeof import('./src/components/arena/CardDisplayDialog.vue')['default']
     CardName: typeof import('./src/components/common/CardName.vue')['default']
     CardNameList: typeof import('./src/components/common/CardNameList.vue')['default']
     CountDisplay: typeof import('./src/components/common/CountDisplay.vue')['default']
@@ -16,6 +17,7 @@ declare module 'vue' {
     GameLog: typeof import('./src/components/arena/GameLog.vue')['default']
     InPlayCardSlot: typeof import('./src/components/arena/InPlayCardSlot.vue')['default']
     PlayerDeck: typeof import('./src/components/arena/PlayerDeck.vue')['default']
+    PlayerDiscard: typeof import('./src/components/arena/PlayerDiscard.vue')['default']
     PlayerHandHidden: typeof import('./src/components/arena/PlayerHandHidden.vue')['default']
     PlayerHandVisible: typeof import('./src/components/arena/PlayerHandVisible.vue')['default']
     PlayingCard: typeof import('./src/components/common/PlayingCard.vue')['default']
