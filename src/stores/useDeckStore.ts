@@ -7,7 +7,7 @@ export const useDeckStore = defineStore("decks", () => {
   const Decks = ref<DeckRecord>(decks);
   const AllDecks = ref<Record<string, DeckInfo>>(allDecks);
 
-  console.log("Decks loaded:", Object.keys(Decks.value).length);
+  console.log("Decks loaded:", Object.keys(AllDecks.value).length);
 
   return { Decks, AllDecks };
 });

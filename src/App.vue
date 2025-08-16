@@ -105,6 +105,12 @@ onMounted(() => {
         .join("\n")
     );
   }
+
+  for (const [deckName, deck] of Object.entries(deckStore.AllDecks)) {
+    if (deck.Cards.length !== 20) {
+      console.warn(`Deck "${deckName}" has ${deck.Cards.length} cards (expected 20).`);
+    }
+  }
 });
 </script>
 
