@@ -1,8 +1,14 @@
 <template>
   <div class="card-container">
-    <div v-for="(card, i) of cards" :key="i" class="hand-card">
-      <PlayingCard :height-px="200" />
-    </div>
+    <v-tooltip location="bottom" :text="String(cards)">
+      <template #activator="{ props }">
+        <div v-bind="props" class="d-inline-block">
+          <div v-for="(card, i) of cards" :key="i" class="hand-card">
+            <PlayingCard :height-px="200" />
+          </div>
+        </div>
+      </template>
+    </v-tooltip>
   </div>
 </template>
 
