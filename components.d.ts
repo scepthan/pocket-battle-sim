@@ -20,6 +20,8 @@ declare module 'vue' {
     PlayerDiscard: typeof import('./src/components/arena/PlayerDiscard.vue')['default']
     PlayerHandHidden: typeof import('./src/components/arena/PlayerHandHidden.vue')['default']
     PlayerHandVisible: typeof import('./src/components/arena/PlayerHandVisible.vue')['default']
+    PlayerInfo: typeof import('./src/components/arena/PlayerInfo.vue')['default']
+    PlayerPokemon: typeof import('./src/components/arena/PlayerPokemon.vue')['default']
     PlayingCard: typeof import('./src/components/common/PlayingCard.vue')['default']
     PlayingField: typeof import('./src/components/arena/PlayingField.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

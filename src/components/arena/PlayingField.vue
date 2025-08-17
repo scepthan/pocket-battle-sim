@@ -3,71 +3,20 @@
     <div class="d-flex" style="width: 1056px; height: 704px">
       <div class="d-flex w-100 justify-center flex-row">
         <div class="d-flex flex-column align-center ga-2">
-          <v-row no-gutters class="align-center ga-1">
-            <InPlayCardSlot
-              v-for="i in 3"
-              :key="i"
-              :card="game?.Player2.Bench[i - 1] ?? EmptyCardSlot.Bench(i - 1)"
-              :height-px="140"
-            />
-          </v-row>
-          <v-row no-gutters class="align-center">
-            <InPlayCardSlot :card="game?.Player2.ActivePokemon ?? EmptyCardSlot.Active()" />
-          </v-row>
+          <PlayerPokemon :player="game?.Player2" reverse />
 
-          <v-row no-gutters class="align-center">
-            <InPlayCardSlot :card="game?.Player1.ActivePokemon ?? EmptyCardSlot.Active()" />
-          </v-row>
-          <v-row no-gutters class="align-center ga-1">
-            <InPlayCardSlot
-              v-for="i in 3"
-              :key="i"
-              :card="game?.Player1.Bench[i - 1] ?? EmptyCardSlot.Bench(i - 1)"
-              :height-px="140"
-            />
-          </v-row>
+          <PlayerPokemon :player="game?.Player1" />
         </div>
 
         <div class="h-100 d-flex flex-column align-center justify-space-between">
-          <div class="d-flex flex-row">
-            <div class="d-flex flex-column align-center ga-2" style="width: 180px">
-              <span>{{ game?.Player2.Name }}</span>
-              <EnergyZone
-                class="ml-5"
-                :current-energy="game?.Player2.AvailableEnergy"
-                :next-energy="game?.Player2.NextEnergy"
-              />
-              <div class="d-flex flex-row ga-2">
-                <PlayerDeck
-                  :cards="game?.Player2.Deck.concat(game.Player2.Hand) ?? []"
-                  :count="game?.Player2.Deck.length"
-                />
-                <PlayerDiscard :cards="game?.Player2.Discard.slice().reverse() ?? []" />
-              </div>
-            </div>
-            <PlayerHandHidden :cards="game?.Player2.Hand.length ?? 0" />
-          </div>
+          <PlayerInfo :player="game?.Player2" reverse />
           <div class="flex-grow-1 w-100 d-flex flex-column-reverse overflow-y-auto">
             <GameLog
               :log-entries="game?.GameLog.entries ?? []"
               :shown-players="shownPlayers ?? []"
             />
           </div>
-          <div class="d-flex flex-row align-end">
-            <div class="d-flex flex-column align-center ga-2" style="width: 180px">
-              <div class="d-flex flex-row ga-2">
-                <PlayerDeck :cards="game?.Player1.Deck.slice() ?? []" />
-                <PlayerDiscard :cards="game?.Player1.Discard.slice().reverse() ?? []" />
-              </div>
-              <EnergyZone
-                class="ml-5"
-                :current-energy="game?.Player1.AvailableEnergy"
-                :next-energy="game?.Player1.NextEnergy"
-              />
-              <span>{{ game?.Player1.Name }}</span>
-            </div>
-            <PlayerHandVisible :cards="game?.Player1.Hand ?? []" />
-          </div>
+          <PlayerInfo :player="game?.Player1" hand-visible />
         </div>
       </div>
     </div>
@@ -75,14 +24,10 @@
 </template>
 
 <script setup lang="ts">
-import { EmptyCardSlot, type Game } from "@/core";
-import EnergyZone from "./EnergyZone.vue";
+import { type Game } from "@/core";
 import GameLog from "./GameLog.vue";
-import InPlayCardSlot from "./InPlayCardSlot.vue";
-import PlayerDeck from "./PlayerDeck.vue";
-import PlayerDiscard from "./PlayerDiscard.vue";
-import PlayerHandHidden from "./PlayerHandHidden.vue";
-import PlayerHandVisible from "./PlayerHandVisible.vue";
+import PlayerInfo from "./PlayerInfo.vue";
+import PlayerPokemon from "./PlayerPokemon.vue";
 
 export interface Props {
   game: Game | undefined;
