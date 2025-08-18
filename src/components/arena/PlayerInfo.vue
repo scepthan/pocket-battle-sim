@@ -6,7 +6,10 @@
       style="width: 180px"
     >
       <div class="d-flex flex-row ga-2">
-        <PlayerDeck :cards="player?.Deck.slice() ?? []" />
+        <PlayerDeck
+          :deck="player?.Deck.slice() ?? []"
+          :hand="handVisible ? undefined : player?.Hand.slice() ?? []"
+        />
         <PlayerDiscard :cards="player?.Discard.slice().reverse() ?? []" />
       </div>
       <EnergyZone
@@ -23,6 +26,11 @@
 
 <script setup lang="ts">
 import type { Player } from "@/core";
+import EnergyZone from "./EnergyZone.vue";
+import PlayerDeck from "./PlayerDeck.vue";
+import PlayerDiscard from "./PlayerDiscard.vue";
+import PlayerHandHidden from "./PlayerHandHidden.vue";
+import PlayerHandVisible from "./PlayerHandVisible.vue";
 
 export interface Props {
   player: Player | undefined;

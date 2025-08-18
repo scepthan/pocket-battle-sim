@@ -1,10 +1,10 @@
 <template>
   <v-dialog v-model="dialog" width="640">
     <template #activator="{ props: dialog }">
-      <v-tooltip location="center" :text="String(displayCount)">
+      <v-tooltip location="center" :text="String(deckSize)">
         <template #activator="{ props: tooltip }">
           <div v-bind="mergeProps(dialog, tooltip)" class="d-inline-block cursor-pointer">
-            <PlayingCard v-if="displayCount > 0" :height-px="100" />
+            <PlayingCard v-if="deckSize > 0" :height-px="100" />
             <InPlayCardSlot v-else :height-px="100" />
           </div>
         </template>
@@ -12,7 +12,7 @@
     </template>
 
     <CardDisplayDialog
-      :title="cards.length === displayCount ? 'Cards in Deck' : 'Cards in Deck and Hand'"
+      :title="`Cards in Deck (${deck.length})` + (hand ? ` and Hand (${hand.length})` : '')"
       :cards="sortedCards"
       @close="dialog = false"
     />
@@ -27,13 +27,15 @@ import CardDisplayDialog from "./CardDisplayDialog.vue";
 import InPlayCardSlot from "./InPlayCardSlot.vue";
 
 export interface Props {
-  cards: TPlayingCard[];
-  count?: number;
+  deck: TPlayingCard[];
+  hand?: TPlayingCard[];
 }
 const props = defineProps<Props>();
 
 const dialog = ref(false);
 
-const displayCount = computed(() => props.count ?? props.cards.length);
-const sortedCards = computed(() => props.cards.slice().sort((a, b) => a.ID.localeCompare(b.ID)));
+const deckSize = computed(() => props.deck.length);
+const sortedCards = computed(() =>
+  props.deck.concat(props.hand ?? []).sort((a, b) => a.ID.localeCompare(b.ID))
+);
 </script>
