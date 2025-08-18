@@ -11,10 +11,7 @@
         <div class="h-100 d-flex flex-column align-center justify-space-between">
           <PlayerInfo :player="game?.Player2" reverse />
           <div class="flex-grow-1 w-100 d-flex flex-column-reverse overflow-y-auto">
-            <GameLog
-              :log-entries="game?.GameLog.entries ?? []"
-              :shown-players="shownPlayers ?? []"
-            />
+            <GameLog :game-log="game?.GameLog" :shown-players="shownPlayers ?? []" />
           </div>
           <PlayerInfo :player="game?.Player1" hand-visible />
         </div>

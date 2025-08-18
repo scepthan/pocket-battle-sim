@@ -20,10 +20,16 @@ import type {
 const coinLog = (result: boolean) => (result ? "Heads" : "Tails");
 
 export class GameLogger {
-  entries: LoggedEvent[] = [];
+  turns: LoggedEvent[][] = [[]];
+  get currentTurn() {
+    return this.turns[0];
+  }
+  get entries() {
+    return this.turns.slice().reverse().flat();
+  }
 
   private addEntry(entry: LoggedEvent) {
-    this.entries.push(entry);
+    this.currentTurn.push(entry);
   }
 
   startGame(player1: Player, player2: Player) {
@@ -35,6 +41,7 @@ export class GameLogger {
   }
 
   nextTurn(turnNumber: number, attackingPlayer: Player, defendingPlayer: Player) {
+    this.turns.unshift([]);
     this.addEntry({
       type: "nextTurn",
       turnNumber,
