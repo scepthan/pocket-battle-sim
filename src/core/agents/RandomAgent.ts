@@ -75,8 +75,7 @@ export class RandomAgent extends PlayerAgent {
     if (game.canRetreat()) {
       if (
         game.retreatCostModifier < 0
-          ? (game.selfActive.RetreatCost ?? 0) + game.retreatCostModifier <= 0 ||
-            Math.random() < 0.5
+          ? game.selfActive.RetreatCost + game.retreatCostModifier <= 0 || Math.random() < 0.5
           : Math.random() < 0.125
       ) {
         const randomBench = rand(game.selfBenched);
@@ -106,7 +105,7 @@ export class RandomAgent extends PlayerAgent {
 
     // End turn with a random attack
     const attacks = [];
-    for (const attack of active.Attacks ?? []) {
+    for (const attack of active.Attacks) {
       if (game.canUseAttack(attack)) attacks.push(attack);
     }
     if (attacks.length > 0) {

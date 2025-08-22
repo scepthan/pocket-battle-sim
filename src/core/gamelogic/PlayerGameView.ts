@@ -253,7 +253,7 @@ export class PlayerGameView {
     await this.#game.delay();
 
     if (!energy) {
-      let retreatCost = this.selfActive.RetreatCost ?? 0;
+      let retreatCost = this.selfActive.RetreatCost;
       retreatCost += this.retreatCostModifier;
       if (retreatCost < 0) retreatCost = 0;
       energy = this.selfActive.AttachedEnergy.slice(0, retreatCost);
