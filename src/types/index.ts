@@ -1,2 +1,3 @@
 export type { BattleRecord } from "./BattleRecord";
-export type { MassSimulatorWorkerMessage } from "./MassSimulatorWorkerMessage";
+export type { MassSimulatorFromWorkerMessage } from "./MassSimulatorFromWorkerMessage";
+export type { MassSimulatorToWorkerMessage } from "./MassSimulatorToWorkerMessage";

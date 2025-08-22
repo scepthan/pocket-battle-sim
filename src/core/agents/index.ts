@@ -1,2 +1,2 @@
-export { BetterRandomAgent } from "./BetterRandomAgent";
+export * from "./BetterRandomAgent";
 export { RandomAgent } from "./RandomAgent";

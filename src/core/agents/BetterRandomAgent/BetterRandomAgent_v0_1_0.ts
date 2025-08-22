@@ -7,11 +7,11 @@ import type {
   PlayerGameView,
   PokemonCard,
   SupporterCard,
-} from "../gamelogic";
-import { PlayerAgent } from "../gamelogic";
-import { randomElement as rand, removeElement } from "../util";
+} from "../../gamelogic";
+import { PlayerAgent } from "../../gamelogic";
+import { randomElement as rand, removeElement } from "../../util";
 
-export class BetterRandomAgent extends PlayerAgent {
+export class BetterRandomAgent_v0_1_0 extends PlayerAgent {
   async setupPokemon(game: GameInitState) {
     const basicPokemon = game.hand.filter(
       (x) => x.CardType == "Pokemon" && x.Stage == 0

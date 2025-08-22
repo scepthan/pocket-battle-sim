@@ -22,9 +22,9 @@
 </template>
 
 <script setup lang="ts">
-import { allAgents } from "@/core";
+import { allAgents, removeElement } from "@/core";
 import { useDeckStore } from "@/stores";
-import type { BattleRecord, MassSimulatorWorkerMessage } from "@/types";
+import type { BattleRecord, MassSimulatorFromWorkerMessage } from "@/types";
 import { MassAgentSimulatorWorker, MassDeckSimulatorWorker } from "@/workers";
 import { onMounted, reactive, ref } from "vue";
 
@@ -43,10 +43,14 @@ const overallRecords = reactive<Record<string, DeckRecord>>({});
 const useAgents = ref(true);
 
 onMounted(() => {
-  const allEntrants = useAgents.value ? allAgents : deckStore.AllDecks;
+  const allEntrants = Object.keys(useAgents.value ? allAgents : deckStore.AllDecks);
 
-  Object.keys(allEntrants).forEach((deck) => {
-    overallRecords[deck] = {
+  if (useAgents.value) {
+    removeElement(allEntrants, "BetterRandomAgent");
+  }
+
+  allEntrants.forEach((entrant) => {
+    overallRecords[entrant] = {
       gamesPlayed: 0,
       wins: 0,
       losses: 0,
@@ -57,7 +61,7 @@ onMounted(() => {
   const worker = useAgents.value ? new MassAgentSimulatorWorker() : new MassDeckSimulatorWorker();
   const previousEvents: Record<string, BattleRecord> = {};
 
-  worker.onmessage = (event: MessageEvent<MassSimulatorWorkerMessage>) => {
+  worker.onmessage = (event: MessageEvent<MassSimulatorFromWorkerMessage>) => {
     const { matchup, firstDeck, secondDeck } = event.data;
 
     const matchupKey = `${firstDeck} v. ${secondDeck}`;
@@ -91,5 +95,10 @@ onMounted(() => {
     record2.losses += firstWins;
     record2.ties += ties;
   };
+
+  worker.postMessage({
+    type: "start",
+    entrants: allEntrants,
+  });
 });
 </script>

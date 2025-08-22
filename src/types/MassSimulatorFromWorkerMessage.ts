@@ -1,6 +1,6 @@
 import type { BattleRecord } from "./BattleRecord";
 
-export interface MassSimulatorWorkerMessage {
+export interface MassSimulatorFromWorkerMessage {
   type: "matchupProgress" | "matchupComplete";
   matchup: BattleRecord;
   firstDeck: string;
