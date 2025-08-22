@@ -127,7 +127,7 @@ export class RandomAgent extends PlayerAgent {
     return rand(options);
   }
   async viewCards() {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    //await new Promise((resolve) => setTimeout(resolve, 1000));
   }
   async distributeEnergy(pokemon: InPlayPokemonCard[], energy: Energy[]): Promise<Energy[][]> {
     const distribution: Energy[][] = pokemon.map(() => []);

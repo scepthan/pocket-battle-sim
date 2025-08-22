@@ -11,7 +11,7 @@
 
     <hr />
 
-    <v-row v-for="(record, matchup) in matchupRecords" :key="matchup">
+    <v-row v-for="[matchup, record] in Object.entries(matchupRecords).slice(-20)" :key="matchup">
       <v-col cols="4">{{ matchup }}</v-col>
       <v-col cols="2">{{ record.firstWins }}</v-col>
       <v-col cols="2">{{ record.secondWins }}</v-col>
@@ -22,10 +22,11 @@
 </template>
 
 <script setup lang="ts">
+import { allAgents } from "@/core";
 import { useDeckStore } from "@/stores";
-import type { BattleRecord } from "@/types";
-import MyWorker from "@/workers/massSimulatorWorker.ts?worker";
-import { onMounted, reactive } from "vue";
+import type { BattleRecord, MassSimulatorWorkerMessage } from "@/types";
+import { MassAgentSimulatorWorker, MassDeckSimulatorWorker } from "@/workers";
+import { onMounted, reactive, ref } from "vue";
 
 interface DeckRecord {
   gamesPlayed: number;
@@ -39,10 +40,12 @@ const deckStore = useDeckStore();
 const matchupRecords = reactive<Record<string, BattleRecord>>({});
 const overallRecords = reactive<Record<string, DeckRecord>>({});
 
-onMounted(() => {
-  const allDecks = deckStore.AllDecks;
+const useAgents = ref(true);
 
-  Object.keys(allDecks).forEach((deck) => {
+onMounted(() => {
+  const allEntrants = useAgents.value ? allAgents : deckStore.AllDecks;
+
+  Object.keys(allEntrants).forEach((deck) => {
     overallRecords[deck] = {
       gamesPlayed: 0,
       wins: 0,
@@ -51,33 +54,42 @@ onMounted(() => {
     };
   });
 
-  const worker = new MyWorker();
+  const worker = useAgents.value ? new MassAgentSimulatorWorker() : new MassDeckSimulatorWorker();
+  const previousEvents: Record<string, BattleRecord> = {};
 
-  worker.onmessage = (
-    event: MessageEvent<{
-      type: "matchupComplete";
-      matchup: BattleRecord;
-      firstDeck: string;
-      secondDeck: string;
-    }>
-  ) => {
-    console.log("Matchup complete:", event.data);
+  worker.onmessage = (event: MessageEvent<MassSimulatorWorkerMessage>) => {
     const { matchup, firstDeck, secondDeck } = event.data;
 
     const matchupKey = `${firstDeck} v. ${secondDeck}`;
     matchupRecords[matchupKey] = matchup;
 
+    let { gamesPlayed, firstWins, secondWins, ties } = matchup;
+
+    if (previousEvents[matchupKey]) {
+      const previousEvent = previousEvents[matchupKey];
+      gamesPlayed = matchup.gamesPlayed - previousEvent.gamesPlayed;
+      firstWins = matchup.firstWins - previousEvent.firstWins;
+      secondWins = matchup.secondWins - previousEvent.secondWins;
+      ties = matchup.ties - previousEvent.ties;
+    }
+
+    if (event.data.type === "matchupComplete") {
+      delete previousEvents[matchupKey];
+    } else if (event.data.type === "matchupProgress") {
+      previousEvents[matchupKey] = event.data.matchup;
+    }
+
     const record1 = overallRecords[firstDeck];
-    record1.gamesPlayed += matchup.gamesPlayed;
-    record1.wins += matchup.firstWins;
-    record1.losses += matchup.secondWins;
-    record1.ties += matchup.ties;
+    record1.gamesPlayed += gamesPlayed;
+    record1.wins += firstWins;
+    record1.losses += secondWins;
+    record1.ties += ties;
 
     const record2 = overallRecords[secondDeck];
-    record2.gamesPlayed += matchup.gamesPlayed;
-    record2.wins += matchup.secondWins;
-    record2.losses += matchup.firstWins;
-    record2.ties += matchup.ties;
+    record2.gamesPlayed += gamesPlayed;
+    record2.wins += secondWins;
+    record2.losses += firstWins;
+    record2.ties += ties;
   };
 });
 </script>
