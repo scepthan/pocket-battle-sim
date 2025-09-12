@@ -6,6 +6,7 @@ import {
   parseEnergy,
   type CardSlot,
   type PlayingCard,
+  type PokemonCard,
   type TrainerEffect,
 } from "../gamelogic";
 import type { ParsedResult } from "./types";
@@ -280,6 +281,27 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
           },
         };
       },
+    },
+    {
+      pattern: /^Put a Basic Pokémon from your opponent's discard pile onto their Bench.$/,
+      transform: () => ({
+        type: "Conditional",
+        condition: (game: Game) =>
+          game.DefendingPlayer.Bench.some((slot) => !slot.isPokemon) &&
+          game.DefendingPlayer.Discard.some(
+            (card) => card.CardType == "Pokemon" && card.Stage == 0
+          ),
+        effect: async (game: Game) => {
+          const benchIndex = game.DefendingPlayer.Bench.findIndex((slot) => !slot.isPokemon);
+          if (benchIndex < 0) return;
+          const validCards = game.DefendingPlayer.Discard.filter(
+            (card) => card.CardType == "Pokemon" && card.Stage == 0
+          ) as PokemonCard[];
+          const card = await game.choose(game.AttackingPlayer, validCards);
+          if (!card) return;
+          await game.DefendingPlayer.putPokemonOnBench(card, benchIndex, card);
+        },
+      }),
     },
   ];
 

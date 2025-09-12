@@ -26,9 +26,10 @@ Backend todo:
     - [x] Draw mon onto Bench
     - [x] Distribute energy among Benched mon
     - [x] Use opposing mon's attack
-  - [ ] A1a: 53/68 (77.9%)
+  - [ ] A1a: 54/68 (79.4%)
     - [ ] Confused
     - [ ] Burned
+    - [ ] Rework how multi-effect attacks are parsed (e.g. Volcarona)
 - [ ] Bring in newer sets
 - [x] Single battle simulation
 - [ ] Basic logic-based AI opponent (at least as competitive as Auto Mode)
