@@ -1,5 +1,5 @@
 <template>
-  <img class="energy-icon" :src="energyUrl" :title="energy" />
+  <img class="energy-icon d-block" :src="energyUrl" :title="energy" />
 </template>
 
 <script setup lang="ts">
