@@ -13,6 +13,8 @@ declare module 'vue' {
     CopyJsonButton: typeof import('./src/components/builder/CopyJsonButton.vue')['default']
     CountDisplay: typeof import('./src/components/common/CountDisplay.vue')['default']
     DeckBuilder: typeof import('./src/components/builder/DeckBuilder.vue')['default']
+    DeckDisplay: typeof import('./src/components/builder/DeckDisplay.vue')['default']
+    DeckPanel: typeof import('./src/components/builder/DeckPanel.vue')['default']
     EnergyIcon: typeof import('./src/components/common/EnergyIcon.vue')['default']
     EnergySelector: typeof import('./src/components/builder/EnergySelector.vue')['default']
     EnergyZone: typeof import('./src/components/arena/EnergyZone.vue')['default']
@@ -29,6 +31,7 @@ declare module 'vue' {
     ResetDeckButton: typeof import('./src/components/builder/ResetDeckButton.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SearchPanel: typeof import('./src/components/builder/SearchPanel.vue')['default']
     SelectableCard: typeof import('./src/components/builder/SelectableCard.vue')['default']
   }
 }
