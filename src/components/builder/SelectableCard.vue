@@ -1,7 +1,15 @@
 <template>
   <v-card :style="style">
-    <v-overlay :model-value="!selectable" contained />
-    <PlayingCard :card="card" v-on="$attrs" />
+    <v-overlay
+      persistent
+      :model-value="count > 0"
+      contained
+      scrim="white"
+      class="justify-center align-end"
+    >
+      <div class="px-4 py-2 bg-purple-darken-4 text-white">{{ count }}</div>
+    </v-overlay>
+    <PlayingCard :card="card" :height-px="height" v-on="$attrs" />
   </v-card>
 </template>
 
@@ -11,7 +19,7 @@ import { computed } from "vue";
 
 export interface Props {
   card: PlayingCard;
-  selectable: boolean;
+  count: number;
   heightPx?: number;
 }
 const props = defineProps<Props>();

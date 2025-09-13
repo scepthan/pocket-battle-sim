@@ -8,8 +8,9 @@
             <v-col v-for="(card, index) in row" :key="index" cols="2">
               <SelectableCard
                 :card="card"
-                :selectable="selectedCards.filter((x) => x.Name == card.Name).length < 2"
+                :count="selectedCards.filter((x) => x.ID == card.ID).length"
                 @click="() => cardClicked(card)"
+                @contextmenu.prevent="() => cardUnclicked(card)"
               />
             </v-col>
           </v-row>
@@ -18,6 +19,22 @@
     </v-col>
     <v-col cols="3">
       <div class="json-output">Cards: {{ selectedCards.length }}<br />{{ deckJson }}</div>
+
+      <v-row class="mb-2">
+        <v-col
+          v-for="(card, index) in selectedCards.filter((x, i, a) => a.indexOf(x) == i)"
+          :key="index"
+          cols="4"
+        >
+          <SelectableCard
+            :card="card"
+            :count="selectedCards.filter((x) => x.ID == card.ID).length"
+            :height-px="150"
+            @click="() => cardClicked(card)"
+            @contextmenu.prevent="() => cardUnclicked(card)"
+          />
+        </v-col>
+      </v-row>
     </v-col>
   </v-row>
 </template>
@@ -62,8 +79,14 @@ const deckJson = computed(
 const cardClicked = (card: PlayingCard) => {
   if (selectedCards.value.filter((x) => x.Name == card.Name).length < 2) {
     selectedCards.value.push(card);
-  } else if (selectedCards.value.includes(card)) {
-    selectedCards.value = selectedCards.value.filter((x) => x !== card);
+  }
+};
+const cardUnclicked = (card: PlayingCard) => {
+  if (selectedCards.value.includes(card)) {
+    selectedCards.value.splice(
+      selectedCards.value.findIndex((x) => x === card),
+      1
+    );
   }
 };
 </script>
