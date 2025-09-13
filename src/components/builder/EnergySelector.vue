@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="energyDialog" max-width="400px">
+  <v-dialog v-model="energyDialog" max-width="380px">
     <!-- Energy selector (can select up to 3) -->
     <template #activator="{ props }">
       <v-btn v-bind="props" class="rounded-pill">

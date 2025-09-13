@@ -40,7 +40,7 @@ const deckStore = useDeckStore();
 const matchupRecords = reactive<Record<string, BattleRecord>>({});
 const overallRecords = reactive<Record<string, DeckRecord>>({});
 
-const useAgents = ref(true);
+const useAgents = ref(false);
 
 onMounted(() => {
   const allEntrants = Object.keys(useAgents.value ? allAgents : deckStore.AllDecks);

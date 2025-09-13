@@ -10,7 +10,7 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn variant="elevated" color="error" @click="$emit('reset')">Yes, reset</v-btn>
+        <v-btn variant="elevated" color="error" @click="resetDeck()">Yes, reset</v-btn>
         <v-btn @click="resetDialogOpen = false">Cancel</v-btn>
       </v-card-actions>
     </v-card>
@@ -20,9 +20,14 @@
 <script setup lang="ts">
 import { ref } from "vue";
 
-defineEmits<{
+const emits = defineEmits<{
   (e: "reset"): void;
 }>();
 
 const resetDialogOpen = ref(false);
+
+const resetDeck = () => {
+  resetDialogOpen.value = false;
+  emits("reset");
+};
 </script>
