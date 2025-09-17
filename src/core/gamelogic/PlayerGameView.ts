@@ -179,7 +179,7 @@ export class PlayerGameView {
       if (!this.selfBenched.includes(pokemon)) return false;
     }
     if (ability.Conditions.includes("HasDamage")) {
-      if (pokemon.CurrentHP == pokemon.BaseHP) return false;
+      if (!pokemon.isDamaged()) return false;
     }
     return true;
   }

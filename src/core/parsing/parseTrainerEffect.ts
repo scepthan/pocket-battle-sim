@@ -153,7 +153,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         type: "Targeted",
         validTargets: (game: Game) => {
           let validPokemon = game.AttackingPlayer.InPlayPokemon;
-          validPokemon = validPokemon.filter((pokemon) => pokemon.CurrentHP < pokemon.BaseHP);
+          validPokemon = validPokemon.filter((pokemon) => pokemon.isDamaged());
           if (isEnergyShort(type))
             validPokemon = validPokemon.filter((x) => x.Type == parseEnergy(type));
           return validPokemon;

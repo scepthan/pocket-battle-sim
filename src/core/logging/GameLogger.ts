@@ -257,7 +257,7 @@ export class GameLogger {
       initialHP: initialHP,
       damageDealt: damage,
       finalHP: pokemon.CurrentHP,
-      maxHP: pokemon.BaseHP,
+      maxHP: pokemon.MaxHP,
     });
   }
 
@@ -368,7 +368,7 @@ export class GameLogger {
       damageDealt,
       initialHP,
       finalHP: pokemon.CurrentHP,
-      maxHP: pokemon.BaseHP,
+      maxHP: pokemon.MaxHP,
       weaknessBoost,
     });
   }
@@ -381,7 +381,7 @@ export class GameLogger {
       initialHP,
       healingDealt: HP,
       finalHP: pokemon.CurrentHP,
-      maxHP: pokemon.BaseHP,
+      maxHP: pokemon.MaxHP,
     });
   }
 

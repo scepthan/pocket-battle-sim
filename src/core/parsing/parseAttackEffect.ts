@@ -93,8 +93,7 @@ export const parseAttackEffect = (
 
         return async (game: Game) => {
           const active = game.DefendingPlayer.activeOrThrow();
-          // TODO: need to implement a separate "MaxHP" property for capes
-          if (active.CurrentHP < active.BaseHP) await conditionalEffect(game);
+          if (active.isDamaged()) await conditionalEffect(game);
           else await defaultEffect(game);
         };
       },
@@ -106,7 +105,7 @@ export const parseAttackEffect = (
 
         return async (game: Game) => {
           const active = game.AttackingPlayer.activeOrThrow();
-          if (active.CurrentHP < active.BaseHP) await conditionalEffect(game);
+          if (active.isDamaged()) await conditionalEffect(game);
           else await defaultEffect(game);
         };
       },
@@ -307,6 +306,15 @@ export const parseAttackEffect = (
       transform: () => async (game: Game) => {
         const damageDealt = game.attackActivePokemon(baseAttackHP);
         game.healPokemon(game.AttackingPlayer.activeOrThrow(), damageDealt);
+      },
+    },
+    {
+      pattern: /^Heal (\d+) damage from each of your Pokémon\.$/,
+      transform: (_, HP) => async (game: Game) => {
+        await defaultEffect(game);
+        for (const pokemon of game.AttackingPlayer.InPlayPokemon) {
+          if (pokemon.isDamaged()) game.healPokemon(pokemon, Number(HP));
+        }
       },
     },
 

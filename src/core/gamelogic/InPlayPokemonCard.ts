@@ -27,6 +27,7 @@ export class InPlayPokemonCard {
   Ability?: Ability;
 
   CurrentHP: number;
+  MaxHP: number;
   PrimaryCondition?: PrimaryCondition;
   SecondaryConditions: Set<SecondaryCondition> = new Set();
   get CurrentConditions() {
@@ -58,13 +59,16 @@ export class InPlayPokemonCard {
     this.Ability = inputCard.Ability;
 
     this.CurrentHP = this.BaseHP;
+    this.MaxHP = this.BaseHP;
   }
 
   evolveInto(inputCard: PokemonCard) {
     this.BaseCard = inputCard;
     this.InPlayCards.push(inputCard);
 
-    this.CurrentHP += inputCard.BaseHP - this.BaseHP;
+    const hpIncrease = inputCard.BaseHP - this.BaseHP;
+    this.CurrentHP += hpIncrease;
+    this.MaxHP += hpIncrease;
 
     this.ID = inputCard.ID;
     this.Name = inputCard.Name;
@@ -78,6 +82,10 @@ export class InPlayPokemonCard {
     this.Ability = inputCard.Ability;
   }
 
+  isDamaged() {
+    return this.CurrentHP < this.MaxHP;
+  }
+
   applyDamage(HP: number) {
     this.CurrentHP -= HP;
     if (this.CurrentHP < 0) this.CurrentHP = 0;
@@ -85,7 +93,7 @@ export class InPlayPokemonCard {
 
   healDamage(HP: number) {
     this.CurrentHP += HP;
-    if (this.CurrentHP > this.BaseHP) this.CurrentHP = this.BaseHP;
+    if (this.CurrentHP > this.MaxHP) this.CurrentHP = this.MaxHP;
   }
 
   attachEnergy(energy: Energy[]) {

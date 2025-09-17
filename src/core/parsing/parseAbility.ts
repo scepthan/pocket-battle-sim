@@ -128,7 +128,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       transform: (_, healing) => {
         ability.Effect = async (game: Game) => {
           for (const pokemon of game.AttackingPlayer.InPlayPokemon) {
-            if (pokemon.CurrentHP < pokemon.BaseHP) {
+            if (pokemon.isDamaged()) {
               game.healPokemon(pokemon, Number(healing));
             }
           }
