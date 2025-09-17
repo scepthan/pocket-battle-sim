@@ -222,6 +222,17 @@ export const parseAttackEffect = (
     },
     {
       pattern:
+        /^This attack does (\d+)( more)? damage for each of your opponent's Benched Pokémon\.$/i,
+      transform: (_, damagePerBench, more) => {
+        return async (game: Game) => {
+          let totalDamage = more ? baseAttackHP : 0;
+          totalDamage += game.DefendingPlayer.BenchedPokemon.length * Number(damagePerBench);
+          game.attackActivePokemon(totalDamage);
+        };
+      },
+    },
+    {
+      pattern:
         /^1 of your opponent's Pokémon is chosen at random (\d+) times\. For each time a Pokémon was chosen, do (\d+) damage to it\.$/i,
       transform: (_, times, damage) => async (game: Game) => {
         const damages = game.DefendingPlayer.InPlayPokemon.map(() => ({ damage: 0 }));
