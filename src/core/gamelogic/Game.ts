@@ -387,6 +387,15 @@ export class Game {
 
   // Methods to cover any action a player can take and execute the proper follow-up effects
   async useAttack(attack: Attack) {
+    const attacker = this.AttackingPlayer.activeOrThrow();
+    if (attacker.PokemonStatuses.some((status) => status.type === "CoinFlipToAttack")) {
+      if (!this.AttackingPlayer.flipCoin()) {
+        this.GameLog.attackFailed(this.AttackingPlayer);
+        this.endTurnResolve(true);
+        return;
+      }
+    }
+
     this.GameLog.useAttack(this.AttackingPlayer, attack.Name);
 
     this.CurrentlyAttacking = true;

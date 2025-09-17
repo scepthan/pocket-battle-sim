@@ -24,6 +24,9 @@ export interface CounterAttackPokemonStatus extends BasePokemonStatus {
   type: "CounterAttack";
   amount: number;
 }
+export interface CoinFlipToAttackPokemonStatus extends BasePokemonStatus {
+  type: "CoinFlipToAttack";
+}
 
 export type PokemonStatus =
   | CannotAttackPokemonStatus
@@ -31,4 +34,5 @@ export type PokemonStatus =
   | ReduceDamagePokemonStatus
   | PreventDamagePokemonStatus
   | ReduceAttackPokemonStatus
-  | CounterAttackPokemonStatus;
+  | CounterAttackPokemonStatus
+  | CoinFlipToAttackPokemonStatus;

@@ -369,10 +369,7 @@ export const parseAttackEffect = (
           }
 
           const card = game.AttackingPlayer.drawRandomFiltered(predicate);
-          if (card === undefined) {
-            game.GameLog.noValidCards(game.AttackingPlayer);
-            return;
-          }
+          if (card === undefined) return;
 
           await game.AttackingPlayer.putPokemonOnBench(card as PokemonCard, benchSlot.index);
         };
@@ -623,6 +620,19 @@ export const parseAttackEffect = (
           type: "CannotUseSupporter",
           source: "Effect",
           category: "GameRule",
+          keepNextTurn: true,
+        });
+      },
+    },
+    {
+      pattern:
+        /^During your opponent's next turn, if the Defending Pokémon tries to use an attack, your opponent flips a coin. If tails, that attack doesn't happen.$/i,
+      transform: () => async (game: Game) => {
+        await defaultEffect(game);
+        game.DefendingPlayer.applyActivePokemonStatus({
+          type: "CoinFlipToAttack",
+          source: "Effect",
+          condition: "none",
           keepNextTurn: true,
         });
       },
