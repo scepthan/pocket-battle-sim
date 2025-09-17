@@ -303,6 +303,30 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         },
       }),
     },
+    {
+      pattern:
+        /^Look at the top card of your deck. If that card is a {(\w)} Pokémon, put it into your hand. If it is not a {\1} Pokémon, put it on the bottom of your deck.$/i,
+      transform: (_, type) => {
+        const fullType = parseEnergy(type);
+
+        return {
+          type: "Conditional",
+          condition: (game: Game) => game.AttackingPlayer.Deck.length > 0,
+          effect: async (game: Game) => {
+            const topCard = game.AttackingPlayer.Deck.shift()!;
+            await game.showCards(game.AttackingPlayer, [topCard]);
+
+            if (topCard.CardType == "Pokemon" && topCard.Type == fullType) {
+              game.AttackingPlayer.Hand.push(topCard);
+              game.GameLog.putIntoHand(game.AttackingPlayer, [topCard]);
+            } else {
+              game.AttackingPlayer.Deck.push(topCard);
+              game.GameLog.returnToBottomOfDeck(game.AttackingPlayer, [topCard]);
+            }
+          },
+        };
+      },
+    },
   ];
 
   for (const { pattern, transform } of dictionary) {

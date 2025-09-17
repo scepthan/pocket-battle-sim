@@ -127,6 +127,14 @@ export class GameLogger {
     });
   }
 
+  putIntoHand(player: Player, cards: PlayingCard[]) {
+    this.addEntry({
+      type: "putIntoHand",
+      player: player.Name,
+      cardIds: cards.map((card) => card.ID),
+    });
+  }
+
   drawRandomFiltered(player: Player, card?: PlayingCard) {
     const success = card !== undefined;
     this.addEntry({
@@ -188,6 +196,14 @@ export class GameLogger {
       player: player.Name,
       source: "inPlay",
       cardIds: pokemon.InPlayCards.map((card) => card.ID),
+    });
+  }
+
+  returnToBottomOfDeck(player: Player, cards: PlayingCard[]) {
+    this.addEntry({
+      type: "returnToBottomOfDeck",
+      player: player.Name,
+      cardIds: cards.map((card) => card.ID),
     });
   }
 

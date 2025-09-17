@@ -26,7 +26,7 @@ Backend todo:
     - [x] Draw mon onto Bench
     - [x] Distribute energy among Benched mon
     - [x] Use opposing mon's attack
-  - [ ] A1a: 63/68 (92.6%)
+  - [ ] A1a: 64/68 (94.1%)
     - [x] Put opponent mon from Discard back onto Bench
     - [x] Copy attack without energy requirement
     - [x] Extra damage if ex
@@ -36,11 +36,11 @@ Backend todo:
     - [x] Discard random Energy from among field
     - [x] Ability to move Energy between mon
     - [x] Heal all mon
+    - [x] Draw mon if on top of deck
     - [ ] Energy-doubling Ability
     - [ ] Rework how multi-effect attacks are parsed (e.g. Volcarona)
     - [ ] Evolution-blocking Ability
     - [ ] Coin flip to attack effect
-    - [ ] Draw mon if on top of deck
   - [ ] A2
     - [ ] Confused
     - [ ] Burned

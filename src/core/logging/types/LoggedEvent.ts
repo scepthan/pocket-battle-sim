@@ -69,6 +69,11 @@ interface DrawToHandEvent {
   success: boolean;
   failureReason?: "handFull" | "deckEmpty" | "noValidCards";
 }
+interface PutIntoHandEvent {
+  type: "putIntoHand";
+  player: string;
+  cardIds: string[];
+}
 interface PlayToActiveEvent {
   type: "playToActive";
   player: string;
@@ -103,6 +108,11 @@ interface ReturnToDeckEvent {
   type: "returnToDeck";
   player: string;
   source: "hand" | "inPlay" | "discard";
+  cardIds: string[];
+}
+interface ReturnToBottomOfDeckEvent {
+  type: "returnToBottomOfDeck";
+  player: string;
   cardIds: string[];
 }
 interface ShuffleDeckEvent {
@@ -297,12 +307,14 @@ export type LoggedEvent =
   | ActionFailedEvent
   | TurnErrorEvent
   | DrawToHandEvent
+  | PutIntoHandEvent
   | PlayToActiveEvent
   | PlayToBenchEvent
   | PlayTrainerEvent
   | DiscardCardsEvent
   | ReturnToHandEvent
   | ReturnToDeckEvent
+  | ReturnToBottomOfDeckEvent
   | ShuffleDeckEvent
   | SwapActivePokemonEvent
   | SelectActivePokemonEvent

@@ -38,6 +38,13 @@
           <span v-else> hand. </span>
         </p>
 
+        <p v-else-if="entry.type == 'putIntoHand'">
+          <b>{{ entry.player }}</b> puts <CountDisplay :count="entry.cardIds" single="card" /> into
+          their hand<span v-if="shownPlayers.includes(entry.player)"
+            >: <CardNameList :card-ids="entry.cardIds" /> </span
+          >.
+        </p>
+
         <div v-else-if="entry.type == 'playToActive'">
           <p>
             <b>{{ entry.player }}</b> chooses <CardName :card-id="entry.cardId" /> as their Active
@@ -322,6 +329,16 @@
             <b>{{ entry.player }}</b
             >'s {{ entry.type == "returnToHand" ? "hand" : "deck"
             }}<span v-if="entry.source == 'inPlay' || shownPlayers.includes(entry.player)"
+              >: <CardNameList :card-ids="entry.cardIds" /> </span
+            >.
+          </p>
+        </div>
+
+        <div v-else-if="entry.type == 'returnToBottomOfDeck'">
+          <p>
+            <CountDisplay :count="entry.cardIds" single="card" /> returned to bottom of
+            <b>{{ entry.player }}</b
+            >'s deck<span v-if="shownPlayers.includes(entry.player)"
               >: <CardNameList :card-ids="entry.cardIds" /> </span
             >.
           </p>
