@@ -294,6 +294,15 @@ export const parseAttackEffect = (
       },
     },
     {
+      pattern:
+        /^Shuffle your hand into your deck. Draw a card for each card in your opponent's hand.$/i,
+      transform: () => async (game: Game) => {
+        await defaultEffect(game);
+        game.AttackingPlayer.shuffleHandIntoDeck();
+        game.drawCards(game.DefendingPlayer.Hand.length);
+      },
+    },
+    {
       pattern: /^Put 1 random(?: \{(\w)\})? Pokémon from your deck into your hand\.$/i,
       transform: (_, type) => {
         const e = type ? parseEnergy(type) : undefined;
