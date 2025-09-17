@@ -379,11 +379,12 @@ export class GameLogger {
     });
   }
 
-  pokemonKnockedOut(player: Player, pokemon: InPlayPokemonCard) {
+  pokemonKnockedOut(player: Player, pokemon: InPlayPokemonCard, fromAttack: boolean) {
     this.addEntry({
       type: "pokemonKnockedOut",
       player: player.Name,
       targetPokemon: player.pokemonToDescriptor(pokemon),
+      fromAttack,
     });
   }
 

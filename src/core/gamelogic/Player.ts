@@ -477,8 +477,8 @@ export class Player {
     this.discardEnergy(pokemon.AttachedEnergy, "removedFromField");
   }
 
-  async knockOutPokemon(pokemon: InPlayPokemonCard) {
-    this.logger.pokemonKnockedOut(this, pokemon);
+  async knockOutPokemon(pokemon: InPlayPokemonCard, fromAttack: boolean) {
+    this.logger.pokemonKnockedOut(this, pokemon, fromAttack);
 
     for (const card of pokemon.InPlayCards) {
       if (!this.InPlay.includes(card)) console.log("Card not in play:", card);

@@ -36,6 +36,7 @@ export class Game {
   CurrentlyAttacking: boolean = false;
   UsedAbilities: Set<InPlayPokemonCard> = new Set();
   AttackDamagedPokemon: Set<InPlayPokemonCard> = new Set();
+  AttackKnockedOutPokemon: Set<InPlayPokemonCard> = new Set();
 
   GameRules: GameRules = {
     DeckSize: 20,
@@ -153,6 +154,7 @@ export class Game {
     this.CanPlaySupporter = true;
     this.UsedAbilities = new Set();
     this.AttackDamagedPokemon = new Set();
+    this.AttackKnockedOutPokemon = new Set();
     if (this.TurnNumber > 2) {
       for (const pokemon of this.AttackingPlayer.InPlayPokemon) {
         pokemon.ReadyToEvolve = true;
@@ -314,7 +316,8 @@ export class Game {
     for (const player of [this.DefendingPlayer, this.AttackingPlayer]) {
       for (const pokemon of player.InPlayPokemon) {
         if (pokemon.CurrentHP <= 0) {
-          await this.knockOutPokemon(player, pokemon);
+          const fromAttack = this.AttackKnockedOutPokemon.has(pokemon);
+          await this.knockOutPokemon(player, pokemon, fromAttack);
         }
       }
     }
@@ -549,6 +552,9 @@ export class Game {
 
     if (totalDamage > 0) {
       this.AttackDamagedPokemon.add(defender);
+      if (defender.CurrentHP <= 0) {
+        this.AttackKnockedOutPokemon.add(defender);
+      }
     }
 
     return totalDamage;
@@ -563,12 +569,12 @@ export class Game {
     this.GameLog.pokemonDamaged(owner, target, initialHP, HP, fromAttack);
   }
 
-  async knockOutPokemon(player: Player, pokemon: InPlayPokemonCard) {
-    if (this.shouldPreventDamage(pokemon)) {
+  async knockOutPokemon(player: Player, pokemon: InPlayPokemonCard, fromAttack: boolean) {
+    if (pokemon.CurrentHP > 0 && this.shouldPreventDamage(pokemon)) {
       this.GameLog.damagePrevented(player, pokemon);
       return;
     }
-    await player.knockOutPokemon(pokemon);
+    await player.knockOutPokemon(pokemon, fromAttack);
 
     const opposingPlayer = player == this.Player1 ? this.Player2 : this.Player1;
     opposingPlayer.GamePoints += pokemon.PrizePoints;

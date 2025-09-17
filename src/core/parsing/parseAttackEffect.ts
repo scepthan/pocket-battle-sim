@@ -134,6 +134,19 @@ export const parseAttackEffect = (
         };
       },
     },
+    {
+      pattern:
+        /^If any of your Pokémon were knocked out by damage from an attack during your opponent's last turn, (.+?\.)$/i,
+      transform: (_, effectText) => {
+        const conditionalEffect = recursiveParse(effectText);
+
+        return async (game: Game) => {
+          if (game.GameLog.turns[1]?.some((e) => e.type == "pokemonKnockedOut" && e.fromAttack))
+            await conditionalEffect(game);
+          else await defaultEffect(game);
+        };
+      },
+    },
 
     // Damage-determining effects
     {

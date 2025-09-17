@@ -208,6 +208,7 @@ interface PokemonKnockedOutEvent {
   type: "pokemonKnockedOut";
   player: string;
   targetPokemon: InPlayPokemonDescriptor;
+  fromAttack: boolean;
 }
 interface PokemonHealedEvent {
   type: "pokemonHealed";
