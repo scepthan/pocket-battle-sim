@@ -122,6 +122,18 @@ export const parseAttackEffect = (
         };
       },
     },
+    {
+      pattern: /^If your opponent's Active Pokémon is a Pokémon ex, (.+?\.)$/i,
+      transform: (_, effectText) => {
+        const conditionalEffect = recursiveParse(effectText);
+
+        return async (game: Game) => {
+          const defender = game.DefendingPlayer.activeOrThrow();
+          if (defender.Name.endsWith(" ex")) await conditionalEffect(game);
+          else await defaultEffect(game);
+        };
+      },
+    },
 
     // Damage-determining effects
     {
