@@ -1,5 +1,5 @@
 <template>
-  <img class="energy-icon d-block" :src="energyUrl" :title="energy" />
+  <img :class="classList" :src="energyUrl" :title="energy" />
 </template>
 
 <script setup lang="ts">
@@ -9,9 +9,17 @@ import { computed } from "vue";
 
 export interface Props {
   energy: Energy;
+  inline?: boolean;
 }
 
 const props = defineProps<Props>();
+const classList = computed(() => {
+  return {
+    "energy-icon": true,
+    "d-inline": !!props.inline,
+    "d-block": !props.inline,
+  };
+});
 
 const energyUrl = computed(() => Energies[props.energy]);
 </script>

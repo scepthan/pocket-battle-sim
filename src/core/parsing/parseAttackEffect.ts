@@ -558,12 +558,11 @@ export const parseAttackEffect = (
     // Miscellaneous
     {
       pattern:
-        /^Choose 1 of your opponent's Pokémon's attacks and use it as this attack\. If this Pokémon doesn't have the necessary Energy to use that attack, this attack does nothing\.$/i,
-      transform: () => async (game: Game) => {
-        const chosenPokemon = await game.choosePokemon(
-          game.AttackingPlayer,
-          game.DefendingPlayer.InPlayPokemon
-        );
+        /^Choose 1 of your opponent's( Active)? Pokémon's attacks and use it as this attack\.( If this Pokémon doesn't have the necessary Energy to use that attack, this attack does nothing\.)?$/i,
+      transform: (_, active, energyRequired) => async (game: Game) => {
+        const chosenPokemon = active
+          ? game.DefendingPlayer.activeOrThrow()
+          : await game.choosePokemon(game.AttackingPlayer, game.DefendingPlayer.InPlayPokemon);
         if (!chosenPokemon) {
           game.GameLog.attackFailed(game.AttackingPlayer);
           return;
@@ -574,13 +573,15 @@ export const parseAttackEffect = (
           return;
         }
         game.GameLog.copyAttack(game.AttackingPlayer, chosenAttack.Name);
-        if (
-          game.AttackingPlayer.activeOrThrow().hasSufficientEnergy(chosenAttack.RequiredEnergy) &&
-          !chosenAttack.Text?.includes("use it as this attack")
-        ) {
-          await game.useEffect(chosenAttack.Effect);
-        } else {
+        let attackFailed = chosenAttack.Text?.includes("use it as this attack");
+        if (energyRequired) {
+          const active = game.AttackingPlayer.activeOrThrow();
+          if (!active.hasSufficientEnergy(chosenAttack.RequiredEnergy)) attackFailed = true;
+        }
+        if (attackFailed) {
           game.GameLog.attackFailed(game.AttackingPlayer);
+        } else {
+          await game.useEffect(chosenAttack.Effect);
         }
       },
     },

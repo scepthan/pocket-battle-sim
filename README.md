@@ -26,10 +26,33 @@ Backend todo:
     - [x] Draw mon onto Bench
     - [x] Distribute energy among Benched mon
     - [x] Use opposing mon's attack
-  - [ ] A1a: 54/68 (79.4%)
+  - [ ] A1a: 55/68 (80.8%)
+    - [x] Put opponent mon from Discard back onto Bench
+    - [x] Copy attack without energy requirement
+    - [ ] Energy-doubling Ability
+    - [ ] Rework how multi-effect attacks are parsed (e.g. Volcarona)
+    - [ ] Discard random Energy
+    - [ ] Ability to move Energy between mon
+    - [ ] Evolution-blocking Ability
+    - [ ] Extra damage if mon knocked out from attack
+    - [ ] Coin flip to attack effect
+    - [ ] Extra damage per opponent's Benched mon
+    - [ ] Extra damage if ex
+    - [ ] Redraw hand
+    - [ ] Draw mon if on top of deck
+  - [ ] A2
     - [ ] Confused
     - [ ] Burned
-    - [ ] Rework how multi-effect attacks are parsed (e.g. Volcarona)
+    - [ ] Pokémon Tools
+  - [ ] A2a
+  - [ ] A2b
+  - [ ] A3
+  - [ ] A3a
+    - [ ] Ultra Beasts
+  - [ ] A3b
+  - [ ] A4
+    - [ ] Baby Pokémon (0-cost attacks)
+  - [ ] A4a
 - [ ] Bring in newer sets
 - [x] Single battle simulation
 - [ ] Basic logic-based AI opponent (at least as competitive as Auto Mode)

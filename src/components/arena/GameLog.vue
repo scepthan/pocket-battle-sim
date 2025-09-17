@@ -73,7 +73,7 @@
               Energy attached to
               <CardName :card-id="entry.targetPokemon.cardId" />:
             </span>
-            <EnergyIcon v-for="(energy, i) in entry.energyTypes" :key="i" :energy="energy" />
+            <EnergyIcon v-for="(energy, i) in entry.energyTypes" :key="i" inline :energy="energy" />
           </p>
         </div>
 
@@ -81,22 +81,22 @@
           <p v-if="entry.currentEnergy == 'none'">
             Next energy for <b>{{ entry.player }}</b
             >:
-            <EnergyIcon :energy="entry.nextEnergy" />
+            <EnergyIcon inline :energy="entry.nextEnergy" />
           </p>
           <p v-else>
-            Energy generated: <EnergyIcon :energy="entry.currentEnergy" /> (Next:
-            <EnergyIcon :energy="entry.nextEnergy" />)
+            Energy generated: <EnergyIcon inline :energy="entry.currentEnergy" /> (Next:
+            <EnergyIcon inline :energy="entry.nextEnergy" />)
           </p>
         </div>
 
         <div v-else-if="entry.type == 'discardEnergy'">
           <p v-if="entry.source == 'energyZone'">
             <b>{{ entry.player }}</b> discards an energy from their energy zone:
-            <EnergyIcon :energy="entry.energyTypes[0]" />
+            <EnergyIcon inline :energy="entry.energyTypes[0]" />
           </p>
           <p v-else-if="entry.energyTypes.length > 0">
             Energy discarded:
-            <EnergyIcon v-for="(energy, i) in entry.energyTypes" :key="i" :energy="energy" />
+            <EnergyIcon v-for="(energy, i) in entry.energyTypes" :key="i" inline :energy="energy" />
           </p>
           <p v-else>No energy could be discarded.</p>
         </div>
