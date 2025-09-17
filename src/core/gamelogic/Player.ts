@@ -329,15 +329,15 @@ export class Player {
       discarded.push(removeElement(energies, energy));
     }
 
-    this.discardEnergy(discarded, "effect");
+    this.discardEnergy(discarded, "effect", pokemon);
   }
 
-  discardEnergy(energies: Energy[], source: DiscardEnergySource) {
+  discardEnergy(energies: Energy[], source: DiscardEnergySource, pokemon?: InPlayPokemonCard) {
     if (energies.length == 0) return;
 
     this.DiscardedEnergy.push(...energies);
 
-    this.logger.discardEnergy(this, energies, source);
+    this.logger.discardEnergy(this, energies, source, pokemon);
   }
 
   activeOrThrow(): InPlayPokemonCard {
@@ -384,7 +384,7 @@ export class Player {
     currentActive.AttachedEnergy = previousEnergy;
 
     await this.swapActivePokemon(newActive, "retreat");
-    this.discardEnergy(discardedEnergy, "retreat");
+    this.discardEnergy(discardedEnergy, "retreat", currentActive);
   }
 
   async swapActivePokemon(

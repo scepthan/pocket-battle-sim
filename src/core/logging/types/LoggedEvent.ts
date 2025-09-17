@@ -162,6 +162,7 @@ interface DiscardEnergyEvent {
   type: "discardEnergy";
   player: string;
   source: DiscardEnergySource;
+  targetPokemon?: InPlayPokemonDescriptor;
   energyTypes: Energy[];
 }
 

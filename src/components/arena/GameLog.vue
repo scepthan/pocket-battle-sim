@@ -90,15 +90,17 @@
         </div>
 
         <div v-else-if="entry.type == 'discardEnergy'">
-          <p v-if="entry.source == 'energyZone'">
-            <b>{{ entry.player }}</b> discards an energy from their energy zone:
-            <EnergyIcon inline :energy="entry.energyTypes[0]" />
-          </p>
-          <p v-else-if="entry.energyTypes.length > 0">
-            Energy discarded:
+          <p v-if="entry.energyTypes.length == 0">No energy could be discarded.</p>
+          <p v-else>
+            <span v-if="entry.source == 'energyZone'">
+              <b>{{ entry.player }}</b> discards an energy from their energy zone:
+            </span>
+            <span v-else-if="entry.targetPokemon">
+              Energy discarded from <CardName :card-id="entry.targetPokemon.cardId" />:
+            </span>
+            <span v-else> Energy discarded: </span>
             <EnergyIcon v-for="(energy, i) in entry.energyTypes" :key="i" inline :energy="energy" />
           </p>
-          <p v-else>No energy could be discarded.</p>
         </div>
 
         <div v-else-if="entry.type == 'applyPlayerStatus'">

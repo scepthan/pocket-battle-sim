@@ -208,11 +208,17 @@ export class GameLogger {
     });
   }
 
-  discardEnergy(player: Player, energyTypes: Energy[], source: DiscardEnergySource) {
+  discardEnergy(
+    player: Player,
+    energyTypes: Energy[],
+    source: DiscardEnergySource,
+    targetPokemon?: InPlayPokemonCard
+  ) {
     this.addEntry({
       type: "discardEnergy",
       player: player.Name,
       source,
+      targetPokemon: targetPokemon ? player.pokemonToDescriptor(targetPokemon) : undefined,
       energyTypes,
     });
   }

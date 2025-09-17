@@ -1,4 +1,5 @@
 import {
+  InPlayPokemonCard,
   parseEnergy,
   type BasicEffect,
   type Energy,
@@ -408,6 +409,25 @@ export const parseAttackEffect = (
       transform: () => async (game: Game) => {
         await defaultEffect(game);
         game.DefendingPlayer.discardRandomEnergy(game.DefendingPlayer.activeOrThrow());
+      },
+    },
+    {
+      pattern:
+        /^Discard a random Energy from among the Energy attached to all Pokémon \(both yours and your opponent's\)\.$/i,
+      transform: () => async (game: Game) => {
+        await defaultEffect(game);
+        const allPokemon = [
+          ...game.AttackingPlayer.InPlayPokemon,
+          ...game.DefendingPlayer.InPlayPokemon,
+        ];
+        const allEnergy: { pokemon: InPlayPokemonCard; energy: Energy }[] = [];
+        for (const p of allPokemon) {
+          for (const e of p.AttachedEnergy) {
+            allEnergy.push({ pokemon: p, energy: e });
+          }
+        }
+        const { pokemon, energy } = randomElement(allEnergy);
+        game.discardEnergy(pokemon, energy, 1);
       },
     },
     {

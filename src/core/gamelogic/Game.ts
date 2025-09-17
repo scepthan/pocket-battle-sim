@@ -598,14 +598,14 @@ export class Game {
       count--;
     }
 
-    this.findOwner(pokemon).discardEnergy(discardedEnergy, "effect");
+    this.findOwner(pokemon).discardEnergy(discardedEnergy, "effect", pokemon);
   }
   discardAllEnergy(pokemon: InPlayPokemonCard) {
     if (this.shouldPreventDamage(pokemon)) return;
     const discardedEnergy = pokemon.AttachedEnergy.slice();
     pokemon.AttachedEnergy = [];
 
-    this.findOwner(pokemon).discardEnergy(discardedEnergy, "effect");
+    this.findOwner(pokemon).discardEnergy(discardedEnergy, "effect", pokemon);
   }
 
   applyPokemonStatus(pokemon: InPlayPokemonCard, status: PokemonStatus) {
