@@ -33,10 +33,14 @@ interface DecreaseRetreatCostPlayerStatus extends PokemonPlayerStatus {
   type: "DecreaseRetreatCost";
   amount: number;
 }
+interface CannotEvolvePlayerStatus extends PokemonPlayerStatus {
+  type: "CannotEvolve";
+}
 
 export type PlayerStatus =
   | CannotUseSupporterPlayerStatus
   | CannotUseItemPlayerStatus
   | IncreaseAttackPlayerStatus
   | IncreaseDefensePlayerStatus
-  | DecreaseRetreatCostPlayerStatus;
+  | DecreaseRetreatCostPlayerStatus
+  | CannotEvolvePlayerStatus;

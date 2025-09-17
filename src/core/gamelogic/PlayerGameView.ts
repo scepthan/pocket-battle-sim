@@ -196,6 +196,17 @@ export class PlayerGameView {
       this.selfActive.AttachedEnergy.length
     );
   }
+  canEvolve(pokemon: InPlayPokemonCard) {
+    if (!this.canPlay) return false;
+    if (!pokemon.ReadyToEvolve) return false;
+    if (
+      this.#player.PlayerStatuses.some(
+        (status) => status.type == "CannotEvolve" && status.appliesToPokemon(pokemon, this.#game)
+      )
+    )
+      return false;
+    return true;
+  }
   validTargets(card: ItemCard | SupporterCard): CardSlot[] {
     if (card.Effect.type == "Targeted") {
       return card.Effect.validTargets(this.#game);
@@ -226,6 +237,7 @@ export class PlayerGameView {
   }
   async playPokemonToEvolve(pokemon: PokemonCard, inPlayPokemon: InPlayPokemonCard) {
     if (!this.canPlay) return false;
+    if (!this.canEvolve(inPlayPokemon)) return false;
 
     if (pokemon.EvolvesFrom == inPlayPokemon.Name) {
       await this.#game.delay();

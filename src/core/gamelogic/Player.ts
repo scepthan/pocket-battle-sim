@@ -264,6 +264,13 @@ export class Player {
     if (!pokemon.ReadyToEvolve) {
       throw new Error("Pokemon is not ready to evolve");
     }
+    if (
+      this.PlayerStatuses.some(
+        (status) => status.type == "CannotEvolve" && status.appliesToPokemon(pokemon, this.game)
+      )
+    ) {
+      throw new Error("Cannot evolve this Pokemon due to status effect");
+    }
 
     removeElement(this.Hand, card);
     this.InPlay.push(card);

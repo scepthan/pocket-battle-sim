@@ -16,7 +16,7 @@ interface AbilityTransformer {
 export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Ability> => {
   const ability: Ability = {
     Name: inputAbility.Name,
-    Trigger: "GameRule",
+    Trigger: "OnEnterPlay",
     Conditions: [],
     Text: inputAbility.Effect,
     Effect: async (game: Game) => {
@@ -245,6 +245,25 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           opponent.applyStatus(status);
         };
         ability.UndoEffect = undoPlayerStatus("CannotUseSupporter", true);
+      },
+    },
+    {
+      pattern:
+        /^Your opponent can't play any Pokémon from their hand to evolve their Active Pokémon\.$/i,
+      transform: () => {
+        ability.Effect = async (game: Game, pokemon: InPlayPokemonCard) => {
+          const opponent = game.findOwner(pokemon) == game.Player1 ? game.Player2 : game.Player1;
+          const status: PlayerStatus = {
+            category: "Pokemon",
+            type: "CannotEvolve",
+            source: "Ability",
+            appliesToPokemon: (p) => p === opponent.ActivePokemon,
+            descriptor: "Active Pokémon",
+          };
+          pokemon.ActivePlayerStatuses.push(status);
+          opponent.applyStatus(status);
+        };
+        ability.UndoEffect = undoPlayerStatus("CannotEvolve", true);
       },
     },
   ];

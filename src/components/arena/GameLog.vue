@@ -132,6 +132,10 @@
             damage to <b>{{ entry.player }}</b
             >'s {{ entry.status.descriptor ?? "Pokemon" }}!
           </p>
+          <p v-else-if="entry.status.type == 'CannotEvolve'">
+            <b>{{ entry.player }}</b> cannot evolve their {{ entry.status.descriptor ?? "Pokemon"
+            }}<span v-if="entry.status.source == 'Effect'"> next turn</span>!
+          </p>
           <p v-else-if="entry.status.type == 'CannotUseSupporter'">
             <b>{{ entry.player }}</b> cannot use Supporter cards from their hand<span
               v-if="entry.status.source == 'Effect'"
