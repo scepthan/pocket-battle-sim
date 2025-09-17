@@ -78,6 +78,36 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     },
     {
       pattern:
+        /move a {(\w)} Energy from 1 of your Benched(?: {(\w)})? Pokémon to your Active(?: {(\w)})? Pokémon\./i,
+      transform: (_, energyType, benchedType, activeType) => {
+        const fullType = parseEnergy(energyType);
+        const at = activeType && parseEnergy(activeType);
+        const bt = benchedType && parseEnergy(benchedType);
+
+        ability.Effect = async (game: Game) => {
+          const active = game.AttackingPlayer.activeOrThrow();
+          if (active.Type != at) {
+            game.GameLog.noValidTargets(game.AttackingPlayer);
+            return;
+          }
+
+          const validBenched = game.AttackingPlayer.BenchedPokemon.filter(
+            (p) => (bt ? p.Type === bt : true) && p.AttachedEnergy.includes(fullType)
+          );
+          if (!validBenched.length) {
+            game.GameLog.noValidTargets(game.AttackingPlayer);
+            return;
+          }
+
+          const benched = await game.choosePokemon(game.AttackingPlayer, validBenched);
+          if (!benched) return;
+
+          game.AttackingPlayer.transferEnergy(benched, active, [fullType]);
+        };
+      },
+    },
+    {
+      pattern:
         /take 1 {(\w)} Energy from your Energy Zone and attach it to the {(\w)} Pokémon in the Active Spot\./i,
       transform: (_, energyType, pokemonType) => {
         const fullType = parseEnergy(energyType);
