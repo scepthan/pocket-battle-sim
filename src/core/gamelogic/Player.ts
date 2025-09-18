@@ -170,7 +170,7 @@ export class Player {
       throw new Error("Can only play Basic Pokemon at game start");
     }
 
-    const pokemon = new InPlayPokemonCard(setup.active);
+    const pokemon = new InPlayPokemonCard(this, setup.active);
     this.ActivePokemon = pokemon;
     this.InPlay.push(setup.active);
     removeElement(this.Hand, setup.active);
@@ -240,7 +240,7 @@ export class Player {
       throw new Error("Can only play Basic Pokemon to bench");
     }
 
-    const pokemon = new InPlayPokemonCard(card, trueCard);
+    const pokemon = new InPlayPokemonCard(this, card, trueCard);
     this.Bench[index] = pokemon;
     this.InPlay.push(trueCard);
     // Needs to be optional because fossils are currently removed from hand before this method is called

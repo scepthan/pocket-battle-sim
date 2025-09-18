@@ -1,9 +1,11 @@
 import type { Game } from "../Game";
 import type { InPlayPokemonCard } from "../InPlayPokemonCard";
+import type { Energy } from "./Energy";
 
 interface BasePlayerStatus {
   source: "Effect" | "Ability";
   keepNextTurn?: boolean;
+  doesNotStack?: boolean;
 }
 
 interface GameRulePlayerStatus extends BasePlayerStatus {
@@ -36,6 +38,11 @@ interface DecreaseRetreatCostPlayerStatus extends PokemonPlayerStatus {
 interface CannotEvolvePlayerStatus extends PokemonPlayerStatus {
   type: "CannotEvolve";
 }
+interface DoubleEnergyPlayerStatus extends PokemonPlayerStatus {
+  type: "DoubleEnergy";
+  energyType: Energy;
+  doesNotStack: true;
+}
 
 export type PlayerStatus =
   | CannotUseSupporterPlayerStatus
@@ -43,4 +50,5 @@ export type PlayerStatus =
   | IncreaseAttackPlayerStatus
   | IncreaseDefensePlayerStatus
   | DecreaseRetreatCostPlayerStatus
-  | CannotEvolvePlayerStatus;
+  | CannotEvolvePlayerStatus
+  | DoubleEnergyPlayerStatus;

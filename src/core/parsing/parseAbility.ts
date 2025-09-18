@@ -1,5 +1,6 @@
 import {
   parseEnergy,
+  Player,
   type Ability,
   type Game,
   type InPlayPokemonCard,
@@ -235,14 +236,14 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       pattern: /^your opponent can't use any Supporter cards from their hand\.$/i,
       transform: () => {
         ability.Effect = async (game: Game, pokemon: InPlayPokemonCard) => {
-          const opponent = game.findOwner(pokemon) == game.Player1 ? game.Player2 : game.Player1;
+          const player = game.findOwner(pokemon);
+          const opponent = player == game.Player1 ? game.Player2 : game.Player1;
           const status: PlayerStatus = {
             category: "GameRule",
             type: "CannotUseSupporter",
             source: "Ability",
           };
-          pokemon.ActivePlayerStatuses.push(status);
-          opponent.applyStatus(status);
+          applyPlayerStatus(opponent, status, player, pokemon);
         };
         ability.UndoEffect = undoPlayerStatus("CannotUseSupporter", true);
       },
@@ -252,7 +253,8 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         /^Your opponent can't play any Pokémon from their hand to evolve their Active Pokémon\.$/i,
       transform: () => {
         ability.Effect = async (game: Game, pokemon: InPlayPokemonCard) => {
-          const opponent = game.findOwner(pokemon) == game.Player1 ? game.Player2 : game.Player1;
+          const player = game.findOwner(pokemon);
+          const opponent = player == game.Player1 ? game.Player2 : game.Player1;
           const status: PlayerStatus = {
             category: "Pokemon",
             type: "CannotEvolve",
@@ -260,8 +262,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
             appliesToPokemon: (p) => p === opponent.ActivePokemon,
             descriptor: "Active Pokémon",
           };
-          pokemon.ActivePlayerStatuses.push(status);
-          opponent.applyStatus(status);
+          applyPlayerStatus(opponent, status, player, pokemon);
         };
         ability.UndoEffect = undoPlayerStatus("CannotEvolve", true);
       },
@@ -288,6 +289,28 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
   };
 };
 
+const applyPlayerStatus = (
+  player: Player,
+  status: PlayerStatus,
+  owner: Player,
+  pokemon: InPlayPokemonCard
+) => {
+  if (status.doesNotStack && owner.PlayerStatuses.some((s) => s.type === status.type)) {
+    let activeStatus: PlayerStatus | undefined;
+    for (const p of owner.InPlayPokemon) {
+      if (p !== pokemon && p.Name === pokemon.Name) {
+        activeStatus = p.ActivePlayerStatuses.find((s) => s.type === status.type);
+        if (activeStatus) {
+          status = activeStatus;
+          break;
+        }
+      }
+    }
+  }
+
+  player.applyStatus(status);
+  pokemon.ActivePlayerStatuses.push(status);
+};
 const undoPlayerStatus =
   (statusType: string, isOpponent: boolean) => async (game: Game, pokemon: InPlayPokemonCard) => {
     const status = pokemon.ActivePlayerStatuses.find((s) => s.type === statusType);
@@ -295,6 +318,15 @@ const undoPlayerStatus =
     pokemon.ActivePlayerStatuses = pokemon.ActivePlayerStatuses.filter((s) => s !== status);
 
     const owner = game.findOwner(pokemon);
+
+    if (
+      status.doesNotStack &&
+      owner.InPlayPokemon.some((p) => p !== pokemon && p.ActivePlayerStatuses.includes(status))
+    ) {
+      // Another instance of this status is still active on another Pokémon, so do not remove it from the player
+      return;
+    }
+
     const player = isOpponent ? (owner == game.Player1 ? game.Player2 : game.Player1) : owner;
     removeElement(player.PlayerStatuses, status);
   };

@@ -1,19 +1,21 @@
 import { removeElement } from "../util";
 import type { Game } from "./Game";
-import type {
-  Ability,
-  Attack,
-  Energy,
-  PlayerStatus,
-  PlayingCard,
-  PokemonCard,
-  PokemonStatus,
-  PrimaryCondition,
-  SecondaryCondition,
+import type { Player } from "./Player";
+import {
+  type Ability,
+  type Attack,
+  type Energy,
+  type PlayerStatus,
+  type PlayingCard,
+  type PokemonCard,
+  type PokemonStatus,
+  type PrimaryCondition,
+  type SecondaryCondition,
 } from "./types";
 
 export class InPlayPokemonCard {
   BaseCard: PokemonCard;
+  #player: Player;
 
   ID: string;
   Name: string;
@@ -28,22 +30,44 @@ export class InPlayPokemonCard {
 
   CurrentHP: number;
   MaxHP: number;
+  AttachedEnergy: Energy[] = [];
+
   PrimaryCondition?: PrimaryCondition;
   SecondaryConditions: Set<SecondaryCondition> = new Set();
+  PokemonStatuses: PokemonStatus[] = [];
+  ActivePlayerStatuses: PlayerStatus[] = []; // PlayerStatuses currently in play from this Pokemon's Ability
+
+  InPlayCards: PlayingCard[] = [];
+  ReadyToEvolve: boolean = false;
+
+  isPokemon = true as const;
+
   get CurrentConditions() {
     return [this.PrimaryCondition, ...this.SecondaryConditions].filter(
       (condition) => condition !== undefined
     );
   }
-  PokemonStatuses: PokemonStatus[] = [];
-  AttachedEnergy: Energy[] = [];
-  InPlayCards: PlayingCard[] = [];
-  ReadyToEvolve: boolean = false;
-  ActivePlayerStatuses: PlayerStatus[] = [];
 
-  isPokemon = true as const;
+  get EffectiveEnergy() {
+    const energiesToDouble = new Set<Energy>();
+    for (const status of this.#player.PlayerStatuses) {
+      if (status.type === "DoubleEnergy" && status.appliesToPokemon(this, this.#player.game)) {
+        energiesToDouble.add(status.energyType);
+      }
+    }
 
-  constructor(inputCard: PokemonCard, trueCard: PlayingCard = inputCard) {
+    const effectiveEnergy: Energy[] = [];
+    for (const energy of this.AttachedEnergy) {
+      effectiveEnergy.push(energy);
+      if (energiesToDouble.has(energy)) {
+        effectiveEnergy.push(energy);
+      }
+    }
+    return effectiveEnergy;
+  }
+
+  constructor(player: Player, inputCard: PokemonCard, trueCard: PlayingCard = inputCard) {
+    this.#player = player;
     this.BaseCard = inputCard;
     this.InPlayCards.push(trueCard);
 

@@ -143,6 +143,10 @@
               next turn</span
             >!
           </p>
+          <p v-else-if="entry.status.type == 'DoubleEnergy'">
+            All of <b>{{ entry.player }}</b>'s {{ entry.status.descriptor ?? "Pokemon" }} now have their
+            <EnergyIcon inline :energy="entry.status.energyType" /> count as double!
+          </p>
           <p v-else>Unknown player status: {{ entry.status.type }}</p>
         </div>
 
