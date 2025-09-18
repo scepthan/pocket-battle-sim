@@ -20,8 +20,8 @@ const start = async (agentNames: string[]) => {
       console.log("Next matchup:", agentName1, "v.", agentName2);
       const loops = 10000;
 
-      const Agent1 = allAgents[agentName1];
-      const Agent2 = allAgents[agentName2];
+      const Agent1 = allAgents[agentName1]!;
+      const Agent2 = allAgents[agentName2]!;
 
       matchupRecords[agentName1 + " v. " + agentName2] = newBattleRecord(agentName1, agentName2);
       if (agentName1 != agentName2) {
@@ -38,6 +38,7 @@ const start = async (agentNames: string[]) => {
         const matchupName =
           first == "Player1" ? agentName1 + " v. " + agentName2 : agentName2 + " v. " + agentName1;
         const matchup = matchupRecords[matchupName];
+        if (!matchup) throw new Error("Something went wrong setting up matchup " + matchupName);
 
         matchup.gamesPlayed++;
 

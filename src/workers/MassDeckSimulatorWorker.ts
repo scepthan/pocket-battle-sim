@@ -21,8 +21,8 @@ const start = async (deckNames: string[]) => {
       console.log("Next matchup:", deck1, "v.", deck2);
       const loops = 500 * (deck1 == deck2 ? 1 : 2);
 
-      const agent1 = new BetterRandomAgent("Player1", allDecks[deck1]);
-      const agent2 = new BetterRandomAgent("Player2", allDecks[deck2]);
+      const agent1 = new BetterRandomAgent("Player1", allDecks[deck1]!);
+      const agent2 = new BetterRandomAgent("Player2", allDecks[deck2]!);
 
       matchupRecords[deck1 + " v. " + deck2] = newBattleRecord(deck1, deck2);
       if (deck1 != deck2) {
@@ -36,6 +36,7 @@ const start = async (deckNames: string[]) => {
         const second = game.DefendingPlayer.Name;
         const matchupName = first == "Player1" ? deck1 + " v. " + deck2 : deck2 + " v. " + deck1;
         const matchup = matchupRecords[matchupName];
+        if (!matchup) throw new Error("Something went wrong setting up matchup " + matchupName);
 
         matchup.gamesPlayed++;
 

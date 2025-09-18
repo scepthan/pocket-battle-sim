@@ -93,9 +93,9 @@ export class Game {
     if (Math.random() >= 0.5) {
       players.reverse();
     }
-    this.GameLog.startGame(players[0], players[1]);
-    this.AttackingPlayer = players[0];
-    this.DefendingPlayer = players[1];
+    this.AttackingPlayer = players[0]!;
+    this.DefendingPlayer = players[1]!;
+    this.GameLog.startGame(this.AttackingPlayer, this.DefendingPlayer);
 
     this.AttackingPlayer.setup(this.GameRules.InitialHandSize);
     this.DefendingPlayer.setup(this.GameRules.InitialHandSize);
@@ -691,9 +691,10 @@ export class Game {
 
     for (const i in distribution) {
       if (+i >= validPokemon.length) throw new Error("Invalid energy distribution");
-      if (distribution[i].length == 0) continue;
-      const pokemon = validPokemon[i];
-      player.attachEnergy(pokemon, distribution[i], "energyZone");
+      const energies = distribution[i]!;
+      if (energies.length == 0) continue;
+      const pokemon = validPokemon[i]!;
+      player.attachEnergy(pokemon, energies, "energyZone");
     }
   }
 }

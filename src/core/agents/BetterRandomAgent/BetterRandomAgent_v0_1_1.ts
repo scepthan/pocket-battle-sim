@@ -18,7 +18,7 @@ export class BetterRandomAgent_v0_1_1 extends PlayerAgent {
     ) as PokemonCard[];
 
     return {
-      active: basicPokemon[0],
+      active: basicPokemon[0]!,
       bench: basicPokemon.slice(1, 4),
     };
   }
@@ -60,7 +60,7 @@ export class BetterRandomAgent_v0_1_1 extends PlayerAgent {
     ) as PokemonCard[];
     const bench = game.selfBench;
     for (let i = 0; i < 3 && handBasics.length > 0; i++) {
-      if (!bench[i].isPokemon) {
+      if (!bench[i]!.isPokemon) {
         const randomBasic = rand(handBasics);
         await game.playPokemonToBench(randomBasic, i);
         removeElement(handBasics, randomBasic);
@@ -203,9 +203,7 @@ export class BetterRandomAgent_v0_1_1 extends PlayerAgent {
   async distributeEnergy(pokemon: PlayerPokemonView[], energy: Energy[]): Promise<Energy[][]> {
     const distribution: Energy[][] = pokemon.map(() => []);
     for (const en of energy) {
-      const chosenPokemon = rand(pokemon);
-      const index = pokemon.indexOf(chosenPokemon);
-      distribution[index].push(en);
+      rand(distribution).push(en);
     }
     return distribution;
   }

@@ -83,13 +83,13 @@ onMounted(() => {
       previousEvents[matchupKey] = event.data.matchup;
     }
 
-    const record1 = overallRecords[firstDeck];
+    const record1 = overallRecords[firstDeck]!;
     record1.gamesPlayed += gamesPlayed;
     record1.wins += firstWins;
     record1.losses += secondWins;
     record1.ties += ties;
 
-    const record2 = overallRecords[secondDeck];
+    const record2 = overallRecords[secondDeck]!;
     record2.gamesPlayed += gamesPlayed;
     record2.wins += secondWins;
     record2.losses += firstWins;

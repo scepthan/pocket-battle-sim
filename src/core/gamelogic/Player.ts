@@ -149,12 +149,7 @@ export class Player {
   }
 
   chooseNextEnergy() {
-    const length = this.EnergyTypes.length;
-    if (length == 1) {
-      this.NextEnergy = this.EnergyTypes[0];
-    } else {
-      this.NextEnergy = randomElement(this.EnergyTypes);
-    }
+    this.NextEnergy = randomElement(this.EnergyTypes);
   }
 
   hasBasicPokemon() {
@@ -233,6 +228,9 @@ export class Player {
   }
 
   async putPokemonOnBench(card: PokemonCard, index: number, trueCard: PlayingCard = card) {
+    if (!this.Bench[index]) {
+      throw new Error("Invalid bench index specified");
+    }
     if (this.Bench[index].isPokemon) {
       throw new Error("Bench already has a Pokemon in this slot");
     }

@@ -18,7 +18,7 @@
         v-for="i in card.AttachedEnergy.length"
         :key="i"
         :width="height / 10"
-        :energy="card.AttachedEnergy[i - 1]"
+        :energy="card.AttachedEnergy[i - 1]!"
       />
     </div>
   </div>

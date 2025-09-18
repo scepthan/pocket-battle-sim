@@ -17,6 +17,12 @@ const game = ref<Game>();
 onMounted(() => {
   const allDecks = deckStore.AllDecks;
   const deckNames = Object.keys(allDecks) as (keyof typeof allDecks)[];
+  const findDeck = (deckName: string) => {
+    const deck = allDecks[deckName];
+    if (!deck) throw new Error("Could not find deck: " + deckName);
+    return deck;
+  };
+
   let newGameCountdown = 0;
 
   // For testing purposes, you can set playerDeck and opponentDeck to specific deck names
@@ -29,11 +35,11 @@ onMounted(() => {
     if (newGameCountdown > 0) return newGameCountdown--;
 
     newGameCountdown = 10;
-    const deck1 = playerDeck || randomElement(deckNames);
-    const deck2 = opponentDeck || randomElement(deckNames);
+    const deck1 = findDeck(playerDeck || randomElement(deckNames));
+    const deck2 = findDeck(opponentDeck || randomElement(deckNames));
 
-    player.value = new BetterRandomAgent("Player", allDecks[deck1]);
-    opponent.value = new BetterRandomAgent("Opponent", allDecks[deck2]);
+    player.value = new BetterRandomAgent("Player", deck1);
+    opponent.value = new BetterRandomAgent("Opponent", deck2);
 
     game.value = new Game(player.value, opponent.value, {
       DelayPerAction: 1000,

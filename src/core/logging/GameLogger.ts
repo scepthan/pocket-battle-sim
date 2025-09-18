@@ -22,7 +22,7 @@ const coinLog = (result: boolean) => (result ? "Heads" : "Tails");
 export class GameLogger {
   turns: LoggedEvent[][] = [[]];
   get currentTurn() {
-    return this.turns[0];
+    return this.turns[0]!;
   }
   get entries() {
     return this.turns.slice().reverse().flat();

@@ -19,7 +19,7 @@ export class RandomAgent extends PlayerAgent {
     }
 
     return {
-      active: basicPokemon[0],
+      active: basicPokemon[0]!,
       bench: basicPokemon.slice(1, 4),
     };
   }
@@ -40,7 +40,7 @@ export class RandomAgent extends PlayerAgent {
       const randomBasic = rand(handBasics);
       const bench = game.selfBench;
       for (let i = 0; i < 3; i++) {
-        if (!bench[i].isPokemon) {
+        if (!bench[i]!.isPokemon) {
           await game.playPokemonToBench(randomBasic, i);
           break;
         }
@@ -131,9 +131,7 @@ export class RandomAgent extends PlayerAgent {
   async distributeEnergy(pokemon: PlayerPokemonView[], energy: Energy[]): Promise<Energy[][]> {
     const distribution: Energy[][] = pokemon.map(() => []);
     for (const en of energy) {
-      const chosenPokemon = rand(pokemon);
-      const index = pokemon.indexOf(chosenPokemon);
-      distribution[index].push(en);
+      rand(distribution).push(en);
     }
     return distribution;
   }
