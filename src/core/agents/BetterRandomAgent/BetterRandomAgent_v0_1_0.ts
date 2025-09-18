@@ -2,9 +2,9 @@ import type {
   CardSlot,
   Energy,
   GameInitState,
-  InPlayPokemonCard,
   ItemCard,
   PlayerGameView,
+  PlayerPokemonView,
   PokemonCard,
   SupporterCard,
 } from "../../gamelogic";
@@ -193,7 +193,7 @@ export class BetterRandomAgent_v0_1_0 extends PlayerAgent {
     const bench = game.selfBenched;
     return rand(bench);
   }
-  async choosePokemon(pokemon: InPlayPokemonCard[]) {
+  async choosePokemon(pokemon: PlayerPokemonView[]) {
     return rand(pokemon);
   }
   async choose<T>(options: T[]) {
@@ -202,7 +202,7 @@ export class BetterRandomAgent_v0_1_0 extends PlayerAgent {
   async viewCards() {
     //await new Promise((resolve) => setTimeout(resolve, 1000));
   }
-  async distributeEnergy(pokemon: InPlayPokemonCard[], energy: Energy[]): Promise<Energy[][]> {
+  async distributeEnergy(pokemon: PlayerPokemonView[], energy: Energy[]): Promise<Energy[][]> {
     const distribution: Energy[][] = pokemon.map(() => []);
     for (const en of energy) {
       const chosenPokemon = rand(pokemon);
@@ -212,7 +212,7 @@ export class BetterRandomAgent_v0_1_0 extends PlayerAgent {
     return distribution;
   }
 
-  findPotentialEvolutions(game: PlayerGameView, pokemon: InPlayPokemonCard) {
+  findPotentialEvolutions(game: PlayerGameView, pokemon: PlayerPokemonView) {
     const allPokemon: PokemonCard[] = [];
     let currentPokemon = [pokemon.Name];
     while (currentPokemon.length > 0) {
@@ -230,7 +230,7 @@ export class BetterRandomAgent_v0_1_0 extends PlayerAgent {
     return allPokemon;
   }
 
-  findRemainingEnergy(pokemon: InPlayPokemonCard, cost: Energy[]): Energy[] {
+  findRemainingEnergy(pokemon: PlayerPokemonView, cost: Energy[]): Energy[] {
     const remainingEnergy = cost.slice();
     for (const e1 of pokemon.AttachedEnergy) {
       const index = remainingEnergy.findIndex((e2) => e2 == e1 || e2 == "Colorless");

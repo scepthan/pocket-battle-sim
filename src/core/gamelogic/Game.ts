@@ -5,6 +5,7 @@ import { removeElement } from "../util";
 import type { InPlayPokemonCard } from "./InPlayPokemonCard";
 import { Player } from "./Player";
 import { PlayerGameView } from "./PlayerGameView";
+import { PlayerPokemonView } from "./PlayerPokemonView";
 import type {
   Ability,
   Attack,
@@ -108,6 +109,11 @@ export class Game {
   }
   findOwner(pokemon: InPlayPokemonCard) {
     return this.Player1.InPlayPokemon.includes(pokemon) ? this.Player1 : this.Player2;
+  }
+  viewToPokemon(view: PlayerPokemonView, validPokemon: InPlayPokemonCard[]) {
+    const pokemon = validPokemon.find((p) => view.is(p));
+    if (!pokemon) throw new Error("Invalid Pokémon selected");
+    return pokemon;
   }
 
   async start() {
@@ -380,8 +386,14 @@ export class Game {
     if (promises.length > 0) {
       await this.delay();
       const newActive = await Promise.all(promises);
-      if (newActive[0]) await this.Player1.setNewActivePokemon(newActive[0]);
-      if (newActive[1]) await this.Player2.setNewActivePokemon(newActive[1]);
+      if (newActive[0])
+        await this.Player1.setNewActivePokemon(
+          this.viewToPokemon(newActive[0], this.Player1.BenchedPokemon)
+        );
+      if (newActive[1])
+        await this.Player2.setNewActivePokemon(
+          this.viewToPokemon(newActive[1], this.Player2.BenchedPokemon)
+        );
     }
   }
 
@@ -633,7 +645,8 @@ export class Game {
       return false;
     }
     const agent = this.findAgent(player);
-    const newActive = await agent.swapActivePokemon(new PlayerGameView(this, player), reason);
+    const newActiveView = await agent.swapActivePokemon(new PlayerGameView(this, player), reason);
+    const newActive = this.viewToPokemon(newActiveView, player.BenchedPokemon);
     await player.swapActivePokemon(newActive, reason);
     return true;
   }
@@ -643,10 +656,10 @@ export class Game {
       return;
     }
     const agent = this.findAgent(player);
-    const selected = await agent.choosePokemon(validPokemon);
-    if (!validPokemon.includes(selected)) {
-      throw new Error("Invalid Pokemon selected");
-    }
+    const selectedView = await agent.choosePokemon(
+      validPokemon.map((p) => new PlayerPokemonView(p))
+    );
+    const selected = this.viewToPokemon(selectedView, validPokemon);
     return selected;
   }
   async choose<T>(player: Player, options: T[]) {
@@ -669,7 +682,10 @@ export class Game {
   }
   async distributeEnergy(player: Player, energy: Energy[], validPokemon: InPlayPokemonCard[]) {
     const agent = this.findAgent(player);
-    const distribution = await agent.distributeEnergy(validPokemon, energy);
+    const distribution = await agent.distributeEnergy(
+      validPokemon.map((p) => new PlayerPokemonView(p)),
+      energy
+    );
     const sorted = distribution.flat().sort().join(",");
     if (sorted !== energy.slice().sort().join(",")) throw new Error("Invalid energy distribution");
 

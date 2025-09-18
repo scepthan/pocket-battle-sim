@@ -1,6 +1,6 @@
 import { parseDeck } from "../../parsing";
-import type { InPlayPokemonCard } from "../InPlayPokemonCard";
 import type { PlayerGameView } from "../PlayerGameView";
+import type { PlayerPokemonView } from "../PlayerPokemonView";
 import type { DeckInfo } from "./Deck";
 import type { Energy } from "./Energy";
 import type { PlayingCard, PokemonCard } from "./PlayingCard";
@@ -32,9 +32,9 @@ export abstract class PlayerAgent {
   abstract swapActivePokemon(
     game: PlayerGameView,
     reason: "selfEffect" | "opponentEffect" | "activeKnockedOut"
-  ): Promise<InPlayPokemonCard>;
-  abstract choosePokemon(pokemon: InPlayPokemonCard[]): Promise<InPlayPokemonCard>;
+  ): Promise<PlayerPokemonView>;
+  abstract choosePokemon(pokemon: PlayerPokemonView[]): Promise<PlayerPokemonView>;
   abstract choose<T>(options: T[]): Promise<T>;
   abstract viewCards(cards: PlayingCard[]): Promise<void>;
-  abstract distributeEnergy(pokemon: InPlayPokemonCard[], energy: Energy[]): Promise<Energy[][]>;
+  abstract distributeEnergy(pokemon: PlayerPokemonView[], energy: Energy[]): Promise<Energy[][]>;
 }

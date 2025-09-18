@@ -1,6 +1,8 @@
+import type { EmptyCardSlot } from "./EmptyCardSlot";
 import type { Game } from "./Game";
 import { InPlayPokemonCard } from "./InPlayPokemonCard";
 import type { Player } from "./Player";
+import { PlayerPokemonView } from "./PlayerPokemonView";
 import type {
   Ability,
   Attack,
@@ -12,8 +14,13 @@ import type {
   SupporterCard,
 } from "./types";
 
+const viewOrEmpty = (slot: InPlayPokemonCard | EmptyCardSlot) => {
+  if (slot.isPokemon) return new PlayerPokemonView(slot);
+  return slot;
+};
+
 interface PlayerGameViewWithActivePokemon {
-  selfActive: InPlayPokemonCard;
+  selfActive: PlayerPokemonView;
 }
 export class PlayerGameView {
   #game: Game;
@@ -30,6 +37,12 @@ export class PlayerGameView {
     } else {
       this.#opponent = game.Player1;
     }
+  }
+
+  #pokemonFromView(view: PlayerPokemonView) {
+    for (const pokemon of [...this.#player.InPlayPokemon, ...this.#opponent.InPlayPokemon])
+      if (view.is(pokemon)) return pokemon;
+    throw new Error("Could not find Pokemon: " + view.Name);
   }
 
   // Game attributes
@@ -50,16 +63,16 @@ export class PlayerGameView {
 
   // Self attributes
   get selfActive() {
-    return this.#player.ActivePokemon;
+    return viewOrEmpty(this.#player.ActivePokemon);
   }
   get selfBench() {
-    return this.#player.Bench.slice();
+    return this.#player.Bench.map(viewOrEmpty);
   }
   get selfBenched() {
-    return this.#player.BenchedPokemon;
+    return this.#player.BenchedPokemon.map((p) => new PlayerPokemonView(p));
   }
   get selfInPlayPokemon() {
-    return this.#player.InPlayPokemon;
+    return this.#player.InPlayPokemon.map((p) => new PlayerPokemonView(p));
   }
   get selfHand() {
     return this.#player.Hand.slice();
@@ -79,16 +92,16 @@ export class PlayerGameView {
 
   // Opponent attributes
   get opponentActive() {
-    return this.#opponent.ActivePokemon;
+    return viewOrEmpty(this.#opponent.ActivePokemon);
   }
   get opponentBench() {
-    return this.#opponent.Bench.slice();
+    return this.#opponent.Bench.map(viewOrEmpty);
   }
   get opponentBenched() {
-    return this.#opponent.BenchedPokemon;
+    return this.#opponent.BenchedPokemon.map((p) => new PlayerPokemonView(p));
   }
   get opponentInPlayPokemon() {
-    return this.#opponent.InPlayPokemon;
+    return this.#opponent.InPlayPokemon.map((p) => new PlayerPokemonView(p));
   }
   get opponentHandSize() {
     return this.#opponent.Hand.length;
@@ -165,13 +178,10 @@ export class PlayerGameView {
       return false;
     return this.selfActive.hasSufficientEnergy(attack.RequiredEnergy);
   }
-  canUseAbility(pokemon: InPlayPokemonCard, ability: Ability) {
+  canUseAbility(pokemon: PlayerPokemonView, ability: Ability) {
     if (!this.canPlay) return false;
     if (pokemon.Ability !== ability) return false;
     if (!["OnceDuringTurn", "ManyDuringTurn"].includes(ability.Trigger)) return false;
-    if (ability.Trigger == "OnceDuringTurn") {
-      if (this.#game.UsedAbilities.has(pokemon)) return false;
-    }
     if (ability.Conditions.includes("Active")) {
       if (pokemon != this.selfActive) return false;
     }
@@ -180,6 +190,10 @@ export class PlayerGameView {
     }
     if (ability.Conditions.includes("HasDamage")) {
       if (!pokemon.isDamaged()) return false;
+    }
+    const realPokemon = this.#pokemonFromView(pokemon);
+    if (ability.Trigger == "OnceDuringTurn") {
+      if (this.#game.UsedAbilities.has(realPokemon)) return false;
     }
     return true;
   }
@@ -196,12 +210,14 @@ export class PlayerGameView {
       this.selfActive.AttachedEnergy.length
     );
   }
-  canEvolve(pokemon: InPlayPokemonCard) {
+  canEvolve(pokemon: PlayerPokemonView) {
     if (!this.canPlay) return false;
     if (!pokemon.ReadyToEvolve) return false;
+    const realPokemon = this.#pokemonFromView(pokemon);
     if (
       this.#player.PlayerStatuses.some(
-        (status) => status.type == "CannotEvolve" && status.appliesToPokemon(pokemon, this.#game)
+        (status) =>
+          status.type == "CannotEvolve" && status.appliesToPokemon(realPokemon, this.#game)
       )
     )
       return false;
@@ -215,12 +231,13 @@ export class PlayerGameView {
   }
 
   // Action methods
-  async attachAvailableEnergy(pokemon: InPlayPokemonCard) {
+  async attachAvailableEnergy(pokemon: PlayerPokemonView) {
     if (!this.canPlay) return false;
 
     if (this.selfAvailableEnergy) {
+      const realPokemon = this.#pokemonFromView(pokemon);
       await this.#game.delay();
-      await this.#game.attachAvailableEnergy(pokemon);
+      await this.#game.attachAvailableEnergy(realPokemon);
       return true;
     }
     return false;
@@ -235,22 +252,24 @@ export class PlayerGameView {
     }
     return false;
   }
-  async playPokemonToEvolve(pokemon: PokemonCard, inPlayPokemon: InPlayPokemonCard) {
+  async playPokemonToEvolve(pokemon: PokemonCard, inPlayPokemon: PlayerPokemonView) {
     if (!this.canPlay) return false;
     if (!this.canEvolve(inPlayPokemon)) return false;
 
     if (pokemon.EvolvesFrom == inPlayPokemon.Name) {
+      const realPokemon = this.#pokemonFromView(inPlayPokemon);
       await this.#game.delay();
-      await this.#game.evolvePokemon(inPlayPokemon, pokemon);
+      await this.#game.evolvePokemon(realPokemon, pokemon);
       return true;
     }
     return false;
   }
-  async useAbility(pokemon: InPlayPokemonCard, ability: Ability) {
+  async useAbility(pokemon: PlayerPokemonView, ability: Ability) {
     if (!this.canUseAbility(pokemon, ability)) return false;
     await this.#game.delay();
 
-    await this.#game.useAbility(pokemon, ability);
+    const realPokemon = this.#pokemonFromView(pokemon);
+    await this.#game.useAbility(realPokemon, ability);
     return true;
   }
   async useAttack(attack: Attack) {
@@ -260,7 +279,7 @@ export class PlayerGameView {
     await this.#game.useAttack(attack);
     return true;
   }
-  async retreatActivePokemon(benchedPokemon: InPlayPokemonCard, energy?: Energy[]) {
+  async retreatActivePokemon(benchedPokemon: PlayerPokemonView, energy?: Energy[]) {
     if (!this.canRetreat()) return false;
     await this.#game.delay();
 
@@ -271,7 +290,8 @@ export class PlayerGameView {
       energy = this.selfActive.AttachedEnergy.slice(0, retreatCost);
     }
 
-    await this.#game.retreatActivePokemon(benchedPokemon, energy);
+    const realPokemon = this.#pokemonFromView(benchedPokemon);
+    await this.#game.retreatActivePokemon(realPokemon, energy);
     return true;
   }
   async playItemCard(card: ItemCard, target?: CardSlot) {

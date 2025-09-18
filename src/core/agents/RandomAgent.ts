@@ -2,8 +2,8 @@ import type {
   CardSlot,
   Energy,
   GameInitState,
-  InPlayPokemonCard,
   PlayerGameView,
+  PlayerPokemonView,
   PokemonCard,
 } from "../gamelogic";
 import { PlayerAgent } from "../gamelogic";
@@ -119,7 +119,7 @@ export class RandomAgent extends PlayerAgent {
     const bench = game.selfBenched;
     return rand(bench);
   }
-  async choosePokemon(pokemon: InPlayPokemonCard[]) {
+  async choosePokemon(pokemon: PlayerPokemonView[]) {
     return rand(pokemon);
   }
   async choose<T>(options: T[]) {
@@ -128,7 +128,7 @@ export class RandomAgent extends PlayerAgent {
   async viewCards() {
     //await new Promise((resolve) => setTimeout(resolve, 1000));
   }
-  async distributeEnergy(pokemon: InPlayPokemonCard[], energy: Energy[]): Promise<Energy[][]> {
+  async distributeEnergy(pokemon: PlayerPokemonView[], energy: Energy[]): Promise<Energy[][]> {
     const distribution: Energy[][] = pokemon.map(() => []);
     for (const en of energy) {
       const chosenPokemon = rand(pokemon);
