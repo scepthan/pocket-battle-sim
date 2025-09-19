@@ -15,10 +15,10 @@
 
     <div class="card-energy">
       <EnergyIcon
-        v-for="i in card.AttachedEnergy.length"
+        v-for="(energy, i) in card.AttachedEnergy"
         :key="i"
         :width="height / 10"
-        :energy="card.AttachedEnergy[i - 1]!"
+        :energy="energy"
       />
     </div>
   </div>
