@@ -372,10 +372,8 @@ export class Player {
     }
     if (modifiedCost < 0) modifiedCost = 0;
 
-    if (modifiedCost > previousEnergy.length) {
-      throw new Error("Not enough energy to retreat");
-    }
-    if (modifiedCost > energyToDiscard.length) {
+    const effectiveEnergyToDiscard = currentActive.calculateEffectiveEnergy(energyToDiscard);
+    if (modifiedCost > effectiveEnergyToDiscard.length) {
       throw new Error("Not enough energy provided");
     }
 
@@ -427,6 +425,7 @@ export class Player {
   async removePokemonFromField(pokemon: InPlayPokemonCard) {
     if (this.game.shouldPreventDamage(pokemon)) return;
 
+    await pokemon.onLeavePlay(this.game);
     if (pokemon == this.ActivePokemon) {
       await pokemon.onLeaveActive(this.game);
       this.ActivePokemon = EmptyCardSlot.Active();

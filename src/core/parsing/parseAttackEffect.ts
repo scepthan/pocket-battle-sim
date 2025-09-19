@@ -176,7 +176,7 @@ export const parseAttackEffect = (
         const predicate = fullType ? (e: Energy) => e == fullType : () => true;
 
         return async (game: Game) => {
-          const energy = game.AttackingPlayer.activeOrThrow().AttachedEnergy;
+          const energy = game.AttackingPlayer.activeOrThrow().EffectiveEnergy;
           const totalFlips = energy.filter(predicate).length;
           const { heads } = game.AttackingPlayer.flipMultiCoins(totalFlips);
           game.attackActivePokemon(heads * Number(damage));
@@ -187,7 +187,7 @@ export const parseAttackEffect = (
       pattern:
         /^This attack does (\d+) more damage for each Energy attached to your opponent's Active Pokémon\.$/i,
       transform: (_, extraDamage) => async (game: Game) => {
-        const energyCount = game.DefendingPlayer.activeOrThrow().AttachedEnergy.length;
+        const energyCount = game.DefendingPlayer.activeOrThrow().EffectiveEnergy.length;
         const damage = baseAttackHP + Number(extraDamage) * energyCount;
         game.attackActivePokemon(damage);
       },

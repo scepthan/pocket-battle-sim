@@ -78,10 +78,13 @@ export class PlayerPokemonView {
     return this.#self.ReadyToEvolve;
   }
 
-  hasSufficientEnergy(energies: Energy[]) {
+  calculateEffectiveEnergy(energies: Energy[]): Energy[] {
+    return this.#self.calculateEffectiveEnergy(energies);
+  }
+  hasSufficientEnergy(energies: Energy[]): boolean {
     return this.#self.hasSufficientEnergy(energies);
   }
-  isDamaged() {
+  isDamaged(): boolean {
     return this.#self.isDamaged();
   }
 }

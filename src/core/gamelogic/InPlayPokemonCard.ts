@@ -15,7 +15,7 @@ import {
 
 export class InPlayPokemonCard {
   BaseCard: PokemonCard;
-  #player: Player;
+  player: Player;
 
   ID: string;
   Name: string;
@@ -49,15 +49,19 @@ export class InPlayPokemonCard {
   }
 
   get EffectiveEnergy() {
+    return this.calculateEffectiveEnergy(this.AttachedEnergy);
+  }
+
+  calculateEffectiveEnergy(energies: Energy[]) {
     const energiesToDouble = new Set<Energy>();
-    for (const status of this.#player.PlayerStatuses) {
-      if (status.type === "DoubleEnergy" && status.appliesToPokemon(this, this.#player.game)) {
+    for (const status of this.player.PlayerStatuses) {
+      if (status.type === "DoubleEnergy" && status.appliesToPokemon(this, this.player.game)) {
         energiesToDouble.add(status.energyType);
       }
     }
 
     const effectiveEnergy: Energy[] = [];
-    for (const energy of this.AttachedEnergy) {
+    for (const energy of energies) {
       effectiveEnergy.push(energy);
       if (energiesToDouble.has(energy)) {
         effectiveEnergy.push(energy);
@@ -67,7 +71,7 @@ export class InPlayPokemonCard {
   }
 
   constructor(player: Player, inputCard: PokemonCard, trueCard: PlayingCard = inputCard) {
-    this.#player = player;
+    this.player = player;
     this.BaseCard = inputCard;
     this.InPlayCards.push(trueCard);
 
@@ -129,7 +133,7 @@ export class InPlayPokemonCard {
     energies = energies
       .slice()
       .sort((a, b) => (a == "Colorless" ? 1 : 0) - (b == "Colorless" ? 1 : 0));
-    const energyAvailable = this.AttachedEnergy.slice();
+    const energyAvailable = this.EffectiveEnergy.slice();
     for (const energy of energies) {
       if (energy === "Colorless" && energyAvailable.length > 0) {
         energyAvailable.pop();
@@ -168,6 +172,12 @@ export class InPlayPokemonCard {
 
   async onLeaveBench(game: Game) {
     if (this.Ability?.Trigger === "OnEnterBench" && this.Ability.UndoEffect) {
+      await this.Ability.UndoEffect(game, this);
+    }
+  }
+
+  async onLeavePlay(game: Game) {
+    if (this.Ability?.Trigger === "OnEnterPlay" && this.Ability.UndoEffect) {
       await this.Ability.UndoEffect(game, this);
     }
   }

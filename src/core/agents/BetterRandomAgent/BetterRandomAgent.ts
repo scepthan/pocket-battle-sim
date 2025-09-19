@@ -228,7 +228,7 @@ export class BetterRandomAgent extends PlayerAgent {
 
   findRemainingEnergy(pokemon: PlayerPokemonView, cost: Energy[]): Energy[] {
     const remainingEnergy = cost.slice();
-    for (const e1 of pokemon.AttachedEnergy) {
+    for (const e1 of pokemon.EffectiveEnergy) {
       const index = remainingEnergy.findIndex((e2) => e2 == e1 || e2 == "Colorless");
       if (index >= 0) remainingEnergy.splice(index, 1);
     }

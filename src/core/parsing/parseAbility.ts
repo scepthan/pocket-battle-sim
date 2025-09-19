@@ -267,6 +267,28 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         ability.UndoEffect = undoPlayerStatus("CannotEvolve", true);
       },
     },
+    {
+      pattern:
+        /^Each {(\w)} Energy attached to your {\1} Pokémon provides 2 {\1} Energy. This effect doesn't stack.$/i,
+      transform: (_, energyType) => {
+        const fullType = parseEnergy(energyType);
+
+        ability.Effect = async (game: Game, pokemon: InPlayPokemonCard) => {
+          const player = game.findOwner(pokemon);
+          const status: PlayerStatus = {
+            category: "Pokemon",
+            type: "DoubleEnergy",
+            energyType: fullType,
+            source: "Ability",
+            appliesToPokemon: (p) => p.Type === fullType,
+            doesNotStack: true,
+            descriptor: fullType + "-type Pokémon",
+          };
+          applyPlayerStatus(player, status, player, pokemon);
+        };
+        ability.UndoEffect = undoPlayerStatus("DoubleEnergy", false);
+      },
+    },
   ];
 
   mainloop: while (abilityText) {

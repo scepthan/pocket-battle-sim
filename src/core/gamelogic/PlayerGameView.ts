@@ -207,7 +207,7 @@ export class PlayerGameView {
       return false;
     return (
       this.selfActive.RetreatCost + this.retreatCostModifier <=
-      this.selfActive.AttachedEnergy.length
+      this.selfActive.EffectiveEnergy.length
     );
   }
   canEvolve(pokemon: PlayerPokemonView) {
@@ -287,7 +287,13 @@ export class PlayerGameView {
       let retreatCost = this.selfActive.RetreatCost;
       retreatCost += this.retreatCostModifier;
       if (retreatCost < 0) retreatCost = 0;
-      energy = this.selfActive.AttachedEnergy.slice(0, retreatCost);
+      energy = [];
+      let i = 0;
+      while (this.selfActive.calculateEffectiveEnergy(energy).length < retreatCost) {
+        const nextEnergy = this.selfActive.AttachedEnergy[i++];
+        if (!nextEnergy) throw new Error("Not enough energy to retreat");
+        energy.push(nextEnergy);
+      }
     }
 
     const realPokemon = this.#pokemonFromView(benchedPokemon);
