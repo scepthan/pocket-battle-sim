@@ -1,4 +1,4 @@
-import { cards as inputCards } from "@/assets";
+import { allCards as inputCards } from "@/assets";
 import type { PlayingCard } from "../gamelogic";
 import { parseCard } from "./parseCard";
 

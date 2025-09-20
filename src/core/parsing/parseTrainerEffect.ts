@@ -1,4 +1,4 @@
-import { cards as allCards } from "@/assets";
+import { allCards } from "@/assets";
 import {
   Game,
   InPlayPokemonCard,

@@ -1,4 +1,4 @@
-import { cards as inputCards } from "@/assets";
+import { allCards as inputCards } from "@/assets";
 import { parseCard, type InputCard, type PlayingCard } from "@/core";
 import { defineStore } from "pinia";
 import { ref } from "vue";
