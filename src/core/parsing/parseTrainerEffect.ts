@@ -1,4 +1,3 @@
-import { allCards } from "@/assets";
 import {
   Game,
   InPlayPokemonCard,
@@ -9,6 +8,7 @@ import {
   type PokemonCard,
   type TrainerEffect,
 } from "../gamelogic";
+import { parsePlayingCardPredicate, parsePokemonPredicate } from "./parsePredicates";
 import type { ParsedResult } from "./types";
 
 interface EffectTransformer {
@@ -26,16 +26,17 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
       }),
     },
     {
-      pattern: /^Put a random Basic Pokémon from your deck into your hand\.$/,
-      transform: () => ({
-        type: "Conditional",
-        condition: (game: Game) => game.AttackingPlayer.canDraw(),
-        effect: async (game: Game) => {
-          game.AttackingPlayer.drawRandomFiltered(
-            (card) => card.CardType == "Pokemon" && card.Stage == 0
-          );
-        },
-      }),
+      pattern: /^Put (?:a|1) random (.+?) from your deck into your hand\.$/,
+      transform: (_, specifier) => {
+        const predicate = parsePlayingCardPredicate(specifier);
+        return {
+          type: "Conditional",
+          condition: (game: Game) => game.AttackingPlayer.canDraw(),
+          effect: async (game: Game) => {
+            game.AttackingPlayer.drawRandomFiltered(predicate);
+          },
+        };
+      },
     },
     {
       pattern: /^Switch out your opponent’s Active Pokémon to the Bench\./,
@@ -102,16 +103,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
       pattern:
         /^During this turn, attacks used by your (.+?) do \+(\d+) damage to your opponent’s Active Pokémon\.$/,
       transform: (_, specifier, modifier) => {
-        let appliesToPokemon: (pokemon: InPlayPokemonCard) => boolean = () => false;
-        let descriptor: string | undefined;
-
-        if (specifier === "Pokémon") {
-          appliesToPokemon = () => true;
-        } else {
-          descriptor = specifier;
-          const names = parsePokemonNames(specifier);
-          appliesToPokemon = (pokemon: InPlayPokemonCard) => names.includes(pokemon.Name);
-        }
+        const appliesToPokemon = parsePokemonPredicate(specifier);
 
         return {
           type: "Conditional",
@@ -121,7 +113,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
               type: "IncreaseAttack",
               category: "Pokemon",
               appliesToPokemon,
-              descriptor,
+              descriptor: specifier,
               source: "Effect",
               amount: Number(modifier),
             });
@@ -184,15 +176,12 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     },
     {
       pattern: /^Put your (.+?) in the Active Spot into your hand\.$/,
-      transform: (_, pokemon) => {
-        const names = parsePokemonNames(pokemon);
+      transform: (_, specifier) => {
+        const predicate = parsePokemonPredicate(specifier);
 
         return {
           type: "Conditional",
-          condition: (game: Game) => {
-            const active = game.AttackingPlayer.ActivePokemon;
-            return active.isPokemon && names.includes(active.Name);
-          },
+          condition: (game: Game) => predicate(game.AttackingPlayer.activeOrThrow()),
           effect: async (game: Game) => {
             await game.AttackingPlayer.returnPokemonToHand(game.AttackingPlayer.activeOrThrow());
           },
@@ -201,14 +190,13 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     },
     {
       pattern: /^Take a {(\w)} Energy from your Energy Zone and attach it to (.+?)\.$/,
-      transform: (_, energyType, pokemon) => {
+      transform: (_, energyType, specifier) => {
         const fullType = parseEnergy(energyType);
-        const names = parsePokemonNames(pokemon);
+        const predicate = parsePokemonPredicate(specifier);
 
         return {
           type: "Targeted",
-          validTargets: (game: Game) =>
-            game.AttackingPlayer.InPlayPokemon.filter((x) => names.includes(x.Name)),
+          validTargets: (game: Game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
           effect: async (game: Game, pokemon: CardSlot) => {
             if (!pokemon.isPokemon) return;
             game.AttackingPlayer.attachEnergy(pokemon, [fullType], "energyZone");
@@ -219,13 +207,13 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     {
       pattern:
         /^Move all {(\w)} Energy from your Benched Pokémon to your (.+?) in the Active Spot\.$/,
-      transform: (_, energyType, pokemonNames) => {
+      transform: (_, energyType, specifier) => {
         const fullType = parseEnergy(energyType);
-        const names = parsePokemonNames(pokemonNames);
+        const predicate = parsePokemonPredicate(specifier);
 
         return {
           type: "Conditional",
-          condition: (game: Game) => names.includes(game.AttackingPlayer.activeOrThrow().Name),
+          condition: (game: Game) => predicate(game.AttackingPlayer.activeOrThrow()),
           effect: async (game: Game) => {
             for (const pokemon of game.AttackingPlayer.BenchedPokemon) {
               const energyToMove = pokemon.AttachedEnergy.filter((e) => e == fullType);
@@ -328,14 +316,4 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
       },
     },
   };
-};
-
-export const parsePokemonNames = (nameString: string) => {
-  const names = nameString.split(/, or | or |, /);
-
-  const unknownNames = names.filter((name) => !allCards.some((card) => card.name === name));
-  if (unknownNames.length > 0)
-    console.warn(`Unknown Pokémon names in card effect: ${unknownNames.join(", ")}`);
-
-  return names;
 };

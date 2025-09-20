@@ -8,7 +8,7 @@ import {
   type PokemonCard,
 } from "../gamelogic";
 import { randomElement } from "../util";
-import { parsePokemonNames } from "./parseTrainerEffect";
+import { parsePlayingCardPredicate } from "./parsePredicates";
 import type { ParsedResult } from "./types";
 
 interface EffectTransformer {
@@ -350,12 +350,8 @@ export const parseAttackEffect = (
     },
     {
       pattern: /^Put 1 random (.+?) from your deck onto your bench\.$/i,
-      transform: (_, pokemon) => {
-        const pokemonNames = parsePokemonNames(pokemon);
-        const predicate =
-          pokemon == "Basic Pokémon"
-            ? (card: PlayingCard) => card.CardType == "Pokemon" && card.Stage == 0
-            : (card: PlayingCard) => card.CardType == "Pokemon" && pokemonNames.includes(card.Name);
+      transform: (_, specifier) => {
+        const predicate = parsePlayingCardPredicate(specifier);
 
         return async (game: Game) => {
           await defaultEffect(game);

@@ -19,10 +19,13 @@ Backend todo:
     - [x] Coin flip to attack effect
     - [x] Energy-doubling Ability
     - [x] Discard energy and attack any mon
-  - [ ] A2
-    - [ ] Confused
-    - [ ] Burned
+  - [ ] A2: 84/157 (53.5%)
     - [ ] Pokémon Tools
+    - [ ] Confused
+      - [ ] Promo Misdreavus
+    - [ ] Burned
+    - [ ] Ability activation on energy attach
+      - [ ] Promo Cresselia ex
   - [ ] A2a
   - [ ] A2b
   - [ ] A3
