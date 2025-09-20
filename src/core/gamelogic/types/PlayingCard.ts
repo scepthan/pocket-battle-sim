@@ -25,6 +25,11 @@ export interface ItemCard extends BaseCard {
   Text: string;
   Effect: TrainerEffect;
 }
+export interface FossilCard extends BaseCard {
+  CardType: "Fossil";
+  Text: string;
+  Effect: TrainerEffect;
+}
 export interface SupporterCard extends BaseCard {
   CardType: "Supporter";
   Text: string;
@@ -41,5 +46,5 @@ export interface StadiumCard extends BaseCard {
   Effect: BasicEffect;
 }
 
-export type TrainerCard = ItemCard | SupporterCard; // | ToolCard | StadiumCard
+export type TrainerCard = ItemCard | FossilCard | SupporterCard; // | ToolCard | StadiumCard
 export type PlayingCard = PokemonCard | TrainerCard;

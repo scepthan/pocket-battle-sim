@@ -167,6 +167,8 @@ export class PlayerGameView {
         if (!card.Effect.condition(this.#game, this.#player)) return false;
       }
       return true;
+    } else if (card.CardType == "Fossil") {
+      return this.selfBench.some((slot) => !slot.isPokemon);
     }
   }
   canUseAttack(attack: Attack): this is PlayerGameViewWithActivePokemon {

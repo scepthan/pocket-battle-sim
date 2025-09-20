@@ -9,7 +9,7 @@ export const parseDeck = (cardIds: string[]) => {
 
   for (const cardId of cardIds) {
     if (!(cardId in outputCards)) {
-      const inputCard = inputCards.find((card) => card.ID == cardId);
+      const inputCard = inputCards.find((card) => card.id == cardId);
       if (!inputCard) throw new Error("Could not find card with ID " + cardId);
 
       const card = parseCard(inputCard).value;

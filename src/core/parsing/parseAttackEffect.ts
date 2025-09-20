@@ -87,7 +87,7 @@ export const parseAttackEffect = (
       },
     },
     {
-      pattern: /^If your opponent's Active Pokémon has damage on it, (.+?\.)$/i,
+      pattern: /^If your opponent’s Active Pokémon has damage on it, (.+?\.)$/i,
       transform: (_, effectText) => {
         const conditionalEffect = recursiveParse(effectText);
 
@@ -111,7 +111,7 @@ export const parseAttackEffect = (
       },
     },
     {
-      pattern: /^If your opponent's Active Pokémon is Poisoned, (.+?\.)$/i,
+      pattern: /^If your opponent’s Active Pokémon is Poisoned, (.+?\.)$/i,
       transform: (_, effectText) => {
         const conditionalEffect = recursiveParse(effectText);
 
@@ -123,7 +123,7 @@ export const parseAttackEffect = (
       },
     },
     {
-      pattern: /^If your opponent's Active Pokémon is a Pokémon ex, (.+?\.)$/i,
+      pattern: /^If your opponent’s Active Pokémon is a Pokémon ex, (.+?\.)$/i,
       transform: (_, effectText) => {
         const conditionalEffect = recursiveParse(effectText);
 
@@ -136,7 +136,7 @@ export const parseAttackEffect = (
     },
     {
       pattern:
-        /^If any of your Pokémon were knocked out by damage from an attack during your opponent's last turn, (.+?\.)$/i,
+        /^If any of your Pokémon were knocked out by damage from an attack during your opponent’s last turn, (.+?\.)$/i,
       transform: (_, effectText) => {
         const conditionalEffect = recursiveParse(effectText);
 
@@ -185,7 +185,7 @@ export const parseAttackEffect = (
     },
     {
       pattern:
-        /^This attack does (\d+) more damage for each Energy attached to your opponent's Active Pokémon\.$/i,
+        /^This attack does (\d+) more damage for each Energy attached to your opponent’s Active Pokémon\.$/i,
       transform: (_, extraDamage) => async (game: Game) => {
         const energyCount = game.DefendingPlayer.activeOrThrow().EffectiveEnergy.length;
         const damage = baseAttackHP + Number(extraDamage) * energyCount;
@@ -222,7 +222,7 @@ export const parseAttackEffect = (
     },
     {
       pattern:
-        /^This attack does (\d+)( more)? damage for each of your opponent's Benched Pokémon\.$/i,
+        /^This attack does (\d+)( more)? damage for each of your opponent’s Benched Pokémon\.$/i,
       transform: (_, damagePerBench, more) => {
         return async (game: Game) => {
           let totalDamage = more ? baseAttackHP : 0;
@@ -233,7 +233,7 @@ export const parseAttackEffect = (
     },
     {
       pattern:
-        /^1 of your opponent's Pokémon is chosen at random (\d+) times\. For each time a Pokémon was chosen, do (\d+) damage to it\.$/i,
+        /^1 of your opponent’s Pokémon is chosen at random (\d+) times\. For each time a Pokémon was chosen, do (\d+) damage to it\.$/i,
       transform: (_, times, damage) => async (game: Game) => {
         const damages = game.DefendingPlayer.InPlayPokemon.map((p) => ({ pokemon: p, damage: 0 }));
         for (let i = 0; i < Number(times); i++) {
@@ -245,9 +245,9 @@ export const parseAttackEffect = (
       },
     },
 
-    // Damage to opponent's bench
+    // Damage to opponent’s bench
     {
-      pattern: /^This attack also does (\d+) damage to each of your opponent's Benched Pokémon\.$/i,
+      pattern: /^This attack also does (\d+) damage to each of your opponent’s Benched Pokémon\.$/i,
       transform: (_, benchDamage) => async (game: Game) => {
         await defaultEffect(game);
         for (const pokemon of game.DefendingPlayer.BenchedPokemon) {
@@ -256,7 +256,7 @@ export const parseAttackEffect = (
       },
     },
     {
-      pattern: /^This attack does (\d+) damage to 1 of your opponent's( Benched)? Pokémon\.$/i,
+      pattern: /^This attack does (\d+) damage to 1 of your opponent’s( Benched)? Pokémon\.$/i,
       transform: (_, damage, benched) => async (game: Game) => {
         const pokemon = await game.choosePokemon(
           game.AttackingPlayer,
@@ -300,7 +300,7 @@ export const parseAttackEffect = (
     },
     {
       pattern:
-        /^Heal from this Pokémon the same amount of damage you did to your opponent's Active Pokémon\.$/i,
+        /^Heal from this Pokémon the same amount of damage you did to your opponent’s Active Pokémon\.$/i,
       transform: () => async (game: Game) => {
         const damageDealt = game.attackActivePokemon(baseAttackHP);
         game.healPokemon(game.AttackingPlayer.activeOrThrow(), damageDealt);
@@ -326,7 +326,7 @@ export const parseAttackEffect = (
     },
     {
       pattern:
-        /^Shuffle your hand into your deck. Draw a card for each card in your opponent's hand.$/i,
+        /^Shuffle your hand into your deck. Draw a card for each card in your opponent’s hand.$/i,
       transform: () => async (game: Game) => {
         await defaultEffect(game);
         game.AttackingPlayer.shuffleHandIntoDeck();
@@ -374,7 +374,7 @@ export const parseAttackEffect = (
       },
     },
     {
-      pattern: /^discard a random card from your opponent's hand\.$/i,
+      pattern: /^discard a random card from your opponent’s hand\.$/i,
       transform: () => async (game: Game) => {
         await defaultEffect(game);
         game.DefendingPlayer.discardRandomFiltered();
@@ -409,7 +409,7 @@ export const parseAttackEffect = (
     },
     {
       pattern:
-        /^Discard (a|\d+|all) \{(\w)\} Energy from this Pokémon\. This attack does (\d+) damage to 1 of your opponent's Pokémon\.$/i,
+        /^Discard (a|\d+|all) \{(\w)\} Energy from this Pokémon\. This attack does (\d+) damage to 1 of your opponent’s Pokémon\.$/i,
       transform: (_, count, energyType, damage) => {
         const fullType = parseEnergy(energyType);
         const numToDiscard = count == "all" ? Infinity : count == "a" ? 1 : Number(count);
@@ -426,7 +426,7 @@ export const parseAttackEffect = (
       },
     },
     {
-      pattern: /^Discard a random Energy from your opponent's Active Pokémon.$/i,
+      pattern: /^Discard a random Energy from your opponent’s Active Pokémon.$/i,
       transform: () => async (game: Game) => {
         await defaultEffect(game);
         game.DefendingPlayer.discardRandomEnergy(game.DefendingPlayer.activeOrThrow());
@@ -434,7 +434,7 @@ export const parseAttackEffect = (
     },
     {
       pattern:
-        /^Discard a random Energy from among the Energy attached to all Pokémon \(both yours and your opponent's\)\.$/i,
+        /^Discard a random Energy from among the Energy attached to all Pokémon \(both yours and your opponent’s\)\.$/i,
       transform: () => async (game: Game) => {
         await defaultEffect(game);
         const allPokemon = [
@@ -522,14 +522,14 @@ export const parseAttackEffect = (
       },
     },
     {
-      pattern: /^Switch out your opponent's Active Pokémon to the Bench\./i,
+      pattern: /^Switch out your opponent’s Active Pokémon to the Bench\./i,
       transform: () => async (game: Game) => {
         await defaultEffect(game);
         await game.swapActivePokemon(game.DefendingPlayer, "opponentEffect");
       },
     },
     {
-      pattern: /^your opponent shuffles their Active Pokémon back into their deck\./i,
+      pattern: /^your opponent shuffles their Active Pokémon into their deck\./i,
       transform: () => async (game: Game) => {
         await defaultEffect(game);
         await game.DefendingPlayer.shufflePokemonIntoDeck(game.DefendingPlayer.activeOrThrow());
@@ -538,21 +538,21 @@ export const parseAttackEffect = (
 
     // Special Condition effects
     {
-      pattern: /^Your opponent's active Pokémon is now Poisoned\.$/i,
+      pattern: /^Your opponent’s active Pokémon is now Poisoned\.$/i,
       transform: () => async (game: Game) => {
         await defaultEffect(game);
         game.DefendingPlayer.poisonActivePokemon();
       },
     },
     {
-      pattern: /^Your opponent's active Pokémon is now Asleep\.$/i,
+      pattern: /^Your opponent’s active Pokémon is now Asleep\.$/i,
       transform: () => async (game: Game) => {
         await defaultEffect(game);
         game.DefendingPlayer.sleepActivePokemon();
       },
     },
     {
-      pattern: /^Your opponent's active Pokémon is now Paralyzed\.$/i,
+      pattern: /^Your opponent’s active Pokémon is now Paralyzed\.$/i,
       transform: () => async (game: Game) => {
         await defaultEffect(game);
         game.DefendingPlayer.paralyzeActivePokemon();
@@ -562,7 +562,7 @@ export const parseAttackEffect = (
     // Other status effects
     {
       pattern:
-        /^During your opponent's next turn, this Pokémon takes -(\d+) damage from attacks\.$/i,
+        /^During your opponent’s next turn, this Pokémon takes −(\d+) damage from attacks\.$/i,
       transform: (_, damageReduction) => async (game: Game) => {
         await defaultEffect(game);
         game.AttackingPlayer.applyActivePokemonStatus({
@@ -576,7 +576,7 @@ export const parseAttackEffect = (
     },
     {
       pattern:
-        /^during your opponent's next turn, prevent all damage from—and effects of—attacks done to this Pokémon\.$/i,
+        /^during your opponent’s next turn, prevent all damage from—and effects of—attacks done to this Pokémon\.$/i,
       transform: () => async (game: Game) => {
         await defaultEffect(game);
         game.AttackingPlayer.applyActivePokemonStatus({
@@ -589,7 +589,7 @@ export const parseAttackEffect = (
     },
     {
       pattern:
-        /^During your opponent's next turn, attacks used by the Defending Pokémon do -(\d+) damage\.$/i,
+        /^During your opponent’s next turn, attacks used by the Defending Pokémon do −(\d+) damage\.$/i,
       transform: (_, damageReduction) => async (game: Game) => {
         await defaultEffect(game);
         game.DefendingPlayer.applyActivePokemonStatus({
@@ -604,7 +604,7 @@ export const parseAttackEffect = (
     {
       // Vulpix and Omastar have the same phrase in opposite order, so we account for both arrangements
       pattern:
-        /^(?:the Defending Pokémon can't attack ?|during your opponent's next turn(?:, )?){2}\.$/i,
+        /^(?:the Defending Pokémon can’t attack ?|during your opponent’s next turn(?:, )?){2}\.$/i,
       transform: () => async (game: Game) => {
         await defaultEffect(game);
         game.DefendingPlayer.applyActivePokemonStatus({
@@ -616,7 +616,7 @@ export const parseAttackEffect = (
       },
     },
     {
-      pattern: /^During your opponent's next turn, the Defending Pokémon can't retreat\.$/i,
+      pattern: /^During your opponent’s next turn, the Defending Pokémon can’t retreat\.$/i,
       transform: () => async (game: Game) => {
         await defaultEffect(game);
         game.DefendingPlayer.applyActivePokemonStatus({
@@ -629,7 +629,7 @@ export const parseAttackEffect = (
     },
     {
       pattern:
-        /^Your opponent can't use any Supporter cards from their hand during their next turn\.$/i,
+        /^Your opponent can’t use any Supporter cards from their hand during their next turn\.$/i,
       transform: () => async (game: Game) => {
         await defaultEffect(game);
         game.DefendingPlayer.applyStatus({
@@ -642,7 +642,7 @@ export const parseAttackEffect = (
     },
     {
       pattern:
-        /^During your opponent's next turn, if the Defending Pokémon tries to use an attack, your opponent flips a coin. If tails, that attack doesn't happen.$/i,
+        /^During your opponent’s next turn, if the Defending Pokémon tries to use an attack, your opponent flips a coin. If tails, that attack doesn’t happen.$/i,
       transform: () => async (game: Game) => {
         await defaultEffect(game);
         game.DefendingPlayer.applyActivePokemonStatus({
@@ -657,7 +657,7 @@ export const parseAttackEffect = (
     // Miscellaneous
     {
       pattern:
-        /^Choose 1 of your opponent's( Active)? Pokémon's attacks and use it as this attack\.( If this Pokémon doesn't have the necessary Energy to use that attack, this attack does nothing\.)?$/i,
+        /^Choose 1 of your opponent’s( Active)? Pokémon’s attacks and use it as this attack\.( If this Pokémon doesn’t have the necessary Energy to use that attack, this attack does nothing\.)?$/i,
       transform: (_, active, energyRequired) => async (game: Game) => {
         const chosenPokemon = active
           ? game.DefendingPlayer.activeOrThrow()

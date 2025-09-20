@@ -38,7 +38,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
       }),
     },
     {
-      pattern: /^Switch out your opponent's Active Pokémon to the Bench\./,
+      pattern: /^Switch out your opponent’s Active Pokémon to the Bench\./,
       transform: () => ({
         type: "Conditional",
         condition: (game: Game) => game.DefendingPlayer.BenchedPokemon.length > 0,
@@ -100,7 +100,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     },
     {
       pattern:
-        /^During this turn, attacks used by your (.+?) do \+(\d+) damage to your opponent's Active Pokémon\.$/,
+        /^During this turn, attacks used by your (.+?) do \+(\d+) damage to your opponent’s Active Pokémon\.$/,
       transform: (_, specifier, modifier) => {
         let appliesToPokemon: (pokemon: InPlayPokemonCard) => boolean = () => false;
         let descriptor: string | undefined;
@@ -131,7 +131,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     },
     {
       pattern:
-        /^During your opponent's next turn, all of your Pokémon take -(\d+) damage from attacks from your opponent's Pokémon\.$/,
+        /^During your opponent’s next turn, all of your Pokémon take −(\d+) damage from attacks from your opponent’s Pokémon\.$/,
       transform: (_, modifier) => ({
         type: "Conditional",
         condition: () => true,
@@ -243,7 +243,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     },
     {
       pattern:
-        /Play this card as if it were a (\d+)-HP Basic {(\w)} Pokémon. At any time during your turn, you may discard this card from play. This card can't retreat./i,
+        /Play this card as if it were a (\d+)-HP Basic \{(\w)\} Pokémon\. At any time during your turn, you may discard this card from play\. This card can’t retreat\./i,
       transform: (_, hp, type) => {
         const fullType = parseEnergy(type);
 
@@ -283,7 +283,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
       },
     },
     {
-      pattern: /^Put a Basic Pokémon from your opponent's discard pile onto their Bench.$/,
+      pattern: /^Put a Basic Pokémon from your opponent’s discard pile onto their Bench.$/,
       transform: () => ({
         type: "Conditional",
         condition: (game: Game) =>
@@ -355,7 +355,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
 export const parsePokemonNames = (nameString: string) => {
   const names = nameString.split(/, or | or |, /);
 
-  const unknownNames = names.filter((name) => !allCards.some((card) => card.Name === name));
+  const unknownNames = names.filter((name) => !allCards.some((card) => card.name === name));
   if (unknownNames.length > 0)
     console.warn(`Unknown Pokémon names in card effect: ${unknownNames.join(", ")}`);
 

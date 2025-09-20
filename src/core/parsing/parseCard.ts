@@ -7,52 +7,56 @@ import type { InputCard, ParsedResultOptional } from "./types";
 export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCard> => {
   let parseSuccessful = true;
 
-  if (inputCard.CardType == "Pokemon") {
-    const Attacks = inputCard.Moves.map((attack) => {
+  if (inputCard.cardType == "Pokemon") {
+    const Attacks = inputCard.attacks.map((attack) => {
       const result = parseAttack(attack);
       if (!result.parseSuccessful) parseSuccessful = false;
       return result.value;
     });
 
     let Ability: Ability | undefined;
-    if (inputCard.Ability) {
-      const result = parseAbility(inputCard.Ability);
+    if (inputCard.ability) {
+      const result = parseAbility(inputCard.ability);
       Ability = result.value;
       if (!result.parseSuccessful) parseSuccessful = false;
     }
 
     let Type: Energy = "Colorless";
-    if (isEnergy(inputCard.Type)) {
-      Type = inputCard.Type;
+    if (isEnergy(inputCard.type)) {
+      Type = inputCard.type;
     } else {
       parseSuccessful = false;
     }
 
     const outputCard = {
-      ID: inputCard.ID,
-      Name: inputCard.Name,
-      CardType: inputCard.CardType,
+      ID: inputCard.id,
+      Name: inputCard.name,
+      CardType: inputCard.cardType,
       Type,
-      BaseHP: inputCard.HP,
-      Stage: inputCard.Stage,
-      EvolvesFrom: inputCard.EvolvesFrom,
-      RetreatCost: inputCard.RetreatCost,
-      Weakness: inputCard.Weakness,
-      PrizePoints: inputCard.Name.endsWith(" ex") ? 2 : 1,
+      BaseHP: inputCard.hp,
+      Stage: inputCard.stage,
+      EvolvesFrom: inputCard.previousEvolution,
+      RetreatCost: inputCard.retreatCost,
+      Weakness: inputCard.weakness,
+      PrizePoints: inputCard.name.endsWith(" ex") ? 2 : 1,
       Attacks,
       Ability,
     };
 
     return { value: outputCard, parseSuccessful };
-  } else if (inputCard.CardType == "Item" || inputCard.CardType == "Supporter") {
-    const result = parseTrainerEffect(inputCard.Text);
+  } else if (
+    inputCard.cardType == "Item" ||
+    inputCard.cardType == "Fossil" ||
+    inputCard.cardType == "Supporter"
+  ) {
+    const result = parseTrainerEffect(inputCard.text);
     if (!result.parseSuccessful) parseSuccessful = false;
 
     const outputCard = {
-      ID: inputCard.ID,
-      Name: inputCard.Name,
-      CardType: inputCard.CardType,
-      Text: inputCard.Text,
+      ID: inputCard.id,
+      Name: inputCard.name,
+      CardType: inputCard.cardType,
+      Text: inputCard.text,
       Effect: result.value,
     };
 

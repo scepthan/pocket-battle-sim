@@ -34,26 +34,26 @@ onMounted(() => {
 
   const uniqueCards = cards
     .slice()
-    .sort((a, b) => rarityIndex(a.Rarity) - rarityIndex(b.Rarity) || a.ID.localeCompare(b.ID))
+    .sort((a, b) => rarityIndex(a.rarity) - rarityIndex(b.rarity) || a.id.localeCompare(b.id))
     .filter((card) => {
       const baseCard = {
-        Name: card.Name,
-        CardType: card.CardType,
+        Name: card.name,
+        CardType: card.cardType,
       };
       let functionalCard;
-      if (card.CardType === "Pokemon") {
+      if (card.cardType === "Pokemon") {
         functionalCard = {
           ...baseCard,
-          Type: card.Type,
-          HP: card.HP,
-          RetreatCost: card.RetreatCost,
-          Ability: card.Ability,
-          Moves: card.Moves,
+          Type: card.type,
+          HP: card.hp,
+          RetreatCost: card.retreatCost,
+          Ability: card.ability,
+          Moves: card.attacks,
         };
       } else {
         functionalCard = {
           ...baseCard,
-          Text: card.Text,
+          Text: card.text,
         };
       }
 
@@ -65,27 +65,27 @@ onMounted(() => {
         return true;
       }
     })
-    .sort((a, b) => a.ID.localeCompare(b.ID));
+    .sort((a, b) => a.id.localeCompare(b.id));
 
   console.log(`Loaded ${uniqueCards.length} unique cards from ${cards.length} total cards.`);
 
   const unusedCards = uniqueCards.filter(
     (card) =>
       !Object.values(decklists).some((decks) =>
-        Object.values(decks).some((deck) => deck.Cards.includes(card.ID))
+        Object.values(decks).some((deck) => deck.Cards.includes(card.id))
       )
   );
 
   console.log(
     `Found ${unusedCards.length} unused cards:`,
-    unusedCards.map((card) => `${card.ID} (${card.Name})`).join("; ")
+    unusedCards.map((card) => `${card.id} (${card.name})`).join("; ")
   );
 
   if (debugMultiUseCards) {
     const multiUseCards = uniqueCards.filter(
       (card) =>
         Object.values(decklists).flatMap((decks) =>
-          Object.values(decks).filter((deck) => deck.Cards.includes(card.ID))
+          Object.values(decks).filter((deck) => deck.Cards.includes(card.id))
         ).length > 1
     );
 
@@ -94,10 +94,10 @@ onMounted(() => {
       multiUseCards
         .map(
           (card) =>
-            `${card.ID} (${card.Name}): ${Object.entries(decklists)
+            `${card.id} (${card.name}): ${Object.entries(decklists)
               .flatMap(([setName, set]) =>
                 Object.entries(set).flatMap(([deckName, deck]) =>
-                  deck.Cards.includes(card.ID) ? `${deckName} (${setName})` : []
+                  deck.Cards.includes(card.id) ? `${deckName} (${setName})` : []
                 )
               )
               .join(", ")}`

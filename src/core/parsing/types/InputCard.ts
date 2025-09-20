@@ -1,34 +1,33 @@
 export interface InputCardAbility {
-  Name: string;
-  Effect: string;
+  name: string;
+  text: string;
 }
 export interface InputCardAttack {
-  Name: string;
-  Energy: string;
-  HP?: number;
-  Effect?: string;
+  name: string;
+  cost: string;
+  damage?: number;
+  text?: string;
 }
 export interface BaseInputCard {
-  ID: string;
-  Name: string;
-  Rarity: string;
-  SetID: string;
-  PackID: string;
+  id: string;
+  name: string;
+  rarity: string;
+  setId: string;
 }
 export interface PokemonInputCard extends BaseInputCard {
-  CardType: "Pokemon";
-  Type: string;
-  HP: number;
-  Stage: number;
-  EvolvesFrom?: string;
-  RetreatCost: number;
-  Weakness: string;
-  Moves: InputCardAttack[];
-  Ability?: InputCardAbility;
+  cardType: "Pokemon";
+  type: string;
+  hp: number;
+  stage: number;
+  previousEvolution?: string;
+  retreatCost: number;
+  weakness: string;
+  attacks: InputCardAttack[];
+  ability?: InputCardAbility;
 }
 export interface TrainerInputCard extends BaseInputCard {
-  CardType: "Item" | "Supporter";
-  Text: string;
+  cardType: "Item" | "Fossil" | "Supporter";
+  text: string;
 }
 
 export type InputCard = PokemonInputCard | TrainerInputCard;

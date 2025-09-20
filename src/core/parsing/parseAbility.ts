@@ -16,15 +16,15 @@ interface AbilityTransformer {
 
 export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Ability> => {
   const ability: Ability = {
-    Name: inputAbility.Name,
+    Name: inputAbility.name,
     Trigger: "OnEnterPlay",
     Conditions: [],
-    Text: inputAbility.Effect,
+    Text: inputAbility.text,
     Effect: async (game: Game) => {
       game.GameLog.notImplemented(game.AttackingPlayer);
     },
   };
-  let abilityText = inputAbility.Effect;
+  let abilityText = inputAbility.text;
   let parseSuccessful = true;
   const dictionary: AbilityTransformer[] = [
     {
@@ -54,7 +54,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     },
     {
       pattern:
-        /^If this Pokémon is in the Active Spot and is damaged by an attack from your opponent's Pokémon, /i,
+        /^If this Pokémon is in the Active Spot and is damaged by an attack from your opponent’s Pokémon, /i,
       transform: () => {
         ability.Trigger = "AfterAttackDamage";
         ability.Conditions.push("Active");
@@ -109,7 +109,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     },
     {
       pattern:
-        /take 1 {(\w)} Energy from your Energy Zone and attach it to the {(\w)} Pokémon in the Active Spot\./i,
+        /take a {(\w)} Energy from your Energy Zone and attach it to the {(\w)} Pokémon in the Active Spot\./i,
       transform: (_, energyType, pokemonType) => {
         const fullType = parseEnergy(energyType);
         const pt = parseEnergy(pokemonType);
@@ -145,7 +145,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       },
     },
     {
-      pattern: /do (\d+) damage to 1 of your opponent's Pokémon\.$/i,
+      pattern: /do (\d+) damage to 1 of your opponent’s Pokémon\.$/i,
       transform: (_, damage) => {
         ability.Effect = async (game: Game) => {
           const pokemon = await game.choosePokemon(
@@ -161,7 +161,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       },
     },
     {
-      pattern: /^flip a coin\. If heads, your opponent's Active Pokémon is now Asleep\.$/i,
+      pattern: /^flip a coin\. If heads, your opponent’s Active Pokémon is now Asleep\.$/i,
       transform: () => {
         ability.Effect = async (game: Game) => {
           if (game.AttackingPlayer.flipCoin()) {
@@ -172,7 +172,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     },
     {
       pattern:
-        /^switch out your opponent's Active Pokémon to the Bench\. \(Your opponent chooses the new Active Pokémon\.\)$/i,
+        /^switch out your opponent’s Active Pokémon to the Bench\. \(Your opponent chooses the new Active Pokémon\.\)$/i,
       transform: () => {
         ability.Effect = async (game: Game) => {
           await game.swapActivePokemon(game.DefendingPlayer, "opponentEffect");
@@ -188,7 +188,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       },
     },
     {
-      pattern: /^make your opponent's Active Pokémon Poisoned\.$/i,
+      pattern: /^make your opponent’s Active Pokémon Poisoned\.$/i,
       transform: () => {
         ability.Effect = async (game: Game) => {
           game.DefendingPlayer.poisonActivePokemon();
@@ -196,7 +196,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       },
     },
     {
-      pattern: /^switch in 1 of your opponent's Benched Basic Pokémon to the Active Spot\.$/i,
+      pattern: /^switch in 1 of your opponent’s Benched Basic Pokémon to the Active Spot\.$/i,
       transform: () => {
         ability.Effect = async (game: Game) => {
           const benchedBasics = game.DefendingPlayer.BenchedPokemon.filter((p) => p.Stage === 0);
@@ -217,7 +217,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     },
 
     {
-      pattern: /^This Pokémon takes -(\d+) damage from attacks\.$/i,
+      pattern: /^This Pokémon takes −(\d+) damage from attacks\.$/i,
       transform: (_, amount) => {
         const reduceAmount = Number(amount);
         ability.Trigger = "OnEnterPlay";
@@ -233,7 +233,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       },
     },
     {
-      pattern: /^your opponent can't use any Supporter cards from their hand\.$/i,
+      pattern: /^your opponent can’t use any Supporter cards from their hand\.$/i,
       transform: () => {
         ability.Effect = async (game: Game, pokemon: InPlayPokemonCard) => {
           const player = game.findOwner(pokemon);
@@ -250,7 +250,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     },
     {
       pattern:
-        /^Your opponent can't play any Pokémon from their hand to evolve their Active Pokémon\.$/i,
+        /^Your opponent can’t play any Pokémon from their hand to evolve their Active Pokémon\.$/i,
       transform: () => {
         ability.Effect = async (game: Game, pokemon: InPlayPokemonCard) => {
           const player = game.findOwner(pokemon);
@@ -269,7 +269,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     },
     {
       pattern:
-        /^Each {(\w)} Energy attached to your {\1} Pokémon provides 2 {\1} Energy. This effect doesn't stack.$/i,
+        /^Each {(\w)} Energy attached to your {\1} Pokémon provides 2 {\1} Energy. This effect doesn’t stack.$/i,
       transform: (_, energyType) => {
         const fullType = parseEnergy(energyType);
 
