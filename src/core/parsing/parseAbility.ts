@@ -2,6 +2,8 @@ import {
   parseEnergy,
   Player,
   type Ability,
+  type AbilityCondition,
+  type CardSlot,
   type Game,
   type InPlayPokemonCard,
   type PlayerStatus,
@@ -14,56 +16,62 @@ interface AbilityTransformer {
   transform: (...args: string[]) => void;
 }
 
+const selfActive: AbilityCondition = (game: Game, self: InPlayPokemonCard) =>
+  self.player.ActivePokemon == self;
+
 export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Ability> => {
   const ability: Ability = {
-    Name: inputAbility.name,
-    Trigger: "OnEnterPlay",
-    Conditions: [],
-    Text: inputAbility.text,
-    Effect: async (game: Game) => {
-      game.GameLog.notImplemented(game.AttackingPlayer);
+    name: inputAbility.name,
+    trigger: "OnEnterPlay",
+    conditions: [],
+    text: inputAbility.text,
+    effect: {
+      type: "Standard",
+      effect: async (game: Game) => {
+        game.GameLog.notImplemented(game.AttackingPlayer);
+      },
     },
-  };
+  } as Ability;
   let abilityText = inputAbility.text;
   let parseSuccessful = true;
   const dictionary: AbilityTransformer[] = [
     {
       pattern: /^Once during your turn, you may /i,
       transform: () => {
-        ability.Trigger = "OnceDuringTurn";
+        ability.trigger = "OnceDuringTurn";
       },
     },
     {
       pattern: /^If this Pokémon is in the Active Spot, /i,
       transform: () => {
-        ability.Conditions.push("Active");
+        ability.conditions.push(selfActive);
       },
     },
     {
       pattern: /^Once during your turn, if this Pokémon is in the Active Spot, you may /i,
       transform: () => {
-        ability.Trigger = "OnceDuringTurn";
-        ability.Conditions.push("Active");
+        ability.trigger = "OnceDuringTurn";
+        ability.conditions.push(selfActive);
       },
     },
     {
       pattern: /^As often as you like during your turn, you may /i,
       transform: () => {
-        ability.Trigger = "ManyDuringTurn";
+        ability.trigger = "ManyDuringTurn";
       },
     },
     {
       pattern:
         /^If this Pokémon is in the Active Spot and is damaged by an attack from your opponent’s Pokémon, /i,
       transform: () => {
-        ability.Trigger = "AfterAttackDamage";
-        ability.Conditions.push("Active");
+        ability.trigger = "AfterAttackDamage";
+        ability.conditions.push(selfActive);
       },
     },
     {
       pattern: /^As long as this Pokémon is in the Active Spot, /i,
       transform: () => {
-        ability.Trigger = "OnEnterActive";
+        ability.trigger = "OnEnterActive";
       },
     },
 
@@ -72,7 +80,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       transform: (_, energyType) => {
         const fullType = parseEnergy(energyType);
 
-        ability.Effect = async (game: Game, pokemon?: InPlayPokemonCard) => {
+        ability.effect.effect = async (game: Game, pokemon?: InPlayPokemonCard) => {
           game.AttackingPlayer.attachEnergy(pokemon!, [fullType], "energyZone");
         };
       },
@@ -82,28 +90,26 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         /move a {(\w)} Energy from 1 of your Benched(?: {(\w)})? Pokémon to your Active(?: {(\w)})? Pokémon\./i,
       transform: (_, energyType, benchedType, activeType) => {
         const fullType = parseEnergy(energyType);
-        const at = activeType && parseEnergy(activeType);
         const bt = benchedType && parseEnergy(benchedType);
-
-        ability.Effect = async (game: Game) => {
-          const active = game.AttackingPlayer.activeOrThrow();
-          if (active.Type != at) {
-            game.GameLog.noValidTargets(game.AttackingPlayer);
-            return;
-          }
-
-          const validBenched = game.AttackingPlayer.BenchedPokemon.filter(
-            (p) => (bt ? p.Type === bt : true) && p.AttachedEnergy.includes(fullType)
+        const predicate = (pokemon: InPlayPokemonCard) =>
+          (!bt || pokemon.Type == bt) && pokemon.AttachedEnergy.includes(fullType);
+        if (activeType) {
+          const at = parseEnergy(activeType);
+          ability.conditions.push(
+            (game: Game, self: InPlayPokemonCard) => self.player.activeOrThrow().Type === at
           );
-          if (!validBenched.length) {
-            game.GameLog.noValidTargets(game.AttackingPlayer);
-            return;
-          }
+        }
 
-          const benched = await game.choosePokemon(game.AttackingPlayer, validBenched);
-          if (!benched) return;
+        ability.effect = {
+          type: "Targeted",
+          findValidTargets: (game: Game, self: InPlayPokemonCard) =>
+            self.player.BenchedPokemon.filter(predicate),
+          effect: async (game: Game, self: InPlayPokemonCard, target: CardSlot) => {
+            if (!target.isPokemon) throw new Error("Not a valid target");
+            const active = game.AttackingPlayer.activeOrThrow();
 
-          game.AttackingPlayer.transferEnergy(benched, active, [fullType]);
+            game.AttackingPlayer.transferEnergy(target, active, [fullType]);
+          },
         };
       },
     },
@@ -114,7 +120,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         const fullType = parseEnergy(energyType);
         const pt = parseEnergy(pokemonType);
 
-        ability.Effect = async (game: Game) => {
+        ability.effect.effect = async (game: Game) => {
           const pokemon = game.AttackingPlayer.activeOrThrow();
           if (pokemon.Type != pt) {
             game.GameLog.noValidTargets(game.AttackingPlayer);
@@ -127,7 +133,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     {
       pattern: /heal (\d+) damage from each of your Pokémon\.$/i,
       transform: (_, healing) => {
-        ability.Effect = async (game: Game) => {
+        ability.effect.effect = async (game: Game) => {
           for (const pokemon of game.AttackingPlayer.InPlayPokemon) {
             if (pokemon.isDamaged()) {
               game.healPokemon(pokemon, Number(healing));
@@ -139,7 +145,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     {
       pattern: /do (\d+) damage to the Attacking Pokémon\.$/i,
       transform: (_, damage) => {
-        ability.Effect = async (game: Game) => {
+        ability.effect.effect = async (game: Game) => {
           game.applyDamage(game.AttackingPlayer.activeOrThrow(), Number(damage), false);
         };
       },
@@ -147,23 +153,23 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     {
       pattern: /do (\d+) damage to 1 of your opponent’s Pokémon\.$/i,
       transform: (_, damage) => {
-        ability.Effect = async (game: Game) => {
-          const pokemon = await game.choosePokemon(
-            game.AttackingPlayer,
-            game.DefendingPlayer.InPlayPokemon
-          );
-          if (pokemon) {
-            game.applyDamage(pokemon, Number(damage), false);
-          } else {
-            game.GameLog.noValidTargets(game.AttackingPlayer);
-          }
+        ability.effect = {
+          type: "Targeted",
+          findValidTargets: (game, self) => self.player.opponent.BenchedPokemon,
+          effect: async (game, self, target) => {
+            if (target.isPokemon) {
+              game.applyDamage(target, Number(damage), false);
+            } else {
+              throw new Error("No valid targets for Greninja");
+            }
+          },
         };
       },
     },
     {
       pattern: /^flip a coin\. If heads, your opponent’s Active Pokémon is now Asleep\.$/i,
       transform: () => {
-        ability.Effect = async (game: Game) => {
+        ability.effect.effect = async (game: Game) => {
           if (game.AttackingPlayer.flipCoin()) {
             game.DefendingPlayer.sleepActivePokemon();
           }
@@ -174,7 +180,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       pattern:
         /^switch out your opponent’s Active Pokémon to the Bench\. \(Your opponent chooses the new Active Pokémon\.\)$/i,
       transform: () => {
-        ability.Effect = async (game: Game) => {
+        ability.effect.effect = async (game: Game) => {
           await game.swapActivePokemon(game.DefendingPlayer, "opponentEffect");
         };
       },
@@ -182,7 +188,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     {
       pattern: /^look at the top card of your deck\.$/i,
       transform: () => {
-        ability.Effect = async (game: Game) => {
+        ability.effect.effect = async (game: Game) => {
           await game.showCards(game.AttackingPlayer, game.AttackingPlayer.Deck.slice(0, 1));
         };
       },
@@ -190,7 +196,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     {
       pattern: /^make your opponent’s Active Pokémon Poisoned\.$/i,
       transform: () => {
-        ability.Effect = async (game: Game) => {
+        ability.effect.effect = async (game: Game) => {
           game.DefendingPlayer.poisonActivePokemon();
         };
       },
@@ -198,20 +204,18 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     {
       pattern: /^switch in 1 of your opponent’s Benched Basic Pokémon to the Active Spot\.$/i,
       transform: () => {
-        ability.Effect = async (game: Game) => {
-          const benchedBasics = game.DefendingPlayer.BenchedPokemon.filter((p) => p.Stage === 0);
-          if (benchedBasics.length === 0) {
-            game.GameLog.noValidTargets(game.AttackingPlayer);
-            return;
-          }
-          const chosenPokemon = await game.choosePokemon(game.AttackingPlayer, benchedBasics);
-          if (chosenPokemon) {
-            await game.DefendingPlayer.swapActivePokemon(
-              chosenPokemon,
+        ability.effect = {
+          type: "Targeted",
+          findValidTargets: (game, self) =>
+            self.player.opponent.BenchedPokemon.filter((p) => p.Stage === 0),
+          effect: async (game, self, target) => {
+            if (!target.isPokemon) throw new Error("Not a valid target");
+            await self.player.opponent.swapActivePokemon(
+              target,
               "opponentEffect",
               game.AttackingPlayer.Name
             );
-          }
+          },
         };
       },
     },
@@ -220,8 +224,8 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       pattern: /^This Pokémon takes −(\d+) damage from attacks\.$/i,
       transform: (_, amount) => {
         const reduceAmount = Number(amount);
-        ability.Trigger = "OnEnterPlay";
-        ability.Effect = async (game: Game, pokemon?: InPlayPokemonCard) => {
+        ability.trigger = "OnEnterPlay";
+        ability.effect.effect = async (game: Game, pokemon?: InPlayPokemonCard) => {
           if (!pokemon) return;
           game.applyPokemonStatus(pokemon, {
             type: "ReduceDamage",
@@ -235,36 +239,38 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     {
       pattern: /^your opponent can’t use any Supporter cards from their hand\.$/i,
       transform: () => {
-        ability.Effect = async (game: Game, pokemon: InPlayPokemonCard) => {
-          const player = game.findOwner(pokemon);
-          const opponent = player == game.Player1 ? game.Player2 : game.Player1;
-          const status: PlayerStatus = {
-            category: "GameRule",
-            type: "CannotUseSupporter",
-            source: "Ability",
-          };
-          applyPlayerStatus(opponent, status, player, pokemon);
+        ability.effect = {
+          type: "Standard",
+          effect: async (game: Game, self: InPlayPokemonCard) => {
+            const status: PlayerStatus = {
+              category: "GameRule",
+              type: "CannotUseSupporter",
+              source: "Ability",
+            };
+            applyPlayerStatus(self.player.opponent, status, self.player, self);
+          },
+          undo: undoPlayerStatus("CannotUseSupporter", true),
         };
-        ability.UndoEffect = undoPlayerStatus("CannotUseSupporter", true);
       },
     },
     {
       pattern:
         /^Your opponent can’t play any Pokémon from their hand to evolve their Active Pokémon\.$/i,
       transform: () => {
-        ability.Effect = async (game: Game, pokemon: InPlayPokemonCard) => {
-          const player = game.findOwner(pokemon);
-          const opponent = player == game.Player1 ? game.Player2 : game.Player1;
-          const status: PlayerStatus = {
-            category: "Pokemon",
-            type: "CannotEvolve",
-            source: "Ability",
-            appliesToPokemon: (p) => p === opponent.ActivePokemon,
-            descriptor: "Active Pokémon",
-          };
-          applyPlayerStatus(opponent, status, player, pokemon);
+        ability.effect = {
+          type: "Standard",
+          effect: async (game: Game, self: InPlayPokemonCard) => {
+            const status: PlayerStatus = {
+              category: "Pokemon",
+              type: "CannotEvolve",
+              source: "Ability",
+              appliesToPokemon: (p) => p === self.player.opponent.ActivePokemon,
+              descriptor: "Active Pokémon",
+            };
+            applyPlayerStatus(self.player.opponent, status, self.player, self);
+          },
+          undo: undoPlayerStatus("CannotUseSupporter", true),
         };
-        ability.UndoEffect = undoPlayerStatus("CannotEvolve", true);
       },
     },
     {
@@ -273,20 +279,22 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       transform: (_, energyType) => {
         const fullType = parseEnergy(energyType);
 
-        ability.Effect = async (game: Game, pokemon: InPlayPokemonCard) => {
-          const player = game.findOwner(pokemon);
-          const status: PlayerStatus = {
-            category: "Pokemon",
-            type: "DoubleEnergy",
-            energyType: fullType,
-            source: "Ability",
-            appliesToPokemon: (p) => p.Type === fullType,
-            doesNotStack: true,
-            descriptor: fullType + "-type Pokémon",
-          };
-          applyPlayerStatus(player, status, player, pokemon);
+        ability.effect = {
+          type: "Standard",
+          effect: async (game: Game, self: InPlayPokemonCard) => {
+            const status: PlayerStatus = {
+              category: "Pokemon",
+              type: "DoubleEnergy",
+              energyType: fullType,
+              source: "Ability",
+              appliesToPokemon: (p) => p.Type === fullType,
+              doesNotStack: true,
+              descriptor: fullType + "-type Pokémon",
+            };
+            applyPlayerStatus(self.player, status, self.player, self);
+          },
+          undo: undoPlayerStatus("CannotUseSupporter", true),
         };
-        ability.UndoEffect = undoPlayerStatus("DoubleEnergy", false);
       },
     },
   ];
@@ -339,7 +347,7 @@ const undoPlayerStatus =
     if (!status) return;
     pokemon.ActivePlayerStatuses = pokemon.ActivePlayerStatuses.filter((s) => s !== status);
 
-    const owner = game.findOwner(pokemon);
+    const owner = pokemon.player;
 
     if (
       status.doesNotStack &&
@@ -349,6 +357,6 @@ const undoPlayerStatus =
       return;
     }
 
-    const player = isOpponent ? (owner == game.Player1 ? game.Player2 : game.Player1) : owner;
+    const player = isOpponent ? owner.opponent : owner;
     removeElement(player.PlayerStatuses, status);
   };

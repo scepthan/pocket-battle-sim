@@ -1,6 +1,12 @@
-import type { Game, InPlayPokemonCard } from "..";
+import type { CardSlot, Game, InPlayPokemonCard } from "..";
 
-export type AbilityEffect = (game: Game, pokemon: InPlayPokemonCard) => Promise<void>;
+export type AbilityEffect = (game: Game, self: InPlayPokemonCard) => Promise<void>;
+export type TargetedAbilityEffect = (
+  game: Game,
+  self: InPlayPokemonCard,
+  target: CardSlot
+) => Promise<void>;
+export type AbilityCondition = (game: Game, self: InPlayPokemonCard) => boolean;
 export type AbilityTrigger =
   | "OnceDuringTurn"
   | "ManyDuringTurn"
@@ -9,13 +15,22 @@ export type AbilityTrigger =
   | "OnEnterActive"
   | "OnEnterBench"
   | "GameRule";
-export type AbilityCondition = "Active" | "OnBench" | "HasDamage";
 
+interface TargetedEffect {
+  type: "Targeted";
+  findValidTargets: (game: Game, self: InPlayPokemonCard) => CardSlot[];
+  effect: TargetedAbilityEffect;
+  undo?: undefined;
+}
+interface StandardEffect {
+  type: "Standard";
+  effect: AbilityEffect;
+  undo?: AbilityEffect;
+}
 export interface Ability {
-  Name: string;
-  Trigger: AbilityTrigger;
-  Conditions: AbilityCondition[];
-  Text: string;
-  Effect: AbilityEffect;
-  UndoEffect?: AbilityEffect;
+  name: string;
+  trigger: AbilityTrigger;
+  text: string;
+  conditions: AbilityCondition[];
+  effect: TargetedEffect | StandardEffect;
 }

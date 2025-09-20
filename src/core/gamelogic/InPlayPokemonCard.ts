@@ -4,6 +4,7 @@ import type { Player } from "./Player";
 import {
   type Ability,
   type Attack,
+  type CardSlot,
   type Energy,
   type PlayerStatus,
   type PlayingCard,
@@ -16,6 +17,7 @@ import {
 export class InPlayPokemonCard {
   BaseCard: PokemonCard;
   player: Player;
+  game: Game;
 
   ID: string;
   Name: string;
@@ -72,6 +74,7 @@ export class InPlayPokemonCard {
 
   constructor(player: Player, inputCard: PokemonCard, trueCard: PlayingCard = inputCard) {
     this.player = player;
+    this.game = player.game;
     this.BaseCard = inputCard;
     this.InPlayCards.push(trueCard);
 
@@ -146,51 +149,60 @@ export class InPlayPokemonCard {
     return true;
   }
 
-  async onEnterPlay(game: Game) {
-    if (this.Ability?.Trigger === "OnEnterPlay") {
-      await game.findOwner(this).triggerAbility(this);
+  async useAbility(manuallyActivated: boolean, target?: CardSlot) {
+    if (!this.Ability) return;
+    if (!target && this.Ability.effect.type == "Targeted")
+      throw new Error("No target provided for targeted ability");
+
+    if (manuallyActivated) {
+      this.player.logger.useAbility(this.player, this, this.Ability.name);
+    } else {
+      this.player.logger.triggerAbility(this.player, this, this.Ability.name);
+    }
+
+    await this.Ability.effect.effect(this.game, this, target!);
+  }
+
+  async onEnterPlay() {
+    if (this.Ability?.trigger === "OnEnterPlay") {
+      await this.player.triggerAbility(this);
     }
   }
 
-  async onEnterActive(game: Game) {
-    if (this.Ability?.Trigger === "OnEnterActive") {
-      await game.findOwner(this).triggerAbility(this);
+  async onEnterActive() {
+    if (this.Ability?.trigger === "OnEnterActive") {
+      await this.player.triggerAbility(this);
     }
   }
 
-  async onLeaveActive(game: Game) {
-    if (this.Ability?.Trigger === "OnEnterActive" && this.Ability.UndoEffect) {
-      await this.Ability.UndoEffect(game, this);
+  async onLeaveActive() {
+    if (this.Ability?.trigger === "OnEnterActive" && this.Ability.effect.undo) {
+      await this.Ability.effect.undo(this.game, this);
     }
   }
 
-  async onEnterBench(game: Game) {
-    if (this.Ability?.Trigger === "OnEnterBench") {
-      await game.findOwner(this).triggerAbility(this);
+  async onEnterBench() {
+    if (this.Ability?.trigger === "OnEnterBench") {
+      await this.player.triggerAbility(this);
     }
   }
 
-  async onLeaveBench(game: Game) {
-    if (this.Ability?.Trigger === "OnEnterBench" && this.Ability.UndoEffect) {
-      await this.Ability.UndoEffect(game, this);
+  async onLeaveBench() {
+    if (this.Ability?.trigger === "OnEnterBench" && this.Ability.effect.undo) {
+      await this.Ability.effect.undo(this.game, this);
     }
   }
 
-  async onLeavePlay(game: Game) {
-    if (this.Ability?.Trigger === "OnEnterPlay" && this.Ability.UndoEffect) {
-      await this.Ability.UndoEffect(game, this);
+  async onLeavePlay() {
+    if (this.Ability?.trigger === "OnEnterPlay" && this.Ability.effect.undo) {
+      await this.Ability.effect.undo(this.game, this);
     }
   }
 
-  async onAttackDamage(game: Game) {
-    if (this.Ability?.Trigger === "AfterAttackDamage") {
-      if (this.Ability.Conditions.includes("Active")) {
-        if (game.DefendingPlayer.ActivePokemon === this)
-          await game.findOwner(this).triggerAbility(this);
-      } else if (this.Ability.Conditions.includes("OnBench")) {
-        if (game.DefendingPlayer.BenchedPokemon.includes(this))
-          await game.findOwner(this).triggerAbility(this);
-      }
+  async onAttackDamage() {
+    if (this.Ability?.trigger === "AfterAttackDamage") {
+      if (this.game.DefendingPlayer.InPlayPokemon.includes(this))
+        await this.player.triggerAbility(this);
     }
   }
 }

@@ -45,6 +45,9 @@ export class Player {
   get BenchedPokemon() {
     return this.Bench.filter((x) => x.isPokemon);
   }
+  get opponent() {
+    return this === this.game.Player1 ? this.game.Player2 : this.game.Player1;
+  }
 
   constructor(name: string, deck: Deck, game: Game) {
     this.Name = name;
@@ -172,7 +175,7 @@ export class Player {
 
     this.logger.playToActive(this, setup.active);
 
-    if (pokemon.Ability?.Trigger == "OnEnterPlay") {
+    if (pokemon.Ability?.trigger == "OnEnterPlay") {
       await this.triggerAbility(pokemon);
     }
 
@@ -224,7 +227,7 @@ export class Player {
     this.Bench[index] = EmptyCardSlot.Bench(index);
 
     this.logger.selectActivePokemon(this);
-    await pokemon.onEnterActive(this.game);
+    await pokemon.onEnterActive();
   }
 
   async putPokemonOnBench(card: PokemonCard, index: number, trueCard: PlayingCard = card) {
@@ -248,8 +251,8 @@ export class Player {
 
     this.logger.playToBench(this, card, index);
 
-    await pokemon.onEnterPlay(this.game);
-    await pokemon.onEnterBench(this.game);
+    await pokemon.onEnterPlay();
+    await pokemon.onEnterBench();
   }
 
   async evolvePokemon(pokemon: InPlayPokemonCard, card: PokemonCard) {
@@ -278,18 +281,33 @@ export class Player {
 
     this.recoverAllSpecialConditions(pokemon);
 
-    await pokemon.onEnterPlay(this.game);
-    if (pokemon === this.ActivePokemon) await pokemon.onEnterActive(this.game);
-    else await pokemon.onEnterBench(this.game);
+    await pokemon.onEnterPlay();
+    if (pokemon === this.ActivePokemon) await pokemon.onEnterActive();
+    else await pokemon.onEnterBench();
   }
 
-  async triggerAbility(pokemon: InPlayPokemonCard) {
+  async triggerAbility(pokemon: InPlayPokemonCard, manuallyActivated: boolean = false) {
     if (!pokemon.Ability) {
       throw new Error("Pokemon has no ability");
     }
 
-    this.logger.triggerAbility(this, pokemon, pokemon.Ability.Name);
-    await pokemon.Ability.Effect(this.game, pokemon);
+    const ability = pokemon.Ability;
+    if (!ability.conditions.every((condition) => condition(this.game, pokemon))) return;
+    if (ability.effect.type === "Targeted") {
+      const validTargets = ability.effect.findValidTargets(this.game, pokemon);
+      if (validTargets.length === 0) {
+        return;
+      }
+      const target = validTargets.every((x) => x.isPokemon)
+        ? await this.game.choosePokemon(this, validTargets)
+        : await this.game.choose(this, validTargets);
+      if (!target || !validTargets.includes(target)) {
+        throw new Error("Invalid target for targeted effect");
+      }
+      await pokemon.useAbility(manuallyActivated, target);
+    } else if (ability.effect.type === "Standard") {
+      await pokemon.useAbility(manuallyActivated);
+    }
   }
 
   attachAvailableEnergy(pokemon: InPlayPokemonCard) {
@@ -401,11 +419,11 @@ export class Player {
     this.ActivePokemon = newActive;
     this.Bench[this.Bench.indexOf(newActive)] = currentActive;
 
-    await currentActive.onLeaveActive(this.game);
+    await currentActive.onLeaveActive();
 
     this.logger.swapActivePokemon(this, currentActive, newActive, reason, choosingPlayer);
 
-    await newActive.onEnterActive(this.game);
+    await newActive.onEnterActive();
 
     this.recoverAllSpecialConditions(currentActive);
   }
@@ -425,12 +443,12 @@ export class Player {
   async removePokemonFromField(pokemon: InPlayPokemonCard) {
     if (this.game.shouldPreventDamage(pokemon)) return;
 
-    await pokemon.onLeavePlay(this.game);
+    await pokemon.onLeavePlay();
     if (pokemon == this.ActivePokemon) {
-      await pokemon.onLeaveActive(this.game);
+      await pokemon.onLeaveActive();
       this.ActivePokemon = EmptyCardSlot.Active();
     } else {
-      await pokemon.onLeaveBench(this.game);
+      await pokemon.onLeaveBench();
       const index = this.Bench.indexOf(pokemon);
       this.Bench[index] = EmptyCardSlot.Bench(index);
     }

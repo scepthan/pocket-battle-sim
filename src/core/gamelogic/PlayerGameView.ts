@@ -184,19 +184,14 @@ export class PlayerGameView {
   canUseAbility(pokemon: PlayerPokemonView, ability: Ability) {
     if (!this.canPlay) return false;
     if (pokemon.Ability !== ability) return false;
-    if (!["OnceDuringTurn", "ManyDuringTurn"].includes(ability.Trigger)) return false;
-    if (ability.Conditions.includes("Active")) {
-      if (pokemon != this.selfActive) return false;
-    }
-    if (ability.Conditions.includes("OnBench")) {
-      if (!this.selfBenched.includes(pokemon)) return false;
-    }
-    if (ability.Conditions.includes("HasDamage")) {
-      if (!pokemon.isDamaged()) return false;
-    }
+    if (!["OnceDuringTurn", "ManyDuringTurn"].includes(ability.trigger)) return false;
     const realPokemon = this.#pokemonFromView(pokemon);
-    if (ability.Trigger == "OnceDuringTurn") {
+    if (ability.trigger == "OnceDuringTurn") {
       if (this.#game.UsedAbilities.has(realPokemon)) return false;
+    }
+    if (!ability.conditions.every((condition) => condition(this.#game, realPokemon))) return false;
+    if (ability.effect.type == "Targeted") {
+      if (ability.effect.findValidTargets(this.#game, realPokemon).length == 0) return false;
     }
     return true;
   }

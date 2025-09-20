@@ -305,7 +305,7 @@ export class Game {
     await this.useEffect(effect);
 
     for (const pokemon of this.AttackDamagedPokemon) {
-      await pokemon.onAttackDamage(this);
+      await pokemon.onAttackDamage();
     }
 
     await this.checkForKnockOuts();
@@ -422,19 +422,24 @@ export class Game {
     if (pokemon.Ability !== ability) {
       throw new Error("Pokemon does not have this ability");
     }
-    if (ability.Trigger === "OnceDuringTurn") {
+    if (ability.trigger === "OnceDuringTurn") {
       if (this.UsedAbilities.has(pokemon)) {
         throw new Error("Pokemon's ability has already been used this turn");
       }
       this.UsedAbilities.add(pokemon);
     }
-    if (ability.Conditions.includes("Active") && this.AttackingPlayer.ActivePokemon !== pokemon) {
-      throw new Error("Ability can only be used if the Pokemon is Active");
+
+    let target: CardSlot | undefined;
+    if (ability.effect.type === "Targeted") {
+      const validTargets = ability.effect.findValidTargets(this, pokemon);
+      if (validTargets.length === 0) throw new Error("No valid targets for ability");
+
+      target = validTargets.every((x) => x.isPokemon)
+        ? await this.choosePokemon(pokemon.player, validTargets)
+        : await this.choose(pokemon.player, validTargets);
     }
 
-    this.GameLog.useAbility(this.AttackingPlayer, pokemon, ability.Name);
-
-    await ability.Effect(this, pokemon);
+    await pokemon.useAbility(true, target);
 
     await this.checkForKnockOuts();
   }
@@ -463,12 +468,15 @@ export class Game {
       PrizePoints: 1,
       Attacks: [],
       Ability: {
-        Name: "Discard",
-        Trigger: "OnceDuringTurn",
-        Conditions: [],
-        Text: "Discard this Pokémon from play.",
-        Effect: async (game: Game, self: InPlayPokemonCard) => {
-          await game.AttackingPlayer.discardPokemonFromPlay(self);
+        name: "Discard",
+        trigger: "OnceDuringTurn",
+        conditions: [],
+        text: "Discard this Pokémon from play.",
+        effect: {
+          type: "Standard",
+          effect: async (game: Game, self: InPlayPokemonCard) => {
+            await game.AttackingPlayer.discardPokemonFromPlay(self);
+          },
         },
       },
     };
