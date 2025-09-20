@@ -26,7 +26,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
       }),
     },
     {
-      pattern: /^Put 1 random Basic Pokemon from your deck into your hand\.$/,
+      pattern: /^Put a random Basic Pokémon from your deck into your hand\.$/,
       transform: () => ({
         type: "Conditional",
         condition: (game: Game) => game.AttackingPlayer.canDraw(),

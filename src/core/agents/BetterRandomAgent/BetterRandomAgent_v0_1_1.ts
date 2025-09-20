@@ -27,7 +27,7 @@ export class BetterRandomAgent_v0_1_1 extends PlayerAgent {
     let ownPokemon = game.selfInPlayPokemon;
 
     // Play Professor's Research if available
-    const professor = game.selfHand.find((x) => x.Name == "Professor's Research");
+    const professor = game.selfHand.find((x) => x.Name == "Professor’s Research");
     if (professor) {
       await game.playSupporterCard(professor as SupporterCard);
     } else if (Math.random() > 0.5) {
@@ -68,7 +68,7 @@ export class BetterRandomAgent_v0_1_1 extends PlayerAgent {
     }
 
     // Play each held Item card with 50% chance
-    const itemCards = game.selfHand.filter((x) => x.CardType == "Item");
+    const itemCards = game.selfHand.filter((x) => x.CardType == "Item" || x.CardType == "Fossil");
     for (const card of itemCards) {
       if (!game.canPlayCard(card) || Math.random() < 0.5) continue;
       let target: CardSlot | undefined;

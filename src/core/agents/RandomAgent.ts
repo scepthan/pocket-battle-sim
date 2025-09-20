@@ -48,7 +48,7 @@ export class RandomAgent extends PlayerAgent {
     }
 
     // Play each held Item card with 50% chance
-    const itemCards = game.selfHand.filter((x) => x.CardType == "Item");
+    const itemCards = game.selfHand.filter((x) => x.CardType == "Item" || x.CardType == "Fossil");
     for (const card of itemCards) {
       if (!game.canPlayCard(card) || Math.random() < 0.5) continue;
       let target: CardSlot | undefined;

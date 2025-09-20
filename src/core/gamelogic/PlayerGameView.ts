@@ -8,6 +8,7 @@ import type {
   Attack,
   CardSlot,
   Energy,
+  FossilCard,
   ItemCard,
   PlayingCard,
   PokemonCard,
@@ -225,7 +226,7 @@ export class PlayerGameView {
       return false;
     return true;
   }
-  validTargets(card: ItemCard | SupporterCard): CardSlot[] {
+  validTargets(card: ItemCard | FossilCard | SupporterCard): CardSlot[] {
     if (card.Effect.type == "Targeted") {
       return card.Effect.validTargets(this.#game);
     }
@@ -302,7 +303,7 @@ export class PlayerGameView {
     await this.#game.retreatActivePokemon(realPokemon, energy);
     return true;
   }
-  async playItemCard(card: ItemCard, target?: CardSlot) {
+  async playItemCard(card: ItemCard | FossilCard, target?: CardSlot) {
     if (!this.canPlayCard(card)) return false;
     if (card.Effect.type === "Targeted") {
       if (!target || !card.Effect.validTargets(this.#game).includes(target)) return false;
