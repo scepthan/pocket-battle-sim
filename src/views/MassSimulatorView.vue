@@ -11,7 +11,9 @@
 
     <hr />
 
-    <v-row v-for="[matchup, record] in Object.entries(matchupRecords).slice(-20)" :key="matchup">
+    <v-select v-model="selectedEntrant" :items="entrants"> </v-select>
+
+    <v-row v-for="[matchup, record] in filteredRecords" :key="matchup">
       <v-col cols="4">{{ matchup }}</v-col>
       <v-col cols="2">{{ record.firstWins }}</v-col>
       <v-col cols="2">{{ record.secondWins }}</v-col>
@@ -26,7 +28,7 @@ import { allAgents, removeElement } from "@/core";
 import { useDeckStore } from "@/stores";
 import type { BattleRecord, MassSimulatorFromWorkerMessage } from "@/types";
 import { MassAgentSimulatorWorker, MassDeckSimulatorWorker } from "@/workers";
-import { onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 
 interface DeckRecord {
   gamesPlayed: number;
@@ -41,9 +43,20 @@ const matchupRecords = reactive<Record<string, BattleRecord>>({});
 const overallRecords = reactive<Record<string, DeckRecord>>({});
 
 const useAgents = ref(false);
+const entrants = ref(["none"]);
+const selectedEntrant = ref("none");
+const filteredRecords = computed(() =>
+  Object.entries(matchupRecords).filter(([matchupName]) =>
+    matchupName.includes(selectedEntrant.value)
+  )
+);
 
 onMounted(() => {
-  const allEntrants = Object.keys(useAgents.value ? allAgents : deckStore.AllDecks);
+  const allEntrants = useAgents.value
+    ? Object.keys(allAgents)
+    : Object.keys(deckStore.AllDecks).filter((x) => x.includes("Meta"));
+  entrants.value = allEntrants.slice();
+  selectedEntrant.value = allEntrants[0] ?? "none";
 
   if (useAgents.value) {
     removeElement(allEntrants, "BetterRandomAgent");
