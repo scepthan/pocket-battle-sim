@@ -638,23 +638,36 @@ export class Game {
   findAgent(player: Player) {
     return player == this.Player1 ? this.Agent1 : this.Agent2;
   }
-  async swapActivePokemon(player: Player, reason: "selfEffect" | "opponentEffect") {
+  async swapActivePokemon(
+    player: Player,
+    reason: "selfEffect" | "opponentEffect"
+  ): Promise<boolean> {
     await this.delay();
     if (player.BenchedPokemon.length == 0) {
       this.GameLog.noBenchedPokemon(player);
       return false;
     }
-    const agent = this.findAgent(player);
-    const newActiveView = await agent.swapActivePokemon(new PlayerGameView(this, player), reason);
-    const newActive = this.viewToPokemon(newActiveView, player.BenchedPokemon);
+
+    let newActive = player.BenchedPokemon[0]!;
+    if (player.BenchedPokemon.length > 1) {
+      const agent = this.findAgent(player);
+      const newActiveView = await agent.swapActivePokemon(new PlayerGameView(this, player), reason);
+      newActive = this.viewToPokemon(newActiveView, player.BenchedPokemon);
+    }
+
     await player.swapActivePokemon(newActive, reason);
     return true;
   }
-  async choosePokemon(player: Player, validPokemon: InPlayPokemonCard[]) {
+  async choosePokemon(
+    player: Player,
+    validPokemon: InPlayPokemonCard[]
+  ): Promise<InPlayPokemonCard | undefined> {
     if (validPokemon.length == 0) {
       this.GameLog.noValidTargets(player);
       return;
     }
+    if (validPokemon.length == 1) return validPokemon[0];
+
     const agent = this.findAgent(player);
     const selectedView = await agent.choosePokemon(
       validPokemon.map((p) => new PlayerPokemonView(p))
@@ -662,11 +675,13 @@ export class Game {
     const selected = this.viewToPokemon(selectedView, validPokemon);
     return selected;
   }
-  async choose<T>(player: Player, options: T[]) {
+  async choose<T>(player: Player, options: T[]): Promise<T | undefined> {
     if (options.length == 0) {
       this.GameLog.noValidTargets(player);
       return;
     }
+    if (options.length == 1) return options[0];
+
     const agent = this.findAgent(player);
     const selected = await agent.choose(options);
     if (!options.includes(selected)) {
@@ -674,7 +689,7 @@ export class Game {
     }
     return selected;
   }
-  async showCards(player: Player, cards: PlayingCard[]) {
+  async showCards(player: Player, cards: PlayingCard[]): Promise<void> {
     const cardIds = cards.map((card) => card.ID);
     this.GameLog.viewCards(player, cardIds);
     const agent = this.findAgent(player);
