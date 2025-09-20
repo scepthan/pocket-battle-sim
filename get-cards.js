@@ -7,7 +7,8 @@ const fixDescription = (text) =>
   text.replace(/<span class="energy-text energy-text--type-(\w+)"><\/span>/g, (_, type) => `{${ convertEnergy(type) }}`)
       .replace(/<br \/>/g, " ")
       .replace(/<.+?>/g, "")
-      .replace(/\xA0/g, " ");
+      .replace(/\xA0/g, " ")
+      .trim();
 
 const output_cards = [];
 for (const card of card_data) {
