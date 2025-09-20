@@ -4,29 +4,7 @@ Backend todo:
 
 - [x] Parse cards
   - [x] A1: 226/226 (100%)
-    - [x] Dragon type
-    - [x] Conditions
-      - [x] Special Conditions
-        - [x] Asleep
-        - [x] Paralyzed
-        - [x] Poisoned
-      - [x] Other active mon conditions
-      - [x] Global conditions
-    - [x] Fossils
-    - [x] Abilities
-      - [x] Once during your turn
-      - [x] As often as you like during your turn
-      - [x] Damage reduction
-      - [x] Attack retaliation
-    - [x] Misty
-    - [x] Supporters that affect specific mon
-    - [x] Choose a mon to attack
-    - [x] Shuffle mon into deck
-    - [x] Viewing own deck or opponent's cards
-    - [x] Draw mon onto Bench
-    - [x] Distribute energy among Benched mon
-    - [x] Use opposing mon's attack
-  - [ ] A1a: 66/68 (97.1%)
+  - [x] A1a: 68/68 (100%)
     - [x] Put opponent mon from Discard back onto Bench
     - [x] Copy attack without energy requirement
     - [x] Extra damage if ex
@@ -39,8 +17,8 @@ Backend todo:
     - [x] Draw mon if on top of deck
     - [x] Evolution-blocking Ability
     - [x] Coin flip to attack effect
-    - [ ] Energy-doubling Ability
-    - [ ] Rework how multi-effect attacks are parsed (e.g. Volcarona)
+    - [x] Energy-doubling Ability
+    - [x] Discard energy and attack any mon
   - [ ] A2
     - [ ] Confused
     - [ ] Burned
@@ -65,13 +43,14 @@ Frontend todo:
 - [x] Battle simulator UI (~90%)
   - [ ] Collapse energy icons when at 5 or more
   - [ ] Display game points somewhere
-  - [ ] Display discard somewhere
-  - [ ] Display deck size and opponent hand size
+  - [x] Display discard somewhere
+  - [x] Display deck size and opponent hand size
   - [ ] Display statuses and Special Conditions
 - [ ] Allow user control of one or both players in battle simulator
 - [ ] Deck builder UI
-  - [ ] Display cards currently in deck
-  - [ ] Display count on card and allow +/-/x
+  - [x] Display cards currently in deck
+  - [x] Display count on card and allow +/-/x
+  - [x] Allow energy selection
   - [ ] Add ability to save decks and edit existing decks
 
 Other todo:
@@ -79,5 +58,5 @@ Other todo:
 - [x] Deck library
   - [x] A1 official
   - [x] A1 unofficial
-  - [ ] A1a official
-  - [ ] A1a unofficial
+  - [x] A1a official
+  - [x] A1a unofficial

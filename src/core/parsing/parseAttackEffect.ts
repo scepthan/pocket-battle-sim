@@ -408,6 +408,24 @@ export const parseAttackEffect = (
       },
     },
     {
+      pattern:
+        /^Discard (a|\d+|all) \{(\w)\} Energy from this Pokémon\. This attack does (\d+) damage to 1 of your opponent's Pokémon\.$/i,
+      transform: (_, count, energyType, damage) => {
+        const fullType = parseEnergy(energyType);
+        const numToDiscard = count == "all" ? Infinity : count == "a" ? 1 : Number(count);
+
+        return async (game: Game) => {
+          const pokemon = await game.choosePokemon(
+            game.AttackingPlayer,
+            game.DefendingPlayer.InPlayPokemon
+          );
+          if (!pokemon) return;
+          game.attackPokemon(pokemon, Number(damage));
+          game.discardEnergy(game.AttackingPlayer.activeOrThrow(), fullType, numToDiscard);
+        };
+      },
+    },
+    {
       pattern: /^Discard a random Energy from your opponent's Active Pokémon.$/i,
       transform: () => async (game: Game) => {
         await defaultEffect(game);
