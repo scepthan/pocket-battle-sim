@@ -12,6 +12,7 @@ import type {
   BasicEffect,
   CardSlot,
   Energy,
+  FossilCard,
   GameRules,
   PlayerAgent,
   PlayerStatus,
@@ -447,6 +448,33 @@ export class Game {
   async putPokemonOnBench(pokemon: PokemonCard, index: number) {
     await this.useInitialEffect(
       async (game) => await game.AttackingPlayer.putPokemonOnBench(pokemon, index)
+    );
+  }
+  async putFossilOnBench(card: FossilCard, index: number, hp: number, type: Energy = "Colorless") {
+    const pokemon: PlayingCard = {
+      ID: card.ID,
+      Name: card.Name,
+      CardType: "Pokemon",
+      Type: type,
+      BaseHP: Number(hp),
+      Stage: 0,
+      RetreatCost: -1,
+      Weakness: "",
+      PrizePoints: 1,
+      Attacks: [],
+      Ability: {
+        Name: "Discard",
+        Trigger: "OnceDuringTurn",
+        Conditions: [],
+        Text: "Discard this Pokémon from play.",
+        Effect: async (game: Game, self: InPlayPokemonCard) => {
+          await game.AttackingPlayer.discardPokemonFromPlay(self);
+        },
+      },
+    };
+
+    await this.useInitialEffect(
+      async (game) => await game.AttackingPlayer.putPokemonOnBench(pokemon, index, card)
     );
   }
 

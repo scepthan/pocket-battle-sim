@@ -5,7 +5,7 @@ import {
   isEnergyShort,
   parseEnergy,
   type CardSlot,
-  type PlayingCard,
+  type FossilCard,
   type PokemonCard,
   type TrainerEffect,
 } from "../gamelogic";
@@ -253,31 +253,9 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
             game.AttackingPlayer.Bench.filter((slot) => !slot.isPokemon),
           effect: async (game: Game, benchSlot: CardSlot) => {
             if (benchSlot.isPokemon) return;
-            const card = game.ActiveTrainerCard!;
+            const card = game.ActiveTrainerCard as FossilCard;
 
-            const pokemon: PlayingCard = {
-              ID: card.ID,
-              Name: card.Name,
-              CardType: "Pokemon",
-              Type: fullType,
-              BaseHP: Number(hp),
-              Stage: 0,
-              RetreatCost: -1,
-              Weakness: "",
-              PrizePoints: 1,
-              Attacks: [],
-              Ability: {
-                Name: "Discard",
-                Trigger: "OnceDuringTurn",
-                Conditions: [],
-                Text: "Discard this Pokémon from play.",
-                Effect: async (game: Game, self: InPlayPokemonCard) => {
-                  await game.AttackingPlayer.discardPokemonFromPlay(self);
-                },
-              },
-            };
-
-            await game.AttackingPlayer.putPokemonOnBench(pokemon, benchSlot.index, card);
+            await game.putFossilOnBench(card, benchSlot.index, Number(hp), fullType);
           },
         };
       },
