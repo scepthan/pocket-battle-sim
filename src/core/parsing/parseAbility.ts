@@ -2,11 +2,11 @@ import {
   parseEnergy,
   Player,
   type Ability,
-  type AbilityCondition,
   type CardSlot,
   type Game,
   type InPlayPokemonCard,
   type PlayerStatus,
+  type PokemonCondition,
 } from "../gamelogic";
 import { removeElement } from "../util";
 import type { InputCardAbility, ParsedResult } from "./types";
@@ -16,7 +16,7 @@ interface AbilityTransformer {
   transform: (...args: string[]) => void;
 }
 
-const selfActive: AbilityCondition = (game: Game, self: InPlayPokemonCard) =>
+const selfActive: PokemonCondition = (game: Game, self: InPlayPokemonCard) =>
   self.player.ActivePokemon == self;
 
 export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Ability> => {
