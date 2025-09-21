@@ -512,22 +512,31 @@ export class Game {
     removeElement(this.AttackingPlayer.Hand, card);
     this.ActiveTrainerCard = card;
 
-    this.GameLog.playTrainer(this.AttackingPlayer, card);
+    if (card.CardType === "PokemonTool") {
+      if (!target || !target.isPokemon)
+        throw new Error("Pokémon Tool card requires a target Pokémon");
+      if (target.AttachedToolCards.length >= target.MaxToolCards)
+        throw new Error("Target Pokémon cannot have any more Tool cards attached");
 
-    if (card.Effect.type === "Targeted") {
-      if (!target) {
-        throw new Error("Targeted effect requires a target");
-      }
-      const targetedEffect = card.Effect;
-      const validTargets = targetedEffect.validTargets(this);
-      if (!validTargets.includes(target)) {
-        throw new Error("Invalid target for targeted effect");
-      }
-      await targetedEffect.effect(this, target);
-    } else if (card.Effect.type === "Conditional") {
-      const conditionalEffect = card.Effect;
-      if (conditionalEffect.condition(this, this.AttackingPlayer)) {
-        await conditionalEffect.effect(this);
+      await target.attachPokemonTool(card);
+    } else {
+      this.GameLog.playTrainer(this.AttackingPlayer, card);
+
+      if (card.Effect.type === "Targeted") {
+        if (!target) {
+          throw new Error("Targeted effect requires a target");
+        }
+        const targetedEffect = card.Effect;
+        const validTargets = targetedEffect.validTargets(this);
+        if (!validTargets.includes(target)) {
+          throw new Error("Invalid target for targeted effect");
+        }
+        await targetedEffect.effect(this, target);
+      } else if (card.Effect.type === "Conditional") {
+        const conditionalEffect = card.Effect;
+        if (conditionalEffect.condition(this, this.AttackingPlayer)) {
+          await conditionalEffect.effect(this);
+        }
       }
     }
 

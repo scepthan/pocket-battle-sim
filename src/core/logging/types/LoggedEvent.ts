@@ -92,6 +92,24 @@ interface PlayTrainerEvent {
   trainerType: string;
   targetPokemon?: InPlayPokemonDescriptor;
 }
+interface AttachPokemonToolEvent {
+  type: "attachPokemonTool";
+  player: string;
+  cardId: string;
+  targetPokemon: InPlayPokemonDescriptor;
+}
+interface TriggerPokemonToolEvent {
+  type: "triggerPokemonTool";
+  player: string;
+  cardId: string;
+  targetPokemon: InPlayPokemonDescriptor;
+}
+interface RemovePokemonToolEvent {
+  type: "removePokemonTool";
+  player: string;
+  cardId: string;
+  targetPokemon: InPlayPokemonDescriptor;
+}
 interface DiscardCardsEvent {
   type: "discardCards";
   player: string;
@@ -311,6 +329,9 @@ export type LoggedEvent =
   | PlayToActiveEvent
   | PlayToBenchEvent
   | PlayTrainerEvent
+  | AttachPokemonToolEvent
+  | TriggerPokemonToolEvent
+  | RemovePokemonToolEvent
   | DiscardCardsEvent
   | ReturnToHandEvent
   | ReturnToDeckEvent

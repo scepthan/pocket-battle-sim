@@ -1,4 +1,4 @@
-import type { BasicEffect } from "./BasicEffect";
+import type { BasicEffect } from "./Effects";
 import type { Energy } from "./Energy";
 
 export interface Attack {

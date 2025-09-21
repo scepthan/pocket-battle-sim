@@ -10,6 +10,7 @@ import {
   type PlayingCard,
   type PokemonCard,
   type PokemonStatus,
+  type PokemonToolCard,
   type PrimaryCondition,
   type SecondaryCondition,
 } from "./types";
@@ -33,6 +34,8 @@ export class InPlayPokemonCard {
   CurrentHP: number;
   MaxHP: number;
   AttachedEnergy: Energy[] = [];
+  AttachedToolCards: PokemonToolCard[] = [];
+  MaxToolCards: number = 1;
 
   PrimaryCondition?: PrimaryCondition;
   SecondaryConditions: Set<SecondaryCondition> = new Set();
@@ -131,6 +134,25 @@ export class InPlayPokemonCard {
     this.AttachedEnergy.push(...energy);
   }
 
+  async attachPokemonTool(card: PokemonToolCard) {
+    this.game.GameLog.attachPokemonTool(this.player, card, this);
+    this.AttachedToolCards.push(card);
+    this.InPlayCards.push(card);
+    this.player.InPlay.push(card);
+
+    if (card.Effect.trigger === "OnAttach") await this.triggerPokemonTool(card);
+  }
+
+  async removePokemonTool(card: PokemonToolCard) {
+    this.game.GameLog.removePokemonTool(this.player, card, this);
+    removeElement(this.AttachedToolCards, card);
+    removeElement(this.InPlayCards, card);
+    removeElement(this.player.InPlay, card);
+
+    if (card.Effect.trigger === "OnAttach" && card.Effect.undo)
+      await card.Effect.undo(this.game, this);
+  }
+
   hasSufficientEnergy(energies: Energy[]) {
     // Move Colorless energy to the end of the list so colored Energies are checked first
     energies = energies
@@ -163,6 +185,12 @@ export class InPlayPokemonCard {
     await this.Ability.effect.effect(this.game, this, target!);
   }
 
+  async triggerPokemonTool(tool: PokemonToolCard) {
+    this.game.GameLog.triggerPokemonTool(this.player, tool, this);
+    await tool.Effect.effect(this.game, this);
+  }
+
+  // Event handlers for abilities and tools
   async onEnterPlay() {
     if (this.Ability?.trigger === "OnEnterPlay") {
       await this.player.triggerAbility(this);
@@ -197,12 +225,19 @@ export class InPlayPokemonCard {
     if (this.Ability?.trigger === "OnEnterPlay" && this.Ability.effect.undo) {
       await this.Ability.effect.undo(this.game, this);
     }
+    for (const tool of this.AttachedToolCards) {
+      if (tool.Effect.trigger === "OnAttach" && tool.Effect.undo)
+        await tool.Effect.undo(this.game, this);
+    }
   }
 
   async onAttackDamage() {
     if (this.Ability?.trigger === "AfterAttackDamage") {
       if (this.game.DefendingPlayer.InPlayPokemon.includes(this))
         await this.player.triggerAbility(this);
+    }
+    for (const tool of this.AttachedToolCards) {
+      if (tool.Effect.trigger === "OnAttackDamage") await this.triggerPokemonTool(tool);
     }
   }
 }

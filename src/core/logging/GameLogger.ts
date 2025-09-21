@@ -349,6 +349,33 @@ export class GameLogger {
     });
   }
 
+  attachPokemonTool(player: Player, card: PlayingCard, targetPokemon: InPlayPokemonCard) {
+    this.addEntry({
+      type: "attachPokemonTool",
+      player: player.Name,
+      cardId: card.ID,
+      targetPokemon: player.pokemonToDescriptor(targetPokemon),
+    });
+  }
+
+  triggerPokemonTool(player: Player, tool: PlayingCard, pokemon: InPlayPokemonCard) {
+    this.addEntry({
+      type: "triggerPokemonTool",
+      player: player.Name,
+      cardId: tool.ID,
+      targetPokemon: player.pokemonToDescriptor(pokemon),
+    });
+  }
+
+  removePokemonTool(player: Player, card: PlayingCard, targetPokemon: InPlayPokemonCard) {
+    this.addEntry({
+      type: "removePokemonTool",
+      player: player.Name,
+      cardId: card.ID,
+      targetPokemon: player.pokemonToDescriptor(targetPokemon),
+    });
+  }
+
   copyAttack(player: Player, attackName: string) {
     this.addEntry({
       type: "copyAttack",

@@ -1,6 +1,6 @@
 import type { Game, Player } from "..";
-import type { BasicEffect } from "./BasicEffect";
 import type { CardSlot } from "./CardSlot";
+import type { BasicEffect } from "./Effects";
 
 export type TargetedEffect<T> = (game: Game, target: T) => Promise<void>;
 export type ConditionalTrainerEffect = {
