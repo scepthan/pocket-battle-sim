@@ -26,7 +26,7 @@ export interface PokemonInputCard extends BaseInputCard {
   ability?: InputCardAbility;
 }
 export interface TrainerInputCard extends BaseInputCard {
-  cardType: "Item" | "Fossil" | "Supporter";
+  cardType: "Item" | "Fossil" | "Supporter" | "PokemonTool";
   text: string;
 }
 

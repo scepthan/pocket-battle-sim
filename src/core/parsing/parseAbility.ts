@@ -338,7 +338,7 @@ const applyPlayerStatus = (
     }
   }
 
-  player.applyStatus(status);
+  player.applyPlayerStatus(status);
   pokemon.ActivePlayerStatuses.push(status);
 };
 const undoPlayerStatus =

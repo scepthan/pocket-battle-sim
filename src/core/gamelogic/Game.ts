@@ -36,6 +36,7 @@ export class Game {
   CanPlaySupporter: boolean = true;
   ActiveTrainerCard?: TrainerCard;
   CurrentlyAttacking: boolean = false;
+  AttackingPokemon?: InPlayPokemonCard;
   UsedAbilities: Set<InPlayPokemonCard> = new Set();
   AttackDamagedPokemon: Set<InPlayPokemonCard> = new Set();
   AttackKnockedOutPokemon: Set<InPlayPokemonCard> = new Set();
@@ -412,8 +413,10 @@ export class Game {
     this.GameLog.useAttack(this.AttackingPlayer, attack.Name);
 
     this.CurrentlyAttacking = true;
+    this.AttackingPokemon = attacker;
     await this.useInitialEffect(attack.Effect);
     this.CurrentlyAttacking = false;
+    this.AttackingPokemon = undefined;
 
     this.endTurnResolve(true);
   }
@@ -676,8 +679,7 @@ export class Game {
 
   applyPokemonStatus(pokemon: InPlayPokemonCard, status: PokemonStatus) {
     if (this.shouldPreventDamage(pokemon)) return;
-    const player = this.findOwner(pokemon);
-    player.applyPokemonStatus(pokemon, status);
+    pokemon.applyPokemonStatus(status);
   }
 
   findAgent(player: Player) {

@@ -279,7 +279,7 @@ export class Player {
     this.logger.evolvePokemon(this, pokemon, card);
     pokemon.evolveInto(card);
 
-    this.recoverAllSpecialConditions(pokemon);
+    pokemon.recoverAllStatusConditions();
 
     await pokemon.onEnterPlay();
     if (pokemon === this.ActivePokemon) await pokemon.onEnterActive();
@@ -425,19 +425,7 @@ export class Player {
 
     await newActive.onEnterActive();
 
-    this.recoverAllSpecialConditions(currentActive);
-  }
-
-  recoverAllSpecialConditions(pokemon: InPlayPokemonCard) {
-    const conditions = pokemon.CurrentConditions;
-    if (conditions.length == 0) return;
-
-    pokemon.PrimaryCondition = undefined;
-    pokemon.SecondaryConditions = new Set();
-
-    pokemon.PokemonStatuses = pokemon.PokemonStatuses.filter((status) => status.source != "Effect");
-
-    this.logger.specialConditionEnded(this, conditions);
+    currentActive.recoverAllStatusConditions();
   }
 
   async removePokemonFromField(pokemon: InPlayPokemonCard) {
@@ -554,17 +542,10 @@ export class Player {
   }
 
   applyActivePokemonStatus(status: PokemonStatus) {
-    this.applyPokemonStatus(this.activeOrThrow(), status);
+    this.activeOrThrow().applyPokemonStatus(status);
   }
 
-  applyPokemonStatus(pokemon: InPlayPokemonCard, status: PokemonStatus) {
-    if (this.game.shouldPreventDamage(pokemon)) return;
-
-    pokemon.PokemonStatuses.push(status);
-    this.logger.applyPokemonStatus(this, pokemon, status);
-  }
-
-  applyStatus(status: PlayerStatus) {
+  applyPlayerStatus(status: PlayerStatus) {
     this.PlayerStatuses.push(status);
     this.logger.applyPlayerStatus(this, status);
   }

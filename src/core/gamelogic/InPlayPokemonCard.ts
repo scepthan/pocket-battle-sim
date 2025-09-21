@@ -1,3 +1,4 @@
+import type { GameLogger } from "../logging";
 import { removeElement } from "../util";
 import type { Game } from "./Game";
 import type { Player } from "./Player";
@@ -19,6 +20,7 @@ export class InPlayPokemonCard {
   BaseCard: PokemonCard;
   player: Player;
   game: Game;
+  logger: GameLogger;
 
   ID: string;
   Name: string;
@@ -78,6 +80,7 @@ export class InPlayPokemonCard {
   constructor(player: Player, inputCard: PokemonCard, trueCard: PlayingCard = inputCard) {
     this.player = player;
     this.game = player.game;
+    this.logger = player.logger;
     this.BaseCard = inputCard;
     this.InPlayCards.push(trueCard);
 
@@ -134,8 +137,57 @@ export class InPlayPokemonCard {
     this.AttachedEnergy.push(...energy);
   }
 
+  /**
+   * Recovers this Pokemon from all Special Conditions and removes all "Effect" PokemonStatuses.
+   */
+  recoverAllStatusConditions() {
+    const conditions = this.CurrentConditions;
+    if (conditions.length == 0) return;
+
+    this.PrimaryCondition = undefined;
+    this.SecondaryConditions = new Set();
+
+    this.PokemonStatuses = this.PokemonStatuses.filter((status) => status.source != "Effect");
+
+    this.logger.specialConditionEnded(this.player, conditions);
+  }
+
+  /**
+   * Applies a PokemonStatus to this Pokemon and deals with any immediate effects.
+   *
+   * Applies unconditionally; to check for effect prevention, use Game.applyPokemonStatus().
+   */
+  applyPokemonStatus(status: PokemonStatus) {
+    this.PokemonStatuses.push(status);
+    this.logger.applyPokemonStatus(this.player, this, status);
+
+    if (status.type === "IncreaseMaxHP") {
+      const hpIncrease = status.amount;
+      this.MaxHP += hpIncrease;
+      this.CurrentHP += hpIncrease;
+    }
+  }
+
+  /**
+   * Removes a PokemonStatus from this Pokemon and deals with any side effects.
+   */
+  removePokemonStatus(status: PokemonStatus) {
+    removeElement(this.PokemonStatuses, status);
+
+    if (status.type === "IncreaseMaxHP") {
+      const hpIncrease = status.amount;
+      this.MaxHP -= hpIncrease;
+      this.CurrentHP -= hpIncrease;
+    }
+  }
+
+  /**
+   * Attaches a PokemonTool to this Pokemon and deals with any immediate effects.
+   *
+   * Does not check if a tool can be attached; that should be done before calling this method.
+   */
   async attachPokemonTool(card: PokemonToolCard) {
-    this.game.GameLog.attachPokemonTool(this.player, card, this);
+    this.logger.attachPokemonTool(this.player, card, this);
     this.AttachedToolCards.push(card);
     this.InPlayCards.push(card);
     this.player.InPlay.push(card);
@@ -143,8 +195,13 @@ export class InPlayPokemonCard {
     if (card.Effect.trigger === "OnAttach") await this.triggerPokemonTool(card);
   }
 
+  /**
+   * Removes a PokemonTool from this Pokemon and deals with any side effects.
+   *
+   * Removes the card from in play, but does not discard it or return it to the hand.
+   */
   async removePokemonTool(card: PokemonToolCard) {
-    this.game.GameLog.removePokemonTool(this.player, card, this);
+    this.logger.removePokemonTool(this.player, card, this);
     removeElement(this.AttachedToolCards, card);
     removeElement(this.InPlayCards, card);
     removeElement(this.player.InPlay, card);
@@ -186,7 +243,7 @@ export class InPlayPokemonCard {
   }
 
   async triggerPokemonTool(tool: PokemonToolCard) {
-    this.game.GameLog.triggerPokemonTool(this.player, tool, this);
+    this.logger.triggerPokemonTool(this.player, tool, this);
     await tool.Effect.effect(this.game, this);
   }
 

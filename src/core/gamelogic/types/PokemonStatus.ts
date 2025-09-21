@@ -1,5 +1,5 @@
 interface BasePokemonStatus {
-  source: "Effect" | "Ability" | "Tool";
+  source: "Effect" | "Ability" | "PokemonTool";
   condition: "Active" | "Benched" | "none";
   keepNextTurn?: boolean;
 }
@@ -27,6 +27,10 @@ export interface CounterAttackPokemonStatus extends BasePokemonStatus {
 export interface CoinFlipToAttackPokemonStatus extends BasePokemonStatus {
   type: "CoinFlipToAttack";
 }
+export interface IncreaseMaxHPPokemonStatus extends BasePokemonStatus {
+  type: "IncreaseMaxHP";
+  amount: number;
+}
 
 export type PokemonStatus =
   | CannotAttackPokemonStatus
@@ -35,4 +39,5 @@ export type PokemonStatus =
   | PreventDamagePokemonStatus
   | ReduceAttackPokemonStatus
   | CounterAttackPokemonStatus
-  | CoinFlipToAttackPokemonStatus;
+  | CoinFlipToAttackPokemonStatus
+  | IncreaseMaxHPPokemonStatus;

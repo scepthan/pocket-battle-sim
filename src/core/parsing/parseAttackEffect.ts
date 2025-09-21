@@ -628,7 +628,7 @@ export const parseAttackEffect = (
         /^Your opponent can’t use any Supporter cards from their hand during their next turn\.$/i,
       transform: () => async (game: Game) => {
         await defaultEffect(game);
-        game.DefendingPlayer.applyStatus({
+        game.DefendingPlayer.applyPlayerStatus({
           type: "CannotUseSupporter",
           source: "Effect",
           category: "GameRule",

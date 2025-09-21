@@ -54,7 +54,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         type: "Conditional",
         condition: () => true,
         effect: async (game: Game) => {
-          game.AttackingPlayer.applyStatus({
+          game.AttackingPlayer.applyPlayerStatus({
             type: "DecreaseRetreatCost",
             category: "Pokemon",
             appliesToPokemon: (pokemon: InPlayPokemonCard, game: Game) =>
@@ -109,7 +109,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
           type: "Conditional",
           condition: () => true,
           effect: async (game: Game) => {
-            game.AttackingPlayer.applyStatus({
+            game.AttackingPlayer.applyPlayerStatus({
               type: "IncreaseAttack",
               category: "Pokemon",
               appliesToPokemon,
@@ -128,7 +128,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         type: "Conditional",
         condition: () => true,
         effect: async (game: Game) => {
-          game.AttackingPlayer.applyStatus({
+          game.AttackingPlayer.applyPlayerStatus({
             type: "IncreaseDefense",
             category: "Pokemon",
             appliesToPokemon: () => true,

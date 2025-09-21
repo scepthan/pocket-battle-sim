@@ -1,6 +1,7 @@
 import { isEnergy, type Ability, type Energy, type PlayingCard } from "../gamelogic";
 import { parseAbility } from "./parseAbility";
 import { parseAttack } from "./parseAttack";
+import { parsePokemonToolEffect } from "./parsePokemonToolEffect";
 import { parseTrainerEffect } from "./parseTrainerEffect";
 import type { InputCard, ParsedResultOptional } from "./types";
 
@@ -50,6 +51,19 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
     inputCard.cardType == "Supporter"
   ) {
     const result = parseTrainerEffect(inputCard.text);
+    if (!result.parseSuccessful) parseSuccessful = false;
+
+    const outputCard = {
+      ID: inputCard.id,
+      Name: inputCard.name,
+      CardType: inputCard.cardType,
+      Text: inputCard.text,
+      Effect: result.value,
+    };
+
+    return { value: outputCard, parseSuccessful };
+  } else if (inputCard.cardType == "PokemonTool") {
+    const result = parsePokemonToolEffect(inputCard.text);
     if (!result.parseSuccessful) parseSuccessful = false;
 
     const outputCard = {
