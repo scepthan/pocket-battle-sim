@@ -144,7 +144,8 @@
             >!
           </p>
           <p v-else-if="entry.status.type == 'DoubleEnergy'">
-            All of <b>{{ entry.player }}</b>'s {{ entry.status.descriptor ?? "Pokemon" }} now have their
+            All of <b>{{ entry.player }}</b
+            >'s {{ entry.status.descriptor ?? "Pokemon" }} now have their
             <EnergyIcon inline :energy="entry.status.energyType" /> count as double!
           </p>
           <p v-else>Unknown player status: {{ entry.status.type }}</p>
@@ -169,6 +170,24 @@
         <div v-else-if="entry.type == 'playTrainer'">
           <p>
             <b>{{ entry.player }}</b> uses <CardName :card-id="entry.cardId" />!
+          </p>
+        </div>
+
+        <div v-else-if="entry.type == 'attachPokemonTool'">
+          <p>
+            <b>{{ entry.player }}</b> attaches <CardName :card-id="entry.cardId" /> to
+            <CardName :card-id="entry.targetPokemon.cardId" />!
+          </p>
+        </div>
+
+        <div v-else-if="entry.type == 'triggerPokemonTool'">
+          <p><CardName :card-id="entry.cardId" />'s effect is triggered!</p>
+        </div>
+
+        <div v-else-if="entry.type == 'removePokemonTool'">
+          <p>
+            <CardName :card-id="entry.cardId" /> is removed from
+            <CardName :card-id="entry.targetPokemon.cardId" />!
           </p>
         </div>
 

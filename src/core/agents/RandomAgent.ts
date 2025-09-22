@@ -1,5 +1,5 @@
 import type {
-  CardSlot,
+  CardSlotView,
   Energy,
   GameInitState,
   PlayerGameView,
@@ -51,7 +51,7 @@ export class RandomAgent extends PlayerAgent {
     const itemCards = game.selfHand.filter((x) => x.CardType == "Item" || x.CardType == "Fossil");
     for (const card of itemCards) {
       if (!game.canPlayCard(card) || Math.random() < 0.5) continue;
-      let target: CardSlot | undefined;
+      let target: CardSlotView | undefined;
       if (card.Effect.type === "Targeted") {
         target = rand(game.validTargets(card));
       }
@@ -64,7 +64,7 @@ export class RandomAgent extends PlayerAgent {
       .filter((x) => game.canPlayCard(x));
     if (supporterCards.length > 0) {
       const card = rand(supporterCards);
-      let target: CardSlot | undefined;
+      let target: CardSlotView | undefined;
       if (card.Effect.type === "Targeted") {
         target = rand(game.validTargets(card));
       }

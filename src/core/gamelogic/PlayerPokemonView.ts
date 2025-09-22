@@ -56,6 +56,12 @@ export class PlayerPokemonView {
   get EffectiveEnergy() {
     return this.#self.EffectiveEnergy;
   }
+  get AttachedToolCards() {
+    return this.#self.AttachedToolCards;
+  }
+  get MaxToolCards() {
+    return this.#self.MaxToolCards;
+  }
   get PrimaryCondition() {
     return this.#self.PrimaryCondition;
   }

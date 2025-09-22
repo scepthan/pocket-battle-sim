@@ -1,6 +1,6 @@
 import type {
   Attack,
-  CardSlot,
+  CardSlotView,
   Energy,
   GameInitState,
   ItemCard,
@@ -38,7 +38,7 @@ export class BetterRandomAgent extends PlayerAgent {
       ) as SupporterCard[];
       if (supporterCards.length > 0) {
         const card = rand(supporterCards);
-        let target: CardSlot | undefined;
+        let target: CardSlotView | undefined;
         if (card.Effect.type === "Targeted") {
           target = rand(game.validTargets(card));
         }
@@ -72,11 +72,21 @@ export class BetterRandomAgent extends PlayerAgent {
     const itemCards = game.selfHand.filter((x) => x.CardType == "Item" || x.CardType == "Fossil");
     for (const card of itemCards) {
       if (!game.canPlayCard(card) || Math.random() < 0.5) continue;
-      let target: CardSlot | undefined;
+      let target: CardSlotView | undefined;
       if (card.Effect.type === "Targeted") {
         target = rand(game.validTargets(card));
       }
       await game.playItemCard(card, target);
+    }
+
+    // Play each held Pokemon Tool card with 50% chance
+    const toolCards = game.selfHand.filter((x) => x.CardType == "PokemonTool");
+    for (const card of toolCards) {
+      if (!game.canPlayCard(card) || Math.random() < 0.5) continue;
+      const validTargets = game.validTargets(card) as PlayerPokemonView[];
+      if (validTargets.length == 0) continue;
+      const target = rand(validTargets);
+      await game.playPokemonToolCard(card, target);
     }
 
     // Retreat with 100% chance if retreat cost is 0; 50% chance if cost is reduced; 12.5% chance if cost is normal

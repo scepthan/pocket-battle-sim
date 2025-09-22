@@ -1,4 +1,5 @@
 import type {
+  Attack,
   CardSlotView,
   Energy,
   GameInitState,
@@ -11,7 +12,11 @@ import type {
 import { PlayerAgent } from "../../gamelogic";
 import { randomElement as rand, removeElement } from "../../util";
 
-export class BetterRandomAgent_v0_1_1 extends PlayerAgent {
+/**
+ * v0.1.3 - 2025-09-22
+ * Added Pokemon Tool support.
+ */
+export class BetterRandomAgent_v0_1_3 extends PlayerAgent {
   async setupPokemon(game: GameInitState) {
     const basicPokemon = game.hand.filter(
       (x) => x.CardType == "Pokemon" && x.Stage == 0
@@ -76,6 +81,16 @@ export class BetterRandomAgent_v0_1_1 extends PlayerAgent {
         target = rand(game.validTargets(card));
       }
       await game.playItemCard(card, target);
+    }
+
+    // Play each held Pokemon Tool card with 50% chance
+    const toolCards = game.selfHand.filter((x) => x.CardType == "PokemonTool");
+    for (const card of toolCards) {
+      if (!game.canPlayCard(card) || Math.random() < 0.5) continue;
+      const validTargets = game.validTargets(card) as PlayerPokemonView[];
+      if (validTargets.length == 0) continue;
+      const target = rand(validTargets);
+      await game.playPokemonToolCard(card, target);
     }
 
     // Retreat with 100% chance if retreat cost is 0; 50% chance if cost is reduced; 12.5% chance if cost is normal
@@ -176,14 +191,13 @@ export class BetterRandomAgent_v0_1_1 extends PlayerAgent {
       }
     }
 
-    // End turn with a random attack
-    const attacks = [];
+    // End turn with the attack with the highest energy cost that can be used
+    let chosenAttack: Attack | undefined;
     for (const attack of active.Attacks) {
-      if (game.canUseAttack(attack)) attacks.push(attack);
+      if (game.canUseAttack(attack)) chosenAttack = attack;
     }
-    if (attacks.length > 0) {
-      const randomAttack = rand(attacks);
-      await game.useAttack(randomAttack);
+    if (chosenAttack) {
+      await game.useAttack(chosenAttack);
     }
     return;
   }
@@ -228,7 +242,7 @@ export class BetterRandomAgent_v0_1_1 extends PlayerAgent {
 
   findRemainingEnergy(pokemon: PlayerPokemonView, cost: Energy[]): Energy[] {
     const remainingEnergy = cost.slice();
-    for (const e1 of pokemon.AttachedEnergy) {
+    for (const e1 of pokemon.EffectiveEnergy) {
       const index = remainingEnergy.findIndex((e2) => e2 == e1 || e2 == "Colorless");
       if (index >= 0) remainingEnergy.splice(index, 1);
     }

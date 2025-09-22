@@ -282,10 +282,6 @@ export class InPlayPokemonCard {
     if (this.Ability?.trigger === "OnEnterPlay" && this.Ability.effect.undo) {
       await this.Ability.effect.undo(this.game, this);
     }
-    for (const tool of this.AttachedToolCards) {
-      if (tool.Effect.trigger === "OnAttach" && tool.Effect.undo)
-        await tool.Effect.undo(this.game, this);
-    }
   }
 
   async onAttackDamage() {

@@ -12,10 +12,12 @@ import type {
   ItemCard,
   PlayingCard,
   PokemonCard,
+  PokemonToolCard,
   SupporterCard,
 } from "./types";
 
-const viewOrEmpty = (slot: InPlayPokemonCard | EmptyCardSlot) => {
+export type CardSlotView = PlayerPokemonView | EmptyCardSlot;
+const viewOrEmpty = (slot: CardSlot): CardSlotView => {
   if (slot.isPokemon) return new PlayerPokemonView(slot);
   return slot;
 };
@@ -40,10 +42,14 @@ export class PlayerGameView {
     }
   }
 
-  #pokemonFromView(view: PlayerPokemonView) {
+  #pokemonFromView(view: PlayerPokemonView): InPlayPokemonCard {
     for (const pokemon of [...this.#player.InPlayPokemon, ...this.#opponent.InPlayPokemon])
       if (view.is(pokemon)) return pokemon;
     throw new Error("Could not find Pokemon: " + view.Name);
+  }
+  #pokemonOrEmpty(slot: CardSlotView): CardSlot {
+    if (slot.isPokemon) return this.#pokemonFromView(slot);
+    return slot;
   }
 
   // Game attributes
@@ -138,7 +144,7 @@ export class PlayerGameView {
   hasActivePokemon(): this is PlayerGameViewWithActivePokemon {
     return this.selfActive.isPokemon;
   }
-  canPlayCard(card: PlayingCard) {
+  canPlayCard(card: PlayingCard): boolean {
     if (!this.canPlay) return false;
 
     if (!this.selfHand.includes(card)) {
@@ -170,7 +176,13 @@ export class PlayerGameView {
       return true;
     } else if (card.CardType == "Fossil") {
       return this.selfBench.some((slot) => !slot.isPokemon);
+    } else if (card.CardType == "PokemonTool") {
+      return this.selfBench.some(
+        (slot) => slot.isPokemon && slot.AttachedToolCards.length < slot.MaxToolCards
+      );
     }
+
+    return false;
   }
   canUseAttack(attack: Attack): this is PlayerGameViewWithActivePokemon {
     if (!this.canPlay || !this.hasActivePokemon()) return false;
@@ -181,7 +193,7 @@ export class PlayerGameView {
       return false;
     return this.selfActive.hasSufficientEnergy(attack.RequiredEnergy);
   }
-  canUseAbility(pokemon: PlayerPokemonView, ability: Ability) {
+  canUseAbility(pokemon: PlayerPokemonView, ability: Ability): boolean {
     if (!this.canPlay) return false;
     if (pokemon.Ability !== ability) return false;
     if (!["OnceDuringTurn", "ManyDuringTurn"].includes(ability.trigger)) return false;
@@ -208,7 +220,7 @@ export class PlayerGameView {
       this.selfActive.EffectiveEnergy.length
     );
   }
-  canEvolve(pokemon: PlayerPokemonView) {
+  canEvolve(pokemon: PlayerPokemonView): boolean {
     if (!this.canPlay) return false;
     if (!pokemon.ReadyToEvolve) return false;
     const realPokemon = this.#pokemonFromView(pokemon);
@@ -221,15 +233,18 @@ export class PlayerGameView {
       return false;
     return true;
   }
-  validTargets(card: ItemCard | FossilCard | SupporterCard): CardSlot[] {
+  validTargets(card: ItemCard | FossilCard | SupporterCard | PokemonToolCard): CardSlotView[] {
+    if (card.CardType === "PokemonTool") {
+      return this.selfInPlayPokemon.filter((p) => p.AttachedToolCards.length < p.MaxToolCards);
+    }
     if (card.Effect.type == "Targeted") {
-      return card.Effect.validTargets(this.#game);
+      return card.Effect.validTargets(this.#game).map(viewOrEmpty);
     }
     return [];
   }
 
   // Action methods
-  async attachAvailableEnergy(pokemon: PlayerPokemonView) {
+  async attachAvailableEnergy(pokemon: PlayerPokemonView): Promise<boolean> {
     if (!this.canPlay) return false;
 
     if (this.selfAvailableEnergy) {
@@ -240,7 +255,7 @@ export class PlayerGameView {
     }
     return false;
   }
-  async playPokemonToBench(pokemon: PokemonCard, index: number) {
+  async playPokemonToBench(pokemon: PokemonCard, index: number): Promise<boolean> {
     if (!this.canPlay) return false;
 
     if (pokemon.Stage == 0 && !this.selfBench[index]?.isPokemon) {
@@ -250,7 +265,10 @@ export class PlayerGameView {
     }
     return false;
   }
-  async playPokemonToEvolve(pokemon: PokemonCard, inPlayPokemon: PlayerPokemonView) {
+  async playPokemonToEvolve(
+    pokemon: PokemonCard,
+    inPlayPokemon: PlayerPokemonView
+  ): Promise<boolean> {
     if (!this.canPlay) return false;
     if (!this.canEvolve(inPlayPokemon)) return false;
 
@@ -262,7 +280,7 @@ export class PlayerGameView {
     }
     return false;
   }
-  async useAbility(pokemon: PlayerPokemonView, ability: Ability) {
+  async useAbility(pokemon: PlayerPokemonView, ability: Ability): Promise<boolean> {
     if (!this.canUseAbility(pokemon, ability)) return false;
     await this.#game.delay();
 
@@ -270,14 +288,17 @@ export class PlayerGameView {
     await this.#game.useAbility(realPokemon, ability);
     return true;
   }
-  async useAttack(attack: Attack) {
+  async useAttack(attack: Attack): Promise<boolean> {
     if (!this.canUseAttack(attack)) return false;
     await this.#game.delay();
 
     await this.#game.useAttack(attack);
     return true;
   }
-  async retreatActivePokemon(benchedPokemon: PlayerPokemonView, energy?: Energy[]) {
+  async retreatActivePokemon(
+    benchedPokemon: PlayerPokemonView,
+    energy?: Energy[]
+  ): Promise<boolean> {
     if (!this.canRetreat()) return false;
     await this.#game.delay();
 
@@ -298,24 +319,35 @@ export class PlayerGameView {
     await this.#game.retreatActivePokemon(realPokemon, energy);
     return true;
   }
-  async playItemCard(card: ItemCard | FossilCard, target?: CardSlot) {
+  async playItemCard(card: ItemCard | FossilCard, target?: CardSlotView): Promise<boolean> {
     if (!this.canPlayCard(card)) return false;
+    const realTarget = target && this.#pokemonOrEmpty(target);
     if (card.Effect.type === "Targeted") {
-      if (!target || !card.Effect.validTargets(this.#game).includes(target)) return false;
+      if (!realTarget || !card.Effect.validTargets(this.#game).includes(realTarget)) return false;
     }
     await this.#game.delay();
 
-    await this.#game.playTrainer(card, target);
+    await this.#game.playTrainer(card, realTarget);
     return true;
   }
-  async playSupporterCard(card: SupporterCard, target?: CardSlot) {
+  async playSupporterCard(card: SupporterCard, target?: CardSlotView): Promise<boolean> {
     if (!this.canPlayCard(card)) return false;
+    const realTarget = target && this.#pokemonOrEmpty(target);
     if (card.Effect.type === "Targeted") {
-      if (!target || !card.Effect.validTargets(this.#game).includes(target)) return false;
+      if (!realTarget || !card.Effect.validTargets(this.#game).includes(realTarget)) return false;
     }
     await this.#game.delay();
 
-    await this.#game.playTrainer(card, target);
+    await this.#game.playTrainer(card, realTarget);
+    return true;
+  }
+  async playPokemonToolCard(card: PokemonToolCard, target: PlayerPokemonView): Promise<boolean> {
+    if (!this.canPlayCard(card)) return false;
+    if (target.AttachedToolCards.length >= target.MaxToolCards) return false;
+    await this.#game.delay();
+
+    const realPokemon = this.#pokemonFromView(target);
+    await this.#game.playTrainer(card, realPokemon);
     return true;
   }
 }
