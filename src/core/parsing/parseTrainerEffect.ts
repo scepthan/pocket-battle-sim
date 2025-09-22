@@ -8,6 +8,7 @@ import {
   type PokemonCard,
   type TrainerEffect,
 } from "../gamelogic";
+import { randomElement, removeElement } from "../util";
 import { parsePlayingCardPredicate, parsePokemonPredicate } from "./parsePredicates";
 import type { ParsedResult } from "./types";
 
@@ -319,6 +320,35 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
           game.DefendingPlayer.shuffleHandIntoDeck();
           const cardsToDraw = game.GameRules.PrizePoints - game.DefendingPlayer.GamePoints;
           game.DefendingPlayer.drawCards(cardsToDraw);
+        },
+      }),
+    },
+    {
+      pattern: /^Choose a Pokémon in your hand and switch it with a random Pokémon in your deck.$/i,
+      transform: () => ({
+        type: "Conditional",
+        condition: (game) => game.AttackingPlayer.Hand.some((c) => c.CardType == "Pokemon"),
+        effect: async (game) => {
+          const handPokemon = game.AttackingPlayer.Hand.filter((c) => c.CardType == "Pokemon");
+          const chosen = await game.choose(game.AttackingPlayer, handPokemon);
+          if (!chosen) return;
+
+          const deckPokemon = game.AttackingPlayer.Deck.filter((c) => c.CardType == "Pokemon");
+          if (deckPokemon.length == 0) {
+            game.GameLog.noValidCards(game.AttackingPlayer);
+            return;
+          }
+          const pokemonFromDeck = randomElement(deckPokemon);
+
+          removeElement(game.AttackingPlayer.Hand, chosen);
+          game.AttackingPlayer.Deck.push(chosen);
+          game.GameLog.returnToDeck(game.AttackingPlayer, [chosen], "hand");
+
+          removeElement(game.AttackingPlayer.Deck, pokemonFromDeck);
+          game.AttackingPlayer.Hand.push(pokemonFromDeck);
+          game.GameLog.putIntoHand(game.AttackingPlayer, [pokemonFromDeck]);
+
+          game.AttackingPlayer.shuffleDeck();
         },
       }),
     },

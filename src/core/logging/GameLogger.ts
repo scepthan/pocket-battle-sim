@@ -199,6 +199,15 @@ export class GameLogger {
     });
   }
 
+  returnToDeck(player: Player, cards: PlayingCard[], source: "hand" | "discard" | "inPlay") {
+    this.addEntry({
+      type: "returnToDeck",
+      player: player.Name,
+      source,
+      cardIds: cards.map((card) => card.ID),
+    });
+  }
+
   returnToBottomOfDeck(player: Player, cards: PlayingCard[]) {
     this.addEntry({
       type: "returnToBottomOfDeck",

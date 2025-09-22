@@ -27,6 +27,7 @@ Backend todo:
     - [ ] Ability activation on energy attach
       - [ ] Promo Cresselia ex
     - [x] Attack effect based on whether Tool attached
+    - [x] Swap mon in hand for random mon in deck
     - [x] Bring in opponent's damaged Benched mon
     - [x] Make opponent redraw for their remaining prize points
   - [ ] A2a
