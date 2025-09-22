@@ -1,4 +1,10 @@
-import { Game, parseEnergy, type PokemonStatus, type PokemonToolEffect } from "../gamelogic";
+import {
+  Game,
+  InPlayPokemonCard,
+  parseEnergy,
+  type PokemonStatus,
+  type PokemonToolEffect,
+} from "../gamelogic";
 import type { ParsedResult } from "./types";
 
 interface EffectTransformer {
@@ -60,7 +66,7 @@ export const parsePokemonToolEffect = (cardText: string): ParsedResult<PokemonTo
           pokemon.applyPokemonStatus(status);
         };
         effect.undo = async (game, pokemon) => {
-          pokemon.removePokemonStatus(status);
+          removePokemonStatus(pokemon, status);
         };
       },
     },
@@ -101,4 +107,12 @@ export const parsePokemonToolEffect = (cardText: string): ParsedResult<PokemonTo
     parseSuccessful,
     value: effect,
   };
+};
+
+const removePokemonStatus = (pokemon: InPlayPokemonCard, status: PokemonStatus) => {
+  const foundStatus = pokemon.PokemonStatuses.find(
+    (s) => s.type === status.type && s.source === status.source
+  );
+  if (!foundStatus) throw new Error("Could not find status to remove");
+  pokemon.removePokemonStatus(foundStatus);
 };

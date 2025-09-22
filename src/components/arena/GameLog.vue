@@ -326,6 +326,10 @@
             must flip a coin to attack<span v-if="entry.status.source == 'Effect'"> next turn</span
             >!
           </p>
+          <p v-else-if="entry.status.type == 'IncreaseMaxHP'">
+            <CardName :card-id="entry.targetPokemon.cardId" />'s max HP is increased by
+            {{ entry.status.amount }}!
+          </p>
           <p v-else>
             Unknown status type applied to <CardName :card-id="entry.targetPokemon.cardId" />:
             {{ entry.status.type }}
