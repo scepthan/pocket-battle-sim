@@ -27,6 +27,7 @@ declare module 'vue' {
     PlayerInfo: typeof import('./src/components/arena/PlayerInfo.vue')['default']
     PlayerPokemon: typeof import('./src/components/arena/PlayerPokemon.vue')['default']
     PlayingCard: typeof import('./src/components/common/PlayingCard.vue')['default']
+    PlayingCardImage: typeof import('./src/components/common/PlayingCardImage.vue')['default']
     PlayingField: typeof import('./src/components/arena/PlayingField.vue')['default']
     ResetDeckButton: typeof import('./src/components/builder/ResetDeckButton.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

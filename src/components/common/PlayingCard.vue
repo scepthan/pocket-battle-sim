@@ -2,29 +2,25 @@
   <div class="flip-card" :style="style">
     <div class="flip-card-inner">
       <div class="flip-card-front">
-        <img :src="cardURL" :height="height" />
+        <PlayingCardImage :card-id="card?.ID" :height="height" />
       </div>
       <div class="flip-card-back">
-        <img :src="cardBackUrl" :height="height" />
+        <PlayingCardImage :height="height" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import cardBackUrl from "@/assets/img/cardback.jpg";
 import type { PlayingCard } from "@/core";
 import { computed } from "vue";
+import PlayingCardImage from "./PlayingCardImage.vue";
 
 export interface Props {
   heightPx?: number;
   card?: PlayingCard;
 }
 const props = defineProps<Props>();
-
-const cardURL = computed(() =>
-  props.card ? `https://static.dotgg.gg/pokepocket/card/${props.card.ID}.webp` : cardBackUrl
-);
 
 const ratio = 367 / 512;
 const height = computed(() => props.heightPx ?? 200);

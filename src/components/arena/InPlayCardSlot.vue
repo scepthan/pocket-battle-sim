@@ -11,6 +11,15 @@
         </div>
         <div class="hp-bar-border" />
       </div>
+
+      <div class="pokemon-tools">
+        <PlayingCardImage
+          v-for="(tool, i) in card.AttachedToolCards"
+          :key="i"
+          :card-id="tool.ID"
+          :title="tool.Name"
+        />
+      </div>
     </div>
 
     <div class="card-energy">
@@ -31,6 +40,7 @@ import EnergyIcon from "@/components/common/EnergyIcon.vue";
 import PlayingCard from "@/components/common/PlayingCard.vue";
 import type { EmptyCardSlot, InPlayPokemonCard } from "@/core";
 import { computed } from "vue";
+import PlayingCardImage from "../common/PlayingCardImage.vue";
 
 export interface Props {
   heightPx?: number;
@@ -107,5 +117,18 @@ const hpBarPaddingStyle = computed(() => ({
 }
 .card-energy img {
   margin-right: -8px;
+}
+
+.pokemon-tools {
+  width: 30%;
+  height: 13.2%;
+  overflow: hidden;
+  margin-right: -3%;
+  margin-top: 5%;
+}
+.pokemon-tools img {
+  width: 110%;
+  margin-top: -19%;
+  margin-left: -5%;
 }
 </style>
