@@ -21,15 +21,55 @@ Backend todo:
     - [x] Discard energy and attack any mon
   - [ ] A2: 90/157 (57.3%)
     - [x] Pokémon Tools
-    - [ ] Confused
-      - [ ] Promo Misdreavus
-    - [ ] Burned
-    - [ ] Ability activation on energy attach
-      - [ ] Promo Cresselia ex
-    - [x] Attack effect based on whether Tool attached
-    - [x] Swap mon in hand for random mon in deck
-    - [x] Bring in opponent's damaged Benched mon
-    - [x] Make opponent redraw for their remaining prize points
+    - [ ] New Special Conditions
+      - [ ] Confused
+        - [ ] Promo Misdreavus
+      - [ ] Burned
+    - [ ] New Pokemon statuses
+      - [ ] Prevent self from using attack
+      - [ ] Prevent self from attacking next turn
+      - [ ] Prevent non-damage effects of attacks
+      - [ ] Attack does extra damage next turn
+      - [ ] Remove retreat cost
+    - [ ] New player status
+      - [ ] Attacks of specific type do +N damage
+    - [ ] New attack conditionals
+      - [ ] If defending mon is specific type
+      - [x] If attacking mon has Tool attached
+      - [ ] If defending mon has Tool attached
+      - [ ] If defending mon is knocked out
+    - [ ] New attack effects
+      - [ ] Discard random energy from self
+      - [ ] Discard all energy of type from self
+      - [ ] Also do damage to 1 of opponent's Benched mon
+      - [ ] Discard energy and damage all Benched mon
+      - [ ] Attach energy to 2 Benched mon
+      - [ ] Attach energy to specific mon
+      - [ ] Attack only works with specific mon on bench
+      - [ ] Discard cards from own deck
+      - [ ] Do N damage to each of opponent's mon
+      - [ ] Flip coins for damage and Poison
+      - [ ] Flip coin for each own mon in play
+      - [ ] Attach N energy to Benched mon
+      - [ ] Change opponent's next energy
+      - [ ] Remove opposing mon's Tool
+      - [ ] Halve opposing mon's HP
+      - [ ] Choose a card from your opponent's hand to discard
+      - [ ] Put opposing mon back in opponent's hand
+      - [ ] Do extra damage based on own damage
+    - [ ] New Trainer effects
+      - [x] Swap mon in hand for random mon in deck
+      - [x] Bring in opponent's damaged Benched mon
+      - [ ] Attach energy from discard to specific mon
+      - [ ] Move energy from Benched mon to Active mon
+      - [x] Make opponent redraw for their remaining prize points
+    - [ ] Abilities
+      - [ ] Take -N damage from typed mon
+      - [ ] Absorb damage from other mon
+      - [ ] Damage/heal on energy attach
+        - [ ] Promo Cresselia ex
+      - [ ] Flip coin to reduce damage
+      - [ ] Discard to draw
   - [ ] A2a
   - [ ] A2b
   - [ ] A3
