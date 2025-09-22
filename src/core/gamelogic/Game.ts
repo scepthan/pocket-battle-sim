@@ -45,6 +45,7 @@ export class Game {
     DeckSize: 20,
     InitialHandSize: 5,
     MaxHandSize: 10,
+    PrizePoints: 3,
     TurnLimit: 30,
     DelayPerAction: 0,
   };
@@ -186,7 +187,7 @@ export class Game {
     }
 
     // Draw a card into the attacking player's hand
-    this.AttackingPlayer.drawCards(1, this.GameRules.MaxHandSize);
+    this.AttackingPlayer.drawCards(1);
 
     // Execute the player's turn
     try {
@@ -350,10 +351,10 @@ export class Game {
     if (this.Player2.InPlayPokemon.length == 0) {
       player1WinConditions.push("noPokemonLeft");
     }
-    if (this.Player1.GamePoints >= 3) {
+    if (this.Player1.GamePoints >= this.GameRules.PrizePoints) {
       player1WinConditions.push("maxPrizePointsReached");
     }
-    if (this.Player2.GamePoints >= 3) {
+    if (this.Player2.GamePoints >= this.GameRules.PrizePoints) {
       player2WinConditions.push("maxPrizePointsReached");
     }
 
@@ -562,7 +563,7 @@ export class Game {
 
   //
   drawCards(count: number) {
-    this.AttackingPlayer.drawCards(count, this.GameRules.MaxHandSize);
+    this.AttackingPlayer.drawCards(count);
   }
 
   attackActivePokemon(HP: number) {

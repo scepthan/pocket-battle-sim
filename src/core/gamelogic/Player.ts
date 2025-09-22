@@ -104,7 +104,7 @@ export class Player {
     this.reset();
 
     while (true) {
-      this.drawCards(handSize, handSize, false);
+      this.drawCards(handSize, false);
       if (this.hasBasicPokemon()) {
         break;
       }
@@ -139,10 +139,10 @@ export class Player {
     return this.Deck.length > 0 && this.Hand.length < this.game.GameRules.MaxHandSize;
   }
 
-  drawCards(count: number, maxHandSize: number, log: boolean = true) {
+  drawCards(count: number, log: boolean = true) {
     const cardsDrawn: PlayingCard[] = [];
     while (cardsDrawn.length < count) {
-      if (this.Deck.length == 0 || this.Hand.length >= maxHandSize) break;
+      if (this.Deck.length == 0 || this.Hand.length >= this.game.GameRules.MaxHandSize) break;
 
       cardsDrawn.push(this.Deck.shift()!);
     }

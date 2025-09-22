@@ -72,7 +72,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         condition: () => true,
         effect: async (game: Game) => {
           game.DefendingPlayer.shuffleHandIntoDeck();
-          game.DefendingPlayer.drawCards(Number(count), game.GameRules.MaxHandSize);
+          game.DefendingPlayer.drawCards(Number(count));
         },
       }),
     },
@@ -306,6 +306,19 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
             "opponentEffect",
             game.AttackingPlayer.Name
           );
+        },
+      }),
+    },
+    {
+      pattern:
+        /^Your opponent shuffles their hand into their deck and draws a card for each of their remaining points needed to win\.$/i,
+      transform: () => ({
+        type: "Conditional",
+        condition: () => true,
+        effect: async (game) => {
+          game.DefendingPlayer.shuffleHandIntoDeck();
+          const cardsToDraw = game.GameRules.PrizePoints - game.DefendingPlayer.GamePoints;
+          game.DefendingPlayer.drawCards(cardsToDraw);
         },
       }),
     },
