@@ -293,6 +293,22 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         };
       },
     },
+    {
+      pattern:
+        /^Switch in 1 of your opponent’s Benched Pokémon that has damage on it to the Active Spot\.$/i,
+      transform: () => ({
+        type: "Targeted",
+        validTargets: (game) => game.DefendingPlayer.BenchedPokemon.filter((p) => p.isDamaged()),
+        effect: async (game, target) => {
+          if (!target.isPokemon) return;
+          await game.DefendingPlayer.swapActivePokemon(
+            target,
+            "opponentEffect",
+            game.AttackingPlayer.Name
+          );
+        },
+      }),
+    },
   ];
 
   for (const { pattern, transform } of dictionary) {
