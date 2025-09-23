@@ -268,13 +268,21 @@ export const parseAttackEffect = (
       },
     },
     {
-      pattern: /^This attack does (\d+) damage to 1 of your opponent’s( Benched)? Pokémon\.$/i,
-      transform: (_, damage, benched) => async (game: Game) => {
+      pattern:
+        /^This attack( also)? does (\d+) damage to 1 of your opponent’s( Benched)? Pokémon\.$/i,
+      transform: (_, attackActive, damage, benched) => async (game: Game) => {
         const pokemon = await game.choosePokemon(
           game.AttackingPlayer,
           benched ? game.DefendingPlayer.BenchedPokemon : game.DefendingPlayer.InPlayPokemon
         );
-        if (pokemon) {
+        if (attackActive) await defaultEffect(game);
+        if (pokemon) game.attackPokemon(pokemon, Number(damage));
+      },
+    },
+    {
+      pattern: /^This attack does (\d+) damage to each of your opponent’s Pokémon\.$/i,
+      transform: (_, damage) => async (game: Game) => {
+        for (const pokemon of game.DefendingPlayer.InPlayPokemon) {
           game.attackPokemon(pokemon, Number(damage));
         }
       },
@@ -416,19 +424,14 @@ export const parseAttackEffect = (
       },
     },
     {
-      pattern:
-        /^Discard (a|\d+|all) \{(\w)\} Energy from this Pokémon\. This attack does (\d+) damage to 1 of your opponent’s Pokémon\.$/i,
-      transform: (_, count, energyType, damage) => {
+      pattern: /^Discard (a|\d+|all) \{(\w)\} Energy from this Pokémon\. (This attack .+?\.)$/i,
+      transform: (_, count, energyType, attackText) => {
         const fullType = parseEnergy(energyType);
         const numToDiscard = count == "all" ? Infinity : count == "a" ? 1 : Number(count);
+        const attackEffect = recursiveParse(attackText);
 
         return async (game: Game) => {
-          const pokemon = await game.choosePokemon(
-            game.AttackingPlayer,
-            game.DefendingPlayer.InPlayPokemon
-          );
-          if (!pokemon) return;
-          game.attackPokemon(pokemon, Number(damage));
+          await attackEffect(game);
           game.discardEnergy(game.AttackingPlayer.activeOrThrow(), fullType, numToDiscard);
         };
       },

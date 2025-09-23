@@ -19,7 +19,7 @@ Backend todo:
     - [x] Coin flip to attack effect
     - [x] Energy-doubling Ability
     - [x] Discard energy and attack any mon
-  - [ ] A2: 90/157 (57.3%)
+  - [ ] A2: 94/157 (59.9%)
     - [x] Pokémon Tools
     - [ ] New Special Conditions
       - [ ] Confused
@@ -41,13 +41,13 @@ Backend todo:
     - [ ] New attack effects
       - [ ] Discard random energy from self
       - [ ] Discard all energy of type from self
-      - [ ] Also do damage to 1 of opponent's Benched mon
-      - [ ] Discard energy and damage all Benched mon
+      - [x] Also do damage to 1 of opponent's Benched mon
+      - [x] Discard energy and damage all Benched mon
       - [ ] Attach energy to 2 Benched mon
       - [ ] Attach energy to specific mon
       - [ ] Attack only works with specific mon on bench
       - [ ] Discard cards from own deck
-      - [ ] Do N damage to each of opponent's mon
+      - [x] Do N damage to each of opponent's mon
       - [ ] Flip coins for damage and Poison
       - [ ] Flip coin for each own mon in play
       - [ ] Attach N energy to Benched mon
@@ -92,6 +92,7 @@ Frontend todo:
   - [ ] Display game points somewhere
   - [x] Display discard somewhere
   - [x] Display deck size and opponent hand size
+  - [x] Display attached Pokemon Tools
   - [ ] Display statuses and Special Conditions
 - [ ] Allow user control of one or both players in battle simulator
 - [ ] Deck builder UI
@@ -105,5 +106,10 @@ Other todo:
 - [x] Deck library
   - [x] A1 official
   - [x] A1 unofficial
+  - [x] A1 meta
   - [x] A1a official
   - [x] A1a unofficial
+  - [ ] A1a meta
+  - [ ] A2 official
+  - [ ] A2 unofficial
+  - [ ] A2 meta
