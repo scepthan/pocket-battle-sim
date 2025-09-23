@@ -19,7 +19,7 @@ Backend todo:
     - [x] Coin flip to attack effect
     - [x] Energy-doubling Ability
     - [x] Discard energy and attack any mon
-  - [ ] A2: 126/157 (80.3%)
+  - [ ] A2: 128/157 (81.5%)
     - [x] Pokémon Tools
     - [x] New Special Conditions
       - [x] Confused
@@ -61,8 +61,8 @@ Backend todo:
     - [ ] New Trainer effects
       - [x] Swap mon in hand for random mon in deck
       - [x] Bring in opponent's damaged Benched mon
-      - [ ] Attach energy from discard to specific mon
-      - [ ] Move energy from Benched mon to Active mon
+      - [x] Attach energy from discard to specific mon
+      - [x] Move energy from Benched mon to Active mon
       - [x] Make opponent redraw for their remaining prize points
     - [ ] Abilities
       - [ ] Absorb damage from other mon
