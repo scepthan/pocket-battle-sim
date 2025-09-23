@@ -341,8 +341,6 @@ export class Player {
   }
 
   discardRandomEnergy(pokemon: InPlayPokemonCard, count: number = 1) {
-    if (this.game.shouldPreventDamage(pokemon)) return;
-
     const energies = pokemon.AttachedEnergy;
 
     const discarded: Energy[] = [];
@@ -414,7 +412,6 @@ export class Player {
     choosingPlayer?: string
   ) {
     const currentActive = this.activeOrThrow();
-    if (this.game.shouldPreventDamage(currentActive)) return;
 
     this.ActivePokemon = newActive;
     this.Bench[this.Bench.indexOf(newActive)] = currentActive;
@@ -429,8 +426,6 @@ export class Player {
   }
 
   async removePokemonFromField(pokemon: InPlayPokemonCard) {
-    if (this.game.shouldPreventDamage(pokemon)) return;
-
     await pokemon.onLeavePlay();
     if (pokemon == this.ActivePokemon) {
       await pokemon.onLeaveActive();
@@ -443,8 +438,6 @@ export class Player {
   }
 
   async returnPokemonToHand(pokemon: InPlayPokemonCard) {
-    if (this.game.shouldPreventDamage(pokemon)) return;
-
     await this.removePokemonFromField(pokemon);
 
     for (const card of pokemon.InPlayCards) {
@@ -458,8 +451,6 @@ export class Player {
   }
 
   async shufflePokemonIntoDeck(pokemon: InPlayPokemonCard) {
-    if (this.game.shouldPreventDamage(pokemon)) return;
-
     await this.removePokemonFromField(pokemon);
 
     for (const card of pokemon.InPlayCards) {
@@ -518,26 +509,17 @@ export class Player {
   }
 
   poisonActivePokemon() {
-    const pokemon = this.activeOrThrow();
-    if (this.game.shouldPreventDamage(pokemon)) return;
-
-    pokemon.SecondaryConditions.add("Poisoned");
+    this.activeOrThrow().SecondaryConditions.add("Poisoned");
     this.logger.specialConditionApplied(this, "Poisoned");
   }
 
   sleepActivePokemon() {
-    const pokemon = this.activeOrThrow();
-    if (this.game.shouldPreventDamage(pokemon)) return;
-
-    pokemon.PrimaryCondition = "Asleep";
+    this.activeOrThrow().PrimaryCondition = "Asleep";
     this.logger.specialConditionApplied(this, "Asleep");
   }
 
   paralyzeActivePokemon() {
-    const pokemon = this.activeOrThrow();
-    if (this.game.shouldPreventDamage(pokemon)) return;
-
-    pokemon.PrimaryCondition = "Paralyzed";
+    this.activeOrThrow().PrimaryCondition = "Paralyzed";
     this.logger.specialConditionApplied(this, "Paralyzed");
   }
 

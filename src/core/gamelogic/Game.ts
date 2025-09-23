@@ -110,9 +110,6 @@ export class Game {
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
-  findOwner(pokemon: InPlayPokemonCard) {
-    return this.Player1.InPlayPokemon.includes(pokemon) ? this.Player1 : this.Player2;
-  }
   viewToPokemon(view: PlayerPokemonView, validPokemon: InPlayPokemonCard[]) {
     const pokemon = validPokemon.find((p) => view.is(p));
     if (!pokemon) throw new Error("Invalid Pokémon selected");
@@ -236,7 +233,7 @@ export class Game {
       if (pokemon.SecondaryConditions.has("Poisoned")) {
         const initialHP = pokemon.CurrentHP;
         const damage = 10;
-        const player = this.findOwner(pokemon);
+        const player = pokemon.player;
 
         pokemon.applyDamage(damage);
         this.GameLog.specialConditionDamage(player, "Poisoned", initialHP, damage);
@@ -246,7 +243,7 @@ export class Game {
     // Flip to wake up sleeping Pokemon
     for (const pokemon of [attacker, defender]) {
       if (pokemon.PrimaryCondition == "Asleep") {
-        const player = this.findOwner(pokemon);
+        const player = pokemon.player;
         if (player.flipCoin()) {
           pokemon.PrimaryCondition = undefined;
           this.GameLog.specialConditionEnded(player, ["Asleep"]);
@@ -558,7 +555,18 @@ export class Game {
   shouldPreventDamage(pokemon: InPlayPokemonCard): boolean {
     if (!this.CurrentlyAttacking) return false;
     if (!this.DefendingPlayer.InPlayPokemon.includes(pokemon)) return false;
-    return pokemon.PokemonStatuses.some((status) => status.type === "PreventDamage");
+    return pokemon.PokemonStatuses.some(
+      (status) =>
+        status.type === "PreventAttackDamage" || status.type === "PreventAttackDamageAndEffects"
+    );
+  }
+  shouldPreventEffects(pokemon: InPlayPokemonCard): boolean {
+    if (!this.CurrentlyAttacking) return false;
+    if (!this.DefendingPlayer.InPlayPokemon.includes(pokemon)) return false;
+    return pokemon.PokemonStatuses.some(
+      (status) =>
+        status.type === "PreventAttackEffects" || status.type === "PreventAttackDamageAndEffects"
+    );
   }
 
   //
@@ -632,15 +640,14 @@ export class Game {
 
   applyDamage(target: InPlayPokemonCard, HP: number, fromAttack: boolean) {
     const initialHP = target.CurrentHP;
-    const owner = this.findOwner(target);
 
     target.applyDamage(HP);
 
-    this.GameLog.pokemonDamaged(owner, target, initialHP, HP, fromAttack);
+    this.GameLog.pokemonDamaged(target.player, target, initialHP, HP, fromAttack);
   }
 
   async knockOutPokemon(player: Player, pokemon: InPlayPokemonCard, fromAttack: boolean) {
-    if (pokemon.CurrentHP > 0 && this.shouldPreventDamage(pokemon)) {
+    if (pokemon.CurrentHP > 0 && this.shouldPreventEffects(pokemon)) {
       this.GameLog.damagePrevented(player, pokemon);
       return;
     }
@@ -652,15 +659,14 @@ export class Game {
 
   healPokemon(target: InPlayPokemonCard, HP: number) {
     const initialHP = target.CurrentHP;
-    const owner = this.findOwner(target);
 
     target.healDamage(HP);
 
-    this.GameLog.pokemonHealed(owner, target, initialHP, HP);
+    this.GameLog.pokemonHealed(target.player, target, initialHP, HP);
   }
 
   discardEnergy(pokemon: InPlayPokemonCard, type: Energy, count: number) {
-    if (this.shouldPreventDamage(pokemon)) return;
+    if (this.shouldPreventEffects(pokemon)) return;
     const discardedEnergy: Energy[] = [];
     while (pokemon.AttachedEnergy.includes(type) && count > 0) {
       discardedEnergy.push(type);
@@ -668,19 +674,43 @@ export class Game {
       count--;
     }
 
-    this.findOwner(pokemon).discardEnergy(discardedEnergy, "effect", pokemon);
+    pokemon.player.discardEnergy(discardedEnergy, "effect", pokemon);
   }
   discardAllEnergy(pokemon: InPlayPokemonCard) {
-    if (this.shouldPreventDamage(pokemon)) return;
+    if (this.shouldPreventEffects(pokemon)) return;
     const discardedEnergy = pokemon.AttachedEnergy.slice();
     pokemon.AttachedEnergy = [];
 
-    this.findOwner(pokemon).discardEnergy(discardedEnergy, "effect", pokemon);
+    pokemon.player.discardEnergy(discardedEnergy, "effect", pokemon);
+  }
+  discardRandomEnergy(pokemon: InPlayPokemonCard, count: number = 1) {
+    if (this.shouldPreventEffects(pokemon)) return;
+    if (pokemon.AttachedEnergy.length == 0) return;
+
+    pokemon.player.discardRandomEnergy(pokemon, count);
   }
 
   applyPokemonStatus(pokemon: InPlayPokemonCard, status: PokemonStatus) {
-    if (this.shouldPreventDamage(pokemon)) return;
+    if (this.shouldPreventEffects(pokemon)) return;
     pokemon.applyPokemonStatus(status);
+  }
+
+  poisonActivePokemon() {
+    if (this.shouldPreventEffects(this.AttackingPlayer.activeOrThrow())) return;
+
+    this.AttackingPlayer.poisonActivePokemon();
+  }
+
+  sleepActivePokemon() {
+    if (this.shouldPreventEffects(this.AttackingPlayer.activeOrThrow())) return;
+
+    this.AttackingPlayer.sleepActivePokemon();
+  }
+
+  paralyzeActivePokemon() {
+    if (this.shouldPreventEffects(this.AttackingPlayer.activeOrThrow())) return;
+
+    this.AttackingPlayer.paralyzeActivePokemon();
   }
 
   findAgent(player: Player) {
@@ -690,6 +720,7 @@ export class Game {
     player: Player,
     reason: "selfEffect" | "opponentEffect"
   ): Promise<boolean> {
+    if (this.shouldPreventEffects(player.activeOrThrow())) return false;
     await this.delay();
     if (player.BenchedPokemon.length == 0) {
       this.GameLog.noBenchedPokemon(player);

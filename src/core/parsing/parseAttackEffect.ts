@@ -406,14 +406,22 @@ export const parseAttackEffect = (
 
     // Energy effects
     {
-      pattern: /^Discard (a|\d+) \{(\w)\} Energy from this Pokémon\.$/i,
+      pattern: /^Discard (a|\d+|all) \{(\w)\} Energy from this Pokémon\.$/i,
       transform: (_, count, energyType) => {
+        const energyCount = count == "all" ? Infinity : count == "a" ? 1 : Number(count);
         const fullType = parseEnergy(energyType);
 
         return async (game: Game) => {
           await defaultEffect(game);
-          game.discardEnergy(game.AttackingPlayer.activeOrThrow(), fullType, Number(count) || 1);
+          game.discardEnergy(game.AttackingPlayer.activeOrThrow(), fullType, energyCount);
         };
+      },
+    },
+    {
+      pattern: /^Discard a random Energy from this Pokémon\.$/i,
+      transform: () => async (game) => {
+        await defaultEffect(game);
+        game.discardRandomEnergy(game.AttackingPlayer.activeOrThrow());
       },
     },
     {
@@ -424,15 +432,14 @@ export const parseAttackEffect = (
       },
     },
     {
-      pattern: /^Discard (a|\d+|all) \{(\w)\} Energy from this Pokémon\. (This attack .+?\.)$/i,
-      transform: (_, count, energyType, attackText) => {
-        const fullType = parseEnergy(energyType);
-        const numToDiscard = count == "all" ? Infinity : count == "a" ? 1 : Number(count);
+      pattern: /^(Discard .+? from this Pokémon\.) (This attack .+?\.)$/i,
+      transform: (_, discardText, attackText) => {
+        const discardEffect = recursiveParse(discardText);
         const attackEffect = recursiveParse(attackText);
 
         return async (game: Game) => {
           await attackEffect(game);
-          game.discardEnergy(game.AttackingPlayer.activeOrThrow(), fullType, numToDiscard);
+          await discardEffect(game);
         };
       },
     },
@@ -440,7 +447,7 @@ export const parseAttackEffect = (
       pattern: /^Discard a random Energy from your opponent’s Active Pokémon.$/i,
       transform: () => async (game: Game) => {
         await defaultEffect(game);
-        game.DefendingPlayer.discardRandomEnergy(game.DefendingPlayer.activeOrThrow());
+        game.discardRandomEnergy(game.DefendingPlayer.activeOrThrow());
       },
     },
     {
@@ -591,7 +598,7 @@ export const parseAttackEffect = (
       transform: () => async (game: Game) => {
         await defaultEffect(game);
         game.AttackingPlayer.applyActivePokemonStatus({
-          type: "PreventDamage",
+          type: "PreventAttackDamageAndEffects",
           source: "Effect",
           condition: "none",
           keepNextTurn: true,
