@@ -19,6 +19,7 @@ declare module 'vue' {
     EnergySelector: typeof import('./src/components/builder/EnergySelector.vue')['default']
     EnergyZone: typeof import('./src/components/arena/EnergyZone.vue')['default']
     GameLog: typeof import('./src/components/arena/GameLog.vue')['default']
+    HpChange: typeof import('./src/components/arena/HpChange.vue')['default']
     InPlayCardSlot: typeof import('./src/components/arena/InPlayCardSlot.vue')['default']
     PlayerDeck: typeof import('./src/components/arena/PlayerDeck.vue')['default']
     PlayerDiscard: typeof import('./src/components/arena/PlayerDiscard.vue')['default']

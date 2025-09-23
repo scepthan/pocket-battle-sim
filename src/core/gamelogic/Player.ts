@@ -512,15 +512,21 @@ export class Player {
     this.activeOrThrow().SecondaryConditions.add("Poisoned");
     this.logger.specialConditionApplied(this, "Poisoned");
   }
-
+  burnActivePokemon() {
+    this.activeOrThrow().SecondaryConditions.add("Burned");
+    this.logger.specialConditionApplied(this, "Burned");
+  }
   sleepActivePokemon() {
     this.activeOrThrow().PrimaryCondition = "Asleep";
     this.logger.specialConditionApplied(this, "Asleep");
   }
-
   paralyzeActivePokemon() {
     this.activeOrThrow().PrimaryCondition = "Paralyzed";
     this.logger.specialConditionApplied(this, "Paralyzed");
+  }
+  confuseActivePokemon() {
+    this.activeOrThrow().PrimaryCondition = "Confused";
+    this.logger.specialConditionApplied(this, "Confused");
   }
 
   applyActivePokemonStatus(status: PokemonStatus) {

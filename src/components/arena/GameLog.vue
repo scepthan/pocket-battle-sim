@@ -248,9 +248,7 @@
         <div v-else-if="entry.type == 'pokemonHealed'">
           <p>
             <CardName :card-id="entry.targetPokemon.cardId" /> is healed for
-            {{ entry.healingDealt }} damage! ({{ entry.initialHP }}/{{ entry.maxHP }} &rarr;
-            {{ entry.finalHP }}/{{ entry.maxHP }}
-            HP)
+            {{ entry.healingDealt }} damage! <HpChange :event="entry" />
           </p>
         </div>
 
@@ -258,9 +256,7 @@
           <p v-if="entry.weaknessBoost">It's super effective!</p>
           <p>
             <CardName :card-id="entry.targetPokemon.cardId" /> is hit for
-            {{ entry.damageDealt }} damage! ({{ entry.initialHP }}/{{ entry.maxHP }} &rarr;
-            {{ entry.finalHP }}/{{ entry.maxHP }}
-            HP)
+            {{ entry.damageDealt }} damage! <HpChange :event="entry" />
           </p>
         </div>
 
@@ -276,15 +272,14 @@
         <div v-else-if="entry.type == 'specialConditionDamage'">
           <p>
             <CardName :card-id="entry.targetPokemon.cardId" /> takes {{ entry.damageDealt }} damage
-            from being {{ entry.specialCondition }}! ({{ entry.initialHP }}/{{ entry.maxHP }} &rarr;
-            {{ entry.finalHP }}/{{ entry.maxHP }}
+            from being {{ entry.specialCondition }}! <HpChange :event="entry" />
             HP)
           </p>
         </div>
 
         <div v-else-if="entry.type == 'specialConditionEffective'">
-          <CardName :card-id="entry.targetPokemon.cardId" /> is {{ entry.specialCondition }} and
-          cannot move!
+          <CardName :card-id="entry.targetPokemon.cardId" /> is {{ entry.specialCondition
+          }}<span v-if="entry.specialCondition !== 'Confused'"> and cannot move</span>!
         </div>
 
         <div v-else-if="entry.type == 'specialConditionEnded'">
@@ -297,43 +292,32 @@
         </div>
 
         <div v-else-if="entry.type == 'applyPokemonStatus'">
-          <p v-if="entry.status.type == 'ReduceDamage'">
-            <CardName :card-id="entry.targetPokemon.cardId" /> will take &minus;{{
-              entry.status.amount
-            }}
-            damage from attacks<span v-if="entry.status.source == 'Effect'"> next turn</span>!
-          </p>
-          <p v-else-if="entry.status.type == 'PreventDamage'">
-            <CardName :card-id="entry.targetPokemon.cardId" /> cannot be affected by attacks next
-            turn!
-          </p>
-          <p v-else-if="entry.status.type == 'ReduceAttack'">
-            <CardName :card-id="entry.targetPokemon.cardId" /> will attack for &minus;{{
-              entry.status.amount
-            }}
-            damage<span v-if="entry.status.source == 'Effect'"> next turn</span>!
-          </p>
-          <p v-else-if="entry.status.type == 'CannotAttack'">
-            <CardName :card-id="entry.targetPokemon.cardId" />
-            cannot attack<span v-if="entry.status.source == 'Effect'"> next turn</span>!
-          </p>
-          <p v-else-if="entry.status.type == 'CannotRetreat'">
-            <CardName :card-id="entry.targetPokemon.cardId" />
-            cannot retreat<span v-if="entry.status.source == 'Effect'"> next turn</span>!
-          </p>
-          <p v-else-if="entry.status.type == 'CoinFlipToAttack'">
-            <CardName :card-id="entry.targetPokemon.cardId" />
-            must flip a coin to attack<span v-if="entry.status.source == 'Effect'"> next turn</span
-            >!
-          </p>
-          <p v-else-if="entry.status.type == 'IncreaseMaxHP'">
-            <CardName :card-id="entry.targetPokemon.cardId" />'s max HP is increased by
-            {{ entry.status.amount }}!
-          </p>
-          <p v-else>
-            Unknown status type applied to <CardName :card-id="entry.targetPokemon.cardId" />:
-            {{ entry.status.type }}
-          </p>
+          <CardName :card-id="entry.targetPokemon.cardId" />
+          <span v-if="entry.status.type == 'ReduceDamage'">
+            will take &minus;{{ entry.status.amount }} damage from attacks</span
+          >
+          <span v-else-if="entry.status.type == 'PreventAttackDamageAndEffects'">
+            cannot be affected by attacks</span
+          >
+          <span v-else-if="entry.status.type == 'PreventAttackDamage'">
+            cannot be damaged by attacks</span
+          >
+          <span v-else-if="entry.status.type == 'PreventAttackEffects'">
+            cannot be harmed by effects of attacks</span
+          >
+          <span v-else-if="entry.status.type == 'ReduceAttack'">
+            will attack for &minus;{{ entry.status.amount }} damage</span
+          >
+          <span v-else-if="entry.status.type == 'CannotAttack'"> cannot attack</span>
+          <span v-else-if="entry.status.type == 'CannotRetreat'"> cannot retreat</span>
+          <span v-else-if="entry.status.type == 'CoinFlipToAttack'">
+            must flip a coin to attack</span
+          >
+          <span v-else-if="entry.status.type == 'IncreaseMaxHP'">
+            has its max HP increased by {{ entry.status.amount }}</span
+          >
+          <span v-else> has unknown status "{{ entry.status.type }}" applied to it</span
+          ><span v-if="entry.status.source == 'Effect'"> next turn</span>!
         </div>
 
         <div v-else-if="entry.type == 'pokemonKnockedOut'">
@@ -445,6 +429,7 @@ import CardNameList from "@/components/common/CardNameList.vue";
 import CountDisplay from "@/components/common/CountDisplay.vue";
 import EnergyIcon from "@/components/common/EnergyIcon.vue";
 import type { GameLogger } from "@/core";
+import HpChange from "./HpChange.vue";
 
 export interface Props {
   gameLog?: GameLogger;

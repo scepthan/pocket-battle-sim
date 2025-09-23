@@ -19,12 +19,12 @@ Backend todo:
     - [x] Coin flip to attack effect
     - [x] Energy-doubling Ability
     - [x] Discard energy and attack any mon
-  - [ ] A2: 96/157 (61.1%)
+  - [ ] A2: 101/157 (64.3%)
     - [x] Pokémon Tools
-    - [ ] New Special Conditions
-      - [ ] Confused
-        - [ ] Promo Misdreavus
-      - [ ] Burned
+    - [x] New Special Conditions
+      - [x] Confused
+        - [x] Promo Misdreavus
+      - [x] Burned
     - [ ] New Pokemon statuses
       - [ ] Prevent self from using attack
       - [ ] Prevent self from attacking next turn

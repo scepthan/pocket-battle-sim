@@ -240,6 +240,24 @@ export class Game {
       }
     }
 
+    // Apply burn damage and flip to recover
+    for (const pokemon of [attacker, defender]) {
+      if (pokemon.SecondaryConditions.has("Burned")) {
+        const initialHP = pokemon.CurrentHP;
+        const damage = 20;
+        const player = pokemon.player;
+
+        pokemon.applyDamage(damage);
+        this.GameLog.specialConditionDamage(player, "Burned", initialHP, damage);
+
+        // Flip to recover from burn
+        if (player.flipCoin()) {
+          pokemon.SecondaryConditions.delete("Burned");
+          this.GameLog.specialConditionEnded(player, ["Burned"]);
+        }
+      }
+    }
+
     // Flip to wake up sleeping Pokemon
     for (const pokemon of [attacker, defender]) {
       if (pokemon.PrimaryCondition == "Asleep") {
@@ -400,7 +418,16 @@ export class Game {
   // Methods to cover any action a player can take and execute the proper follow-up effects
   async useAttack(attack: Attack) {
     const attacker = this.AttackingPlayer.activeOrThrow();
-    if (attacker.PokemonStatuses.some((status) => status.type === "CoinFlipToAttack")) {
+
+    let coinFlips = attacker.PokemonStatuses.filter(
+      (status) => status.type === "CoinFlipToAttack"
+    ).length;
+    if (attacker.PrimaryCondition === "Confused") {
+      this.GameLog.specialConditionEffective(this.AttackingPlayer);
+      coinFlips += 1;
+    }
+
+    while (coinFlips-- > 0) {
       if (!this.AttackingPlayer.flipCoin()) {
         this.GameLog.attackFailed(this.AttackingPlayer);
         this.endTurnResolve(true);
@@ -695,22 +722,25 @@ export class Game {
     pokemon.applyPokemonStatus(status);
   }
 
-  poisonActivePokemon() {
+  poisonDefendingPokemon() {
     if (this.shouldPreventEffects(this.AttackingPlayer.activeOrThrow())) return;
-
     this.AttackingPlayer.poisonActivePokemon();
   }
-
-  sleepActivePokemon() {
+  burnDefendingPokemon() {
     if (this.shouldPreventEffects(this.AttackingPlayer.activeOrThrow())) return;
-
+    this.AttackingPlayer.burnActivePokemon();
+  }
+  sleepDefendingPokemon() {
+    if (this.shouldPreventEffects(this.AttackingPlayer.activeOrThrow())) return;
     this.AttackingPlayer.sleepActivePokemon();
   }
-
-  paralyzeActivePokemon() {
+  paralyzeDefendingPokemon() {
     if (this.shouldPreventEffects(this.AttackingPlayer.activeOrThrow())) return;
-
     this.AttackingPlayer.paralyzeActivePokemon();
+  }
+  confuseDefendingPokemon() {
+    if (this.shouldPreventEffects(this.AttackingPlayer.activeOrThrow())) return;
+    this.AttackingPlayer.confuseActivePokemon();
   }
 
   findAgent(player: Player) {

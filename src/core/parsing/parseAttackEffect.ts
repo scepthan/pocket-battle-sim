@@ -556,24 +556,38 @@ export const parseAttackEffect = (
 
     // Special Condition effects
     {
-      pattern: /^Your opponent’s active Pokémon is now Poisoned\.$/i,
+      pattern: /^Your opponent’s Active Pokémon is now Poisoned\.$/i,
       transform: () => async (game: Game) => {
         await defaultEffect(game);
-        game.DefendingPlayer.poisonActivePokemon();
+        game.poisonDefendingPokemon();
       },
     },
     {
-      pattern: /^Your opponent’s active Pokémon is now Asleep\.$/i,
+      pattern: /^Your opponent’s Active Pokémon is now Burned\.$/i,
       transform: () => async (game: Game) => {
         await defaultEffect(game);
-        game.DefendingPlayer.sleepActivePokemon();
+        game.burnDefendingPokemon();
       },
     },
     {
-      pattern: /^Your opponent’s active Pokémon is now Paralyzed\.$/i,
+      pattern: /^Your opponent’s Active Pokémon is now Asleep\.$/i,
       transform: () => async (game: Game) => {
         await defaultEffect(game);
-        game.DefendingPlayer.paralyzeActivePokemon();
+        game.sleepDefendingPokemon();
+      },
+    },
+    {
+      pattern: /^Your opponent’s Active Pokémon is now Paralyzed\.$/i,
+      transform: () => async (game: Game) => {
+        await defaultEffect(game);
+        game.paralyzeDefendingPokemon();
+      },
+    },
+    {
+      pattern: /^Your opponent’s Active Pokémon is now Confused\.$/i,
+      transform: () => async (game: Game) => {
+        await defaultEffect(game);
+        game.confuseDefendingPokemon();
       },
     },
 

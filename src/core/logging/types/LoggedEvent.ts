@@ -10,6 +10,12 @@ import type { InPlayPokemonDescriptor } from "./InPlayPokemonDescriptor";
 
 type CoinFlipResult = "Heads" | "Tails";
 
+export interface HpChangeEvent {
+  initialHP: number;
+  finalHP: number;
+  maxHP: number;
+}
+
 // General game format events
 interface StartGameEvent {
   type: "startGame";
@@ -222,16 +228,13 @@ interface CopyAttackEvent {
   attackName: string;
 }
 
-interface PokemonDamagedEvent {
+interface PokemonDamagedEvent extends HpChangeEvent {
   type: "pokemonDamaged";
   player: string;
   targetPokemon: InPlayPokemonDescriptor;
   fromAttack: boolean;
-  initialHP: number;
   damageDealt: number;
   weaknessBoost?: boolean;
-  finalHP: number;
-  maxHP: number;
 }
 interface PokemonKnockedOutEvent {
   type: "pokemonKnockedOut";
@@ -239,14 +242,11 @@ interface PokemonKnockedOutEvent {
   targetPokemon: InPlayPokemonDescriptor;
   fromAttack: boolean;
 }
-interface PokemonHealedEvent {
+interface PokemonHealedEvent extends HpChangeEvent {
   type: "pokemonHealed";
   player: string;
   targetPokemon: InPlayPokemonDescriptor;
-  initialHP: number;
   healingDealt: number;
-  finalHP: number;
-  maxHP: number;
 }
 interface SpecialConditionAppliedEvent {
   type: "specialConditionApplied";
@@ -262,15 +262,12 @@ interface SpecialConditionEndedEvent {
   specialConditions: SpecialCondition[];
   currentConditionList: SpecialCondition[];
 }
-interface SpecialConditionDamageEvent {
+interface SpecialConditionDamageEvent extends HpChangeEvent {
   type: "specialConditionDamage";
   player: string;
   targetPokemon: InPlayPokemonDescriptor;
   specialCondition: SecondaryCondition;
-  initialHP: number;
   damageDealt: number;
-  finalHP: number;
-  maxHP: number;
 }
 interface SpecialConditionEffectiveEvent {
   type: "specialConditionEffective";
