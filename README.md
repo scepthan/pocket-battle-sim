@@ -19,15 +19,16 @@ Backend todo:
     - [x] Coin flip to attack effect
     - [x] Energy-doubling Ability
     - [x] Discard energy and attack any mon
-  - [ ] A2: 101/157 (64.3%)
+  - [ ] A2: 126/157 (80.3%)
     - [x] Pokémon Tools
     - [x] New Special Conditions
       - [x] Confused
         - [x] Promo Misdreavus
       - [x] Burned
     - [ ] New Pokemon statuses
-      - [ ] Prevent self from using attack
-      - [ ] Prevent self from attacking next turn
+      - [ ] Prevent from using attack next turn
+      - [ ] Prevent from attacking next turn
+      - [ ] Take -N damage from typed mon
       - [ ] Prevent non-damage effects of attacks
       - [ ] Attack does extra damage next turn
       - [ ] Remove retreat cost
@@ -64,7 +65,6 @@ Backend todo:
       - [ ] Move energy from Benched mon to Active mon
       - [x] Make opponent redraw for their remaining prize points
     - [ ] Abilities
-      - [ ] Take -N damage from typed mon
       - [ ] Absorb damage from other mon
       - [ ] Damage/heal on energy attach
         - [ ] Promo Cresselia ex
