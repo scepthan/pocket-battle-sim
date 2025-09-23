@@ -554,16 +554,14 @@ export class Game {
         if (!target) {
           throw new Error("Targeted effect requires a target");
         }
-        const targetedEffect = card.Effect;
-        const validTargets = targetedEffect.validTargets(this);
+        const validTargets = card.Effect.validTargets(this);
         if (!validTargets.includes(target)) {
           throw new Error("Invalid target for targeted effect");
         }
-        await targetedEffect.effect(this, target);
+        await card.Effect.effect(this, target);
       } else if (card.Effect.type === "Conditional") {
-        const conditionalEffect = card.Effect;
-        if (conditionalEffect.condition(this, this.AttackingPlayer)) {
-          await conditionalEffect.effect(this);
+        if (card.Effect.condition(this, this.AttackingPlayer)) {
+          await card.Effect.effect(this);
         }
       }
     }

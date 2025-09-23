@@ -11,6 +11,7 @@ export type ConditionalTrainerEffect = {
 export type TargetedTrainerEffect<T> = {
   type: "Targeted";
   validTargets: (game: Game) => T[];
+  condition?: (game: Game, self: Player) => boolean;
   effect: TargetedEffect<T>;
 };
 export type TrainerEffect = ConditionalTrainerEffect | TargetedTrainerEffect<CardSlot>;

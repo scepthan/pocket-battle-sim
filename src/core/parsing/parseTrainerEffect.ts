@@ -4,6 +4,7 @@ import {
   isEnergyShort,
   parseEnergy,
   type CardSlot,
+  type Energy,
   type FossilCard,
   type PokemonCard,
   type TrainerEffect,
@@ -349,6 +350,46 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
           game.GameLog.putIntoHand(game.AttackingPlayer, [pokemonFromDeck]);
 
           game.AttackingPlayer.shuffleDeck();
+        },
+      }),
+    },
+    {
+      pattern:
+        /^Choose 1 of your (.+?)\. Attach (\d+) \{(\w)\} Energy from your discard pile to that Pokémon\.$/,
+      transform: (_, specifier, count, energyType) => {
+        const predicate = parsePokemonPredicate(specifier);
+        const fullType = parseEnergy(energyType);
+
+        return {
+          type: "Targeted",
+          validTargets: (game: Game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
+          condition: (game: Game) =>
+            game.AttackingPlayer.DiscardedEnergy.some((e) => e == fullType),
+          effect: async (game: Game, pokemon: CardSlot) => {
+            if (!pokemon.isPokemon) return;
+            const energyToAttach: Energy[] = [];
+            for (let i = 0; i < Number(count); i++) {
+              if (!game.AttackingPlayer.DiscardedEnergy.includes(fullType)) break;
+              energyToAttach.push(fullType);
+              removeElement(game.AttackingPlayer.DiscardedEnergy, fullType);
+            }
+            game.AttackingPlayer.attachEnergy(pokemon, energyToAttach, "discard");
+          },
+        };
+      },
+    },
+    {
+      pattern: /^Move an Energy from 1 of your Benched Pokémon to your Active Pokémon\.$/,
+      transform: () => ({
+        type: "Targeted",
+        validTargets: (game) =>
+          game.AttackingPlayer.BenchedPokemon.filter((p) => p.AttachedEnergy.length > 0),
+        effect: async (game, target) => {
+          const player = game.AttackingPlayer;
+          if (!target.isPokemon) return;
+          const energy = await game.choose(player, target.AttachedEnergy);
+          if (!energy) return;
+          player.transferEnergy(target, player.activeOrThrow(), [energy]);
         },
       }),
     },

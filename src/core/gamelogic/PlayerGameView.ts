@@ -155,23 +155,16 @@ export class PlayerGameView {
       if (card.Stage == 0) {
         return this.selfBenched.length < 3;
       } else {
-        return this.selfBenched.some((pokemon) => card.EvolvesFrom == pokemon?.Name);
+        return this.selfBenched.some(
+          (pokemon) => card.EvolvesFrom == pokemon?.Name && this.canEvolve(pokemon)
+        );
       }
-    } else if (card.CardType == "Supporter") {
+    } else if (card.CardType == "Supporter" || card.CardType == "Item") {
       if (!this.canPlaySupporter) return false;
+      if (card.Effect.condition && !card.Effect.condition(this.#game, this.#player)) return false;
       if (card.Effect.type == "Targeted") {
         const validTargets = card.Effect.validTargets(this.#game);
         if (validTargets.length == 0) return false;
-      } else if (card.Effect.type == "Conditional") {
-        if (!card.Effect.condition(this.#game, this.#player)) return false;
-      }
-      return true;
-    } else if (card.CardType == "Item") {
-      if (card.Effect.type == "Targeted") {
-        const validTargets = card.Effect.validTargets(this.#game);
-        if (validTargets.length == 0) return false;
-      } else if (card.Effect.type == "Conditional") {
-        if (!card.Effect.condition(this.#game, this.#player)) return false;
       }
       return true;
     } else if (card.CardType == "Fossil") {
