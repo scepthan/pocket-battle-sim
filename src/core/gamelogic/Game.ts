@@ -35,7 +35,7 @@ export class Game {
   CanRetreat: boolean = true;
   CanPlaySupporter: boolean = true;
   ActiveTrainerCard?: TrainerCard;
-  CurrentlyAttacking: boolean = false;
+  CurrentAttack: Attack | undefined;
   AttackingPokemon?: InPlayPokemonCard;
   UsedAbilities: Set<InPlayPokemonCard> = new Set();
   AttackDamagedPokemon: Set<InPlayPokemonCard> = new Set();
@@ -437,10 +437,10 @@ export class Game {
 
     this.GameLog.useAttack(this.AttackingPlayer, attack.Name);
 
-    this.CurrentlyAttacking = true;
+    this.CurrentAttack = attack;
     this.AttackingPokemon = attacker;
     await this.useInitialEffect(attack.Effect);
-    this.CurrentlyAttacking = false;
+    this.CurrentAttack = undefined;
     this.AttackingPokemon = undefined;
 
     this.endTurnResolve(true);
@@ -578,7 +578,7 @@ export class Game {
   }
 
   shouldPreventDamage(pokemon: InPlayPokemonCard): boolean {
-    if (!this.CurrentlyAttacking) return false;
+    if (!this.CurrentAttack) return false;
     if (!this.DefendingPlayer.InPlayPokemon.includes(pokemon)) return false;
     return pokemon.PokemonStatuses.some(
       (status) =>
@@ -589,7 +589,7 @@ export class Game {
     );
   }
   shouldPreventEffects(pokemon: InPlayPokemonCard): boolean {
-    if (!this.CurrentlyAttacking) return false;
+    if (!this.CurrentAttack) return false;
     if (!this.DefendingPlayer.InPlayPokemon.includes(pokemon)) return false;
     return pokemon.PokemonStatuses.some(
       (status) =>
@@ -620,36 +620,46 @@ export class Game {
     const type = attacker.Type;
     const initialHP = defender.CurrentHP;
     const owner = this.DefendingPlayer;
+    const attackingActive = defender == owner.ActivePokemon;
 
     let totalDamage = HP;
-
-    // First: weakness
     let weaknessBoost = false;
-    if (totalDamage > 0 && defender == owner.ActivePokemon) {
+
+    // First, apply any of the attacker's own damage modification statuses
+    // Currently all modifications only affect the opponent's Active Pokemon--this may change
+    if (totalDamage > 0 && attackingActive) {
       for (const status of this.AttackingPlayer.PlayerStatuses) {
         if (status.type === "IncreaseAttack" && status.appliesToPokemon(attacker, this))
           totalDamage += status.amount;
       }
+      for (const status of attacker.PokemonStatuses) {
+        if (status.type == "ReduceOwnAttackDamage") {
+          totalDamage -= status.amount;
+        } else if (status.type == "IncreaseDamageOfAttack") {
+          if (status.attackName == this.CurrentAttack?.Name) totalDamage += status.amount;
+        }
+      }
+    }
+
+    // Next, add weakness boost
+    if (totalDamage > 0 && attackingActive) {
       if (type == defender.Weakness) {
         totalDamage += 20;
         weaknessBoost = true;
       }
     }
 
-    // Then: damage reduction
-    for (const status of this.DefendingPlayer.PlayerStatuses) {
-      if (status.type === "IncreaseDefense" && status.appliesToPokemon(attacker, this))
-        totalDamage -= status.amount;
-    }
-    for (const status of attacker.PokemonStatuses) {
-      if (status.type == "ReduceOwnAttackDamage") {
-        totalDamage -= status.amount;
+    // After that, apply any damage modification statuses on the defender
+    if (totalDamage > 0) {
+      for (const status of this.DefendingPlayer.PlayerStatuses) {
+        if (status.type === "IncreaseDefense" && status.appliesToPokemon(attacker, this))
+          totalDamage -= status.amount;
       }
-    }
-    for (const status of defender.PokemonStatuses) {
-      if (status.type == "ReduceAttackDamage") {
-        if (status.attackerCondition && !status.attackerCondition.test(attacker)) continue;
-        totalDamage -= status.amount;
+      for (const status of defender.PokemonStatuses) {
+        if (status.type == "ReduceAttackDamage") {
+          if (status.attackerCondition && !status.attackerCondition.test(attacker)) continue;
+          totalDamage -= status.amount;
+        }
       }
     }
 

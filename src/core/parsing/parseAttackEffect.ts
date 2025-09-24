@@ -691,6 +691,19 @@ export const parseAttackEffect = (
         });
       },
     },
+    {
+      pattern: /^During your next turn, this Pokémon’s (.+?) attack does \+(\d+) damage\.$/i,
+      transform: (_, attackName, increaseAmount) => async (game) => {
+        await defaultEffect(game);
+        game.AttackingPlayer.applyActivePokemonStatus({
+          type: "IncreaseDamageOfAttack",
+          attackName,
+          amount: Number(increaseAmount),
+          source: "Effect",
+          keepNextTurn: true,
+        });
+      },
+    },
 
     // Opponent player effects
     {

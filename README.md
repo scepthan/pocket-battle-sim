@@ -19,7 +19,7 @@ Backend todo:
     - [x] Coin flip to attack effect
     - [x] Energy-doubling Ability
     - [x] Discard energy and attack any mon
-  - [ ] A2: 130/157 (82.8%)
+  - [ ] A2: 131/157 (83.4%)
     - [x] Pokémon Tools
     - [x] New Special Conditions
       - [x] Confused
@@ -29,7 +29,7 @@ Backend todo:
       - [x] Prevent from using attack next turn
       - [ ] Take -N damage from typed mon
       - [ ] Prevent non-damage effects of attacks
-      - [ ] Attack does extra damage next turn
+      - [x] Attack does extra damage next turn
       - [ ] Remove retreat cost
     - [ ] New player status
       - [ ] Attacks of specific type do +N damage

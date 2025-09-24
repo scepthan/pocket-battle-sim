@@ -35,6 +35,11 @@ export interface ReduceOwnAttackDamagePokemonStatus extends BasePokemonStatus {
   type: "ReduceOwnAttackDamage";
   amount: number;
 }
+export interface IncreaseDamageOfAttack extends BasePokemonStatus {
+  type: "IncreaseDamageOfAttack";
+  attackName: string;
+  amount: number;
+}
 export interface CoinFlipToAttackPokemonStatus extends BasePokemonStatus {
   type: "CoinFlipToAttack";
 }
@@ -56,14 +61,15 @@ export interface IncreaseMaxHPPokemonStatus extends BasePokemonStatus {
 }
 
 export type PokemonStatus =
-  | CannotAttackPokemonStatus
-  | CannotRetreatPokemonStatus
   | ReduceAttackDamagePokemonStatus
   | PreventAttackDamagePokemonStatus
   | PreventAttackEffectsPokemonStatus
   | PreventAttackDamageAndEffectsPokemonStatus
-  | ReduceOwnAttackDamagePokemonStatus
   | CounterAttackPokemonStatus
+  | ReduceOwnAttackDamagePokemonStatus
+  | IncreaseDamageOfAttack
   | CoinFlipToAttackPokemonStatus
   | CannotUseSpecificAttackPokemonStatus
+  | CannotAttackPokemonStatus
+  | CannotRetreatPokemonStatus
   | IncreaseMaxHPPokemonStatus;
