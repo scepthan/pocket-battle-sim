@@ -19,7 +19,7 @@ Backend todo:
     - [x] Coin flip to attack effect
     - [x] Energy-doubling Ability
     - [x] Discard energy and attack any mon
-  - [ ] A2: 131/157 (83.4%)
+  - [ ] A2: 133/157 (84.7%)
     - [x] Pokémon Tools
     - [x] New Special Conditions
       - [x] Confused
@@ -45,13 +45,13 @@ Backend todo:
       - [x] Also do damage to 1 of opponent's Benched mon
       - [x] Discard energy and damage all Benched mon
       - [ ] Attach energy to 2 Benched mon
-      - [ ] Attach energy to specific mon
+      - [x] Attach energy to specific mon
       - [ ] Attack only works with specific mon on bench
       - [ ] Discard cards from own deck
       - [x] Do N damage to each of opponent's mon
       - [ ] Flip coins for damage and Poison
       - [ ] Flip coin for each own mon in play
-      - [ ] Attach N energy to Benched mon
+      - [x] Attach N energy to Benched mon
       - [ ] Change opponent's next energy
       - [ ] Remove opposing mon's Tool
       - [ ] Halve opposing mon's HP

@@ -1,7 +1,6 @@
 import {
   Game,
   InPlayPokemonCard,
-  isEnergyShort,
   parseEnergy,
   type CardSlot,
   type Energy,
@@ -142,20 +141,17 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
       }),
     },
     {
-      pattern: /^Heal (\d+) damage from 1 of your (?:\{(\w)\} )?Pokémon\.$/,
-      transform: (_, modifier, type) => ({
-        type: "Targeted",
-        validTargets: (game: Game) => {
-          let validPokemon = game.AttackingPlayer.InPlayPokemon;
-          validPokemon = validPokemon.filter((pokemon) => pokemon.isDamaged());
-          if (isEnergyShort(type))
-            validPokemon = validPokemon.filter((x) => x.Type == parseEnergy(type));
-          return validPokemon;
-        },
-        effect: async (game: Game, pokemon: CardSlot) => {
-          if (pokemon.isPokemon) game.healPokemon(pokemon, Number(modifier));
-        },
-      }),
+      pattern: /^Heal (\d+) damage from 1 of your ([^.]+?)\.$/,
+      transform: (_, modifier, specifier) => {
+        const predicate = parsePokemonPredicate(specifier, (p) => p.isDamaged());
+        return {
+          type: "Targeted",
+          validTargets: (game: Game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
+          effect: async (game: Game, pokemon: CardSlot) => {
+            if (pokemon.isPokemon) game.healPokemon(pokemon, Number(modifier));
+          },
+        };
+      },
     },
     {
       pattern:

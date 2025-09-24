@@ -9,6 +9,7 @@ import {
   type PokemonCondition,
 } from "../gamelogic";
 import { removeElement } from "../util";
+import { parsePokemonPredicate } from "./parsePredicates";
 import type { InputCardAbility, ParsedResult } from "./types";
 
 interface AbilityTransformer {
@@ -85,22 +86,19 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       },
     },
     {
-      pattern:
-        /move a {(\w)} Energy from 1 of your Benched(?: {(\w)})? Pokémon to your Active(?: {(\w)})? Pokémon\./i,
-      transform: (_, energyType, benchedType, activeType) => {
+      pattern: /move a {(\w)} Energy from 1 of your Benched (.+?) to your Active (.+?)\./i,
+      transform: (_, energyType, benchedSpecifier, activeSpecifier) => {
         const fullType = parseEnergy(energyType);
-        const bt = benchedType && parseEnergy(benchedType);
-        const predicate = (pokemon: InPlayPokemonCard) =>
-          (!bt || pokemon.Type == bt) && pokemon.AttachedEnergy.includes(fullType);
-        if (activeType) {
-          const at = parseEnergy(activeType);
-          ability.conditions.push((self) => self.player.activeOrThrow().Type === at);
-        }
+        const benchPredicate = parsePokemonPredicate(benchedSpecifier, (p) =>
+          p.AttachedEnergy.includes(fullType)
+        );
+        const activePredicate = parsePokemonPredicate(activeSpecifier);
+        ability.conditions.push((self) => activePredicate(self.player.activeOrThrow()));
 
         ability.effect = {
           type: "Targeted",
           findValidTargets: (game: Game, self: InPlayPokemonCard) =>
-            self.player.BenchedPokemon.filter(predicate),
+            self.player.BenchedPokemon.filter(benchPredicate),
           effect: async (game: Game, self: InPlayPokemonCard, target: CardSlot) => {
             if (!target.isPokemon) throw new Error("Not a valid target");
             const active = game.AttackingPlayer.activeOrThrow();

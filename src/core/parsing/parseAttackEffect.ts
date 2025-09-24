@@ -4,11 +4,10 @@ import {
   type BasicEffect,
   type Energy,
   type Game,
-  type PlayingCard,
   type PokemonCard,
 } from "../gamelogic";
 import { randomElement } from "../util";
-import { parsePlayingCardPredicate } from "./parsePredicates";
+import { parsePlayingCardPredicate, parsePokemonPredicate } from "./parsePredicates";
 import type { ParsedResult } from "./types";
 
 interface EffectTransformer {
@@ -218,27 +217,24 @@ export const parseAttackEffect = (
     },
     {
       pattern:
-        /^This attack does (\d+)( more)? damage for each of your Benched(?: \{(\w)\})? (.+?)\.$/i,
-      transform: (_, damagePerBench, more, type, pokemon) => {
-        const e = type ? parseEnergy(type) : undefined;
-
-        return async (game: Game) => {
-          let totalDamage = more ? baseAttackHP : 0;
-          const bench = game.AttackingPlayer.BenchedPokemon.filter(
-            (p) => (!e || p.Type == e) && (pokemon == "Pokémon" || p.Name == pokemon)
-          );
-          totalDamage += bench.length * Number(damagePerBench);
-          game.attackActivePokemon(totalDamage);
-        };
-      },
-    },
-    {
-      pattern:
         /^This attack does (\d+)( more)? damage for each of your opponent’s Benched Pokémon\.$/i,
       transform: (_, damagePerBench, more) => {
         return async (game: Game) => {
           let totalDamage = more ? baseAttackHP : 0;
           totalDamage += game.DefendingPlayer.BenchedPokemon.length * Number(damagePerBench);
+          game.attackActivePokemon(totalDamage);
+        };
+      },
+    },
+    {
+      pattern: /^This attack does (\d+)( more)? damage for each of your ([^.]+)\.$/i,
+      transform: (_, damageEach, more, specifier) => {
+        const predicate = parsePokemonPredicate(specifier);
+
+        return async (game: Game) => {
+          let totalDamage = more ? baseAttackHP : 0;
+          const validPokemon = game.AttackingPlayer.InPlayPokemon.filter(predicate);
+          totalDamage += validPokemon.length * Number(damageEach);
           game.attackActivePokemon(totalDamage);
         };
       },
@@ -354,13 +350,9 @@ export const parseAttackEffect = (
       },
     },
     {
-      pattern: /^Put 1 random(?: \{(\w)\})? Pokémon from your deck into your hand\.$/i,
-      transform: (_, type) => {
-        const e = type ? parseEnergy(type) : undefined;
-
-        const predicate = e
-          ? (card: PlayingCard) => card.CardType == "Pokemon" && card.Type == e
-          : (card: PlayingCard) => card.CardType == "Pokemon";
+      pattern: /^Put 1 random (.+?) from your deck into your hand\.$/i,
+      transform: (_, specifier) => {
+        const predicate = parsePlayingCardPredicate(specifier);
 
         return async (game: Game) => {
           await defaultEffect(game);
@@ -475,51 +467,46 @@ export const parseAttackEffect = (
       pattern:
         /^Take (a|\d+) \{(\w)\} Energy from your Energy Zone and attach it to this Pokémon\.$/i,
       transform: (_, count, type) => {
-        const fullType = parseEnergy(type);
+        const energyCount = count == "a" ? 1 : Number(count);
+        const energy = new Array(energyCount).fill(parseEnergy(type));
 
         return async (game: Game) => {
           await defaultEffect(game);
-          game.AttackingPlayer.attachEnergy(
-            game.AttackingPlayer.activeOrThrow(),
-            new Array(count == "a" ? 1 : Number(count)).fill(fullType),
-            "energyZone"
-          );
+          const attacker = game.AttackingPlayer.activeOrThrow();
+          game.AttackingPlayer.attachEnergy(attacker, energy, "energyZone");
         };
       },
     },
     {
       pattern:
-        /^Take a \{(\w)\} Energy from your Energy Zone and attach it to 1 of your( Benched)?(?: \{(\w)\})? Pokémon\.$/i,
-      transform: (_, energyType, benched, pokemonType) => {
-        const et = parseEnergy(energyType);
-        const pt = pokemonType ? parseEnergy(pokemonType) : undefined;
+        /^Take (a|\d+) \{(\w)\} Energy from your Energy Zone and attach it to (?:1 of your )?([^.]+)\.$/i,
+      transform: (_, count, type, pokemonSpecifier) => {
+        const energyCount = count == "a" ? 1 : Number(count);
+        const energy = new Array(energyCount).fill(parseEnergy(type));
+        const predicate = parsePokemonPredicate(pokemonSpecifier);
 
         return async (game: Game) => {
           await defaultEffect(game);
-          const validPokemon = (
-            benched ? game.AttackingPlayer.BenchedPokemon : game.AttackingPlayer.InPlayPokemon
-          ).filter((x) => !pt || x.Type == pt);
+          const validPokemon = game.AttackingPlayer.InPlayPokemon.filter(predicate);
           const pokemon = await game.choosePokemon(game.AttackingPlayer, validPokemon);
           if (pokemon) {
-            game.AttackingPlayer.attachEnergy(pokemon, [et], "energyZone");
+            game.AttackingPlayer.attachEnergy(pokemon, energy, "energyZone");
           }
         };
       },
     },
     {
       pattern:
-        /^Flip (\d+) coins\. Take an amount of \{(\w)\} Energy from your Energy Zone equal to the number of heads and attach it to your Benched(?: \{(\w)\})? Pokémon in any way you like\.$/i,
-      transform: (_, coins, energyType, pokemonType) => {
+        /^Flip (\d+) coins\. Take an amount of \{(\w)\} Energy from your Energy Zone equal to the number of heads and attach it to your ([^.]+?) in any way you like\.$/i,
+      transform: (_, coins, energyType, pokemonSpecifier) => {
         const et = parseEnergy(energyType);
-        const pt = pokemonType ? parseEnergy(pokemonType) : undefined;
+        const predicate = parsePokemonPredicate(pokemonSpecifier);
 
         return async (game: Game) => {
           await defaultEffect(game);
           const { heads } = game.AttackingPlayer.flipMultiCoins(Number(coins));
           if (heads == 0) return;
-          const validPokemon = game.AttackingPlayer.BenchedPokemon.filter(
-            (x) => !pt || x.Type == pt
-          );
+          const validPokemon = game.AttackingPlayer.InPlayPokemon.filter(predicate);
           if (validPokemon.length == 0) {
             game.GameLog.noValidTargets(game.AttackingPlayer);
             return;
