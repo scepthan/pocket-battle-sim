@@ -19,15 +19,14 @@ Backend todo:
     - [x] Coin flip to attack effect
     - [x] Energy-doubling Ability
     - [x] Discard energy and attack any mon
-  - [ ] A2: 128/157 (81.5%)
+  - [ ] A2: 130/157 (82.8%)
     - [x] Pokémon Tools
     - [x] New Special Conditions
       - [x] Confused
         - [x] Promo Misdreavus
       - [x] Burned
     - [ ] New Pokemon statuses
-      - [ ] Prevent from using attack next turn
-      - [ ] Prevent from attacking next turn
+      - [x] Prevent from using attack next turn
       - [ ] Take -N damage from typed mon
       - [ ] Prevent non-damage effects of attacks
       - [ ] Attack does extra damage next turn
@@ -41,6 +40,7 @@ Backend todo:
       - [ ] If defending mon is knocked out
     - [ ] New attack effects
       - [x] Discard random energy from self
+      - [x] Prevent self from attacking next turn
       - [x] Discard all energy of type from self
       - [x] Also do damage to 1 of opponent's Benched mon
       - [x] Discard energy and damage all Benched mon

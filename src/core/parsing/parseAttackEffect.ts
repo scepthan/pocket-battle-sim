@@ -404,7 +404,7 @@ export const parseAttackEffect = (
       },
     },
 
-    // Energy effects
+    // Energy discard effects
     {
       pattern: /^Discard (a|\d+|all) \{(\w)\} Energy from this Pokémon\.$/i,
       transform: (_, count, energyType) => {
@@ -469,6 +469,8 @@ export const parseAttackEffect = (
         game.discardEnergy(pokemon, energy, 1);
       },
     },
+
+    // Energy generation effects
     {
       pattern:
         /^Take (a|\d+) \{(\w)\} Energy from your Energy Zone and attach it to this Pokémon\.$/i,
@@ -598,10 +600,9 @@ export const parseAttackEffect = (
       transform: (_, damageReduction) => async (game: Game) => {
         await defaultEffect(game);
         game.AttackingPlayer.applyActivePokemonStatus({
-          type: "ReduceDamage",
+          type: "ReduceAttackDamage",
           amount: Number(damageReduction),
           source: "Effect",
-          condition: "none",
           keepNextTurn: true,
         });
       },
@@ -614,7 +615,6 @@ export const parseAttackEffect = (
         game.AttackingPlayer.applyActivePokemonStatus({
           type: "PreventAttackDamageAndEffects",
           source: "Effect",
-          condition: "none",
           keepNextTurn: true,
         });
       },
@@ -625,10 +625,9 @@ export const parseAttackEffect = (
       transform: (_, damageReduction) => async (game: Game) => {
         await defaultEffect(game);
         game.DefendingPlayer.applyActivePokemonStatus({
-          type: "ReduceAttack",
+          type: "ReduceOwnAttackDamage",
           amount: Number(damageReduction),
           source: "Effect",
-          condition: "none",
           keepNextTurn: true,
         });
       },
@@ -642,7 +641,6 @@ export const parseAttackEffect = (
         game.DefendingPlayer.applyActivePokemonStatus({
           type: "CannotAttack",
           source: "Effect",
-          condition: "none",
           keepNextTurn: true,
         });
       },
@@ -654,20 +652,6 @@ export const parseAttackEffect = (
         game.DefendingPlayer.applyActivePokemonStatus({
           type: "CannotRetreat",
           source: "Effect",
-          condition: "none",
-          keepNextTurn: true,
-        });
-      },
-    },
-    {
-      pattern:
-        /^Your opponent can’t use any Supporter cards from their hand during their next turn\.$/i,
-      transform: () => async (game: Game) => {
-        await defaultEffect(game);
-        game.DefendingPlayer.applyPlayerStatus({
-          type: "CannotUseSupporter",
-          source: "Effect",
-          category: "GameRule",
           keepNextTurn: true,
         });
       },
@@ -680,7 +664,44 @@ export const parseAttackEffect = (
         game.DefendingPlayer.applyActivePokemonStatus({
           type: "CoinFlipToAttack",
           source: "Effect",
-          condition: "none",
+          keepNextTurn: true,
+        });
+      },
+    },
+    {
+      pattern: /^During your next turn, this Pokémon can’t attack\./i,
+      transform: () => async (game) => {
+        await defaultEffect(game);
+        game.AttackingPlayer.applyActivePokemonStatus({
+          type: "CannotAttack",
+          source: "Effect",
+          keepNextTurn: true,
+        });
+      },
+    },
+    {
+      pattern: /^During your next turn, this Pokémon can’t use (.+?)\./i,
+      transform: (_, attackName) => async (game) => {
+        await defaultEffect(game);
+        game.AttackingPlayer.applyActivePokemonStatus({
+          type: "CannotUseSpecificAttack",
+          attackName,
+          source: "Effect",
+          keepNextTurn: true,
+        });
+      },
+    },
+
+    // Opponent player effects
+    {
+      pattern:
+        /^Your opponent can’t use any Supporter cards from their hand during their next turn\.$/i,
+      transform: () => async (game: Game) => {
+        await defaultEffect(game);
+        game.DefendingPlayer.applyPlayerStatus({
+          type: "CannotUseSupporter",
+          source: "Effect",
+          category: "GameRule",
           keepNextTurn: true,
         });
       },

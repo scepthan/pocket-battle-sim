@@ -582,7 +582,10 @@ export class Game {
     if (!this.DefendingPlayer.InPlayPokemon.includes(pokemon)) return false;
     return pokemon.PokemonStatuses.some(
       (status) =>
-        status.type === "PreventAttackDamage" || status.type === "PreventAttackDamageAndEffects"
+        (status.type === "PreventAttackDamage" ||
+          status.type === "PreventAttackDamageAndEffects") &&
+        (!status.attackerCondition ||
+          status.attackerCondition.test(this.AttackingPlayer.activeOrThrow()))
     );
   }
   shouldPreventEffects(pokemon: InPlayPokemonCard): boolean {
@@ -590,7 +593,10 @@ export class Game {
     if (!this.DefendingPlayer.InPlayPokemon.includes(pokemon)) return false;
     return pokemon.PokemonStatuses.some(
       (status) =>
-        status.type === "PreventAttackEffects" || status.type === "PreventAttackDamageAndEffects"
+        (status.type === "PreventAttackEffects" ||
+          status.type === "PreventAttackDamageAndEffects") &&
+        (!status.attackerCondition ||
+          status.attackerCondition.test(this.AttackingPlayer.activeOrThrow()))
     );
   }
 
@@ -636,12 +642,13 @@ export class Game {
         totalDamage -= status.amount;
     }
     for (const status of attacker.PokemonStatuses) {
-      if (status.type == "ReduceAttack") {
+      if (status.type == "ReduceOwnAttackDamage") {
         totalDamage -= status.amount;
       }
     }
     for (const status of defender.PokemonStatuses) {
-      if (status.type == "ReduceDamage") {
+      if (status.type == "ReduceAttackDamage") {
+        if (status.attackerCondition && !status.attackerCondition.test(attacker)) continue;
         totalDamage -= status.amount;
       }
     }

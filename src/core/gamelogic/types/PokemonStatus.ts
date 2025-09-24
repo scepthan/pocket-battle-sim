@@ -1,37 +1,54 @@
+import type { PokemonCondition } from "./Effects";
+
 interface BasePokemonStatus {
   source: "Effect" | "Ability" | "PokemonTool";
-  condition: "Active" | "Benched" | "none";
   keepNextTurn?: boolean;
 }
-export interface CannotAttackPokemonStatus extends BasePokemonStatus {
-  type: "CannotAttack";
+
+// Statuses that affect incoming attacks
+interface DefensePokemonStatus extends BasePokemonStatus {
+  attackerCondition?: {
+    test: PokemonCondition;
+    descriptor: string;
+  };
 }
-export interface CannotRetreatPokemonStatus extends BasePokemonStatus {
-  type: "CannotRetreat";
-}
-export interface ReduceDamagePokemonStatus extends BasePokemonStatus {
-  type: "ReduceDamage";
+export interface ReduceAttackDamagePokemonStatus extends DefensePokemonStatus {
+  type: "ReduceAttackDamage";
   amount: number;
 }
-export interface PreventAttackDamagePokemonStatus extends BasePokemonStatus {
+export interface PreventAttackDamagePokemonStatus extends DefensePokemonStatus {
   type: "PreventAttackDamage";
 }
-export interface PreventAttackEffectsPokemonStatus extends BasePokemonStatus {
+export interface PreventAttackEffectsPokemonStatus extends DefensePokemonStatus {
   type: "PreventAttackEffects";
 }
-export interface PreventAttackDamageAndEffectsPokemonStatus extends BasePokemonStatus {
+export interface PreventAttackDamageAndEffectsPokemonStatus extends DefensePokemonStatus {
   type: "PreventAttackDamageAndEffects";
 }
-export interface ReduceAttackPokemonStatus extends BasePokemonStatus {
-  type: "ReduceAttack";
+export interface CounterAttackPokemonStatus extends DefensePokemonStatus {
+  type: "CounterAttack";
   amount: number;
 }
-export interface CounterAttackPokemonStatus extends BasePokemonStatus {
-  type: "CounterAttack";
+
+// Statuses that affect outgoing attacks
+export interface ReduceOwnAttackDamagePokemonStatus extends BasePokemonStatus {
+  type: "ReduceOwnAttackDamage";
   amount: number;
 }
 export interface CoinFlipToAttackPokemonStatus extends BasePokemonStatus {
   type: "CoinFlipToAttack";
+}
+export interface CannotUseSpecificAttackPokemonStatus extends BasePokemonStatus {
+  type: "CannotUseSpecificAttack";
+  attackName: string;
+}
+export interface CannotAttackPokemonStatus extends BasePokemonStatus {
+  type: "CannotAttack";
+}
+
+// Other statuses
+export interface CannotRetreatPokemonStatus extends BasePokemonStatus {
+  type: "CannotRetreat";
 }
 export interface IncreaseMaxHPPokemonStatus extends BasePokemonStatus {
   type: "IncreaseMaxHP";
@@ -41,11 +58,12 @@ export interface IncreaseMaxHPPokemonStatus extends BasePokemonStatus {
 export type PokemonStatus =
   | CannotAttackPokemonStatus
   | CannotRetreatPokemonStatus
-  | ReduceDamagePokemonStatus
+  | ReduceAttackDamagePokemonStatus
   | PreventAttackDamagePokemonStatus
   | PreventAttackEffectsPokemonStatus
   | PreventAttackDamageAndEffectsPokemonStatus
-  | ReduceAttackPokemonStatus
+  | ReduceOwnAttackDamagePokemonStatus
   | CounterAttackPokemonStatus
   | CoinFlipToAttackPokemonStatus
+  | CannotUseSpecificAttackPokemonStatus
   | IncreaseMaxHPPokemonStatus;

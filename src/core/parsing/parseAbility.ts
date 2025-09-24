@@ -16,8 +16,7 @@ interface AbilityTransformer {
   transform: (...args: string[]) => void;
 }
 
-const selfActive: PokemonCondition = (game: Game, self: InPlayPokemonCard) =>
-  self.player.ActivePokemon == self;
+const selfActive: PokemonCondition = (self) => self.player.ActivePokemon == self;
 
 export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Ability> => {
   const ability: Ability = {
@@ -95,9 +94,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           (!bt || pokemon.Type == bt) && pokemon.AttachedEnergy.includes(fullType);
         if (activeType) {
           const at = parseEnergy(activeType);
-          ability.conditions.push(
-            (game: Game, self: InPlayPokemonCard) => self.player.activeOrThrow().Type === at
-          );
+          ability.conditions.push((self) => self.player.activeOrThrow().Type === at);
         }
 
         ability.effect = {
@@ -228,10 +225,9 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         ability.effect.effect = async (game: Game, pokemon?: InPlayPokemonCard) => {
           if (!pokemon) return;
           game.applyPokemonStatus(pokemon, {
-            type: "ReduceDamage",
+            type: "ReduceAttackDamage",
             amount: reduceAmount,
             source: "Ability",
-            condition: "none",
           });
         };
       },

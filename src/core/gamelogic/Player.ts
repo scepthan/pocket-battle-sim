@@ -292,7 +292,7 @@ export class Player {
     }
 
     const ability = pokemon.Ability;
-    if (!ability.conditions.every((condition) => condition(this.game, pokemon))) return;
+    if (!ability.conditions.every((condition) => condition(pokemon))) return;
     if (ability.effect.type === "Targeted") {
       const validTargets = ability.effect.findValidTargets(this.game, pokemon);
       if (validTargets.length === 0) {

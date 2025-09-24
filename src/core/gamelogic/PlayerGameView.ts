@@ -182,8 +182,15 @@ export class PlayerGameView {
     if (!this.selfActive.Attacks.includes(attack)) return false;
     if (this.selfActive.PrimaryCondition == "Asleep") return false;
     if (this.selfActive.PrimaryCondition == "Paralyzed") return false;
-    if (this.selfActive.PokemonStatuses.some((status) => status.type == "CannotAttack"))
+    if (
+      this.selfActive.PokemonStatuses.some(
+        (status) =>
+          status.type == "CannotAttack" ||
+          (status.type == "CannotUseSpecificAttack" && status.attackName == attack.Name)
+      )
+    )
       return false;
+
     return this.selfActive.hasSufficientEnergy(attack.RequiredEnergy);
   }
   canUseAbility(pokemon: PlayerPokemonView, ability: Ability): boolean {
@@ -194,7 +201,7 @@ export class PlayerGameView {
     if (ability.trigger == "OnceDuringTurn") {
       if (this.#game.UsedAbilities.has(realPokemon)) return false;
     }
-    if (!ability.conditions.every((condition) => condition(this.#game, realPokemon))) return false;
+    if (!ability.conditions.every((condition) => condition(realPokemon))) return false;
     if (ability.effect.type == "Targeted") {
       if (ability.effect.findValidTargets(this.#game, realPokemon).length == 0) return false;
     }

@@ -30,7 +30,7 @@ export const parsePokemonToolEffect = (cardText: string): ParsedResult<PokemonTo
         effect.trigger = "OnAttackDamage";
         if (energyType) {
           const fullType = parseEnergy(energyType);
-          effect.conditions.push((game, pokemon) => pokemon.Type === fullType);
+          effect.conditions.push((pokemon) => pokemon.Type === fullType);
         }
       },
     },
@@ -54,13 +54,12 @@ export const parsePokemonToolEffect = (cardText: string): ParsedResult<PokemonTo
       transform: (_, energyType, hp) => {
         if (energyType) {
           const fullType = parseEnergy(energyType);
-          effect.conditions.push((game, pokemon) => pokemon.Type === fullType);
+          effect.conditions.push((pokemon) => pokemon.Type === fullType);
         }
         const status: PokemonStatus = {
           type: "IncreaseMaxHP",
           amount: Number(hp),
           source: "PokemonTool",
-          condition: "none",
         };
         effect.effect = async (game, pokemon) => {
           pokemon.applyPokemonStatus(status);
@@ -74,7 +73,7 @@ export const parsePokemonToolEffect = (cardText: string): ParsedResult<PokemonTo
       pattern:
         /^if the Pokémon this card is attached to is affected by any Special Conditions, it recovers from all of them, and discard this card\./i,
       transform: () => {
-        effect.conditions.push((game, pokemon) => pokemon.CurrentConditions.length > 0);
+        effect.conditions.push((pokemon) => pokemon.CurrentConditions.length > 0);
         effect.effect = async (game, pokemon) => {
           pokemon.recoverAllStatusConditions();
 

@@ -293,7 +293,7 @@
 
         <div v-else-if="entry.type == 'applyPokemonStatus'">
           <CardName :card-id="entry.targetPokemon.cardId" />
-          <span v-if="entry.status.type == 'ReduceDamage'">
+          <span v-if="entry.status.type == 'ReduceAttackDamage'">
             will take &minus;{{ entry.status.amount }} damage from attacks</span
           >
           <span v-else-if="entry.status.type == 'PreventAttackDamageAndEffects'">
@@ -305,14 +305,17 @@
           <span v-else-if="entry.status.type == 'PreventAttackEffects'">
             cannot be harmed by effects of attacks</span
           >
-          <span v-else-if="entry.status.type == 'ReduceAttack'">
+          <span v-else-if="entry.status.type == 'ReduceOwnAttackDamage'">
             will attack for &minus;{{ entry.status.amount }} damage</span
           >
           <span v-else-if="entry.status.type == 'CannotAttack'"> cannot attack</span>
-          <span v-else-if="entry.status.type == 'CannotRetreat'"> cannot retreat</span>
+          <span v-else-if="entry.status.type == 'CannotUseSpecificAttack'">
+            cannot use {{ entry.status.attackName }}</span
+          >
           <span v-else-if="entry.status.type == 'CoinFlipToAttack'">
             must flip a coin to attack</span
           >
+          <span v-else-if="entry.status.type == 'CannotRetreat'"> cannot retreat</span>
           <span v-else-if="entry.status.type == 'IncreaseMaxHP'">
             has its max HP increased by {{ entry.status.amount }}</span
           >
