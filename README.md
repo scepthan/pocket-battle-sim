@@ -19,7 +19,7 @@ Backend todo:
     - [x] Coin flip to attack effect
     - [x] Energy-doubling Ability
     - [x] Discard energy and attack any mon
-  - [ ] A2: 138/157 (87.3%)
+  - [ ] A2: 139/157 (88.5%)
     - [x] Pokémon Tools
     - [x] New Special Conditions
       - [x] Confused
@@ -65,7 +65,7 @@ Backend todo:
       - [x] Move energy from Benched mon to Active mon
       - [x] Make opponent redraw for their remaining prize points
     - [ ] Abilities
-      - [ ] Absorb damage from other mon
+      - [x] Absorb damage from other mon
       - [ ] Damage/heal on energy attach
         - [ ] Promo Cresselia ex
       - [ ] Flip coin to reduce damage

@@ -211,6 +211,23 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         };
       },
     },
+    {
+      pattern:
+        /^choose 1 of your Pokémon that has damage on it, and move all of its damage to this Pokémon\.$/i,
+      transform: () => {
+        ability.effect = {
+          type: "Targeted",
+          findValidTargets: (game, self) =>
+            self.player.InPlayPokemon.filter((p) => p.isDamaged() && p !== self),
+          effect: async (game, self, target) => {
+            if (!target.isPokemon) throw new Error("Not a valid target");
+            const damage = target.MaxHP - target.CurrentHP;
+            game.applyDamage(self, damage, false);
+            game.healPokemon(target, damage);
+          },
+        };
+      },
+    },
 
     {
       pattern: /^This Pokémon takes −(\d+) damage from attacks(?: from ([^.]+?))?\.$/i,
