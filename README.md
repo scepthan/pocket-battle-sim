@@ -19,7 +19,7 @@ Backend todo:
     - [x] Coin flip to attack effect
     - [x] Energy-doubling Ability
     - [x] Discard energy and attack any mon
-  - [ ] A2: 137/157 (87.3%)
+  - [ ] A2: 138/157 (87.3%)
     - [x] Pokémon Tools
     - [x] New Special Conditions
       - [x] Confused
@@ -36,7 +36,7 @@ Backend todo:
     - [ ] New attack conditionals
       - [x] If defending mon is specific type
       - [x] If attacking mon has Tool attached
-      - [ ] If defending mon has Tool attached
+      - [x] If defending mon has Tool attached
       - [ ] If defending mon is knocked out
     - [ ] New attack effects
       - [x] Discard random energy from self

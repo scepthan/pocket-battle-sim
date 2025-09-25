@@ -159,6 +159,18 @@ export const parseAttackEffect = (
         };
       },
     },
+    {
+      pattern: /^If your opponent’s Active Pokémon has a Pokémon Tool attached, (.+?\.)$/i,
+      transform: (_, effectText) => {
+        const conditionalEffect = recursiveParse(effectText);
+
+        return async (game: Game) => {
+          if (game.DefendingPlayer.activeOrThrow().AttachedToolCards.length > 0)
+            await conditionalEffect(game);
+          else await defaultEffect(game);
+        };
+      },
+    },
 
     // Damage-determining effects
     {
