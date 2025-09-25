@@ -54,12 +54,15 @@ export const parsePokemonPredicate = (
     predicate = (pokemon) => energyTypes.includes(pokemon.Type) && prevPredicate(pokemon);
   }
 
+  if (text === "Pokémon ex") {
+    return (pokemon) => pokemon.Name.endsWith(" ex") && predicate(pokemon);
+  }
   if (text === "Pokémon") {
     return predicate;
   }
 
   const names = parsePokemonNames(text);
-  return (pokemon: InPlayPokemonCard) => names.includes(pokemon.Name) && predicate(pokemon);
+  return (pokemon) => names.includes(pokemon.Name) && predicate(pokemon);
 };
 
 /**
