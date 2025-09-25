@@ -150,13 +150,10 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       transform: (_, damage) => {
         ability.effect = {
           type: "Targeted",
-          findValidTargets: (game, self) => self.player.opponent.BenchedPokemon,
+          findValidTargets: (game, self) => self.player.opponent.InPlayPokemon,
           effect: async (game, self, target) => {
-            if (target.isPokemon) {
-              game.applyDamage(target, Number(damage), false);
-            } else {
-              throw new Error("No valid targets for Greninja");
-            }
+            if (!target.isPokemon) return;
+            game.applyDamage(target, Number(damage), false);
           },
         };
       },
@@ -226,14 +223,26 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
             }
           : undefined;
 
-        ability.trigger = "OnEnterPlay";
-        ability.effect.effect = async (game: Game, pokemon?: InPlayPokemonCard) => {
-          if (!pokemon) return;
-          game.applyPokemonStatus(pokemon, {
+        ability.effect.effect = async (game: Game, self?: InPlayPokemonCard) => {
+          if (!self) return;
+          game.applyPokemonStatus(self, {
             type: "ReduceAttackDamage",
             amount: reduceAmount,
             source: "Ability",
             attackerCondition,
+          });
+        };
+      },
+    },
+    {
+      pattern:
+        /^Prevent all effects of attacks used by your opponent’s Pokémon done to this Pokémon\.$/i,
+      transform: () => {
+        ability.effect.effect = async (game: Game, self?: InPlayPokemonCard) => {
+          if (!self) return;
+          game.applyPokemonStatus(self, {
+            type: "PreventAttackEffects",
+            source: "Ability",
           });
         };
       },
