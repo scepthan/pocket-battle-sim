@@ -1,5 +1,5 @@
 import { allCards } from "@/assets";
-import { parseEnergy, type InPlayPokemonCard, type PlayingCard } from "../gamelogic";
+import { parseEnergy, type Energy, type InPlayPokemonCard, type PlayingCard } from "../gamelogic";
 
 export type Predicate<T> = (obj: T) => boolean;
 export type InPlayPokemonPredicate = Predicate<InPlayPokemonCard>;
@@ -42,12 +42,16 @@ export const parsePokemonPredicate = (
     text = text.slice(6);
   }
 
-  const energyMatch = text.match(/^\{(\w)\} /);
-  if (energyMatch) {
+  const energyTypes: Energy[] = [];
+  let energyMatch;
+  while ((energyMatch = text.match(/^(?:|or |, or |, )\{(\w)\} */))) {
     const energyType = parseEnergy(energyMatch[1]!);
-    const prevPredicate = predicate;
-    predicate = (pokemon) => pokemon.Type == energyType && prevPredicate(pokemon);
+    energyTypes.push(energyType);
     text = text.slice(energyMatch[0].length);
+  }
+  if (energyTypes.length > 0) {
+    const prevPredicate = predicate;
+    predicate = (pokemon) => energyTypes.includes(pokemon.Type) && prevPredicate(pokemon);
   }
 
   if (text === "Pokémon") {

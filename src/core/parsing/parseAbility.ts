@@ -216,9 +216,16 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     },
 
     {
-      pattern: /^This Pokémon takes −(\d+) damage from attacks\.$/i,
-      transform: (_, amount) => {
+      pattern: /^This Pokémon takes −(\d+) damage from attacks(?: from ([^.]+?))?\.$/i,
+      transform: (_, amount, specifier) => {
         const reduceAmount = Number(amount);
+        const attackerCondition = specifier
+          ? {
+              test: parsePokemonPredicate(specifier),
+              descriptor: specifier,
+            }
+          : undefined;
+
         ability.trigger = "OnEnterPlay";
         ability.effect.effect = async (game: Game, pokemon?: InPlayPokemonCard) => {
           if (!pokemon) return;
@@ -226,6 +233,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
             type: "ReduceAttackDamage",
             amount: reduceAmount,
             source: "Ability",
+            attackerCondition,
           });
         };
       },
