@@ -13,7 +13,7 @@ export const useDeckValidator = (rules: GameRules) => {
   };
 
   const canUseAttack = (attack: Attack, energyTypes: Energy[]) =>
-    attack.RequiredEnergy.every((energy) => energy == "Colorless" || energyTypes.includes(energy));
+    attack.requiredEnergy.every((energy) => energy == "Colorless" || energyTypes.includes(energy));
   const canUseAnyAttack = (card: PokemonCard, energyTypes: Energy[]) =>
     card.Attacks.some((attack) => canUseAttack(attack, energyTypes));
   const anyCanUseAnyAttack = (deck: Deck) =>

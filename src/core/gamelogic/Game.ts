@@ -9,8 +9,8 @@ import { PlayerPokemonView } from "./PlayerPokemonView";
 import type {
   Ability,
   Attack,
-  BasicEffect,
   CardSlot,
+  CoinFlipIndicator,
   Energy,
   FossilCard,
   GameRules,
@@ -318,20 +318,6 @@ export class Game {
   }
 
   // Methods to do things during turns
-  async useInitialEffect(effect: BasicEffect) {
-    await this.useEffect(effect);
-
-    for (const pokemon of this.AttackDamagedPokemon) {
-      await pokemon.onAttackDamage();
-    }
-
-    await this.checkForKnockOuts();
-  }
-
-  async useEffect(effect: BasicEffect) {
-    await effect(this);
-  }
-
   async checkForKnockOuts() {
     const attackerPrizePoints = this.AttackingPlayer.GamePoints;
     const defenderPrizePoints = this.DefendingPlayer.GamePoints;
@@ -415,19 +401,96 @@ export class Game {
     }
   }
 
+  flipCoinsForAttack(coinsToFlip: CoinFlipIndicator): number {
+    if (coinsToFlip === "UntilTails") {
+      return this.AttackingPlayer.flipUntilTails().heads;
+    } else if (typeof coinsToFlip === "number") {
+      if (coinsToFlip === 1) {
+        return +this.AttackingPlayer.flipCoin();
+      }
+      return this.AttackingPlayer.flipMultiCoins(coinsToFlip).heads;
+    }
+
+    const actualCount = coinsToFlip(this, this.AttackingPokemon!);
+    return this.AttackingPlayer.flipMultiCoins(actualCount).heads;
+  }
+
+  /**
+   * Executes an attack with the attacking player's Active Pokémon.
+   *
+   * Note: This method directly executes the given attack, without first checking for confusion or
+   * similar status effects. It also does not check for knockouts when the attack ends.
+   *
+   * To execute an attack "properly", call useAttack() instead.
+   */
+  async executeAttack(attack: Attack): Promise<void> {
+    const attacker = this.AttackingPokemon;
+    if (!attacker) throw new Error("Need an attacker to attack!");
+
+    let flippedHeads: number = 0;
+    if (attack.type === "CoinFlipOrDoNothing") {
+      flippedHeads = +this.AttackingPlayer.flipCoin();
+      if (flippedHeads === 0) {
+        this.GameLog.attackFailed(this.AttackingPlayer);
+        return;
+      }
+    }
+
+    let chosenPokemon: InPlayPokemonCard | undefined;
+    if (attack.choosePokemonToAttack) {
+      const validPokemon = attack.choosePokemonToAttack(this, attacker);
+      chosenPokemon = await this.choosePokemon(this.AttackingPlayer, validPokemon);
+    }
+
+    if (attack.type !== "NoBaseDamage") {
+      let baseDamage: number = attack.baseDamage ?? 0;
+
+      if (attack.type === "CoinFlipForDamage" || attack.type === "CoinFlipForAddedDamage") {
+        if (!attack.coinsToFlip)
+          throw new Error(attack.name + " needs to know how many coins to flip");
+        flippedHeads = this.flipCoinsForAttack(attack.coinsToFlip);
+      }
+
+      if (attack.calculateDamage) {
+        baseDamage = attack.calculateDamage(this, attacker, flippedHeads);
+      } else if (attack.type === "CoinFlipForDamage" || attack.type === "CoinFlipForAddedDamage") {
+        throw new Error(attack.name + " needs to know how much damage to deal");
+      }
+
+      this.attackActivePokemon(baseDamage);
+    }
+
+    if (
+      (attack.type === "NoBaseDamage" || attack.type === "PredeterminableDamage") &&
+      attack.coinsToFlip
+    ) {
+      flippedHeads = this.flipCoinsForAttack(attack.coinsToFlip);
+    }
+
+    for (const effect of attack.attackingEffects)
+      await effect(this, attacker, flippedHeads, chosenPokemon);
+
+    for (const effect of attack.sideEffects)
+      await effect(this, attacker, flippedHeads, chosenPokemon);
+  }
+
   // Methods to cover any action a player can take and execute the proper follow-up effects
-  async useAttack(attack: Attack) {
+
+  /**
+   * Launches an attack with the attacking player's Active Pokémon.
+   */
+  async useAttack(attack: Attack): Promise<void> {
     const attacker = this.AttackingPlayer.activeOrThrow();
 
-    let coinFlips = attacker.PokemonStatuses.filter(
+    let coinFlipsToAttack = attacker.PokemonStatuses.filter(
       (status) => status.type === "CoinFlipToAttack"
     ).length;
     if (attacker.PrimaryCondition === "Confused") {
       this.GameLog.specialConditionEffective(this.AttackingPlayer);
-      coinFlips += 1;
+      coinFlipsToAttack += 1;
     }
 
-    while (coinFlips-- > 0) {
+    while (coinFlipsToAttack-- > 0) {
       if (!this.AttackingPlayer.flipCoin()) {
         this.GameLog.attackFailed(this.AttackingPlayer);
         this.endTurnResolve(true);
@@ -435,11 +498,19 @@ export class Game {
       }
     }
 
-    this.GameLog.useAttack(this.AttackingPlayer, attack.Name);
+    this.GameLog.useAttack(this.AttackingPlayer, attack.name);
 
     this.CurrentAttack = attack;
     this.AttackingPokemon = attacker;
-    await this.useInitialEffect(attack.Effect);
+
+    await this.executeAttack(attack);
+
+    for (const pokemon of this.AttackDamagedPokemon) {
+      await pokemon.onAttackDamage();
+    }
+
+    await this.checkForKnockOuts();
+
     this.CurrentAttack = undefined;
     this.AttackingPokemon = undefined;
 
@@ -473,15 +544,13 @@ export class Game {
   }
 
   async attachAvailableEnergy(pokemon: InPlayPokemonCard) {
-    await this.useInitialEffect(async (game) =>
-      game.AttackingPlayer.attachAvailableEnergy(pokemon)
-    );
+    this.AttackingPlayer.attachAvailableEnergy(pokemon);
+    await this.checkForKnockOuts();
   }
 
   async putPokemonOnBench(pokemon: PokemonCard, index: number) {
-    await this.useInitialEffect(
-      async (game) => await game.AttackingPlayer.putPokemonOnBench(pokemon, index)
-    );
+    await this.AttackingPlayer.putPokemonOnBench(pokemon, index);
+    await this.checkForKnockOuts();
   }
   async putFossilOnBench(card: FossilCard, index: number, hp: number, type: Energy = "Colorless") {
     const pokemon: PlayingCard = {
@@ -509,21 +578,18 @@ export class Game {
       },
     };
 
-    await this.useInitialEffect(
-      async (game) => await game.AttackingPlayer.putPokemonOnBench(pokemon, index, card)
-    );
+    await this.AttackingPlayer.putPokemonOnBench(pokemon, index, card);
+    await this.checkForKnockOuts();
   }
 
   async evolvePokemon(inPlayPokemon: InPlayPokemonCard, pokemon: PokemonCard) {
-    await this.useInitialEffect(
-      async (game) => await game.AttackingPlayer.evolvePokemon(inPlayPokemon, pokemon)
-    );
+    await this.AttackingPlayer.evolvePokemon(inPlayPokemon, pokemon);
+    await this.checkForKnockOuts();
   }
 
   async retreatActivePokemon(benchedPokemon: InPlayPokemonCard, energy: Energy[]) {
-    await this.useInitialEffect(
-      async (game) => await game.AttackingPlayer.retreatActivePokemon(benchedPokemon, energy)
-    );
+    await this.AttackingPlayer.retreatActivePokemon(benchedPokemon, energy);
+    await this.checkForKnockOuts();
   }
 
   async playTrainer(card: TrainerCard, target?: CardSlot) {
@@ -607,13 +673,13 @@ export class Game {
 
   attackActivePokemon(HP: number) {
     const defender = this.DefendingPlayer.activeOrThrow();
-    return this.attackPokemon(defender, HP);
+    this.attackPokemon(defender, HP);
   }
 
-  attackPokemon(defender: InPlayPokemonCard, HP: number): number {
+  attackPokemon(defender: InPlayPokemonCard, HP: number): void {
     if (this.shouldPreventDamage(defender)) {
       this.GameLog.damagePrevented(this.DefendingPlayer, defender);
-      return 0;
+      return;
     }
 
     const attacker = this.AttackingPlayer.activeOrThrow();
@@ -636,7 +702,7 @@ export class Game {
         if (status.type == "ReduceOwnAttackDamage") {
           totalDamage -= status.amount;
         } else if (status.type == "IncreaseDamageOfAttack") {
-          if (status.attackName == this.CurrentAttack?.Name) totalDamage += status.amount;
+          if (status.attackName == this.CurrentAttack?.name) totalDamage += status.amount;
         }
       }
     }
@@ -676,8 +742,6 @@ export class Game {
         this.AttackKnockedOutPokemon.add(defender);
       }
     }
-
-    return totalDamage;
   }
 
   applyDamage(target: InPlayPokemonCard, HP: number, fromAttack: boolean) {

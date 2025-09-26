@@ -70,8 +70,11 @@ export const parsePokemonPredicate = (
  * @param text The card text to parse (e.g. "Basic {R} Pokémon", "Pikachu or Charizard")
  * @returns A function that tests whether a given card matches the parsed criteria
  */
-export const parsePlayingCardPredicate = (text: string): PlayingCardPredicate => {
-  let predicate: PlayingCardPredicate = () => true;
+export const parsePlayingCardPredicate = (
+  text: string,
+  basePredicate: PlayingCardPredicate = () => true
+): PlayingCardPredicate => {
+  let predicate: PlayingCardPredicate = basePredicate;
 
   if (text.startsWith("Basic ")) {
     const prevPredicate = predicate;

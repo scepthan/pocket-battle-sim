@@ -126,7 +126,7 @@ export class BetterRandomAgent_v0_1_2 extends PlayerAgent {
     // Play energy
     if (
       active.Attacks.some((a) =>
-        this.findRemainingEnergy(active, a.RequiredEnergy).some(
+        this.findRemainingEnergy(active, a.requiredEnergy).some(
           (e) => e == game.selfAvailableEnergy || e == "Colorless"
         )
       )
@@ -141,7 +141,7 @@ export class BetterRandomAgent_v0_1_2 extends PlayerAgent {
         let maxEnergyRequired = 0;
 
         for (const attack of allAttacks) {
-          const remainingEnergy = this.findRemainingEnergy(p, attack.RequiredEnergy);
+          const remainingEnergy = this.findRemainingEnergy(p, attack.requiredEnergy);
           if (
             remainingEnergy.length > maxEnergyRequired &&
             remainingEnergy.some((e) => e == game.selfAvailableEnergy || e == "Colorless")
@@ -242,7 +242,7 @@ export class BetterRandomAgent_v0_1_2 extends PlayerAgent {
     let maxScore = -10;
     const pokemonScores = bench.map((pokemon) => {
       const usableAttacks = pokemon.Attacks.filter((a) => {
-        const energy = this.findRemainingEnergy(pokemon, a.RequiredEnergy);
+        const energy = this.findRemainingEnergy(pokemon, a.requiredEnergy);
         if (energy.length == 0) return true;
         if (
           energy.length == 1 &&
@@ -259,7 +259,7 @@ export class BetterRandomAgent_v0_1_2 extends PlayerAgent {
         (game.opponentActive.isPokemon && game.opponentActive.Weakness == pokemon.Type ? 1 : 0);
       let score = baseScore - 10;
       usableAttacks.forEach((attack) => {
-        const newScore = attack.RequiredEnergy.length + baseScore;
+        const newScore = attack.requiredEnergy.length + baseScore;
 
         if (newScore > score) {
           score = newScore;

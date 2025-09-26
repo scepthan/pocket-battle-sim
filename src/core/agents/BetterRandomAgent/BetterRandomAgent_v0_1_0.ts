@@ -126,7 +126,7 @@ export class BetterRandomAgent_v0_1_0 extends PlayerAgent {
     // Play energy
     if (
       active.Attacks.some((a) =>
-        this.findRemainingEnergy(active, a.RequiredEnergy).some(
+        this.findRemainingEnergy(active, a.requiredEnergy).some(
           (e) => e == game.selfAvailableEnergy || e == "Colorless"
         )
       )
@@ -141,7 +141,7 @@ export class BetterRandomAgent_v0_1_0 extends PlayerAgent {
         let maxEnergyRequired = 0;
 
         for (const attack of allAttacks) {
-          const remainingEnergy = this.findRemainingEnergy(p, attack.RequiredEnergy);
+          const remainingEnergy = this.findRemainingEnergy(p, attack.requiredEnergy);
           if (
             remainingEnergy.length > maxEnergyRequired &&
             remainingEnergy.some((e) => e == game.selfAvailableEnergy || e == "Colorless")

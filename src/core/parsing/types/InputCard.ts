@@ -6,6 +6,7 @@ export interface InputCardAttack {
   name: string;
   cost: string;
   damage?: number;
+  damageSymbol?: "+" | "x";
   text?: string;
 }
 export interface BaseInputCard {

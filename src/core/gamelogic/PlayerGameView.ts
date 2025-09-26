@@ -186,12 +186,16 @@ export class PlayerGameView {
       this.selfActive.PokemonStatuses.some(
         (status) =>
           status.type == "CannotAttack" ||
-          (status.type == "CannotUseSpecificAttack" && status.attackName == attack.Name)
+          (status.type == "CannotUseSpecificAttack" && status.attackName == attack.name)
       )
     )
       return false;
 
-    return this.selfActive.hasSufficientEnergy(attack.RequiredEnergy);
+    const realActive = this.#player.activeOrThrow();
+    if (attack.extraConditions.some((condition) => !condition(this.#game, realActive)))
+      return false;
+
+    return this.selfActive.hasSufficientEnergy(attack.requiredEnergy);
   }
   canUseAbility(pokemon: PlayerPokemonView, ability: Ability): boolean {
     if (!this.canPlay) return false;
