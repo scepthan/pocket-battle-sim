@@ -613,6 +613,14 @@ export const parseAttackEffect = (attack: Attack): boolean => {
         });
       },
     },
+    {
+      pattern: /put your opponent’s Active Pokémon into their hand\./i,
+      transform: () => {
+        addSideEffect(async (game) => {
+          await game.DefendingPlayer.returnPokemonToHand(game.DefendingPlayer.activeOrThrow());
+        });
+      },
+    },
 
     // Special Condition effects
     {
