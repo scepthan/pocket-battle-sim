@@ -458,6 +458,17 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       },
     },
     {
+      pattern:
+        /^Your opponent reveals their hand\. Choose a card you find there and shuffle it into your opponent’s deck\./i,
+      transform: () => {
+        addSideEffect(async (game) => {
+          const card = await game.choose(game.AttackingPlayer, game.DefendingPlayer.Hand);
+          if (!card) return;
+          game.DefendingPlayer.returnToDeck([card]);
+        });
+      },
+    },
+    {
       pattern: /^Your opponent reveals their hand\./,
       transform: () => {
         addSideEffect(async (game) => {

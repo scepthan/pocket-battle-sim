@@ -19,7 +19,7 @@ Backend todo:
     - [x] Coin flip to attack effect
     - [x] Energy-doubling Ability
     - [x] Discard energy and attack any mon
-  - [ ] A2: 148/157 (94.3%)
+  - [ ] A2: 149/157 (94.9%)
     - [x] Pokémon Tools
     - [x] New Special Conditions
       - [x] Confused
@@ -55,7 +55,7 @@ Backend todo:
       - [x] Change opponent's next energy
       - [x] Remove opposing mon's Tool
       - [x] Halve opposing mon's HP
-      - [ ] Choose a card from your opponent's hand to discard
+      - [x] Choose a card from your opponent's hand to discard
       - [ ] Put opposing mon back in opponent's hand
       - [ ] Do extra damage based on own damage
     - [ ] New Trainer effects

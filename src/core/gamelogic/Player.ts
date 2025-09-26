@@ -218,6 +218,17 @@ export class Player {
     return discarded;
   }
 
+  returnToDeck(cards: PlayingCard[]) {
+    cards = cards.filter((card) => this.Hand.includes(card));
+    if (cards.length == 0) return;
+
+    this.logger.returnToDeck(this, cards, "hand");
+    this.Hand = this.Hand.filter((card) => !cards.includes(card));
+    this.Deck.push(...cards);
+
+    this.shuffleDeck();
+  }
+
   async setNewActivePokemon(pokemon: InPlayPokemonCard) {
     if (!this.Bench.includes(pokemon)) {
       throw new Error("Pokemon not on bench");
