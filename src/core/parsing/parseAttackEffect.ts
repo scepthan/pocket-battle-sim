@@ -753,6 +753,16 @@ export const parseAttackEffect = (attack: Attack): boolean => {
         });
       },
     },
+    {
+      pattern: /^You can use this attack only if you have Uxie and Azelf on your Bench\./i,
+      transform: () => {
+        attack.extraConditions.push((game) =>
+          ["Uxie", "Azelf"].every((name) =>
+            game.AttackingPlayer.BenchedPokemon.some((p) => p.Name == name)
+          )
+        );
+      },
+    },
   ];
 
   let attackText = attack.text;
