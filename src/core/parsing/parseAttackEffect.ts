@@ -191,6 +191,24 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       },
     },
     {
+      pattern: /^If your opponent’s Pokémon is knocked out by damage from this attack,/i,
+      transform: () => {
+        conditionalForNextEffect = (game) => {
+          const damageEvents = game.GameLog.currentTurn.filter(
+            (event) => event.type === "pokemonDamaged"
+          );
+          const activeAttackEvent = damageEvents.find(
+            (event) =>
+              event.player === game.DefendingPlayer.Name &&
+              event.targetPokemon.location === "active" &&
+              event.fromAttack
+          );
+          if (!activeAttackEvent) return false;
+          return activeAttackEvent.finalHP === 0;
+        };
+      },
+    },
+    {
       pattern: /^If heads,/i,
       transform: () => {
         conditionalForNextEffect = (game, self, heads) => heads > 0;
