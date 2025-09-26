@@ -19,7 +19,7 @@ Backend todo:
     - [x] Coin flip to attack effect
     - [x] Energy-doubling Ability
     - [x] Discard energy and attack any mon
-  - [ ] A2: 139/157 (88.5%)
+  - [ ] A2: 141/157 (89.8%)
     - [x] Pokémon Tools
     - [x] New Special Conditions
       - [x] Confused
@@ -50,7 +50,7 @@ Backend todo:
       - [ ] Discard cards from own deck
       - [x] Do N damage to each of opponent's mon
       - [ ] Flip coins for damage and Poison
-      - [ ] Flip coin for each own mon in play
+      - [x] Flip coin for each own mon in play
       - [x] Attach N energy to Benched mon
       - [ ] Change opponent's next energy
       - [ ] Remove opposing mon's Tool
@@ -79,7 +79,7 @@ Backend todo:
   - [ ] A4
     - [ ] Baby Pokémon (0-cost attacks)
   - [ ] A4a
-- [ ] Bring in newer sets
+- [x] Bring in newer sets
 - [x] Single battle simulation
 - [ ] Basic logic-based AI opponent (at least as competitive as Auto Mode)
 - [x] Mass battle simulation

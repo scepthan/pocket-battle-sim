@@ -77,6 +77,12 @@ export const parseAttackEffect = (attack: Attack): boolean => {
         attack.coinsToFlip = (game, self) => self.EffectiveEnergy.filter(predicate).length;
       },
     },
+    {
+      pattern: /^Flip a coin for each Pokémon you have in play\./i,
+      transform: () => {
+        attack.coinsToFlip = (game) => game.AttackingPlayer.InPlayPokemon.length;
+      },
+    },
 
     // Set the type based on what we're doing with the coin flips
     // CoinFlipOrDoNothing
