@@ -291,11 +291,14 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       },
     },
     {
-      pattern:
-        /^Before doing damage, discard all Pokémon Tools from your opponent’s Active Pokémon\./i,
+      pattern: /^Halve your opponent’s Active Pokémon’s remaining HP, rounded down\./i,
       transform: () => {
-        attack.preDamageEffects.push(async (game) => {
-          await game.discardPokemonTools(game.DefendingPlayer.activeOrThrow());
+        attack.attackingEffects.push(async (game) => {
+          const defender = game.DefendingPlayer.activeOrThrow();
+          const targetHp = Math.floor(defender.CurrentHP / 2 / 10) * 10;
+          const damage = defender.CurrentHP - targetHp;
+          // The game does not consider this to be "damage from an attack"
+          game.applyDamage(defender, damage, false);
         });
       },
     },
@@ -762,6 +765,29 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       },
     },
 
+    // Other side effects
+    {
+      pattern:
+        /^Before doing damage, discard all Pokémon Tools from your opponent’s Active Pokémon\./i,
+      transform: () => {
+        attack.preDamageEffects.push(async (game) => {
+          await game.discardPokemonTools(game.DefendingPlayer.activeOrThrow());
+        });
+      },
+    },
+    {
+      pattern:
+        /^Change the type of the next Energy that will be generated for your opponent to 1 of the following at random: ([^.]+?)\./i,
+      transform: (_, energyTypes) => {
+        const possibleEnergies = energyTypes
+          .split(/, or |, /)
+          .map((x) => parseEnergy(x.slice(1, 2)));
+        addSideEffect(async (game) => {
+          game.DefendingPlayer.NextEnergy = randomElement(possibleEnergies);
+        });
+      },
+    },
+
     // Miscellaneous
     {
       pattern:
@@ -802,18 +828,6 @@ export const parseAttackEffect = (attack: Attack): boolean => {
             game.AttackingPlayer.BenchedPokemon.some((p) => p.Name == name)
           )
         );
-      },
-    },
-    {
-      pattern:
-        /^Change the type of the next Energy that will be generated for your opponent to 1 of the following at random: ([^.]+?)\./i,
-      transform: (_, energyTypes) => {
-        const possibleEnergies = energyTypes
-          .split(/, or |, /)
-          .map((x) => parseEnergy(x.slice(1, 2)));
-        addSideEffect(async (game) => {
-          game.DefendingPlayer.NextEnergy = randomElement(possibleEnergies);
-        });
       },
     },
   ];
