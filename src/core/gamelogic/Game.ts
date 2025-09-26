@@ -19,6 +19,7 @@ import type {
   PlayingCard,
   PokemonCard,
   PokemonStatus,
+  PokemonToolCard,
   TrainerCard,
 } from "./types";
 
@@ -442,6 +443,9 @@ export class Game {
       chosenPokemon = await this.choosePokemon(this.AttackingPlayer, validPokemon);
     }
 
+    for (const effect of attack.preDamageEffects)
+      await effect(this, attacker, flippedHeads, chosenPokemon);
+
     if (attack.type !== "NoBaseDamage") {
       let baseDamage: number = attack.baseDamage ?? 0;
 
@@ -794,6 +798,20 @@ export class Game {
     if (pokemon.AttachedEnergy.length == 0) return;
 
     pokemon.player.discardRandomEnergy(pokemon, count);
+  }
+
+  async discardPokemonTools(
+    pokemon: InPlayPokemonCard,
+    tools: PokemonToolCard[] = pokemon.AttachedToolCards
+  ) {
+    if (this.shouldPreventEffects(pokemon)) return;
+    if (tools.length === 0) return;
+
+    for (const tool of tools) {
+      await pokemon.removePokemonTool(tool);
+      pokemon.player.Discard.push(tool);
+    }
+    this.GameLog.discardFromPlay(pokemon.player, tools);
   }
 
   applyPokemonStatus(pokemon: InPlayPokemonCard, status: PokemonStatus) {

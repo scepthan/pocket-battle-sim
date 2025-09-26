@@ -77,12 +77,10 @@ export const parsePokemonToolEffect = (cardText: string): ParsedResult<PokemonTo
         effect.effect = async (game, pokemon) => {
           pokemon.recoverAllStatusConditions();
 
-          const thisCard = pokemon.AttachedToolCards.find((card) => card.Effect === effect);
+          const thisCard = pokemon.AttachedToolCards.find((card) => card.Text === cardText);
           if (!thisCard) throw new Error("Could not find this Pokemon Tool card");
 
-          await pokemon.removePokemonTool(thisCard);
-          pokemon.player.Discard.push(thisCard);
-          game.GameLog.discardFromPlay(pokemon.player, [thisCard]);
+          await game.discardPokemonTools(pokemon, [thisCard]);
         };
       },
     },

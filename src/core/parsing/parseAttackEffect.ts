@@ -290,6 +290,15 @@ export const parseAttackEffect = (attack: Attack): boolean => {
         });
       },
     },
+    {
+      pattern:
+        /^Before doing damage, discard all Pokémon Tools from your opponent’s Active Pokémon\./i,
+      transform: () => {
+        attack.preDamageEffects.push(async (game) => {
+          await game.discardPokemonTools(game.DefendingPlayer.activeOrThrow());
+        });
+      },
+    },
 
     // Damage to opponent’s bench
     {

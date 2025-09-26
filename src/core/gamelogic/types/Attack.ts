@@ -47,6 +47,11 @@ interface BaseAttack {
   choosePokemonToAttack?: (game: Game, self: InPlayPokemonCard) => InPlayPokemonCard[];
 
   /**
+   * Effects to apply when attacking before any damage is done.
+   */
+  preDamageEffects: SideEffect[];
+
+  /**
    * Damage-dealing effects of the attack other than dealing base damage to the Defending Pokémon.
    */
   attackingEffects: SideEffect[];

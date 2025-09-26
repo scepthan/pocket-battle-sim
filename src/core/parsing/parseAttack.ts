@@ -11,6 +11,7 @@ export const parseAttack = (inputAttack: InputCardAttack): ParsedResult<Attack> 
     text: inputAttack.text,
     baseDamage: inputAttack.damage,
     damageSymbol: inputAttack.damageSymbol,
+    preDamageEffects: [],
     attackingEffects: [],
     sideEffects: [],
     extraConditions: [],
