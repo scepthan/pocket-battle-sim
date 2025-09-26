@@ -447,6 +447,14 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       },
     },
     {
+      pattern: /^Discard the top (\d+) cards of your deck\./i,
+      transform: (_, count) => {
+        addSideEffect(async (game) => {
+          game.AttackingPlayer.discardTopOfDeck(Number(count));
+        });
+      },
+    },
+    {
       pattern: /^Your opponent reveals their hand\./,
       transform: () => {
         addSideEffect(async (game) => {

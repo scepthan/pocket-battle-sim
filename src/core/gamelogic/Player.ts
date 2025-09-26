@@ -507,6 +507,13 @@ export class Player {
     this.Discard.push(...cards);
     this.logger.discardFromHand(this, cards);
   }
+  discardTopOfDeck(count: number) {
+    const discarded = this.Deck.splice(0, count);
+    if (discarded.length == 0) return;
+
+    this.Discard.push(...discarded);
+    this.logger.discardFromDeck(this, discarded);
+  }
 
   poisonActivePokemon() {
     this.activeOrThrow().SecondaryConditions.add("Poisoned");

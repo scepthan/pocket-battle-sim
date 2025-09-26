@@ -181,6 +181,15 @@ export class GameLogger {
     });
   }
 
+  discardFromDeck(player: Player, cards: PlayingCard[]) {
+    this.addEntry({
+      type: "discardCards",
+      player: player.Name,
+      source: "deck",
+      cardIds: cards.map((card) => card.ID),
+    });
+  }
+
   returnInPlayPokemonToHand(player: Player, pokemon: InPlayPokemonCard) {
     this.addEntry({
       type: "returnToHand",
