@@ -787,6 +787,18 @@ export const parseAttackEffect = (attack: Attack): boolean => {
         );
       },
     },
+    {
+      pattern:
+        /^Change the type of the next Energy that will be generated for your opponent to 1 of the following at random: ([^.]+?)\./i,
+      transform: (_, energyTypes) => {
+        const possibleEnergies = energyTypes
+          .split(/, or |, /)
+          .map((x) => parseEnergy(x.slice(1, 2)));
+        addSideEffect(async (game) => {
+          game.DefendingPlayer.NextEnergy = randomElement(possibleEnergies);
+        });
+      },
+    },
   ];
 
   let attackText = attack.text;
