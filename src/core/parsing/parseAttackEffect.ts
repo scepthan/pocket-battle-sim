@@ -273,6 +273,13 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       },
     },
     {
+      pattern: /^This attack does more damage equal to the damage this Pokémon has on it\./i,
+      transform: () => {
+        attack.calculateDamage = (game, self) =>
+          (attack.baseDamage ?? 0) + (self.MaxHP - self.CurrentHP);
+      },
+    },
+    {
       pattern:
         /^1 of your opponent’s Pokémon is chosen at random (\d+) times\. For each time a Pokémon was chosen, do (\d+) damage to it\./i,
       transform: (_, times, damage) => {
