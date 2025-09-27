@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 import type {
   AttachEnergySource,
   DiscardEnergySource,
@@ -551,9 +552,34 @@ export class Player {
     this.activeOrThrow().applyPokemonStatus(status);
   }
 
-  applyPlayerStatus(status: PlayerStatus) {
-    this.PlayerStatuses.push(status);
-    this.logger.applyPlayerStatus(this, status);
+  applyPlayerStatus(status: PlayerStatus): PlayerStatus {
+    if (status.source === "Ability" && status.doesNotStack) {
+      const existingStatus = this.PlayerStatuses.find(
+        (s) => s.type === status.type && s.source === "Ability"
+      );
+      if (existingStatus) return existingStatus;
+    }
+
+    const newStatus = Object.assign({}, status);
+    newStatus.id = uuidv4();
+    this.PlayerStatuses.push(newStatus);
+    this.logger.applyPlayerStatus(this, newStatus);
+
+    return newStatus;
+  }
+  removePlayerStatus(statusId: string) {
+    const status = this.PlayerStatuses.find((s) => s.id === statusId);
+    if (!status) return;
+
+    if (status.source === "Ability" && status.doesNotStack) {
+      const otherPokemonWithStatus = this.InPlayPokemon.filter((p) =>
+        p.ActivePlayerStatuses.some((s) => s.id === statusId)
+      );
+      if (otherPokemonWithStatus.length > 0) return;
+    }
+
+    this.PlayerStatuses = this.PlayerStatuses.filter((s) => s.id !== statusId);
+    //this.logger.removePlayerStatus(this, status);
   }
 
   flipCoin() {

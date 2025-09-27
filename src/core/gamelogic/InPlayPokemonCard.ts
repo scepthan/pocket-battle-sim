@@ -230,7 +230,8 @@ export class InPlayPokemonCard {
 
   async useAbility(manuallyActivated: boolean, target?: CardSlot) {
     if (!this.Ability) return;
-    if (!target && this.Ability.effect.type == "Targeted")
+    const effect = this.Ability.effect;
+    if (!target && effect.type == "Targeted")
       throw new Error("No target provided for targeted ability");
 
     if (manuallyActivated) {
@@ -239,7 +240,18 @@ export class InPlayPokemonCard {
       this.player.logger.triggerAbility(this.player, this, this.Ability.name);
     }
 
-    await this.Ability.effect.effect(this.game, this, target!);
+    if (effect.type === "PlayerStatus") {
+      const player = effect.opponent ? this.player.opponent : this.player;
+      const status = player.applyPlayerStatus(effect.status);
+      this.ActivePlayerStatuses.push(status);
+    } else if (effect.type === "PokemonStatus") {
+      const status = Object.assign({}, effect.status);
+      this.applyPokemonStatus(status);
+    } else if (effect.type === "Targeted") {
+      await effect.effect(this.game, this, target!);
+    } else {
+      await effect.effect(this.game, this);
+    }
   }
 
   async triggerPokemonTool(tool: PokemonToolCard) {
@@ -261,8 +273,8 @@ export class InPlayPokemonCard {
   }
 
   async onLeaveActive() {
-    if (this.Ability?.trigger === "OnEnterActive" && this.Ability.effect.undo) {
-      await this.Ability.effect.undo(this.game, this);
+    if (this.Ability?.trigger === "OnEnterActive") {
+      await this.undoAbility();
     }
   }
 
@@ -273,14 +285,14 @@ export class InPlayPokemonCard {
   }
 
   async onLeaveBench() {
-    if (this.Ability?.trigger === "OnEnterBench" && this.Ability.effect.undo) {
-      await this.Ability.effect.undo(this.game, this);
+    if (this.Ability?.trigger === "OnEnterBench") {
+      await this.undoAbility();
     }
   }
 
   async onLeavePlay() {
-    if (this.Ability?.trigger === "OnEnterPlay" && this.Ability.effect.undo) {
-      await this.Ability.effect.undo(this.game, this);
+    if (this.Ability?.trigger === "OnEnterPlay") {
+      await this.undoAbility();
     }
   }
 
@@ -291,6 +303,25 @@ export class InPlayPokemonCard {
     }
     for (const tool of this.AttachedToolCards) {
       if (tool.Effect.trigger === "OnAttackDamage") await this.triggerPokemonTool(tool);
+    }
+  }
+
+  async undoAbility() {
+    if (!this.Ability) return;
+
+    if (this.Ability.effect.type === "PlayerStatus") {
+      for (const status of this.ActivePlayerStatuses) {
+        if (!status.id) throw new Error("Cannot remove PlayerStatus without ID");
+
+        this.ActivePlayerStatuses = this.ActivePlayerStatuses.filter((s) => s.id !== status.id);
+        if (this.Ability.effect.opponent) {
+          this.player.opponent.removePlayerStatus(status.id);
+        } else {
+          this.player.removePlayerStatus(status.id);
+        }
+      }
+    } else if (this.Ability.effect.undo) {
+      await this.Ability.effect.undo(this.game, this);
     }
   }
 }

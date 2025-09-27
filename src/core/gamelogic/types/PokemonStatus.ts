@@ -1,6 +1,7 @@
 import type { PokemonCondition } from "./Effects";
 
 interface BasePokemonStatus {
+  id?: string;
   source: "Effect" | "Ability" | "PokemonTool";
   keepNextTurn?: boolean;
 }

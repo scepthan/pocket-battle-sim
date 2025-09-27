@@ -1,14 +1,11 @@
 import {
   parseEnergy,
-  Player,
   type Ability,
   type CardSlot,
   type Game,
   type InPlayPokemonCard,
-  type PlayerStatus,
   type PokemonCondition,
 } from "../gamelogic";
-import { removeElement } from "../util";
 import { parsePokemonPredicate } from "./parsePredicates";
 import type { InputCardAbility, ParsedResult } from "./types";
 
@@ -229,6 +226,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       },
     },
 
+    // Pokemon statuses
     {
       pattern: /^This Pokémon takes −(\d+) damage from attacks(?: from ([^.]+?))?\.$/i,
       transform: (_, amount, specifier) => {
@@ -240,14 +238,14 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
             }
           : undefined;
 
-        ability.effect.effect = async (game: Game, self?: InPlayPokemonCard) => {
-          if (!self) return;
-          game.applyPokemonStatus(self, {
+        ability.effect = {
+          type: "PokemonStatus",
+          status: {
             type: "ReduceAttackDamage",
             amount: reduceAmount,
             source: "Ability",
             attackerCondition,
-          });
+          },
         };
       },
     },
@@ -255,29 +253,28 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       pattern:
         /^Prevent all effects of attacks used by your opponent’s Pokémon done to this Pokémon\.$/i,
       transform: () => {
-        ability.effect.effect = async (game: Game, self?: InPlayPokemonCard) => {
-          if (!self) return;
-          game.applyPokemonStatus(self, {
+        ability.effect = {
+          type: "PokemonStatus",
+          status: {
             type: "PreventAttackEffects",
             source: "Ability",
-          });
+          },
         };
       },
     },
+
+    // Opponent player statuses
     {
       pattern: /^your opponent can’t use any Supporter cards from their hand\.$/i,
       transform: () => {
         ability.effect = {
-          type: "Standard",
-          effect: async (game: Game, self: InPlayPokemonCard) => {
-            const status: PlayerStatus = {
-              category: "GameRule",
-              type: "CannotUseSupporter",
-              source: "Ability",
-            };
-            applyPlayerStatus(self.player.opponent, status, self.player, self);
+          type: "PlayerStatus",
+          opponent: true,
+          status: {
+            category: "GameRule",
+            type: "CannotUseSupporter",
+            source: "Ability",
           },
-          undo: undoPlayerStatus("CannotUseSupporter", true),
         };
       },
     },
@@ -286,21 +283,20 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         /^Your opponent can’t play any Pokémon from their hand to evolve their Active Pokémon\.$/i,
       transform: () => {
         ability.effect = {
-          type: "Standard",
-          effect: async (game: Game, self: InPlayPokemonCard) => {
-            const status: PlayerStatus = {
-              category: "Pokemon",
-              type: "CannotEvolve",
-              source: "Ability",
-              appliesToPokemon: (p) => p === self.player.opponent.ActivePokemon,
-              descriptor: "Active Pokémon",
-            };
-            applyPlayerStatus(self.player.opponent, status, self.player, self);
+          type: "PlayerStatus",
+          opponent: true,
+          status: {
+            category: "Pokemon",
+            type: "CannotEvolve",
+            source: "Ability",
+            appliesToPokemon: (p) => p === p.player.ActivePokemon,
+            descriptor: "Active Pokémon",
           },
-          undo: undoPlayerStatus("CannotUseSupporter", true),
         };
       },
     },
+
+    // Self player statuses
     {
       pattern:
         /^Each {(\w)} Energy attached to your {\1} Pokémon provides 2 {\1} Energy. This effect doesn’t stack.$/i,
@@ -308,20 +304,17 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         const fullType = parseEnergy(energyType);
 
         ability.effect = {
-          type: "Standard",
-          effect: async (game: Game, self: InPlayPokemonCard) => {
-            const status: PlayerStatus = {
-              category: "Pokemon",
-              type: "DoubleEnergy",
-              energyType: fullType,
-              source: "Ability",
-              appliesToPokemon: (p) => p.Type === fullType,
-              doesNotStack: true,
-              descriptor: fullType + "-type Pokémon",
-            };
-            applyPlayerStatus(self.player, status, self.player, self);
+          type: "PlayerStatus",
+          opponent: false,
+          status: {
+            category: "Pokemon",
+            type: "DoubleEnergy",
+            energyType: fullType,
+            source: "Ability",
+            appliesToPokemon: (p) => p.Type === fullType,
+            doesNotStack: true,
+            descriptor: fullType + "-type Pokémon",
           },
-          undo: undoPlayerStatus("CannotUseSupporter", true),
         };
       },
     },
@@ -346,45 +339,3 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     value: ability,
   };
 };
-
-const applyPlayerStatus = (
-  player: Player,
-  status: PlayerStatus,
-  owner: Player,
-  pokemon: InPlayPokemonCard
-) => {
-  if (status.doesNotStack && owner.PlayerStatuses.some((s) => s.type === status.type)) {
-    let activeStatus: PlayerStatus | undefined;
-    for (const p of owner.InPlayPokemon) {
-      if (p !== pokemon && p.Name === pokemon.Name) {
-        activeStatus = p.ActivePlayerStatuses.find((s) => s.type === status.type);
-        if (activeStatus) {
-          status = activeStatus;
-          break;
-        }
-      }
-    }
-  }
-
-  player.applyPlayerStatus(status);
-  pokemon.ActivePlayerStatuses.push(status);
-};
-const undoPlayerStatus =
-  (statusType: string, isOpponent: boolean) => async (game: Game, pokemon: InPlayPokemonCard) => {
-    const status = pokemon.ActivePlayerStatuses.find((s) => s.type === statusType);
-    if (!status) return;
-    pokemon.ActivePlayerStatuses = pokemon.ActivePlayerStatuses.filter((s) => s !== status);
-
-    const owner = pokemon.player;
-
-    if (
-      status.doesNotStack &&
-      owner.InPlayPokemon.some((p) => p !== pokemon && p.ActivePlayerStatuses.includes(status))
-    ) {
-      // Another instance of this status is still active on another Pokémon, so do not remove it from the player
-      return;
-    }
-
-    const player = isOpponent ? owner.opponent : owner;
-    removeElement(player.PlayerStatuses, status);
-  };

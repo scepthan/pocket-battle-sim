@@ -2,8 +2,10 @@ import type {
   CardSlot,
   Game,
   InPlayPokemonCard,
+  PlayerStatus,
   PokemonCondition,
   PokemonEffect,
+  PokemonStatus,
   TargetedPokemonEffect,
 } from "..";
 
@@ -27,10 +29,25 @@ interface StandardEffect {
   effect: PokemonEffect;
   undo?: PokemonEffect;
 }
+interface PlayerStatusEffect {
+  type: "PlayerStatus";
+  status: PlayerStatus;
+  opponent: boolean;
+  effect?: undefined;
+  undo?: undefined;
+}
+interface PokemonStatusEffect {
+  type: "PokemonStatus";
+  status: PokemonStatus;
+  effect?: undefined;
+  undo?: undefined;
+}
+type AbilityEffect = TargetedEffect | StandardEffect | PlayerStatusEffect | PokemonStatusEffect;
+
 export interface Ability {
   name: string;
   trigger: AbilityTrigger;
   text: string;
   conditions: PokemonCondition[];
-  effect: TargetedEffect | StandardEffect;
+  effect: AbilityEffect;
 }

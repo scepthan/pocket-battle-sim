@@ -3,6 +3,7 @@ import type { InPlayPokemonCard } from "../InPlayPokemonCard";
 import type { Energy } from "./Energy";
 
 interface BasePlayerStatus {
+  id?: string;
   source: "Effect" | "Ability";
   keepNextTurn?: boolean;
   doesNotStack?: boolean;

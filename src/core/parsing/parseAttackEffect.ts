@@ -780,14 +780,14 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       pattern:
         /^Your opponent can’t use any Supporter cards from their hand during their next turn\./i,
       transform: () => {
-        addSideEffect(async (game) =>
+        addSideEffect(async (game) => {
           game.DefendingPlayer.applyPlayerStatus({
             type: "CannotUseSupporter",
             source: "Effect",
             category: "GameRule",
             keepNextTurn: true,
-          })
-        );
+          });
+        });
       },
     },
 
