@@ -5,7 +5,6 @@ import type { Player } from "./Player";
 import {
   type Ability,
   type Attack,
-  type CardSlot,
   type Energy,
   type PlayerStatus,
   type PlayingCard,
@@ -122,19 +121,32 @@ export class InPlayPokemonCard {
   isDamaged() {
     return this.CurrentHP < this.MaxHP;
   }
+  currentDamage() {
+    return this.MaxHP - this.CurrentHP;
+  }
 
   applyDamage(HP: number) {
     this.CurrentHP -= HP;
     if (this.CurrentHP < 0) this.CurrentHP = 0;
   }
-
   healDamage(HP: number) {
     this.CurrentHP += HP;
     if (this.CurrentHP > this.MaxHP) this.CurrentHP = this.MaxHP;
   }
 
-  attachEnergy(energy: Energy[]) {
+  async attachEnergy(energy: Energy[]) {
+    const initialCount = this.AttachedEnergy.length;
     this.AttachedEnergy.push(...energy);
+    if (initialCount === 0 && energy.length > 0) {
+      await this.onFirstEnergyAttach();
+    }
+  }
+  async removeEnergy(energy: Energy[]) {
+    const initialCount = this.AttachedEnergy.length;
+    for (const e of energy) removeElement(this.AttachedEnergy, e);
+    if (initialCount > 0 && energy.length === 0) {
+      await this.onLastEnergyRemove();
+    }
   }
 
   /**
@@ -210,12 +222,13 @@ export class InPlayPokemonCard {
       await card.Effect.undo(this.game, this);
   }
 
-  hasSufficientEnergy(energies: Energy[]) {
+  private energyIsSufficient(energies: Energy[], energyAvailable: Energy[]) {
     // Move Colorless energy to the end of the list so colored Energies are checked first
     energies = energies
       .slice()
       .sort((a, b) => (a == "Colorless" ? 1 : 0) - (b == "Colorless" ? 1 : 0));
-    const energyAvailable = this.EffectiveEnergy.slice();
+    energyAvailable = energyAvailable.slice();
+
     for (const energy of energies) {
       if (energy === "Colorless" && energyAvailable.length > 0) {
         energyAvailable.pop();
@@ -228,29 +241,51 @@ export class InPlayPokemonCard {
     return true;
   }
 
-  async useAbility(manuallyActivated: boolean, target?: CardSlot) {
-    if (!this.Ability) return;
-    const effect = this.Ability.effect;
-    if (!target && effect.type == "Targeted")
-      throw new Error("No target provided for targeted ability");
+  hasSufficientEnergy(energies: Energy[]) {
+    return this.energyIsSufficient(energies, this.EffectiveEnergy);
+  }
+  hasSufficientActualEnergy(energies: Energy[]) {
+    return this.energyIsSufficient(energies, this.AttachedEnergy);
+  }
 
-    if (manuallyActivated) {
-      this.player.logger.useAbility(this.player, this, this.Ability.name);
-    } else {
-      this.player.logger.triggerAbility(this.player, this, this.Ability.name);
+  async triggerAbility() {
+    await this.useAbility(false);
+  }
+
+  async useAbility(manuallyActivated: boolean) {
+    const ability = this.Ability;
+    if (!ability) {
+      throw new Error("Pokemon has no ability");
     }
 
-    if (effect.type === "PlayerStatus") {
-      const player = effect.opponent ? this.player.opponent : this.player;
-      const status = player.applyPlayerStatus(effect.status);
-      this.ActivePlayerStatuses.push(status);
-    } else if (effect.type === "PokemonStatus") {
-      const status = Object.assign({}, effect.status);
-      this.applyPokemonStatus(status);
-    } else if (effect.type === "Targeted") {
-      await effect.effect(this.game, this, target!);
+    if (!ability.conditions.every((condition) => condition(this))) return;
+
+    if (manuallyActivated) {
+      this.player.logger.useAbility(this.player, this, ability.name);
     } else {
-      await effect.effect(this.game, this);
+      this.player.logger.triggerAbility(this.player, this, ability.name);
+    }
+
+    if (ability.effect.type === "Targeted") {
+      const validTargets = ability.effect.findValidTargets(this.player.game, this);
+      if (validTargets.length === 0) return;
+
+      const target = validTargets.every((x) => x.isPokemon)
+        ? await this.player.game.choosePokemon(this.player, validTargets)
+        : await this.player.game.choose(this.player, validTargets);
+      if (!target || !validTargets.includes(target)) {
+        throw new Error("Invalid target for targeted effect");
+      }
+      await ability.effect.effect(this.game, this, target);
+    } else if (ability.effect.type === "Standard") {
+      await ability.effect.effect(this.game, this);
+    } else if (ability.effect.type === "PlayerStatus") {
+      const player = ability.effect.opponent ? this.player.opponent : this.player;
+      const status = player.applyPlayerStatus(ability.effect.status);
+      this.ActivePlayerStatuses.push(status);
+    } else if (ability.effect.type === "PokemonStatus") {
+      const status = Object.assign({}, ability.effect.status);
+      this.applyPokemonStatus(status);
     }
   }
 
@@ -262,13 +297,13 @@ export class InPlayPokemonCard {
   // Event handlers for abilities and tools
   async onEnterPlay() {
     if (this.Ability?.trigger === "OnEnterPlay") {
-      await this.player.triggerAbility(this);
+      await this.triggerAbility();
     }
   }
 
   async onEnterActive() {
     if (this.Ability?.trigger === "OnEnterActive") {
-      await this.player.triggerAbility(this);
+      await this.triggerAbility();
     }
   }
 
@@ -280,7 +315,7 @@ export class InPlayPokemonCard {
 
   async onEnterBench() {
     if (this.Ability?.trigger === "OnEnterBench") {
-      await this.player.triggerAbility(this);
+      await this.triggerAbility();
     }
   }
 
@@ -298,11 +333,22 @@ export class InPlayPokemonCard {
 
   async onAttackDamage() {
     if (this.Ability?.trigger === "AfterAttackDamage") {
-      if (this.game.DefendingPlayer.InPlayPokemon.includes(this))
-        await this.player.triggerAbility(this);
+      if (this.game.DefendingPlayer.InPlayPokemon.includes(this)) await this.triggerAbility();
     }
     for (const tool of this.AttachedToolCards) {
       if (tool.Effect.trigger === "OnAttackDamage") await this.triggerPokemonTool(tool);
+    }
+  }
+
+  async onFirstEnergyAttach() {
+    if (this.Ability?.trigger === "OnFirstEnergyAttach") {
+      await this.triggerAbility();
+    }
+  }
+
+  async onLastEnergyRemove() {
+    if (this.Ability?.trigger === "OnFirstEnergyAttach") {
+      await this.undoAbility();
     }
   }
 

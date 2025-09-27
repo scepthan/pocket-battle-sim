@@ -35,11 +35,7 @@ export class PlayerGameView {
     this.#game = game;
     this.#turnNumber = game.TurnNumber;
     this.#player = player;
-    if (player == game.Player1) {
-      this.#opponent = game.Player2;
-    } else {
-      this.#opponent = game.Player1;
-    }
+    this.#opponent = player.opponent;
   }
 
   #pokemonFromView(view: PlayerPokemonView): InPlayPokemonCard {
@@ -160,7 +156,7 @@ export class PlayerGameView {
         );
       }
     } else if (card.CardType == "Supporter" || card.CardType == "Item") {
-      if (!this.canPlaySupporter) return false;
+      if (card.CardType == "Supporter" && !this.canPlaySupporter) return false;
       if (card.Effect.condition && !card.Effect.condition(this.#game, this.#player)) return false;
       if (card.Effect.type == "Targeted") {
         const validTargets = card.Effect.validTargets(this.#game);

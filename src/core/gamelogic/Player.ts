@@ -65,6 +65,7 @@ export class Player {
     }
   }
 
+  // Helper methods
   pokemonToDescriptor(pokemon: InPlayPokemonCard): InPlayPokemonDescriptor {
     if (pokemon == this.ActivePokemon) {
       return {
@@ -80,11 +81,52 @@ export class Player {
     }
   }
 
+  canDraw() {
+    return this.Deck.length > 0 && this.Hand.length < this.game.GameRules.MaxHandSize;
+  }
+
+  hasBasicPokemon() {
+    return this.Hand.some((card) => card.CardType == "Pokemon" && card.Stage == 0);
+  }
+
+  // Setup methods
   setup(handSize: number) {
     this.drawInitialHand(handSize);
 
     this.chooseNextEnergy();
+  }
+
+  chooseNextEnergy() {
+    this.NextEnergy = randomElement(this.EnergyTypes);
     this.logger.generateNextEnergy(this);
+  }
+
+  async setupPokemon(setup: PlayerGameSetup) {
+    // Set up the active Pokémon
+    if (!this.Hand.includes(setup.active)) {
+      throw new Error("Card not in hand");
+    }
+    if (setup.active.Stage != 0) {
+      throw new Error("Can only play Basic Pokemon at game start");
+    }
+
+    const pokemon = new InPlayPokemonCard(this, setup.active);
+    this.ActivePokemon = pokemon;
+    this.InPlay.push(setup.active);
+    removeElement(this.Hand, setup.active);
+
+    this.logger.playToActive(this, setup.active);
+
+    if (pokemon.Ability?.trigger == "OnEnterPlay") {
+      await pokemon.triggerAbility();
+    }
+
+    // Set up the bench Pokémon
+    for (const i in setup.bench) {
+      const card = setup.bench[i];
+      if (!card) return;
+      await this.putPokemonOnBench(card, +i);
+    }
   }
 
   reset() {
@@ -115,6 +157,7 @@ export class Player {
     this.logger.drawToHand(this, handSize, this.Hand);
   }
 
+  // Drawing-related methods
   shuffleDeck(log: boolean = true) {
     const newDeck: PlayingCard[] = [];
 
@@ -136,10 +179,6 @@ export class Player {
     this.shuffleDeck(log);
   }
 
-  canDraw() {
-    return this.Deck.length > 0 && this.Hand.length < this.game.GameRules.MaxHandSize;
-  }
-
   drawCards(count: number, log: boolean = true) {
     const cardsDrawn: PlayingCard[] = [];
     while (cardsDrawn.length < count) {
@@ -150,42 +189,6 @@ export class Player {
     if (log) this.logger.drawToHand(this, count, cardsDrawn);
 
     this.Hand.push(...cardsDrawn);
-  }
-
-  chooseNextEnergy() {
-    this.NextEnergy = randomElement(this.EnergyTypes);
-  }
-
-  hasBasicPokemon() {
-    return this.Hand.some((card) => card.CardType == "Pokemon" && card.Stage == 0);
-  }
-
-  async setupPokemon(setup: PlayerGameSetup) {
-    // Set up the active Pokémon
-    if (!this.Hand.includes(setup.active)) {
-      throw new Error("Card not in hand");
-    }
-    if (setup.active.Stage != 0) {
-      throw new Error("Can only play Basic Pokemon at game start");
-    }
-
-    const pokemon = new InPlayPokemonCard(this, setup.active);
-    this.ActivePokemon = pokemon;
-    this.InPlay.push(setup.active);
-    removeElement(this.Hand, setup.active);
-
-    this.logger.playToActive(this, setup.active);
-
-    if (pokemon.Ability?.trigger == "OnEnterPlay") {
-      await this.triggerAbility(pokemon);
-    }
-
-    // Set up the bench Pokémon
-    for (const i in setup.bench) {
-      const card = setup.bench[i];
-      if (!card) return;
-      await this.putPokemonOnBench(card, +i);
-    }
   }
 
   drawRandomFiltered(predicate: (card: PlayingCard) => boolean) {
@@ -230,6 +233,10 @@ export class Player {
     this.shuffleDeck();
   }
 
+  // Methods for moving and evolving Pokémon
+  /**
+   * Sets the new Active Pokémon when the previous one is removed from play.
+   */
   async setNewActivePokemon(pokemon: InPlayPokemonCard) {
     if (!this.Bench.includes(pokemon)) {
       throw new Error("Pokemon not on bench");
@@ -298,78 +305,75 @@ export class Player {
     else await pokemon.onEnterBench();
   }
 
-  async triggerAbility(pokemon: InPlayPokemonCard, manuallyActivated: boolean = false) {
-    if (!pokemon.Ability) {
-      throw new Error("Pokemon has no ability");
-    }
-
-    const ability = pokemon.Ability;
-    if (!ability.conditions.every((condition) => condition(pokemon))) return;
-    if (ability.effect.type === "Targeted") {
-      const validTargets = ability.effect.findValidTargets(this.game, pokemon);
-      if (validTargets.length === 0) {
-        return;
-      }
-      const target = validTargets.every((x) => x.isPokemon)
-        ? await this.game.choosePokemon(this, validTargets)
-        : await this.game.choose(this, validTargets);
-      if (!target || !validTargets.includes(target)) {
-        throw new Error("Invalid target for targeted effect");
-      }
-      await pokemon.useAbility(manuallyActivated, target);
-    } else if (ability.effect.type === "Standard") {
-      await pokemon.useAbility(manuallyActivated);
-    }
-  }
-
-  attachAvailableEnergy(pokemon: InPlayPokemonCard) {
+  async attachAvailableEnergy(pokemon: InPlayPokemonCard) {
     if (!this.AvailableEnergy) {
       throw new Error("No energy available to attach");
     }
-    this.attachEnergy(pokemon, [this.AvailableEnergy], "player");
+    await this.attachEnergy(pokemon, [this.AvailableEnergy], "player");
     this.AvailableEnergy = undefined;
   }
 
-  attachEnergy(
+  async attachEnergy(
     pokemon: InPlayPokemonCard,
     energy: Energy[],
     from: AttachEnergySource,
     fromPokemon?: InPlayPokemonCard
   ) {
-    pokemon.attachEnergy(energy);
     this.logger.attachEnergy(this, pokemon, energy, from, fromPokemon);
+    await pokemon.attachEnergy(energy);
   }
 
-  transferEnergy(fromPokemon: InPlayPokemonCard, toPokemon: InPlayPokemonCard, energy: Energy[]) {
-    for (const e of energy) {
-      if (!fromPokemon.AttachedEnergy.includes(e)) {
-        throw new Error("Energy not attached to fromPokemon");
-      }
-      removeElement(fromPokemon.AttachedEnergy, e);
-    }
-    toPokemon.attachEnergy(energy);
+  async transferEnergy(
+    fromPokemon: InPlayPokemonCard,
+    toPokemon: InPlayPokemonCard,
+    energy: Energy[]
+  ) {
+    if (!fromPokemon.hasSufficientActualEnergy(energy))
+      throw new Error("Energy not attached to fromPokemon");
 
     this.logger.attachEnergy(this, toPokemon, energy, "pokemon", fromPokemon);
+
+    await fromPokemon.removeEnergy(energy);
+    await toPokemon.attachEnergy(energy);
   }
 
-  discardRandomEnergy(pokemon: InPlayPokemonCard, count: number = 1) {
-    const energies = pokemon.AttachedEnergy;
-
-    const discarded: Energy[] = [];
-    for (let i = 0; i < count; i++) {
-      if (energies.length == 0) break;
-      const energy = randomElement(energies);
-      discarded.push(removeElement(energies, energy));
+  async discardEnergyFromPokemon(pokemon: InPlayPokemonCard, type: Energy, count: number = 1) {
+    const discardedEnergy: Energy[] = [];
+    const remainingEnergy = pokemon.AttachedEnergy.slice();
+    while (remainingEnergy.includes(type) && count > 0) {
+      discardedEnergy.push(type);
+      removeElement(remainingEnergy, type);
+      count -= 1;
     }
 
-    this.discardEnergy(discarded, "effect", pokemon);
+    this.discardEnergy(discardedEnergy, "effect", pokemon);
+    await pokemon.removeEnergy(discardedEnergy);
   }
+  async discardAllEnergyFromPokemon(pokemon: InPlayPokemonCard) {
+    const discardedEnergy = pokemon.AttachedEnergy.slice();
+    this.discardEnergy(discardedEnergy, "effect", pokemon);
+    await pokemon.removeEnergy(discardedEnergy);
+  }
+  async discardRandomEnergyFromPokemon(pokemon: InPlayPokemonCard, count: number = 1) {
+    if (pokemon.AttachedEnergy.length == 0) return;
 
+    const discardedEnergy: Energy[] = [];
+    const remainingEnergy = pokemon.AttachedEnergy.slice();
+
+    while (remainingEnergy.length > 0 && count > 0) {
+      const energy = randomElement(remainingEnergy);
+      discardedEnergy.push(energy);
+      removeElement(remainingEnergy, energy);
+      count -= 1;
+    }
+
+    this.discardEnergy(discardedEnergy, "effect", pokemon);
+    await pokemon.removeEnergy(discardedEnergy);
+  }
   discardEnergy(energies: Energy[], source: DiscardEnergySource, pokemon?: InPlayPokemonCard) {
     if (energies.length == 0) return;
 
     this.DiscardedEnergy.push(...energies);
-
     this.logger.discardEnergy(this, energies, source, pokemon);
   }
 
@@ -391,8 +395,9 @@ export class Player {
     ) {
       throw new Error("Cannot retreat while " + currentActive.PrimaryCondition);
     }
-
-    const previousEnergy = currentActive.AttachedEnergy.slice();
+    if (!currentActive.hasSufficientActualEnergy(energyToDiscard)) {
+      throw new Error("Energy not attached to active Pokemon");
+    }
 
     let modifiedCost = currentActive.RetreatCost;
     for (const status of this.PlayerStatuses) {
@@ -401,21 +406,13 @@ export class Player {
     if (modifiedCost < 0) modifiedCost = 0;
 
     const effectiveEnergyToDiscard = currentActive.calculateEffectiveEnergy(energyToDiscard);
-    if (modifiedCost > effectiveEnergyToDiscard.length) {
+    if (modifiedCost > effectiveEnergyToDiscard.length)
       throw new Error("Not enough energy provided");
-    }
 
-    const discardedEnergy: Energy[] = [];
-    for (const e of energyToDiscard) {
-      if (!previousEnergy.includes(e)) {
-        throw new Error("Energy not attached to active Pokemon");
-      }
-      discardedEnergy.push(removeElement(previousEnergy, e));
-    }
-    currentActive.AttachedEnergy = previousEnergy;
+    this.discardEnergy(energyToDiscard, "retreat", currentActive);
+    await currentActive.removeEnergy(energyToDiscard);
 
     await this.swapActivePokemon(newActive, "retreat");
-    this.discardEnergy(discardedEnergy, "retreat", currentActive);
   }
 
   async swapActivePokemon(
@@ -490,11 +487,11 @@ export class Player {
     this.discardEnergy(pokemon.AttachedEnergy, "removedFromField");
   }
 
-  async knockOutPokemon(pokemon: InPlayPokemonCard, fromAttack: boolean) {
+  async handleKnockOut(pokemon: InPlayPokemonCard, fromAttack: boolean) {
     this.logger.pokemonKnockedOut(this, pokemon, fromAttack);
 
     for (const card of pokemon.InPlayCards) {
-      if (!this.InPlay.includes(card)) console.log("Card not in play:", card);
+      if (!this.InPlay.includes(card)) throw new Error("Card not in play");
       removeElement(this.InPlay, card);
       this.Discard.push(card);
     }

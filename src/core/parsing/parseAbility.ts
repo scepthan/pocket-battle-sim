@@ -71,6 +71,12 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         ability.trigger = "OnEnterActive";
       },
     },
+    {
+      pattern: /^If this Pokémon has any Energy attached, /i,
+      transform: () => {
+        ability.trigger = "OnFirstEnergyAttach";
+      },
+    },
 
     {
       pattern: /^take a {(\w)} Energy from your Energy Zone and attach it to this Pokémon\.$/i,
@@ -78,7 +84,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         const fullType = parseEnergy(energyType);
 
         ability.effect.effect = async (game: Game, pokemon?: InPlayPokemonCard) => {
-          game.AttackingPlayer.attachEnergy(pokemon!, [fullType], "energyZone");
+          await game.AttackingPlayer.attachEnergy(pokemon!, [fullType], "energyZone");
         };
       },
     },
@@ -100,7 +106,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
             if (!target.isPokemon) throw new Error("Not a valid target");
             const active = game.AttackingPlayer.activeOrThrow();
 
-            game.AttackingPlayer.transferEnergy(target, active, [fullType]);
+            await game.AttackingPlayer.transferEnergy(target, active, [fullType]);
           },
         };
       },
@@ -118,7 +124,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
             game.GameLog.noValidTargets(game.AttackingPlayer);
             return;
           }
-          game.AttackingPlayer.attachEnergy(pokemon, [fullType], "energyZone");
+          await game.AttackingPlayer.attachEnergy(pokemon, [fullType], "energyZone");
         };
       },
     },
@@ -218,7 +224,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
             self.player.InPlayPokemon.filter((p) => p.isDamaged() && p !== self),
           effect: async (game, self, target) => {
             if (!target.isPokemon) throw new Error("Not a valid target");
-            const damage = target.MaxHP - target.CurrentHP;
+            const damage = target.currentDamage();
             game.applyDamage(self, damage, false);
             game.healPokemon(target, damage);
           },
@@ -262,6 +268,18 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         };
       },
     },
+    {
+      pattern: /^it has no Retreat Cost\.$/i,
+      transform: () => {
+        ability.effect = {
+          type: "PokemonStatus",
+          status: {
+            type: "NoRetreatCost",
+            source: "Ability",
+          },
+        };
+      },
+    },
 
     // Opponent player statuses
     {
@@ -299,10 +317,9 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     // Self player statuses
     {
       pattern:
-        /^Attacks used by your(?: \{(\w)\})? Pokémon do \+(\d+) damage to your opponent’s Active Pokémon\.$/i,
-      transform: (_, energyType, amount) => {
-        const fullType = energyType ? parseEnergy(energyType) : undefined;
-        const predicate = fullType ? (p: InPlayPokemonCard) => p.Type === fullType : () => true;
+        /^Attacks used by your (.+?) do \+(\d+) damage to your opponent’s Active Pokémon\.$/i,
+      transform: (_, specifier, amount) => {
+        const predicate = parsePokemonPredicate(specifier);
 
         ability.effect = {
           type: "PlayerStatus",

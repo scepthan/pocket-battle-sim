@@ -56,6 +56,9 @@ export interface CannotAttackPokemonStatus extends BasePokemonStatus {
 export interface CannotRetreatPokemonStatus extends BasePokemonStatus {
   type: "CannotRetreat";
 }
+export interface NoRetreatCostPokemonStatus extends BasePokemonStatus {
+  type: "NoRetreatCost";
+}
 export interface IncreaseMaxHPPokemonStatus extends BasePokemonStatus {
   type: "IncreaseMaxHP";
   amount: number;
@@ -73,4 +76,5 @@ export type PokemonStatus =
   | CannotUseSpecificAttackPokemonStatus
   | CannotAttackPokemonStatus
   | CannotRetreatPokemonStatus
+  | NoRetreatCostPokemonStatus
   | IncreaseMaxHPPokemonStatus;

@@ -3,34 +3,20 @@
 Backend todo:
 
 - [x] Parse cards
-  - [x] A1: 226/226 (100%)
-  - [x] A1a: 68/68 (100%)
-    - [x] Put opponent mon from Discard back onto Bench
-    - [x] Copy attack without energy requirement
-    - [x] Extra damage if ex
-    - [x] Redraw hand to opponent's hand size
-    - [x] Extra damage if mon knocked out from attack
-    - [x] Extra damage per opponent's Benched mon
-    - [x] Discard random Energy from among field
-    - [x] Ability to move Energy between mon
-    - [x] Heal all mon
-    - [x] Draw mon if on top of deck
-    - [x] Evolution-blocking Ability
-    - [x] Coin flip to attack effect
-    - [x] Energy-doubling Ability
-    - [x] Discard energy and attack any mon
-  - [ ] A2: 151/157 (95.5%)
+  - [x] A1: 237/237 (100%)
+  - [x] A1a: 70/70 (100%)
+  - [ ] A2: 152/157 (95.5%)
     - [x] Pokémon Tools
     - [x] New Special Conditions
       - [x] Confused
         - [x] Promo Misdreavus
       - [x] Burned
-    - [ ] New Pokemon statuses
+    - [x] New Pokemon statuses
       - [x] Prevent from using attack next turn
       - [x] Take -N damage from typed mon
       - [x] Prevent non-damage effects of attacks
       - [x] Attack does extra damage next turn
-      - [ ] Remove retreat cost
+      - [x] Remove retreat cost
     - [x] New player status
       - [x] Attacks of specific type do +N damage
     - [x] New attack conditionals

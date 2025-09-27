@@ -16,6 +16,8 @@ export type AbilityTrigger =
   | "OnEnterPlay"
   | "OnEnterActive"
   | "OnEnterBench"
+  | "OnFirstEnergyAttach"
+  | "OnEnergyZoneAttach"
   | "GameRule";
 
 interface TargetedEffect {

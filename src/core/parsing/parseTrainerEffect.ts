@@ -23,7 +23,8 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
       transform: (_, count) => ({
         type: "Conditional",
         condition: (game: Game) => game.AttackingPlayer.canDraw(),
-        effect: async (game: Game) => game.drawCards(count == "a" ? 1 : Number(count)),
+        effect: async (game: Game) =>
+          game.AttackingPlayer.drawCards(count == "a" ? 1 : Number(count)),
       }),
     },
     {
@@ -167,7 +168,11 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
           effect: async (game: Game, pokemon: CardSlot) => {
             if (!pokemon.isPokemon) return;
             const { heads } = game.AttackingPlayer.flipUntilTails();
-            game.AttackingPlayer.attachEnergy(pokemon, new Array(heads).fill(et), "energyZone");
+            await game.AttackingPlayer.attachEnergy(
+              pokemon,
+              new Array(heads).fill(et),
+              "energyZone"
+            );
           },
         };
       },
@@ -197,7 +202,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
           validTargets: (game: Game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
           effect: async (game: Game, pokemon: CardSlot) => {
             if (!pokemon.isPokemon) return;
-            game.AttackingPlayer.attachEnergy(pokemon, [fullType], "energyZone");
+            await game.AttackingPlayer.attachEnergy(pokemon, [fullType], "energyZone");
           },
         };
       },
@@ -216,7 +221,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
             for (const pokemon of game.AttackingPlayer.BenchedPokemon) {
               const energyToMove = pokemon.AttachedEnergy.filter((e) => e == fullType);
               if (energyToMove.length > 0) {
-                game.AttackingPlayer.transferEnergy(
+                await game.AttackingPlayer.transferEnergy(
                   pokemon,
                   game.AttackingPlayer.activeOrThrow(),
                   energyToMove
@@ -369,7 +374,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
               energyToAttach.push(fullType);
               removeElement(game.AttackingPlayer.DiscardedEnergy, fullType);
             }
-            game.AttackingPlayer.attachEnergy(pokemon, energyToAttach, "discard");
+            await game.AttackingPlayer.attachEnergy(pokemon, energyToAttach, "discard");
           },
         };
       },
@@ -385,7 +390,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
           if (!target.isPokemon) return;
           const energy = await game.choose(player, target.AttachedEnergy);
           if (!energy) return;
-          player.transferEnergy(target, player.activeOrThrow(), [energy]);
+          await player.transferEnergy(target, player.activeOrThrow(), [energy]);
         },
       }),
     },

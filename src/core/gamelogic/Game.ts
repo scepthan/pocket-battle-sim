@@ -15,6 +15,7 @@ import type {
   FossilCard,
   GameRules,
   PlayerAgent,
+  PlayerGameSetup,
   PlayerStatus,
   PlayingCard,
   PokemonCard,
@@ -105,19 +106,28 @@ export class Game {
     this.DefendingPlayer.setup(this.GameRules.InitialHandSize);
   }
 
-  async delay() {
+  // Helper methods
+  async delay(): Promise<void> {
     const delay = this.GameRules.DelayPerAction;
     if (delay) {
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
-  viewToPokemon(view: PlayerPokemonView, validPokemon: InPlayPokemonCard[]) {
+  private viewToPokemon(
+    view: PlayerPokemonView,
+    validPokemon: InPlayPokemonCard[]
+  ): InPlayPokemonCard {
     const pokemon = validPokemon.find((p) => view.is(p));
     if (!pokemon) throw new Error("Invalid Pokémon selected");
     return pokemon;
   }
 
-  async start() {
+  // Game flow methods
+
+  /**
+   * Sets up the game, then kicks off the game loop.
+   */
+  async start(): Promise<void> {
     const [setup1, setup2] = await Promise.all([
       this.startPlayer(this.Agent1, this.Player1),
       this.startPlayer(this.Agent2, this.Player2),
@@ -141,7 +151,7 @@ export class Game {
     }
   }
 
-  async startPlayer(agent: PlayerAgent, player: Player) {
+  private async startPlayer(agent: PlayerAgent, player: Player): Promise<PlayerGameSetup> {
     return await agent.setupPokemon({
       hand: player.Hand,
       firstEnergy: player.NextEnergy,
@@ -149,9 +159,12 @@ export class Game {
     });
   }
 
-  async nextTurn() {
+  /**
+   * The core of the game loop.
+   */
+  private async nextTurn(): Promise<void> {
+    // Switch the attacking and defending players
     if (this.TurnNumber > 0) {
-      // Switch the attacking and defending players
       [this.AttackingPlayer, this.DefendingPlayer] = [this.DefendingPlayer, this.AttackingPlayer];
     }
     this.TurnNumber += 1;
@@ -173,9 +186,8 @@ export class Game {
 
     // Generate next energy for the attacking player
     if (this.TurnNumber > 1) {
-      this.AttackingPlayer.AvailableEnergy = this.AttackingPlayer.NextEnergy; // Set the available energy for the attacking player
+      this.AttackingPlayer.AvailableEnergy = this.AttackingPlayer.NextEnergy;
       this.AttackingPlayer.chooseNextEnergy();
-      this.GameLog.generateNextEnergy(this.AttackingPlayer);
     }
 
     // Log the Special Conditions that will affect the Active Pokemon
@@ -251,7 +263,6 @@ export class Game {
         pokemon.applyDamage(damage);
         this.GameLog.specialConditionDamage(player, "Burned", initialHP, damage);
 
-        // Flip to recover from burn
         if (player.flipCoin()) {
           pokemon.SecondaryConditions.delete("Burned");
           this.GameLog.specialConditionEnded(player, ["Burned"]);
@@ -318,8 +329,14 @@ export class Game {
     }
   }
 
-  // Methods to do things during turns
-  async checkForKnockOuts() {
+  /**
+   * Checks the game for any Pokémon that should be knocked out, then handles checking for game
+   * over and choosing new Active Pokémon if necessary.
+   *
+   * This method is called at the end of every chain-of-events that the player can kick off by
+   * performing any action (attacking, retreating, evolving, attaching Energy, etc.).
+   */
+  private async checkForKnockOuts(): Promise<void> {
     const attackerPrizePoints = this.AttackingPlayer.GamePoints;
     const defenderPrizePoints = this.DefendingPlayer.GamePoints;
 
@@ -328,7 +345,7 @@ export class Game {
       for (const pokemon of player.InPlayPokemon) {
         if (pokemon.CurrentHP <= 0) {
           const fromAttack = this.AttackKnockedOutPokemon.has(pokemon);
-          await this.knockOutPokemon(player, pokemon, fromAttack);
+          await this.handleKnockOut(pokemon, fromAttack);
         }
       }
     }
@@ -340,13 +357,18 @@ export class Game {
     const player1WinConditions = [];
     const player2WinConditions = [];
 
-    // There are two main win conditions:
-    // 1. A player has reached 3 prize points
-    // 2. A player's opponent has no Pokemon left in play
-    // Once either of these conditions is met, the game is over, and the player with the most win conditions wins.
-    // If both players have the same number of win conditions, the game is a draw.
-    // For example, if player 1 scores their third prize point while knocking out their own Active Pokemon to give player 2 their second prize point,
-    // but player 2 has Pokemon on the Bench while player 1 does not, both players have only one win condition, so the game is a draw.
+    /**
+     * There are two main win conditions:
+     * 1. A player has reached 3 prize points
+     * 2. A player's opponent has no Pokemon left in play
+     *
+     * Once either of these conditions is met, the game is over, and the player with the most win
+     * conditions wins. If both players have the same amount of win conditions, the game is a draw.
+     *
+     * For example, if player 1 scores their third prize point while knocking out their own Active
+     * Pokemon to give player 2 their second prize point, but player 2 has Pokemon on the Bench
+     * while player 1 does not, both players have only one win condition, so the game is a draw.
+     */
     if (this.Player1.InPlayPokemon.length == 0) {
       player2WinConditions.push("noPokemonLeft");
     }
@@ -402,7 +424,19 @@ export class Game {
     }
   }
 
-  flipCoinsForAttack(coinsToFlip: CoinFlipIndicator): number {
+  /**
+   * Handles knocking out of a Pokémon that has had its HP reduced to 0.
+   * @param fromAttack whether the knockout is considered by the game to be "from an attack".
+   */
+  private async handleKnockOut(pokemon: InPlayPokemonCard, fromAttack: boolean): Promise<void> {
+    await pokemon.player.handleKnockOut(pokemon, fromAttack);
+
+    pokemon.player.opponent.GamePoints += pokemon.PrizePoints;
+  }
+
+  // Helper methods for the attack process
+
+  private flipCoinsForAttack(coinsToFlip: CoinFlipIndicator): number {
     if (coinsToFlip === "UntilTails") {
       return this.AttackingPlayer.flipUntilTails().heads;
     } else if (typeof coinsToFlip === "number") {
@@ -416,11 +450,35 @@ export class Game {
     return this.AttackingPlayer.flipMultiCoins(actualCount).heads;
   }
 
+  private shouldPreventDamage(pokemon: InPlayPokemonCard): boolean {
+    if (!this.CurrentAttack) return false;
+    return pokemon.PokemonStatuses.some(
+      (status) =>
+        (status.type === "PreventAttackDamage" ||
+          status.type === "PreventAttackDamageAndEffects") &&
+        (!status.attackerCondition ||
+          status.attackerCondition.test(this.AttackingPlayer.activeOrThrow()))
+    );
+  }
+
+  private shouldPreventEffects(pokemon: InPlayPokemonCard): boolean {
+    if (!this.CurrentAttack) return false;
+    if (!this.DefendingPlayer.InPlayPokemon.includes(pokemon)) return false;
+    return pokemon.PokemonStatuses.some(
+      (status) =>
+        (status.type === "PreventAttackEffects" ||
+          status.type === "PreventAttackDamageAndEffects") &&
+        (!status.attackerCondition ||
+          status.attackerCondition.test(this.AttackingPlayer.activeOrThrow()))
+    );
+  }
+
   /**
    * Executes an attack with the attacking player's Active Pokémon.
    *
    * Note: This method directly executes the given attack, without first checking for confusion or
-   * similar status effects. It also does not check for knockouts when the attack ends.
+   * similar status effects. It also does not check for knockouts when the attack ends. It is only
+   * exposed to allow for an attack to copy another.
    *
    * To execute an attack "properly", call useAttack() instead.
    */
@@ -461,7 +519,8 @@ export class Game {
         throw new Error(attack.name + " needs to know how much damage to deal");
       }
 
-      this.attackActivePokemon(baseDamage);
+      const defender = this.DefendingPlayer.activeOrThrow();
+      this.attackPokemon(defender, baseDamage);
     }
 
     if (
@@ -481,7 +540,8 @@ export class Game {
   // Methods to cover any action a player can take and execute the proper follow-up effects
 
   /**
-   * Launches an attack with the attacking player's Active Pokémon.
+   * Launches an attack with the attacking player's Active Pokémon. Ends the turn when the attack
+   * finishes.
    */
   async useAttack(attack: Attack): Promise<void> {
     const attacker = this.AttackingPlayer.activeOrThrow();
@@ -521,7 +581,10 @@ export class Game {
     this.endTurnResolve(true);
   }
 
-  async useAbility(pokemon: InPlayPokemonCard, ability: Ability) {
+  /**
+   * Manually triggers a Pokémon's Ability.
+   */
+  async useAbility(pokemon: InPlayPokemonCard, ability: Ability): Promise<void> {
     if (pokemon.Ability !== ability) {
       throw new Error("Pokemon does not have this ability");
     }
@@ -530,73 +593,57 @@ export class Game {
         throw new Error("Pokemon's ability has already been used this turn");
       }
       this.UsedAbilities.add(pokemon);
+    } else if (ability.trigger !== "ManyDuringTurn") {
+      throw new Error("Ability cannot be used manually");
+    }
+    if (
+      ability.effect.type === "Targeted" &&
+      ability.effect.findValidTargets(this, pokemon).length === 0
+    ) {
+      throw new Error("No valid targets for ability");
     }
 
-    let target: CardSlot | undefined;
-    if (ability.effect.type === "Targeted") {
-      const validTargets = ability.effect.findValidTargets(this, pokemon);
-      if (validTargets.length === 0) throw new Error("No valid targets for ability");
-
-      target = validTargets.every((x) => x.isPokemon)
-        ? await this.choosePokemon(pokemon.player, validTargets)
-        : await this.choose(pokemon.player, validTargets);
-    }
-
-    await pokemon.useAbility(true, target);
-
+    await pokemon.useAbility(true);
     await this.checkForKnockOuts();
   }
 
-  async attachAvailableEnergy(pokemon: InPlayPokemonCard) {
-    this.AttackingPlayer.attachAvailableEnergy(pokemon);
+  /**
+   * Attaches the player's current Energy from their Energy Zone to one of their Pokémon.
+   */
+  async attachAvailableEnergy(pokemon: InPlayPokemonCard): Promise<void> {
+    await this.AttackingPlayer.attachAvailableEnergy(pokemon);
     await this.checkForKnockOuts();
   }
 
-  async putPokemonOnBench(pokemon: PokemonCard, index: number) {
+  /**
+   * Plays a Basic Pokémon from the player's hand to one of their open Bench slots.
+   */
+  async putPokemonOnBench(pokemon: PokemonCard, index: number): Promise<void> {
     await this.AttackingPlayer.putPokemonOnBench(pokemon, index);
     await this.checkForKnockOuts();
   }
-  async putFossilOnBench(card: FossilCard, index: number, hp: number, type: Energy = "Colorless") {
-    const pokemon: PlayingCard = {
-      ID: card.ID,
-      Name: card.Name,
-      CardType: "Pokemon",
-      Type: type,
-      BaseHP: Number(hp),
-      Stage: 0,
-      RetreatCost: -1,
-      Weakness: "",
-      PrizePoints: 1,
-      Attacks: [],
-      Ability: {
-        name: "Discard",
-        trigger: "OnceDuringTurn",
-        conditions: [],
-        text: "Discard this Pokémon from play.",
-        effect: {
-          type: "Standard",
-          effect: async (game: Game, self: InPlayPokemonCard) => {
-            await game.AttackingPlayer.discardPokemonFromPlay(self);
-          },
-        },
-      },
-    };
 
-    await this.AttackingPlayer.putPokemonOnBench(pokemon, index, card);
-    await this.checkForKnockOuts();
-  }
-
-  async evolvePokemon(inPlayPokemon: InPlayPokemonCard, pokemon: PokemonCard) {
+  /**
+   * Plays an Evolution Pokémon from the player's hand to evolve one of their Pokémon.
+   */
+  async evolvePokemon(inPlayPokemon: InPlayPokemonCard, pokemon: PokemonCard): Promise<void> {
     await this.AttackingPlayer.evolvePokemon(inPlayPokemon, pokemon);
     await this.checkForKnockOuts();
   }
 
-  async retreatActivePokemon(benchedPokemon: InPlayPokemonCard, energy: Energy[]) {
+  /**
+   * Retreats the player's Active Pokémon using the given Energy to pay the Retreat Cost.
+   */
+  async retreatActivePokemon(benchedPokemon: InPlayPokemonCard, energy: Energy[]): Promise<void> {
     await this.AttackingPlayer.retreatActivePokemon(benchedPokemon, energy);
     await this.checkForKnockOuts();
   }
 
-  async playTrainer(card: TrainerCard, target?: CardSlot) {
+  /**
+   * Plays a Trainer card from the player's hand. If the card requires a target (e.g. Potion,
+   * Misty, any Pokémon Tool), it must be given here.
+   */
+  async playTrainer(card: TrainerCard, target?: CardSlot): Promise<void> {
     if (!this.AttackingPlayer.Hand.includes(card)) {
       throw new Error("Card not in hand");
     }
@@ -647,39 +694,12 @@ export class Game {
     }
   }
 
-  shouldPreventDamage(pokemon: InPlayPokemonCard): boolean {
-    if (!this.CurrentAttack) return false;
-    if (!this.DefendingPlayer.InPlayPokemon.includes(pokemon)) return false;
-    return pokemon.PokemonStatuses.some(
-      (status) =>
-        (status.type === "PreventAttackDamage" ||
-          status.type === "PreventAttackDamageAndEffects") &&
-        (!status.attackerCondition ||
-          status.attackerCondition.test(this.AttackingPlayer.activeOrThrow()))
-    );
-  }
-  shouldPreventEffects(pokemon: InPlayPokemonCard): boolean {
-    if (!this.CurrentAttack) return false;
-    if (!this.DefendingPlayer.InPlayPokemon.includes(pokemon)) return false;
-    return pokemon.PokemonStatuses.some(
-      (status) =>
-        (status.type === "PreventAttackEffects" ||
-          status.type === "PreventAttackDamageAndEffects") &&
-        (!status.attackerCondition ||
-          status.attackerCondition.test(this.AttackingPlayer.activeOrThrow()))
-    );
-  }
+  // Methods for attack, ability, and trainer effects to call to perform game actions
+  // Any action that can be prevented with a status effect should be called through these methods
 
-  //
-  drawCards(count: number) {
-    this.AttackingPlayer.drawCards(count);
-  }
-
-  attackActivePokemon(HP: number) {
-    const defender = this.DefendingPlayer.activeOrThrow();
-    this.attackPokemon(defender, HP);
-  }
-
+  /**
+   * Hits a Pokémon for a base amount of damage, after applying weakness and status effects.
+   */
   attackPokemon(defender: InPlayPokemonCard, HP: number): void {
     if (this.shouldPreventDamage(defender)) {
       this.GameLog.damagePrevented(this.DefendingPlayer, defender);
@@ -721,9 +741,11 @@ export class Game {
 
     // After that, apply any damage modification statuses on the defender
     if (totalDamage > 0) {
-      for (const status of this.DefendingPlayer.PlayerStatuses) {
-        if (status.type === "IncreaseDefense" && status.appliesToPokemon(attacker, this))
-          totalDamage -= status.amount;
+      if (owner === this.DefendingPlayer) {
+        for (const status of this.DefendingPlayer.PlayerStatuses) {
+          if (status.type === "IncreaseDefense" && status.appliesToPokemon(attacker, this))
+            totalDamage -= status.amount;
+        }
       }
       for (const status of defender.PokemonStatuses) {
         if (status.type == "ReduceAttackDamage") {
@@ -737,7 +759,6 @@ export class Game {
     if (totalDamage < 0) totalDamage = 0;
 
     defender.applyDamage(totalDamage);
-
     this.GameLog.attackDamage(owner, defender, initialHP, totalDamage, weaknessBoost);
 
     if (totalDamage > 0) {
@@ -748,62 +769,68 @@ export class Game {
     }
   }
 
-  applyDamage(target: InPlayPokemonCard, HP: number, fromAttack: boolean) {
+  /**
+   * Applies a set amount of damage directly to a Pokémon, ignoring weakness or status effects.
+   * @param fromAttack whether the damage is considered by the game to be "from an attack".
+   */
+  applyDamage(target: InPlayPokemonCard, HP: number, fromAttack: boolean): void {
     const initialHP = target.CurrentHP;
 
     target.applyDamage(HP);
-
     this.GameLog.pokemonDamaged(target.player, target, initialHP, HP, fromAttack);
   }
 
-  async knockOutPokemon(player: Player, pokemon: InPlayPokemonCard, fromAttack: boolean) {
-    if (pokemon.CurrentHP > 0 && this.shouldPreventEffects(pokemon)) {
-      this.GameLog.damagePrevented(player, pokemon);
+  /**
+   * Directly knocks out a Pokémon from any amount of remaining HP.
+   */
+  async knockOutPokemon(pokemon: InPlayPokemonCard): Promise<void> {
+    if (this.shouldPreventEffects(pokemon)) {
+      this.GameLog.damagePrevented(pokemon.player, pokemon);
       return;
     }
-    await player.knockOutPokemon(pokemon, fromAttack);
 
-    const opposingPlayer = player == this.Player1 ? this.Player2 : this.Player1;
-    opposingPlayer.GamePoints += pokemon.PrizePoints;
+    await this.handleKnockOut(pokemon, false);
   }
 
-  healPokemon(target: InPlayPokemonCard, HP: number) {
+  /**
+   * Heals a set amount of damage from a Pokémon.
+   */
+  healPokemon(target: InPlayPokemonCard, HP: number): void {
     const initialHP = target.CurrentHP;
 
     target.healDamage(HP);
-
     this.GameLog.pokemonHealed(target.player, target, initialHP, HP);
   }
 
-  discardEnergy(pokemon: InPlayPokemonCard, type: Energy, count: number) {
+  /**
+   * Discards (up to) a given amount of a given type of Energy from a Pokémon.
+   */
+  async discardEnergy(pokemon: InPlayPokemonCard, type: Energy, count: number): Promise<void> {
     if (this.shouldPreventEffects(pokemon)) return;
-    const discardedEnergy: Energy[] = [];
-    while (pokemon.AttachedEnergy.includes(type) && count > 0) {
-      discardedEnergy.push(type);
-      removeElement(pokemon.AttachedEnergy, type);
-      count--;
-    }
-
-    pokemon.player.discardEnergy(discardedEnergy, "effect", pokemon);
+    await pokemon.player.discardEnergyFromPokemon(pokemon, type, count);
   }
-  discardAllEnergy(pokemon: InPlayPokemonCard) {
+  /**
+   * Discards all Energy from a Pokémon.
+   */
+  async discardAllEnergy(pokemon: InPlayPokemonCard): Promise<void> {
     if (this.shouldPreventEffects(pokemon)) return;
-    const discardedEnergy = pokemon.AttachedEnergy.slice();
-    pokemon.AttachedEnergy = [];
-
-    pokemon.player.discardEnergy(discardedEnergy, "effect", pokemon);
+    await pokemon.player.discardAllEnergyFromPokemon(pokemon);
   }
-  discardRandomEnergy(pokemon: InPlayPokemonCard, count: number = 1) {
+  /**
+   * Discards 1 or more random Energy from a Pokémon.
+   */
+  async discardRandomEnergy(pokemon: InPlayPokemonCard, count: number = 1): Promise<void> {
     if (this.shouldPreventEffects(pokemon)) return;
-    if (pokemon.AttachedEnergy.length == 0) return;
-
-    pokemon.player.discardRandomEnergy(pokemon, count);
+    await pokemon.player.discardRandomEnergyFromPokemon(pokemon, count);
   }
 
+  /**
+   * Discards a given tool or tools from a Pokémon. Discards all by default.
+   */
   async discardPokemonTools(
     pokemon: InPlayPokemonCard,
     tools: PokemonToolCard[] = pokemon.AttachedToolCards
-  ) {
+  ): Promise<void> {
     if (this.shouldPreventEffects(pokemon)) return;
     if (tools.length === 0) return;
 
@@ -814,35 +841,93 @@ export class Game {
     this.GameLog.discardFromPlay(pokemon.player, tools);
   }
 
+  /**
+   * Applies a given PokemonStatus to a Pokémon.
+   */
   applyPokemonStatus(pokemon: InPlayPokemonCard, status: PokemonStatus) {
     if (this.shouldPreventEffects(pokemon)) return;
     pokemon.applyPokemonStatus(status);
   }
 
+  /**
+   * Makes the Defending Pokémon Poisoned.
+   */
   poisonDefendingPokemon() {
-    if (this.shouldPreventEffects(this.AttackingPlayer.activeOrThrow())) return;
-    this.AttackingPlayer.poisonActivePokemon();
+    if (this.shouldPreventEffects(this.DefendingPlayer.activeOrThrow())) return;
+    this.DefendingPlayer.poisonActivePokemon();
   }
+  /**
+   * Makes the Defending Pokémon Burned.
+   */
   burnDefendingPokemon() {
-    if (this.shouldPreventEffects(this.AttackingPlayer.activeOrThrow())) return;
-    this.AttackingPlayer.burnActivePokemon();
+    if (this.shouldPreventEffects(this.DefendingPlayer.activeOrThrow())) return;
+    this.DefendingPlayer.burnActivePokemon();
   }
+  /**
+   * Makes the Defending Pokémon Asleep.
+   */
   sleepDefendingPokemon() {
-    if (this.shouldPreventEffects(this.AttackingPlayer.activeOrThrow())) return;
-    this.AttackingPlayer.sleepActivePokemon();
+    if (this.shouldPreventEffects(this.DefendingPlayer.activeOrThrow())) return;
+    this.DefendingPlayer.sleepActivePokemon();
   }
+  /**
+   * Makes the Defending Pokémon Paralyzed.
+   */
   paralyzeDefendingPokemon() {
-    if (this.shouldPreventEffects(this.AttackingPlayer.activeOrThrow())) return;
-    this.AttackingPlayer.paralyzeActivePokemon();
+    if (this.shouldPreventEffects(this.DefendingPlayer.activeOrThrow())) return;
+    this.DefendingPlayer.paralyzeActivePokemon();
   }
+  /**
+   * Makes the Defending Pokémon Confused.
+   */
   confuseDefendingPokemon() {
-    if (this.shouldPreventEffects(this.AttackingPlayer.activeOrThrow())) return;
-    this.AttackingPlayer.confuseActivePokemon();
+    if (this.shouldPreventEffects(this.DefendingPlayer.activeOrThrow())) return;
+    this.DefendingPlayer.confuseActivePokemon();
   }
 
-  findAgent(player: Player) {
+  /**
+   * Puts a Fossil card onto the Bench as if it were a Pokémon.
+   */
+  async putFossilOnBench(card: FossilCard, index: number, hp: number, type: Energy = "Colorless") {
+    const pokemon: PlayingCard = {
+      ID: card.ID,
+      Name: card.Name,
+      CardType: "Pokemon",
+      Type: type,
+      BaseHP: Number(hp),
+      Stage: 0,
+      RetreatCost: -1,
+      Weakness: "",
+      PrizePoints: 1,
+      Attacks: [],
+      Ability: {
+        name: "Discard",
+        trigger: "OnceDuringTurn",
+        conditions: [],
+        text: "Discard this Pokémon from play.",
+        effect: {
+          type: "Standard",
+          effect: async (game: Game, self: InPlayPokemonCard) => {
+            await game.AttackingPlayer.discardPokemonFromPlay(self);
+          },
+        },
+      },
+    };
+
+    await this.AttackingPlayer.putPokemonOnBench(pokemon, index, card);
+    await this.checkForKnockOuts();
+  }
+
+  // Methods to interact with the player agents
+
+  private findAgent(player: Player) {
     return player == this.Player1 ? this.Agent1 : this.Agent2;
   }
+
+  /**
+   * Asks a player to choose a new Active Pokémon from among their Benched Pokémon.
+   * If they have no Benched Pokémon, this does nothing.
+   */
   async swapActivePokemon(
     player: Player,
     reason: "selfEffect" | "opponentEffect"
@@ -864,6 +949,10 @@ export class Game {
     await player.swapActivePokemon(newActive, reason);
     return true;
   }
+
+  /**
+   * Asks a player to choose from a selection of Pokémon.
+   */
   async choosePokemon(
     player: Player,
     validPokemon: InPlayPokemonCard[]
@@ -881,6 +970,11 @@ export class Game {
     const selected = this.viewToPokemon(selectedView, validPokemon);
     return selected;
   }
+
+  /**
+   * Asks a player to choose from a selection of any type of object. For Pokémon specifically,
+   * use choosePokemon().
+   */
   async choose<T>(player: Player, options: T[]): Promise<T | undefined> {
     if (options.length == 0) {
       this.GameLog.noValidTargets(player);
@@ -895,12 +989,20 @@ export class Game {
     }
     return selected;
   }
+
+  /**
+   * Shows a player a set of cards that they aren't normally able to see.
+   */
   async showCards(player: Player, cards: PlayingCard[]): Promise<void> {
     const cardIds = cards.map((card) => card.ID);
     this.GameLog.viewCards(player, cardIds);
     const agent = this.findAgent(player);
     await agent.viewCards(cards);
   }
+
+  /**
+   * Asks a player to distribute a set of Energy among a set of Pokémon.
+   */
   async distributeEnergy(player: Player, energy: Energy[], validPokemon: InPlayPokemonCard[]) {
     const agent = this.findAgent(player);
     const distribution = await agent.distributeEnergy(
@@ -915,7 +1017,7 @@ export class Game {
       const energies = distribution[i]!;
       if (energies.length == 0) continue;
       const pokemon = validPokemon[i]!;
-      player.attachEnergy(pokemon, energies, "energyZone");
+      await player.attachEnergy(pokemon, energies, "energyZone");
     }
   }
 }

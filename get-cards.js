@@ -13,7 +13,7 @@ const fixDescription = (text) =>
 const output_cards = [];
 for (const card of card_data) {
   const new_card = {
-    name: card.name,
+    name: card.name.trim(),
     rarity: card.rarity,
   };
 

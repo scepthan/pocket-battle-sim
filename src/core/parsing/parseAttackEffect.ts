@@ -275,8 +275,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
     {
       pattern: /^This attack does more damage equal to the damage this Pokémon has on it\./i,
       transform: () => {
-        attack.calculateDamage = (game, self) =>
-          (attack.baseDamage ?? 0) + (self.MaxHP - self.CurrentHP);
+        attack.calculateDamage = (game, self) => (attack.baseDamage ?? 0) + self.currentDamage();
       },
     },
     {
@@ -407,7 +406,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       pattern: /^Draw (a|\d+) cards?\./i,
       transform: (_, count) => {
         const cardCount = count == "a" ? 1 : Number(count);
-        addSideEffect(async (game) => game.drawCards(cardCount));
+        addSideEffect(async (game) => game.AttackingPlayer.drawCards(cardCount));
       },
     },
     {
@@ -416,7 +415,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       transform: () => {
         addSideEffect(async (game) => {
           game.AttackingPlayer.shuffleHandIntoDeck();
-          game.drawCards(game.DefendingPlayer.Hand.length);
+          game.AttackingPlayer.drawCards(game.DefendingPlayer.Hand.length);
         });
       },
     },
@@ -530,7 +529,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
             }
           }
           const { pokemon, energy } = randomElement(allEnergy);
-          game.discardEnergy(pokemon, energy, 1);
+          await game.discardEnergy(pokemon, energy, 1);
         });
       },
     },
@@ -544,7 +543,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
         const energy = new Array(energyCount).fill(parseEnergy(type));
 
         addSideEffect(async (game, self) => {
-          game.AttackingPlayer.attachEnergy(self, energy, "energyZone");
+          await game.AttackingPlayer.attachEnergy(self, energy, "energyZone");
         });
       },
     },
@@ -560,7 +559,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
           const validPokemon = game.AttackingPlayer.InPlayPokemon.filter(predicate);
           const pokemon = await game.choosePokemon(game.AttackingPlayer, validPokemon);
           if (pokemon) {
-            game.AttackingPlayer.attachEnergy(pokemon, energy, "energyZone");
+            await game.AttackingPlayer.attachEnergy(pokemon, energy, "energyZone");
           }
         });
       },
