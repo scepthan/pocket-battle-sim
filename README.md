@@ -31,9 +31,9 @@ Backend todo:
       - [x] Prevent non-damage effects of attacks
       - [x] Attack does extra damage next turn
       - [ ] Remove retreat cost
-    - [ ] New player status
-      - [ ] Attacks of specific type do +N damage
-    - [ ] New attack conditionals
+    - [x] New player status
+      - [x] Attacks of specific type do +N damage
+    - [x] New attack conditionals
       - [x] If defending mon is specific type
       - [x] If attacking mon has Tool attached
       - [x] If defending mon has Tool attached
@@ -58,7 +58,7 @@ Backend todo:
       - [x] Choose a card from your opponent's hand to discard
       - [x] Put opposing mon back in opponent's hand
       - [x] Do extra damage based on own damage
-    - [ ] New Trainer effects
+    - [x] New Trainer effects
       - [x] Swap mon in hand for random mon in deck
       - [x] Bring in opponent's damaged Benched mon
       - [x] Attach energy from discard to specific mon

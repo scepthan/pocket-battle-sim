@@ -299,6 +299,27 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     // Self player statuses
     {
       pattern:
+        /^Attacks used by your(?: \{(\w)\})? Pokémon do \+(\d+) damage to your opponent’s Active Pokémon\.$/i,
+      transform: (_, energyType, amount) => {
+        const fullType = energyType ? parseEnergy(energyType) : undefined;
+        const predicate = fullType ? (p: InPlayPokemonCard) => p.Type === fullType : () => true;
+
+        ability.effect = {
+          type: "PlayerStatus",
+          opponent: false,
+          status: {
+            category: "Pokemon",
+            type: "IncreaseAttack",
+            amount: Number(amount),
+            source: "Ability",
+            appliesToPokemon: predicate,
+            descriptor: "Active Pokémon",
+          },
+        };
+      },
+    },
+    {
+      pattern:
         /^Each {(\w)} Energy attached to your {\1} Pokémon provides 2 {\1} Energy. This effect doesn’t stack.$/i,
       transform: (_, energyType) => {
         const fullType = parseEnergy(energyType);
