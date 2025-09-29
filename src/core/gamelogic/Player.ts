@@ -319,8 +319,12 @@ export class Player {
     from: AttachEnergySource,
     fromPokemon?: InPlayPokemonCard
   ) {
+    const previous = pokemon.AttachedEnergy.length;
+
+    pokemon.attachEnergy(energy);
     this.logger.attachEnergy(this, pokemon, energy, from, fromPokemon);
-    await pokemon.attachEnergy(energy);
+
+    if (previous === 0 && energy.length > 0) await pokemon.onFirstEnergyAttach();
   }
 
   async transferEnergy(
@@ -331,10 +335,15 @@ export class Player {
     if (!fromPokemon.hasSufficientActualEnergy(energy))
       throw new Error("Energy not attached to fromPokemon");
 
+    const toPrevious = toPokemon.AttachedEnergy.length;
+
+    fromPokemon.removeEnergy(energy);
+    toPokemon.attachEnergy(energy);
     this.logger.attachEnergy(this, toPokemon, energy, "pokemon", fromPokemon);
 
-    await fromPokemon.removeEnergy(energy);
-    await toPokemon.attachEnergy(energy);
+    if (fromPokemon.AttachedEnergy.length === 0 && energy.length > 0)
+      await fromPokemon.onLastEnergyRemove();
+    if (toPrevious === 0 && energy.length > 0) await toPokemon.onFirstEnergyAttach();
   }
 
   async discardEnergyFromPokemon(pokemon: InPlayPokemonCard, type: Energy, count: number = 1) {
@@ -346,13 +355,19 @@ export class Player {
       count -= 1;
     }
 
+    pokemon.removeEnergy(discardedEnergy);
     this.discardEnergy(discardedEnergy, "effect", pokemon);
-    await pokemon.removeEnergy(discardedEnergy);
+
+    if (pokemon.AttachedEnergy.length === 0 && discardedEnergy.length > 0)
+      await pokemon.onLastEnergyRemove();
   }
   async discardAllEnergyFromPokemon(pokemon: InPlayPokemonCard) {
     const discardedEnergy = pokemon.AttachedEnergy.slice();
+
+    pokemon.removeEnergy(discardedEnergy);
     this.discardEnergy(discardedEnergy, "effect", pokemon);
-    await pokemon.removeEnergy(discardedEnergy);
+
+    if (discardedEnergy.length > 0) await pokemon.onLastEnergyRemove();
   }
   async discardRandomEnergyFromPokemon(pokemon: InPlayPokemonCard, count: number = 1) {
     if (pokemon.AttachedEnergy.length == 0) return;
@@ -367,8 +382,11 @@ export class Player {
       count -= 1;
     }
 
+    pokemon.removeEnergy(discardedEnergy);
     this.discardEnergy(discardedEnergy, "effect", pokemon);
-    await pokemon.removeEnergy(discardedEnergy);
+
+    if (pokemon.AttachedEnergy.length === 0 && discardedEnergy.length > 0)
+      await pokemon.onLastEnergyRemove();
   }
   discardEnergy(energies: Energy[], source: DiscardEnergySource, pokemon?: InPlayPokemonCard) {
     if (energies.length == 0) return;
@@ -409,8 +427,11 @@ export class Player {
     if (modifiedCost > effectiveEnergyToDiscard.length)
       throw new Error("Not enough energy provided");
 
+    currentActive.removeEnergy(energyToDiscard);
     this.discardEnergy(energyToDiscard, "retreat", currentActive);
-    await currentActive.removeEnergy(energyToDiscard);
+
+    if (currentActive.AttachedEnergy.length === 0 && energyToDiscard.length > 0)
+      await currentActive.onLastEnergyRemove();
 
     await this.swapActivePokemon(newActive, "retreat");
   }

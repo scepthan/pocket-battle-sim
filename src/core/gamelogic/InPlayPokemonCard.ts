@@ -134,19 +134,11 @@ export class InPlayPokemonCard {
     if (this.CurrentHP > this.MaxHP) this.CurrentHP = this.MaxHP;
   }
 
-  async attachEnergy(energy: Energy[]) {
-    const initialCount = this.AttachedEnergy.length;
+  attachEnergy(energy: Energy[]) {
     this.AttachedEnergy.push(...energy);
-    if (initialCount === 0 && energy.length > 0) {
-      await this.onFirstEnergyAttach();
-    }
   }
-  async removeEnergy(energy: Energy[]) {
-    const initialCount = this.AttachedEnergy.length;
+  removeEnergy(energy: Energy[]) {
     for (const e of energy) removeElement(this.AttachedEnergy, e);
-    if (initialCount > 0 && energy.length === 0) {
-      await this.onLastEnergyRemove();
-    }
   }
 
   /**
