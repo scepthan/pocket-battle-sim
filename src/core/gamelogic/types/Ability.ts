@@ -1,5 +1,6 @@
 import type {
   CardSlot,
+  Energy,
   Game,
   InPlayPokemonCard,
   PlayerStatus,
@@ -10,46 +11,48 @@ import type {
 } from "..";
 
 export type AbilityTrigger =
-  | "OnceDuringTurn"
-  | "ManyDuringTurn"
-  | "AfterAttackDamage"
-  | "OnEnterPlay"
-  | "OnEnterActive"
-  | "OnEnterBench"
-  | "OnFirstEnergyAttach"
-  | "OnEnergyZoneAttach"
-  | "GameRule";
+  | { type: "Manual"; multiUse: boolean }
+  | { type: "OnEnterPlay"; excludeSetup?: boolean }
+  | { type: "AfterDamagedByAttack" }
+  | { type: "AfterKnockedOutByAttack" }
+  | { type: "OnEnergyZoneAttach"; energy?: Energy }
+  | { type: "OnEndOwnTurn"; firstOnly?: boolean }
+  | { type: "OnPokemonCheckup" };
 
+interface StandardEffect {
+  type: "Standard";
+  effect: PokemonEffect;
+  undo?: PokemonEffect;
+}
 interface TargetedEffect {
   type: "Targeted";
   findValidTargets: (game: Game, self: InPlayPokemonCard) => CardSlot[];
   effect: TargetedPokemonEffect;
   undo?: undefined;
 }
-interface StandardEffect {
-  type: "Standard";
-  effect: PokemonEffect;
-  undo?: PokemonEffect;
-}
 interface PlayerStatusEffect {
   type: "PlayerStatus";
   status: PlayerStatus;
   opponent: boolean;
-  effect?: undefined;
-  undo?: undefined;
 }
 interface PokemonStatusEffect {
   type: "PokemonStatus";
   status: PokemonStatus;
-  effect?: undefined;
-  undo?: undefined;
 }
-type AbilityEffect = TargetedEffect | StandardEffect | PlayerStatusEffect | PokemonStatusEffect;
+export type StatusAbilityEffect = PlayerStatusEffect | PokemonStatusEffect;
 
-export interface Ability {
+interface BaseAbility {
   name: string;
-  trigger: AbilityTrigger;
   text: string;
   conditions: PokemonCondition[];
-  effect: AbilityEffect;
 }
+interface StandardAbility extends BaseAbility {
+  type: "Standard";
+  trigger: AbilityTrigger;
+  effect: StandardEffect | TargetedEffect;
+}
+interface StatusAbility extends BaseAbility {
+  type: "Status";
+  effect: StatusAbilityEffect;
+}
+export type Ability = StandardAbility | StatusAbility;
