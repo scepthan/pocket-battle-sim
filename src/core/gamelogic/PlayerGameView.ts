@@ -196,9 +196,9 @@ export class PlayerGameView {
   canUseAbility(pokemon: PlayerPokemonView, ability: Ability): boolean {
     if (!this.canPlay) return false;
     if (pokemon.Ability !== ability) return false;
-    if (!["OnceDuringTurn", "ManyDuringTurn"].includes(ability.trigger)) return false;
+    if (ability.type !== "Standard" || ability.trigger.type !== "Manual") return false;
     const realPokemon = this.#pokemonFromView(pokemon);
-    if (ability.trigger == "OnceDuringTurn") {
+    if (!ability.trigger.multiUse) {
       if (this.#game.UsedAbilities.has(realPokemon)) return false;
     }
     if (!ability.conditions.every((condition) => condition(realPokemon))) return false;

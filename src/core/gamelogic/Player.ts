@@ -117,7 +117,11 @@ export class Player {
 
     this.logger.playToActive(this, setup.active);
 
-    if (pokemon.Ability?.trigger == "OnEnterPlay") {
+    if (
+      pokemon.Ability?.type === "Standard" &&
+      pokemon.Ability.trigger.type === "OnEnterPlay" &&
+      !pokemon.Ability.trigger.excludeSetup
+    ) {
       await pokemon.triggerAbility();
     }
 
@@ -234,6 +238,7 @@ export class Player {
   }
 
   // Methods for moving and evolving Pokémon
+
   /**
    * Sets the new Active Pokémon when the previous one is removed from play.
    */
@@ -246,7 +251,6 @@ export class Player {
     this.Bench[index] = EmptyCardSlot.Bench(index);
 
     this.logger.selectActivePokemon(this);
-    await pokemon.onEnterActive();
   }
 
   async putPokemonOnBench(card: PokemonCard, index: number, trueCard: PlayingCard = card) {
@@ -271,7 +275,6 @@ export class Player {
     this.logger.playToBench(this, card, index);
 
     await pokemon.onEnterPlay();
-    await pokemon.onEnterBench();
   }
 
   async evolvePokemon(pokemon: InPlayPokemonCard, card: PokemonCard) {
@@ -301,8 +304,6 @@ export class Player {
     pokemon.recoverAllStatusConditions();
 
     await pokemon.onEnterPlay();
-    if (pokemon === this.ActivePokemon) await pokemon.onEnterActive();
-    else await pokemon.onEnterBench();
   }
 
   async attachAvailableEnergy(pokemon: InPlayPokemonCard) {
@@ -319,12 +320,8 @@ export class Player {
     from: AttachEnergySource,
     fromPokemon?: InPlayPokemonCard
   ) {
-    const previous = pokemon.AttachedEnergy.length;
-
     pokemon.attachEnergy(energy);
     this.logger.attachEnergy(this, pokemon, energy, from, fromPokemon);
-
-    if (previous === 0 && energy.length > 0) await pokemon.onFirstEnergyAttach();
   }
 
   async transferEnergy(
@@ -335,15 +332,9 @@ export class Player {
     if (!fromPokemon.hasSufficientActualEnergy(energy))
       throw new Error("Energy not attached to fromPokemon");
 
-    const toPrevious = toPokemon.AttachedEnergy.length;
-
     fromPokemon.removeEnergy(energy);
     toPokemon.attachEnergy(energy);
     this.logger.attachEnergy(this, toPokemon, energy, "pokemon", fromPokemon);
-
-    if (fromPokemon.AttachedEnergy.length === 0 && energy.length > 0)
-      await fromPokemon.onLastEnergyRemove();
-    if (toPrevious === 0 && energy.length > 0) await toPokemon.onFirstEnergyAttach();
   }
 
   async discardEnergyFromPokemon(pokemon: InPlayPokemonCard, type: Energy, count: number = 1) {
@@ -357,17 +348,12 @@ export class Player {
 
     pokemon.removeEnergy(discardedEnergy);
     this.discardEnergy(discardedEnergy, "effect", pokemon);
-
-    if (pokemon.AttachedEnergy.length === 0 && discardedEnergy.length > 0)
-      await pokemon.onLastEnergyRemove();
   }
   async discardAllEnergyFromPokemon(pokemon: InPlayPokemonCard) {
     const discardedEnergy = pokemon.AttachedEnergy.slice();
 
     pokemon.removeEnergy(discardedEnergy);
     this.discardEnergy(discardedEnergy, "effect", pokemon);
-
-    if (discardedEnergy.length > 0) await pokemon.onLastEnergyRemove();
   }
   async discardRandomEnergyFromPokemon(pokemon: InPlayPokemonCard, count: number = 1) {
     if (pokemon.AttachedEnergy.length == 0) return;
@@ -384,9 +370,6 @@ export class Player {
 
     pokemon.removeEnergy(discardedEnergy);
     this.discardEnergy(discardedEnergy, "effect", pokemon);
-
-    if (pokemon.AttachedEnergy.length === 0 && discardedEnergy.length > 0)
-      await pokemon.onLastEnergyRemove();
   }
   discardEnergy(energies: Energy[], source: DiscardEnergySource, pokemon?: InPlayPokemonCard) {
     if (energies.length == 0) return;
@@ -430,9 +413,6 @@ export class Player {
     currentActive.removeEnergy(energyToDiscard);
     this.discardEnergy(energyToDiscard, "retreat", currentActive);
 
-    if (currentActive.AttachedEnergy.length === 0 && energyToDiscard.length > 0)
-      await currentActive.onLastEnergyRemove();
-
     await this.swapActivePokemon(newActive, "retreat");
   }
 
@@ -446,22 +426,15 @@ export class Player {
     this.ActivePokemon = newActive;
     this.Bench[this.Bench.indexOf(newActive)] = currentActive;
 
-    await currentActive.onLeaveActive();
-
     this.logger.swapActivePokemon(this, currentActive, newActive, reason, choosingPlayer);
-
-    await newActive.onEnterActive();
 
     currentActive.recoverAllStatusConditions();
   }
 
   async removePokemonFromField(pokemon: InPlayPokemonCard) {
-    await pokemon.onLeavePlay();
     if (pokemon == this.ActivePokemon) {
-      await pokemon.onLeaveActive();
       this.ActivePokemon = EmptyCardSlot.Active();
     } else {
-      await pokemon.onLeaveBench();
       const index = this.Bench.indexOf(pokemon);
       this.Bench[index] = EmptyCardSlot.Bench(index);
     }
@@ -579,7 +552,10 @@ export class Player {
     }
 
     const newStatus = Object.assign({}, status);
-    newStatus.id = uuidv4();
+    if (!newStatus.id) newStatus.id = uuidv4();
+    if (this.PlayerStatuses.some((s) => s.id === newStatus.id))
+      throw new Error("Status has already been applied to this player");
+
     this.PlayerStatuses.push(newStatus);
     this.logger.applyPlayerStatus(this, newStatus);
 

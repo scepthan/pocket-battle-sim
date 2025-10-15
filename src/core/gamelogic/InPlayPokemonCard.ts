@@ -288,59 +288,17 @@ export class InPlayPokemonCard {
 
   // Event handlers for abilities and tools
   async onEnterPlay() {
-    if (this.Ability?.trigger === "OnEnterPlay") {
+    if (this.Ability?.type === "Standard" && this.Ability.trigger.type === "OnEnterPlay") {
       await this.triggerAbility();
     }
   }
 
-  async onEnterActive() {
-    if (this.Ability?.trigger === "OnEnterActive") {
-      await this.triggerAbility();
-    }
-  }
-
-  async onLeaveActive() {
-    if (this.Ability?.trigger === "OnEnterActive") {
-      await this.undoAbility();
-    }
-  }
-
-  async onEnterBench() {
-    if (this.Ability?.trigger === "OnEnterBench") {
-      await this.triggerAbility();
-    }
-  }
-
-  async onLeaveBench() {
-    if (this.Ability?.trigger === "OnEnterBench") {
-      await this.undoAbility();
-    }
-  }
-
-  async onLeavePlay() {
-    if (this.Ability?.trigger === "OnEnterPlay") {
-      await this.undoAbility();
-    }
-  }
-
-  async onAttackDamage() {
-    if (this.Ability?.trigger === "AfterAttackDamage") {
+  async afterDamagedByAttack() {
+    if (this.Ability?.type === "Standard" && this.Ability.trigger.type === "AfterDamagedByAttack") {
       if (this.game.DefendingPlayer.InPlayPokemon.includes(this)) await this.triggerAbility();
     }
     for (const tool of this.AttachedToolCards) {
       if (tool.Effect.trigger === "OnAttackDamage") await this.triggerPokemonTool(tool);
-    }
-  }
-
-  async onFirstEnergyAttach() {
-    if (this.Ability?.trigger === "OnFirstEnergyAttach") {
-      await this.triggerAbility();
-    }
-  }
-
-  async onLastEnergyRemove() {
-    if (this.Ability?.trigger === "OnFirstEnergyAttach") {
-      await this.undoAbility();
     }
   }
 
@@ -358,8 +316,6 @@ export class InPlayPokemonCard {
           this.player.removePlayerStatus(status.id);
         }
       }
-    } else if (this.Ability.effect.undo) {
-      await this.Ability.effect.undo(this.game, this);
     }
   }
 }

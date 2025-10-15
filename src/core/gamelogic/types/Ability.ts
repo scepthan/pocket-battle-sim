@@ -22,13 +22,11 @@ export type AbilityTrigger =
 interface StandardEffect {
   type: "Standard";
   effect: PokemonEffect;
-  undo?: PokemonEffect;
 }
 interface TargetedEffect {
   type: "Targeted";
   findValidTargets: (game: Game, self: InPlayPokemonCard) => CardSlot[];
   effect: TargetedPokemonEffect;
-  undo?: undefined;
 }
 interface PlayerStatusEffect {
   type: "PlayerStatus";
