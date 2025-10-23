@@ -573,7 +573,7 @@ export class Player {
     }
 
     this.PlayerStatuses = this.PlayerStatuses.filter((s) => s.id !== statusId);
-    //this.logger.removePlayerStatus(this, status);
+    this.logger.removePlayerStatus(this, status);
   }
 
   flipCoin() {

@@ -472,6 +472,14 @@ export class GameLogger {
     });
   }
 
+  removePlayerStatus(player: Player, status: PlayerStatus) {
+    this.addEntry({
+      type: "removePlayerStatus",
+      player: player.Name,
+      status,
+    });
+  }
+
   viewCards(player: Player, cardIds: string[]) {
     this.addEntry({
       type: "viewCards",

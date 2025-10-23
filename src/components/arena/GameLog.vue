@@ -151,6 +151,10 @@
           <p v-else>Unknown player status: {{ entry.status.type }}</p>
         </div>
 
+        <div v-else-if="entry.type == 'removePlayerStatus'">
+          <p>Player status removed from {{ entry.player }}: {{ entry.status.type }}</p>
+        </div>
+
         <div v-else-if="entry.type == 'swapActivePokemon'">
           <p v-if="entry.reason == 'retreat'">
             <b>{{ entry.player }}</b> retreats their active
@@ -273,7 +277,6 @@
           <p>
             <CardName :card-id="entry.targetPokemon.cardId" /> takes {{ entry.damageDealt }} damage
             from being {{ entry.specialCondition }}! <HpChange :event="entry" />
-            HP)
           </p>
         </div>
 
