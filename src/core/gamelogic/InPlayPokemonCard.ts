@@ -271,13 +271,8 @@ export class InPlayPokemonCard {
       await ability.effect.effect(this.game, this, target);
     } else if (ability.effect.type === "Standard") {
       await ability.effect.effect(this.game, this);
-    } else if (ability.effect.type === "PlayerStatus") {
-      const player = ability.effect.opponent ? this.player.opponent : this.player;
-      const status = player.applyPlayerStatus(ability.effect.status);
-      this.ActivePlayerStatuses.push(status);
-    } else if (ability.effect.type === "PokemonStatus") {
-      const status = Object.assign({}, ability.effect.status);
-      this.applyPokemonStatus(status);
+    } else {
+      throw new Error(`Ability effect type '${ability.effect.type}' cannot be used`);
     }
   }
 

@@ -353,6 +353,19 @@ export class Game {
     this.AttackingPlayer.checkPrizePointsChange(attackerPrizePoints);
     this.DefendingPlayer.checkPrizePointsChange(defenderPrizePoints);
 
+    for (const player of [this.DefendingPlayer, this.AttackingPlayer]) {
+      for (const status of player.PlayerStatuses) {
+        if (
+          status.source === "Ability" &&
+          ![...this.DefendingPlayer.InPlayPokemon, ...this.AttackingPlayer.InPlayPokemon].some(
+            (p) => p.ActivePlayerStatuses.some((s) => s.id === status.id)
+          )
+        ) {
+          player.removePlayerStatus(status.id!);
+        }
+      }
+    }
+
     // Check for game over conditions
     const player1WinConditions = [];
     const player2WinConditions = [];
@@ -449,7 +462,7 @@ export class Game {
           if (existingStatus) {
             if (!applyStatus) statusPlayer.removePlayerStatus(existingStatus.id!);
           } else {
-            if (applyStatus) statusPlayer.applyPlayerStatus(ability.effect.status);
+            if (applyStatus) statusPlayer.applyPlayerStatus(ability.effect.status, pokemon);
           }
         } else {
           if (pokemon.PokemonStatuses.some((x) => x.id === ability.effect.status.id)) {

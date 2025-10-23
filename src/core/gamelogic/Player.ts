@@ -543,7 +543,7 @@ export class Player {
     this.activeOrThrow().applyPokemonStatus(status);
   }
 
-  applyPlayerStatus(status: PlayerStatus): PlayerStatus {
+  applyPlayerStatus(status: PlayerStatus, pokemon?: InPlayPokemonCard) {
     if (status.source === "Ability" && status.doesNotStack) {
       const existingStatus = this.PlayerStatuses.find(
         (s) => s.type === status.type && s.source === "Ability"
@@ -559,7 +559,7 @@ export class Player {
     this.PlayerStatuses.push(newStatus);
     this.logger.applyPlayerStatus(this, newStatus);
 
-    return newStatus;
+    if (pokemon) pokemon.ActivePlayerStatuses.push(newStatus);
   }
   removePlayerStatus(statusId: string) {
     const status = this.PlayerStatuses.find((s) => s.id === statusId);
