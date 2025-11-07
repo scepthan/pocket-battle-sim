@@ -144,7 +144,7 @@ export class InPlayPokemonCard {
   /**
    * Recovers this Pokemon from all Special Conditions and removes all "Effect" PokemonStatuses.
    */
-  recoverAllStatusConditions() {
+  removeAllSpecialConditionsAndStatuses() {
     const conditions = this.CurrentConditions;
     if (conditions.length == 0) return;
 
@@ -271,13 +271,8 @@ export class InPlayPokemonCard {
       await ability.effect.effect(this.game, this, target);
     } else if (ability.effect.type === "Standard") {
       await ability.effect.effect(this.game, this);
-    } else if (ability.effect.type === "PlayerStatus") {
-      const player = ability.effect.opponent ? this.player.opponent : this.player;
-      const status = player.applyPlayerStatus(ability.effect.status);
-      this.ActivePlayerStatuses.push(status);
-    } else if (ability.effect.type === "PokemonStatus") {
-      const status = Object.assign({}, ability.effect.status);
-      this.applyPokemonStatus(status);
+    } else {
+      throw new Error(`Ability effect type '${ability.effect.type}' cannot be used`);
     }
   }
 
@@ -288,78 +283,17 @@ export class InPlayPokemonCard {
 
   // Event handlers for abilities and tools
   async onEnterPlay() {
-    if (this.Ability?.trigger === "OnEnterPlay") {
+    if (this.Ability?.type === "Standard" && this.Ability.trigger.type === "OnEnterPlay") {
       await this.triggerAbility();
     }
   }
 
-  async onEnterActive() {
-    if (this.Ability?.trigger === "OnEnterActive") {
-      await this.triggerAbility();
-    }
-  }
-
-  async onLeaveActive() {
-    if (this.Ability?.trigger === "OnEnterActive") {
-      await this.undoAbility();
-    }
-  }
-
-  async onEnterBench() {
-    if (this.Ability?.trigger === "OnEnterBench") {
-      await this.triggerAbility();
-    }
-  }
-
-  async onLeaveBench() {
-    if (this.Ability?.trigger === "OnEnterBench") {
-      await this.undoAbility();
-    }
-  }
-
-  async onLeavePlay() {
-    if (this.Ability?.trigger === "OnEnterPlay") {
-      await this.undoAbility();
-    }
-  }
-
-  async onAttackDamage() {
-    if (this.Ability?.trigger === "AfterAttackDamage") {
+  async afterDamagedByAttack() {
+    if (this.Ability?.type === "Standard" && this.Ability.trigger.type === "AfterDamagedByAttack") {
       if (this.game.DefendingPlayer.InPlayPokemon.includes(this)) await this.triggerAbility();
     }
     for (const tool of this.AttachedToolCards) {
       if (tool.Effect.trigger === "OnAttackDamage") await this.triggerPokemonTool(tool);
-    }
-  }
-
-  async onFirstEnergyAttach() {
-    if (this.Ability?.trigger === "OnFirstEnergyAttach") {
-      await this.triggerAbility();
-    }
-  }
-
-  async onLastEnergyRemove() {
-    if (this.Ability?.trigger === "OnFirstEnergyAttach") {
-      await this.undoAbility();
-    }
-  }
-
-  async undoAbility() {
-    if (!this.Ability) return;
-
-    if (this.Ability.effect.type === "PlayerStatus") {
-      for (const status of this.ActivePlayerStatuses) {
-        if (!status.id) throw new Error("Cannot remove PlayerStatus without ID");
-
-        this.ActivePlayerStatuses = this.ActivePlayerStatuses.filter((s) => s.id !== status.id);
-        if (this.Ability.effect.opponent) {
-          this.player.opponent.removePlayerStatus(status.id);
-        } else {
-          this.player.removePlayerStatus(status.id);
-        }
-      }
-    } else if (this.Ability.effect.undo) {
-      await this.Ability.effect.undo(this.game, this);
     }
   }
 }

@@ -318,7 +318,7 @@ export class Game {
       }
     }
 
-    await this.checkForKnockOuts();
+    await this.afterAction();
 
     await this.delay();
 
@@ -330,11 +330,26 @@ export class Game {
   }
 
   /**
+   * This method is called at the end of every chain-of-events that the player can kick off by
+   * performing any action (attacking, retreating, evolving, attaching Energy, etc.).
+   */
+  private async afterAction(): Promise<void> {
+    await this.checkForKnockOuts();
+
+    this.removeOutdatedPlayerStatuses();
+
+    this.checkStatusAbilityConditions();
+
+    this.checkForGameOver();
+    if (this.GameOver) return;
+
+    await this.ensureActivePokemon();
+  }
+
+  /**
    * Checks the game for any Pokémon that should be knocked out, then handles checking for game
    * over and choosing new Active Pokémon if necessary.
    *
-   * This method is called at the end of every chain-of-events that the player can kick off by
-   * performing any action (attacking, retreating, evolving, attaching Energy, etc.).
    */
   private async checkForKnockOuts(): Promise<void> {
     const attackerPrizePoints = this.AttackingPlayer.GamePoints;
@@ -352,8 +367,76 @@ export class Game {
 
     this.AttackingPlayer.checkPrizePointsChange(attackerPrizePoints);
     this.DefendingPlayer.checkPrizePointsChange(defenderPrizePoints);
+  }
 
-    // Check for game over conditions
+  /**
+   * Checks all player statuses applied by abilities and removes those whose inflictors are no
+   * longer in play.
+   */
+  private removeOutdatedPlayerStatuses() {
+    for (const player of [this.DefendingPlayer, this.AttackingPlayer]) {
+      for (const status of player.PlayerStatuses) {
+        if (status.source === "Ability") {
+          const triggeringPokemon = [
+            ...this.DefendingPlayer.InPlayPokemon,
+            ...this.AttackingPlayer.InPlayPokemon,
+          ].filter((p) => p.ActivePlayerStatuses.some((s) => s.id === status.id));
+
+          let validPokemon = false;
+          for (const pokemon of triggeringPokemon) {
+            if (
+              pokemon.Ability?.type === "Status" &&
+              pokemon.Ability.effect.status.id === status.id
+            ) {
+              validPokemon = true;
+            } else {
+              removeElement(pokemon.ActivePlayerStatuses, status);
+            }
+          }
+
+          if (!validPokemon) player.removePlayerStatus(status.id!);
+        }
+      }
+    }
+  }
+
+  /**
+   * Checks all Pokémon abilities that apply statuses and applies or removes them as necessary.
+   */
+  private checkStatusAbilityConditions() {
+    for (const player of [this.AttackingPlayer, this.DefendingPlayer]) {
+      for (const pokemon of player.InPlayPokemon) {
+        const ability = pokemon.Ability;
+        if (ability?.type !== "Status") continue;
+
+        const applyStatus = ability.conditions.every((cond) => cond(pokemon));
+
+        if (ability.effect.type === "PlayerStatus") {
+          const statusPlayer = ability.effect.opponent ? player.opponent : player;
+          const existingStatus = pokemon.ActivePlayerStatuses.find(
+            (s) => s.id === ability.effect.status.id
+          );
+
+          if (existingStatus) {
+            if (!applyStatus) statusPlayer.removePlayerStatus(existingStatus.id!);
+          } else {
+            if (applyStatus) statusPlayer.applyPlayerStatus(ability.effect.status, pokemon);
+          }
+        } else {
+          if (pokemon.PokemonStatuses.some((x) => x.id === ability.effect.status.id)) {
+            if (!applyStatus) pokemon.removePokemonStatus(ability.effect.status);
+          } else {
+            if (applyStatus) pokemon.applyPokemonStatus(ability.effect.status);
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Checks whether the game is over and determines the winner if it is.
+   */
+  private checkForGameOver(): void {
     const player1WinConditions = [];
     const player2WinConditions = [];
 
@@ -393,10 +476,13 @@ export class Game {
       }
 
       this.GameOver = true;
-      return;
     }
+  }
 
-    // Have players choose a new Active Pokemon if their previous one was knocked out
+  /**
+   * If either player has no Active Pokémon, prompts them to choose a new one from their Bench.
+   */
+  private async ensureActivePokemon(): Promise<void> {
     const promises = [];
     if (!this.Player1.ActivePokemon.isPokemon) {
       promises[0] = this.Agent1.swapActivePokemon(
@@ -570,10 +656,10 @@ export class Game {
     await this.executeAttack(attack);
 
     for (const pokemon of this.AttackDamagedPokemon) {
-      await pokemon.onAttackDamage();
+      await pokemon.afterDamagedByAttack();
     }
 
-    await this.checkForKnockOuts();
+    await this.afterAction();
 
     this.CurrentAttack = undefined;
     this.AttackingPokemon = undefined;
@@ -588,23 +674,23 @@ export class Game {
     if (pokemon.Ability !== ability) {
       throw new Error("Pokemon does not have this ability");
     }
-    if (ability.trigger === "OnceDuringTurn") {
+    if (ability.type !== "Standard" || ability.trigger.type !== "Manual") {
+      throw new Error("Ability cannot be used manually");
+    }
+    if (!ability.trigger.multiUse) {
       if (this.UsedAbilities.has(pokemon)) {
         throw new Error("Pokemon's ability has already been used this turn");
       }
       this.UsedAbilities.add(pokemon);
-    } else if (ability.trigger !== "ManyDuringTurn") {
-      throw new Error("Ability cannot be used manually");
     }
-    if (
-      ability.effect.type === "Targeted" &&
-      ability.effect.findValidTargets(this, pokemon).length === 0
-    ) {
-      throw new Error("No valid targets for ability");
+    if (ability.effect.type === "Targeted") {
+      if (ability.effect.findValidTargets(this, pokemon).length === 0) {
+        throw new Error("No valid targets for ability");
+      }
     }
 
     await pokemon.useAbility(true);
-    await this.checkForKnockOuts();
+    await this.afterAction();
   }
 
   /**
@@ -612,7 +698,7 @@ export class Game {
    */
   async attachAvailableEnergy(pokemon: InPlayPokemonCard): Promise<void> {
     await this.AttackingPlayer.attachAvailableEnergy(pokemon);
-    await this.checkForKnockOuts();
+    await this.afterAction();
   }
 
   /**
@@ -620,7 +706,7 @@ export class Game {
    */
   async putPokemonOnBench(pokemon: PokemonCard, index: number): Promise<void> {
     await this.AttackingPlayer.putPokemonOnBench(pokemon, index);
-    await this.checkForKnockOuts();
+    await this.afterAction();
   }
 
   /**
@@ -628,7 +714,7 @@ export class Game {
    */
   async evolvePokemon(inPlayPokemon: InPlayPokemonCard, pokemon: PokemonCard): Promise<void> {
     await this.AttackingPlayer.evolvePokemon(inPlayPokemon, pokemon);
-    await this.checkForKnockOuts();
+    await this.afterAction();
   }
 
   /**
@@ -636,7 +722,7 @@ export class Game {
    */
   async retreatActivePokemon(benchedPokemon: InPlayPokemonCard, energy: Energy[]): Promise<void> {
     await this.AttackingPlayer.retreatActivePokemon(benchedPokemon, energy);
-    await this.checkForKnockOuts();
+    await this.afterAction();
   }
 
   /**
@@ -683,7 +769,7 @@ export class Game {
       }
     }
 
-    await this.checkForKnockOuts();
+    await this.afterAction();
 
     this.ActiveTrainerCard = undefined;
     // Workaround for fossils being put into play by their effect
@@ -901,8 +987,9 @@ export class Game {
       PrizePoints: 1,
       Attacks: [],
       Ability: {
+        type: "Standard",
         name: "Discard",
-        trigger: "OnceDuringTurn",
+        trigger: { type: "Manual", multiUse: false },
         conditions: [],
         text: "Discard this Pokémon from play.",
         effect: {
@@ -915,7 +1002,7 @@ export class Game {
     };
 
     await this.AttackingPlayer.putPokemonOnBench(pokemon, index, card);
-    await this.checkForKnockOuts();
+    await this.afterAction();
   }
 
   // Methods to interact with the player agents

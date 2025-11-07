@@ -1,9 +1,9 @@
 <template>
   <v-dialog v-model="dialog" width="640">
-    <template #activator="{ props: dialog }">
+    <template #activator="{ props: dialogProps }">
       <v-tooltip location="center" :text="String(deckSize)">
-        <template #activator="{ props: tooltip }">
-          <div v-bind="mergeProps(dialog, tooltip)" class="d-inline-block cursor-pointer">
+        <template #activator="{ props: tooltipProps }">
+          <div v-bind="mergeProps(dialogProps, tooltipProps)" class="d-inline-block cursor-pointer">
             <PlayingCard v-if="deckSize > 0" :height-px="100" />
             <InPlayCardSlot v-else :height-px="100" />
           </div>
