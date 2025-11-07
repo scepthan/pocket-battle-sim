@@ -2,9 +2,6 @@ import { v4 as uuidv4, v5 as uuidv5 } from "uuid";
 import {
   parseEnergy,
   type Ability,
-  type CardSlot,
-  type Game,
-  type InPlayPokemonCard,
   type PokemonCondition,
   type StatusAbilityEffect,
 } from "../gamelogic";
@@ -27,7 +24,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     text: inputAbility.text,
     effect: {
       type: "Standard",
-      effect: async (game: Game) => {
+      effect: async (game) => {
         game.GameLog.notImplemented(game.AttackingPlayer);
       },
     },
@@ -114,8 +111,8 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         const fullType = parseEnergy(energyType);
         ability.effect = {
           type: "Standard",
-          effect: async (game: Game, pokemon?: InPlayPokemonCard) => {
-            await game.AttackingPlayer.attachEnergy(pokemon!, [fullType], "energyZone");
+          effect: async (game, self) => {
+            await self.player.attachEnergy(self, [fullType], "energyZone");
           },
         };
       },
@@ -132,13 +129,12 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
 
         ability.effect = {
           type: "Targeted",
-          findValidTargets: (game: Game, self: InPlayPokemonCard) =>
-            self.player.BenchedPokemon.filter(benchPredicate),
-          effect: async (game: Game, self: InPlayPokemonCard, target: CardSlot) => {
+          findValidTargets: (game, self) => self.player.BenchedPokemon.filter(benchPredicate),
+          effect: async (game, self, target) => {
             if (!target.isPokemon) throw new Error("Not a valid target");
-            const active = game.AttackingPlayer.activeOrThrow();
+            const active = self.player.activeOrThrow();
 
-            await game.AttackingPlayer.transferEnergy(target, active, [fullType]);
+            await self.player.transferEnergy(target, active, [fullType]);
           },
         };
       },
@@ -152,13 +148,13 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
 
         ability.effect = {
           type: "Standard",
-          effect: async (game: Game) => {
-            const pokemon = game.AttackingPlayer.activeOrThrow();
+          effect: async (game, self) => {
+            const pokemon = self.player.activeOrThrow();
             if (pokemon.Type != pt) {
-              game.GameLog.noValidTargets(game.AttackingPlayer);
+              game.GameLog.noValidTargets(self.player);
               return;
             }
-            await game.AttackingPlayer.attachEnergy(pokemon, [fullType], "energyZone");
+            await self.player.attachEnergy(pokemon, [fullType], "energyZone");
           },
         };
       },
@@ -168,8 +164,8 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       transform: (_, healing) => {
         ability.effect = {
           type: "Standard",
-          effect: async (game: Game) => {
-            for (const pokemon of game.AttackingPlayer.InPlayPokemon) {
+          effect: async (game, self) => {
+            for (const pokemon of self.player.InPlayPokemon) {
               if (pokemon.isDamaged()) {
                 game.healPokemon(pokemon, Number(healing));
               }
@@ -195,8 +191,8 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       transform: (_, damage) => {
         ability.effect = {
           type: "Standard",
-          effect: async (game: Game) => {
-            game.applyDamage(game.AttackingPlayer.activeOrThrow(), Number(damage), false);
+          effect: async (game, self) => {
+            game.applyDamage(self.player.opponent.activeOrThrow(), Number(damage), false);
           },
         };
       },
@@ -219,9 +215,9 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       transform: () => {
         ability.effect = {
           type: "Standard",
-          effect: async (game: Game) => {
-            if (game.AttackingPlayer.flipCoin()) {
-              game.DefendingPlayer.sleepActivePokemon();
+          effect: async (game, self) => {
+            if (self.player.flipCoin()) {
+              self.player.opponent.sleepActivePokemon();
             }
           },
         };
@@ -233,8 +229,8 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       transform: () => {
         ability.effect = {
           type: "Standard",
-          effect: async (game: Game) => {
-            await game.swapActivePokemon(game.DefendingPlayer, "opponentEffect");
+          effect: async (game, self) => {
+            await game.swapActivePokemon(self.player.opponent, "opponentEffect");
           },
         };
       },
@@ -244,8 +240,27 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       transform: () => {
         ability.effect = {
           type: "Standard",
-          effect: async (game: Game) => {
-            await game.showCards(game.AttackingPlayer, game.AttackingPlayer.Deck.slice(0, 1));
+          effect: async (game, self) => {
+            await game.showCards(self.player, self.player.Deck.slice(0, 1));
+          },
+        };
+      },
+    },
+    {
+      pattern:
+        /You must discard a card from your hand in order to use this Ability\. Once during your turn, you may draw a card\./i,
+      transform: () => {
+        if (ability.type === "Status") throw new Error("Cannot set trigger on Status Ability");
+        ability.trigger = { type: "Manual", multiUse: false };
+        ability.conditions.push((self) => self.player.Hand.length > 0);
+        ability.effect = {
+          type: "Standard",
+          effect: async (game, self) => {
+            const player = self.player;
+            const cardToDiscard = await game.choose(player, player.Hand);
+            if (!cardToDiscard) throw new Error("No card chosen to discard");
+            player.discardCardsFromHand([cardToDiscard]);
+            player.drawCards(1);
           },
         };
       },
@@ -255,8 +270,8 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       transform: () => {
         ability.effect = {
           type: "Standard",
-          effect: async (game: Game) => {
-            game.DefendingPlayer.poisonActivePokemon();
+          effect: async (game, self) => {
+            self.player.opponent.poisonActivePokemon();
           },
         };
       },
