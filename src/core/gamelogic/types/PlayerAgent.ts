@@ -69,15 +69,15 @@ export abstract class PlayerAgent {
     return this.choose(pokemon);
   }
   /**
-   * Given a list of options, choose n unique elements from it. Note that n may be larger than the
-   * number of options, in which case all options should be returned.
+   * Given a list of options, choose n unique elements from it. The list is guaranteed to be of
+   * length > n.
    *
    * By default, returns n random elements.
    */
   async chooseN<T>(options: T[], n: number): Promise<T[]> {
     const input = options.slice();
     const output: T[] = [];
-    for (let i = 0; i < n && input.length > 0; i++) {
+    for (let i = 0; i < n; i++) {
       const choice = randomElement(input);
       output.push(choice);
       removeElement(input, choice);
@@ -85,8 +85,8 @@ export abstract class PlayerAgent {
     return output;
   }
   /**
-   * Given a list of some Pokémon currently in play, choose n unique Pokémon from it. Note that n
-   * may be larger than the number of options, in which case all Pokémon should be returned.
+   * Given a list of some Pokémon currently in play, choose n unique Pokémon from it. The list is
+   * guaranteed to be of length > n.
    *
    * By default, calls `this.chooseN()` (random unless this function is user-defined).
    */

@@ -566,6 +566,21 @@ export const parseAttackEffect = (attack: Attack): boolean => {
     },
     {
       pattern:
+        /^Choose 2 of your ([^.]+?)\. For each of those Pokémon, take a \{(\w)\} Energy from your Energy Zone and attach it to that Pokémon\./i,
+      transform: (_, pokemonSpecifier, type) => {
+        const energy = parseEnergy(type);
+        const predicate = parsePokemonPredicate(pokemonSpecifier);
+
+        addSideEffect(async (game) => {
+          const pokemon = game.AttackingPlayer.InPlayPokemon.filter(predicate);
+          const chosenPokemon = await game.chooseNPokemon(game.AttackingPlayer, pokemon, 2);
+          for (const p of chosenPokemon)
+            await game.AttackingPlayer.attachEnergy(p, [energy], "energyZone");
+        });
+      },
+    },
+    {
+      pattern:
         /^Take an amount of \{(\w)\} Energy from your Energy Zone equal to the number of heads and attach it to your ([^.]+?) in any way you like\./i,
       transform: (_, energyType, pokemonSpecifier) => {
         const et = parseEnergy(energyType);

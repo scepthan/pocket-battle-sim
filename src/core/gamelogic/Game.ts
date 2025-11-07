@@ -1,6 +1,6 @@
 import { GameLogger } from "../logging";
 import { useDeckValidator } from "../parsing";
-import { removeElement } from "../util";
+import { isSubset, removeElement } from "../util";
 
 import type { InPlayPokemonCard } from "./InPlayPokemonCard";
 import { Player } from "./Player";
@@ -1060,7 +1060,7 @@ export class Game {
 
   /**
    * Asks a player to choose from a selection of any type of object. For Pokémon specifically,
-   * use choosePokemon().
+   * use `.choosePokemon()`.
    */
   async choose<T>(player: Player, options: T[]): Promise<T | undefined> {
     if (options.length == 0) {
@@ -1072,6 +1072,52 @@ export class Game {
     const agent = this.findAgent(player);
     const selected = await agent.choose(options);
     if (!options.includes(selected)) {
+      throw new Error("Invalid option selected");
+    }
+    return selected;
+  }
+
+  /**
+   * Asks a player to choose N options from a selection of any type of object.
+   */
+  async chooseNPokemon(
+    player: Player,
+    options: InPlayPokemonCard[],
+    n: number
+  ): Promise<InPlayPokemonCard[]> {
+    if (options.length == 0) {
+      this.GameLog.noValidTargets(player);
+      return [];
+    }
+    if (options.length <= n) return options.slice();
+
+    const agent = this.findAgent(player);
+    const selected = (
+      await agent.chooseNPokemon(
+        options.map((p) => new PlayerPokemonView(p)),
+        n
+      )
+    ).map((v) => this.viewToPokemon(v, options));
+    if (!isSubset(options, selected)) {
+      throw new Error("Invalid option selected");
+    }
+    return selected;
+  }
+
+  /**
+   * Asks a player to choose N options from a selection of any type of object. For Pokémon
+   * specifically, use `.chooseNPokemon()`.
+   */
+  async chooseN<T>(player: Player, options: T[], n: number): Promise<T[]> {
+    if (options.length == 0) {
+      this.GameLog.noValidTargets(player);
+      return [];
+    }
+    if (options.length <= n) return options.slice();
+
+    const agent = this.findAgent(player);
+    const selected = await agent.chooseN(options, n);
+    if (!isSubset(options, selected)) {
       throw new Error("Invalid option selected");
     }
     return selected;

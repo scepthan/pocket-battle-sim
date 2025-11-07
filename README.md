@@ -5,7 +5,7 @@ Backend todo:
 - [x] Parse cards
   - [x] A1: 237/237 (100%)
   - [x] A1a: 70/70 (100%)
-  - [ ] A2: 152/157 (95.5%)
+  - [ ] A2: 153/157 (97.5%)
     - [x] Pokémon Tools
     - [x] New Special Conditions
       - [x] Confused
@@ -31,7 +31,7 @@ Backend todo:
       - [x] Discard all energy of type from self
       - [x] Also do damage to 1 of opponent's Benched mon
       - [x] Discard energy and damage all Benched mon
-      - [ ] Attach energy to 2 Benched mon
+      - [x] Attach energy to 2 Benched mon
       - [x] Attach energy to specific mon
       - [x] Attack only works with specific mon on bench
       - [x] Discard cards from own deck
