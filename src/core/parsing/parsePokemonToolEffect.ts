@@ -75,7 +75,7 @@ export const parsePokemonToolEffect = (cardText: string): ParsedResult<PokemonTo
       transform: () => {
         effect.conditions.push((pokemon) => pokemon.CurrentConditions.length > 0);
         effect.effect = async (game, pokemon) => {
-          pokemon.recoverAllStatusConditions();
+          pokemon.removeAllSpecialConditionsAndStatuses();
 
           const thisCard = pokemon.AttachedToolCards.find((card) => card.Text === cardText);
           if (!thisCard) throw new Error("Could not find this Pokemon Tool card");

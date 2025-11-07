@@ -144,7 +144,7 @@ export class InPlayPokemonCard {
   /**
    * Recovers this Pokemon from all Special Conditions and removes all "Effect" PokemonStatuses.
    */
-  recoverAllStatusConditions() {
+  removeAllSpecialConditionsAndStatuses() {
     const conditions = this.CurrentConditions;
     if (conditions.length == 0) return;
 
@@ -294,23 +294,6 @@ export class InPlayPokemonCard {
     }
     for (const tool of this.AttachedToolCards) {
       if (tool.Effect.trigger === "OnAttackDamage") await this.triggerPokemonTool(tool);
-    }
-  }
-
-  async undoAbility() {
-    if (!this.Ability) return;
-
-    if (this.Ability.effect.type === "PlayerStatus") {
-      for (const status of this.ActivePlayerStatuses) {
-        if (!status.id) throw new Error("Cannot remove PlayerStatus without ID");
-
-        this.ActivePlayerStatuses = this.ActivePlayerStatuses.filter((s) => s.id !== status.id);
-        if (this.Ability.effect.opponent) {
-          this.player.opponent.removePlayerStatus(status.id);
-        } else {
-          this.player.removePlayerStatus(status.id);
-        }
-      }
     }
   }
 }

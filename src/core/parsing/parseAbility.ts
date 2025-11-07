@@ -1,3 +1,4 @@
+import { v4 as uuidv4, v5 as uuidv5 } from "uuid";
 import {
   parseEnergy,
   type Ability,
@@ -33,6 +34,10 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
   };
   const convertToStatusAbility = (effect: StatusAbilityEffect) => {
     const currentAbility = ability;
+
+    const doesNotStack = effect.type === "PlayerStatus" && effect.status.doesNotStack;
+    effect.status.id = doesNotStack ? uuidv5(currentAbility.name, uuidv5.URL) : uuidv4();
+
     ability = {
       type: "Status",
       name: currentAbility.name,

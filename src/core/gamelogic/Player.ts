@@ -301,7 +301,7 @@ export class Player {
     this.logger.evolvePokemon(this, pokemon, card);
     pokemon.evolveInto(card);
 
-    pokemon.recoverAllStatusConditions();
+    pokemon.removeAllSpecialConditionsAndStatuses();
 
     await pokemon.onEnterPlay();
   }
@@ -428,7 +428,7 @@ export class Player {
 
     this.logger.swapActivePokemon(this, currentActive, newActive, reason, choosingPlayer);
 
-    currentActive.recoverAllStatusConditions();
+    currentActive.removeAllSpecialConditionsAndStatuses();
   }
 
   async removePokemonFromField(pokemon: InPlayPokemonCard) {
@@ -544,28 +544,28 @@ export class Player {
   }
 
   applyPlayerStatus(status: PlayerStatus, pokemon?: InPlayPokemonCard) {
-    if (status.source === "Ability" && status.doesNotStack) {
-      const existingStatus = this.PlayerStatuses.find(
-        (s) => s.type === status.type && s.source === "Ability"
-      );
-      if (existingStatus) return existingStatus;
+    if (status.source === "Ability") {
+      if (status.id?.length === 36) status.id += this.Name;
+
+      const existingStatus = this.PlayerStatuses.find((s) => s.id === status.id);
+      if (existingStatus) {
+        if (pokemon) pokemon.ActivePlayerStatuses.push(existingStatus);
+        return;
+      }
     }
 
-    const newStatus = Object.assign({}, status);
-    if (!newStatus.id) newStatus.id = uuidv4();
-    if (this.PlayerStatuses.some((s) => s.id === newStatus.id))
-      throw new Error("Status has already been applied to this player");
+    if (!status.id) status.id = uuidv4();
 
-    this.PlayerStatuses.push(newStatus);
-    this.logger.applyPlayerStatus(this, newStatus);
+    this.PlayerStatuses.push(status);
+    this.logger.applyPlayerStatus(this, status);
 
-    if (pokemon) pokemon.ActivePlayerStatuses.push(newStatus);
+    if (pokemon) pokemon.ActivePlayerStatuses.push(status);
   }
   removePlayerStatus(statusId: string) {
     const status = this.PlayerStatuses.find((s) => s.id === statusId);
     if (!status) return;
 
-    if (status.source === "Ability" && status.doesNotStack) {
+    if (status.source === "Ability") {
       const otherPokemonWithStatus = this.InPlayPokemon.filter((p) =>
         p.ActivePlayerStatuses.some((s) => s.id === statusId)
       );
