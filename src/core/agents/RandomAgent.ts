@@ -1,13 +1,6 @@
-import type {
-  CardSlotView,
-  Energy,
-  GameInitState,
-  PlayerGameView,
-  PlayerPokemonView,
-  PokemonCard,
-} from "../gamelogic";
+import type { CardSlotView, GameInitState, PlayerGameView, PokemonCard } from "../gamelogic";
 import { PlayerAgent } from "../gamelogic";
-import { randomElement as rand } from "../util";
+import { randomElement } from "../util";
 
 export class RandomAgent extends PlayerAgent {
   async setupPokemon(game: GameInitState) {
@@ -29,7 +22,7 @@ export class RandomAgent extends PlayerAgent {
 
     // Attach energy to random Pokemon if available
     if (game.selfAvailableEnergy) {
-      await game.attachAvailableEnergy(rand(ownPokemon));
+      await game.attachAvailableEnergy(randomElement(ownPokemon));
     }
 
     // Play a random Basic Pokemon to the Bench if available
@@ -37,7 +30,7 @@ export class RandomAgent extends PlayerAgent {
       (x) => x.CardType == "Pokemon" && x.Stage == 0
     ) as PokemonCard[];
     if (handBasics.length > 0) {
-      const randomBasic = rand(handBasics);
+      const randomBasic = randomElement(handBasics);
       const bench = game.selfBench;
       for (let i = 0; i < 3; i++) {
         if (!bench[i]!.isPokemon) {
@@ -53,7 +46,7 @@ export class RandomAgent extends PlayerAgent {
       if (!game.canPlayCard(card) || Math.random() < 0.5) continue;
       let target: CardSlotView | undefined;
       if (card.Effect.type === "Targeted") {
-        target = rand(game.validTargets(card));
+        target = randomElement(game.validTargets(card));
       }
       await game.playItemCard(card, target);
     }
@@ -63,10 +56,10 @@ export class RandomAgent extends PlayerAgent {
       .filter((x) => x.CardType == "Supporter")
       .filter((x) => game.canPlayCard(x));
     if (supporterCards.length > 0) {
-      const card = rand(supporterCards);
+      const card = randomElement(supporterCards);
       let target: CardSlotView | undefined;
       if (card.Effect.type === "Targeted") {
-        target = rand(game.validTargets(card));
+        target = randomElement(game.validTargets(card));
       }
       await game.playSupporterCard(card, target);
     }
@@ -78,7 +71,7 @@ export class RandomAgent extends PlayerAgent {
           ? game.selfActive.RetreatCost + game.retreatCostModifier <= 0 || Math.random() < 0.5
           : Math.random() < 0.125
       ) {
-        const randomBench = rand(game.selfBenched);
+        const randomBench = randomElement(game.selfBenched);
         await game.retreatActivePokemon(randomBench);
       }
     }
@@ -92,11 +85,11 @@ export class RandomAgent extends PlayerAgent {
         evolveablePokemon.some((y) => y.Name == x.EvolvesFrom)
     ) as PokemonCard[];
     if (pokemonToEvolveWith.length > 0) {
-      const randomEvolver = rand(pokemonToEvolveWith);
+      const randomEvolver = randomElement(pokemonToEvolveWith);
       const pokemonToEvolveFrom = evolveablePokemon.filter(
         (x) => x.Name == randomEvolver.EvolvesFrom
       );
-      const randomEvolvee = rand(pokemonToEvolveFrom);
+      const randomEvolvee = randomElement(pokemonToEvolveFrom);
       await game.playPokemonToEvolve(randomEvolver, randomEvolvee);
     }
 
@@ -109,30 +102,9 @@ export class RandomAgent extends PlayerAgent {
       if (game.canUseAttack(attack)) attacks.push(attack);
     }
     if (attacks.length > 0) {
-      const randomAttack = rand(attacks);
+      const randomAttack = randomElement(attacks);
       await game.useAttack(randomAttack);
     }
     return;
-  }
-
-  async swapActivePokemon(game: PlayerGameView) {
-    const bench = game.selfBenched;
-    return rand(bench);
-  }
-  async choosePokemon(pokemon: PlayerPokemonView[]) {
-    return rand(pokemon);
-  }
-  async choose<T>(options: T[]) {
-    return rand(options);
-  }
-  async viewCards() {
-    //await new Promise((resolve) => setTimeout(resolve, 1000));
-  }
-  async distributeEnergy(pokemon: PlayerPokemonView[], energy: Energy[]): Promise<Energy[][]> {
-    const distribution: Energy[][] = pokemon.map(() => []);
-    for (const en of energy) {
-      rand(distribution).push(en);
-    }
-    return distribution;
   }
 }

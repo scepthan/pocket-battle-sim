@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { randomElement, removeElement } from "@/core/util";
 import { parseDeck } from "../../parsing";
 import type { PlayerGameView } from "../PlayerGameView";
 import type { PlayerPokemonView } from "../PlayerPokemonView";
@@ -27,14 +29,87 @@ export abstract class PlayerAgent {
     this.Deck = parseDeck(deck.Cards);
   }
 
+  /**
+   * Choose initial Pokémon setup at the start of the game.
+   */
   abstract setupPokemon(game: GameInitState): Promise<PlayerGameSetup>;
+
+  /**
+   * The main function called each turn to perform actions, which are provided by PlayerGameView.
+   */
   abstract doTurn(game: PlayerGameView): Promise<void>;
-  abstract swapActivePokemon(
+
+  /**
+   * Choose a Benched Pokémon to swap in as the new Active Pokémon.
+   *
+   * By default, calls `this.choosePokemon()` with the current Benched Pokémon.
+   */
+  async swapActivePokemon(
     game: PlayerGameView,
     reason: "selfEffect" | "opponentEffect" | "activeKnockedOut"
-  ): Promise<PlayerPokemonView>;
-  abstract choosePokemon(pokemon: PlayerPokemonView[]): Promise<PlayerPokemonView>;
-  abstract choose<T>(options: T[]): Promise<T>;
-  abstract viewCards(cards: PlayingCard[]): Promise<void>;
-  abstract distributeEnergy(pokemon: PlayerPokemonView[], energy: Energy[]): Promise<Energy[][]>;
+  ): Promise<PlayerPokemonView> {
+    return this.choosePokemon(game.selfBenched);
+  }
+
+  /**
+   * Given a list of options, choose an element from it. The list is guaranteed to be non-empty.
+   *
+   * By default, returns a random element.
+   */
+  async choose<T>(options: T[]): Promise<T> {
+    return randomElement(options);
+  }
+  /**
+   * Given a list of some Pokémon currently in play, choose one of them. The list is guaranteed to
+   * be non-empty.
+   *
+   * By default, calls `this.choose()` (random unless this function is user-defined).
+   */
+  async choosePokemon(pokemon: PlayerPokemonView[]): Promise<PlayerPokemonView> {
+    return this.choose(pokemon);
+  }
+  /**
+   * Given a list of options, choose n unique elements from it. Note that n may be larger than the
+   * number of options, in which case all options should be returned.
+   *
+   * By default, returns n random elements.
+   */
+  async chooseN<T>(options: T[], n: number): Promise<T[]> {
+    const input = options.slice();
+    const output: T[] = [];
+    for (let i = 0; i < n && input.length > 0; i++) {
+      const choice = randomElement(input);
+      output.push(choice);
+      removeElement(input, choice);
+    }
+    return output;
+  }
+  /**
+   * Given a list of some Pokémon currently in play, choose n unique Pokémon from it. Note that n
+   * may be larger than the number of options, in which case all Pokémon should be returned.
+   *
+   * By default, calls `this.chooseN()` (random unless this function is user-defined).
+   */
+  async chooseNPokemon(pokemon: PlayerPokemonView[], n: number): Promise<PlayerPokemonView[]> {
+    return this.chooseN(pokemon, n);
+  }
+
+  /**
+   * View some cards (e.g., from deck, discard pile, etc.). By default, does nothing.
+   */
+  async viewCards(cards: PlayingCard[]): Promise<void> {}
+
+  /**
+   * Distribute a selection of energy among given Pokémon. By default, distributes randomly.
+   *
+   * @returns An array of Energy arrays, where each array corresponds to the energies assigned to
+   * the Pokémon at the same index.
+   */
+  async distributeEnergy(pokemon: PlayerPokemonView[], energy: Energy[]): Promise<Energy[][]> {
+    const distribution: Energy[][] = pokemon.map(() => []);
+    for (const en of energy) {
+      randomElement(distribution).push(en);
+    }
+    return distribution;
+  }
 }
