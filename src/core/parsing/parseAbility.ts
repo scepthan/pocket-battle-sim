@@ -179,7 +179,19 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       },
     },
     {
-      pattern: /do (\d+) damage to the Attacking Pokémon\.$/i,
+      pattern: /heal (\d+) damage from this Pokémon\.$/i,
+      transform: (_, healing) => {
+        ability.conditions.push((self) => self.isDamaged());
+        ability.effect = {
+          type: "Standard",
+          effect: async (game, self) => {
+            game.healPokemon(self, Number(healing));
+          },
+        };
+      },
+    },
+    {
+      pattern: /do (\d+) damage to (?:the Attacking Pokémon|your opponent’s Active Pokémon)\.$/i,
       transform: (_, damage) => {
         ability.effect = {
           type: "Standard",

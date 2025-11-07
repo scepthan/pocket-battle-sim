@@ -5,7 +5,7 @@ Backend todo:
 - [x] Parse cards
   - [x] A1: 237/237 (100%)
   - [x] A1a: 70/70 (100%)
-  - [ ] A2: 153/157 (97.5%)
+  - [ ] A2: 155/157 (98.7%)
     - [x] Pokémon Tools
     - [x] New Special Conditions
       - [x] Confused
@@ -52,8 +52,8 @@ Backend todo:
       - [x] Make opponent redraw for their remaining prize points
     - [ ] Abilities
       - [x] Absorb damage from other mon
-      - [ ] Damage/heal on energy attach
-        - [ ] Promo Cresselia ex
+      - [x] Damage/heal on energy attach
+        - [x] Promo Cresselia ex
       - [ ] Flip coin to reduce damage
       - [ ] Discard to draw
   - [ ] A2a

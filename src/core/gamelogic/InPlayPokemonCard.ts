@@ -288,6 +288,15 @@ export class InPlayPokemonCard {
     }
   }
 
+  async onEnergyZoneAttach(energy: Energy[]) {
+    if (this.Ability?.type === "Standard" && this.Ability.trigger.type === "OnEnergyZoneAttach") {
+      const expectedEnergy = this.Ability.trigger.energy;
+      for (const e of energy) {
+        if (!expectedEnergy || expectedEnergy === e) await this.triggerAbility();
+      }
+    }
+  }
+
   async afterDamagedByAttack() {
     if (this.Ability?.type === "Standard" && this.Ability.trigger.type === "AfterDamagedByAttack") {
       if (this.game.DefendingPlayer.InPlayPokemon.includes(this)) await this.triggerAbility();

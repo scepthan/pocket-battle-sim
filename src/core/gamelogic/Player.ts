@@ -321,6 +321,7 @@ export class Player {
     fromPokemon?: InPlayPokemonCard
   ) {
     pokemon.attachEnergy(energy);
+    if (from === "energyZone") await pokemon.onEnergyZoneAttach(energy);
     this.logger.attachEnergy(this, pokemon, energy, from, fromPokemon);
   }
 
