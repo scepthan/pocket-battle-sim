@@ -594,8 +594,6 @@ export class Game {
       let baseDamage: number = attack.baseDamage ?? 0;
 
       if (attack.type === "CoinFlipForDamage" || attack.type === "CoinFlipForAddedDamage") {
-        if (!attack.coinsToFlip)
-          throw new Error(attack.name + " needs to know how many coins to flip");
         flippedHeads = this.flipCoinsForAttack(attack.coinsToFlip);
       }
 

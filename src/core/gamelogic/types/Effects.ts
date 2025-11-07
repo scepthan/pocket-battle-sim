@@ -8,4 +8,4 @@ export type TargetedPokemonEffect = (
   target: CardSlot
 ) => Promise<void>;
 
-export type PokemonCondition = (pokemon: InPlayPokemonCard) => boolean;
+export type PokemonConditional = (pokemon: InPlayPokemonCard) => boolean;

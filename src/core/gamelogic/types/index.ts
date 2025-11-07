@@ -1,4 +1,4 @@
-export * from "./Ability";
+export * from "./ability";
 export * from "./Attack";
 export * from "./CardSlot";
 export * from "./Deck";
@@ -6,8 +6,8 @@ export * from "./Effects";
 export * from "./Energy";
 export * from "./GameRules";
 export * from "./PlayerAgent";
-export * from "./PlayerStatus";
+export * from "./playerstatus";
 export * from "./PlayingCard";
-export * from "./PokemonStatus";
+export * from "./pokemonstatus";
 export * from "./SpecialCondition";
 export * from "./TrainerEffect";

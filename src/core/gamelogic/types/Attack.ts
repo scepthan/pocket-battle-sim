@@ -14,6 +14,8 @@ export type SideEffect = (
   target?: InPlayPokemonCard
 ) => Promise<void>;
 
+type DamageCalculation = (game: Game, self: InPlayPokemonCard, heads: number) => number;
+
 interface BaseAttack {
   // Properties inherited from InputAttack
   name: string;
@@ -38,7 +40,7 @@ interface BaseAttack {
    * A method that calculates the base damage of the attack to be applied to the Defending Pokémon.
    * This method should not have any side effects.
    */
-  calculateDamage?: (game: Game, self: InPlayPokemonCard, heads: number) => number;
+  calculateDamage?: DamageCalculation;
 
   /**
    * A method that determines which Pokémon the player can choose to do damage to whenever this
@@ -80,6 +82,8 @@ interface CoinFlipOrDoNothingAttack extends BaseAttack {
 // Flip a coin for each ___. This attack does X damage for each heads.
 interface CoinFlipForDamageAttack extends BaseAttack {
   type: "CoinFlipForDamage";
+  coinsToFlip: CoinFlipIndicator;
+  calculateDamage: DamageCalculation;
 }
 
 // Flip N coins. This attack does X more damage for each heads.
@@ -91,6 +95,8 @@ interface CoinFlipForDamageAttack extends BaseAttack {
 // Flip 2 coins. If both of them are heads, this attack does X more damage.
 interface CoinFlipForAddedDamageAttack extends BaseAttack {
   type: "CoinFlipForAddedDamage";
+  coinsToFlip: CoinFlipIndicator;
+  calculateDamage: DamageCalculation;
 }
 
 // Anything else with baseDamage goes here

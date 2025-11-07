@@ -2,7 +2,7 @@ import { v4 as uuidv4, v5 as uuidv5 } from "uuid";
 import {
   parseEnergy,
   type Ability,
-  type PokemonCondition,
+  type PokemonConditional,
   type StatusAbilityEffect,
 } from "../gamelogic";
 import { parsePokemonPredicate } from "./parsePredicates";
@@ -13,7 +13,7 @@ interface AbilityTransformer {
   transform: (...args: string[]) => void;
 }
 
-const selfActive: PokemonCondition = (self) => self.player.ActivePokemon == self;
+const selfActive: PokemonConditional = (self) => self.player.ActivePokemon == self;
 
 export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Ability> => {
   let ability: Ability = {
