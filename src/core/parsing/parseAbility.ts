@@ -337,6 +337,20 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     },
     {
       pattern:
+        /^If any damage is done to this Pokémon by attacks, flip a coin\. If heads, this Pokémon takes −(\d+) damage from that attack\.$/i,
+      transform: (_, amount) => {
+        convertToStatusAbility({
+          type: "PokemonStatus",
+          status: {
+            type: "ReduceAttackDamageOnCoinFlip",
+            amount: Number(amount),
+            source: "Ability",
+          },
+        });
+      },
+    },
+    {
+      pattern:
         /^Prevent all effects of attacks used by your opponent’s Pokémon done to this Pokémon\.$/i,
       transform: () => {
         convertToStatusAbility({

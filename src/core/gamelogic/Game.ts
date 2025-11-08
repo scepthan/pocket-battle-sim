@@ -832,9 +832,13 @@ export class Game {
         }
       }
       for (const status of defender.PokemonStatuses) {
-        if (status.type == "ReduceAttackDamage") {
+        if (status.type === "ReduceAttackDamage") {
           if (status.attackerCondition && !status.attackerCondition.test(attacker)) continue;
           totalDamage -= status.amount;
+        } else if (status.type === "ReduceAttackDamageOnCoinFlip") {
+          if (status.attackerCondition && !status.attackerCondition.test(attacker)) continue;
+          const flipResult = this.AttackingPlayer.flipCoin();
+          if (flipResult) totalDamage -= status.amount;
         }
       }
     }

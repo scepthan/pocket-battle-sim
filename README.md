@@ -5,7 +5,7 @@ Backend todo:
 - [x] Parse cards
   - [x] A1: 237/237 (100%)
   - [x] A1a: 70/70 (100%)
-  - [ ] A2: 155/157 (98.7%)
+  - [x] A2: 157/157 (100.0%)
     - [x] Pokémon Tools
     - [x] New Special Conditions
       - [x] Confused
@@ -25,7 +25,7 @@ Backend todo:
       - [x] If defending mon has Tool attached
       - [x] If defending mon is knocked out
       - [x] If N or more heads
-    - [ ] New attack effects
+    - [x] New attack effects
       - [x] Discard random energy from self
       - [x] Prevent self from attacking next turn
       - [x] Discard all energy of type from self
@@ -50,12 +50,12 @@ Backend todo:
       - [x] Attach energy from discard to specific mon
       - [x] Move energy from Benched mon to Active mon
       - [x] Make opponent redraw for their remaining prize points
-    - [ ] Abilities
+    - [x] Abilities
       - [x] Absorb damage from other mon
       - [x] Damage/heal on energy attach
         - [x] Promo Cresselia ex
-      - [ ] Flip coin to reduce damage
-      - [ ] Discard to draw
+      - [x] Flip coin to reduce damage
+      - [x] Discard to draw
   - [ ] A2a
   - [ ] A2b
   - [ ] A3
