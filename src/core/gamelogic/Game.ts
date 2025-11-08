@@ -251,7 +251,7 @@ export class Game {
         const damage = 10;
 
         pokemon.applyDamage(damage);
-        this.GameLog.specialConditionDamage(attacker, "Poisoned", initialHP, damage);
+        this.GameLog.specialConditionDamage(pokemon, "Poisoned", initialHP, damage);
       }
     }
 
@@ -262,11 +262,11 @@ export class Game {
         const damage = 20;
 
         pokemon.applyDamage(damage);
-        this.GameLog.specialConditionDamage(attacker, "Burned", initialHP, damage);
+        this.GameLog.specialConditionDamage(pokemon, "Burned", initialHP, damage);
 
         if (pokemon.player.flipCoin()) {
           pokemon.SecondaryConditions.delete("Burned");
-          this.GameLog.specialConditionEnded(attacker, ["Burned"]);
+          this.GameLog.specialConditionEnded(pokemon, ["Burned"]);
         }
       }
     }
@@ -276,7 +276,7 @@ export class Game {
       if (pokemon.PrimaryCondition == "Asleep") {
         if (pokemon.player.flipCoin()) {
           pokemon.PrimaryCondition = undefined;
-          this.GameLog.specialConditionEnded(attacker, ["Asleep"]);
+          this.GameLog.specialConditionEnded(pokemon, ["Asleep"]);
         }
       }
     }
