@@ -917,7 +917,7 @@ export class Game {
    */
   async discardPokemonTools(
     pokemon: InPlayPokemonCard,
-    tools: PokemonToolCard[] = pokemon.AttachedToolCards
+    tools: PokemonToolCard[] = pokemon.AttachedToolCards.slice()
   ): Promise<void> {
     if (this.shouldPreventEffects(pokemon)) return;
     if (tools.length === 0) return;
