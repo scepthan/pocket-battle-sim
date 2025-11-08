@@ -424,7 +424,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
             amount: Number(amount),
             source: "Ability",
             appliesToPokemon: predicate,
-            descriptor: "Active Pokémon",
+            descriptor: specifier,
           },
         });
       },

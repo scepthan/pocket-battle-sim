@@ -119,7 +119,8 @@
             >!
           </p>
           <p v-else-if="entry.status.type == 'IncreaseAttack'">
-            Attacks used<span v-if="entry.status.descriptor"> by {{ entry.status.descriptor }}</span
+            Attacks used<span v-if="entry.status.descriptor">
+              by your {{ entry.status.descriptor }}</span
             ><span v-if="entry.status.source == 'Effect'"> this turn</span> do +{{
               entry.status.amount
             }}
