@@ -26,8 +26,8 @@ onMounted(() => {
 
   // For testing purposes, you can set playerDeck and opponentDeck to specific deck names
   // Otherwise, they will be selected at random from the available decks
-  const playerDeck: string | undefined = "A1 Custom - Venusaur & Victreebel";
-  const opponentDeck: string | undefined = "A1a Solo Battles - Gyarados ex & Vaporeon";
+  const playerDeck: string | undefined = undefined;
+  const opponentDeck: string | undefined = undefined;
 
   setInterval(() => {
     if (game.value && !game.value.GameOver) return;

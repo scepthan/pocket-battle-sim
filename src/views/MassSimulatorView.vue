@@ -53,7 +53,7 @@ const filteredRecords = computed(() =>
 onMounted(() => {
   const allEntrants = useAgents.value
     ? Object.keys(allAgents)
-    : Object.keys(deckStore.AllDecks).filter((x) => x.includes("A1"));
+    : Object.keys(deckStore.AllDecks).filter((x) => x.includes("Meta"));
   entrants.value = allEntrants.slice();
   selectedEntrant.value = allEntrants[0] ?? "none";
 
