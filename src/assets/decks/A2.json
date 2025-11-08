@@ -1,4 +1,38 @@
 {
+  "A2 Solo Battles": {
+    "Yanmega ex & Exeggutor ex": {
+      "Cards": ["A1-021", "A1-021", "A1-023", "A1-023", "A1-203", "A1-203", "A1-219", "A1-219", "A2-006", "A2-006", "A2-007", "A2-007", "A2-147", "A2-147", "A2-150", "A2-150", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Grass"]
+    },
+    "Infernape ex & Rapidash": {
+      "Cards": ["A1-042", "A1-042", "A1-043", "A1-043", "A1-048", "A1-048", "A2-027", "A2-027", "A2-028", "A2-028", "A2-029", "A2-029", "A2-148", "A2-148", "A2-150", "A2-150", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Fire"]
+    },
+    "Palkia ex & Vaporeon": {
+      "Cards": ["A1-084", "A1-084", "A1a-019", "A1a-019", "A1a-068", "A1a-068", "A2-049", "A2-049", "A2-050", "A2-050", "A2-126", "A2-126", "A2-147", "A2-147", "A2-150", "A2-150", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Water"]
+    },
+    "Pachirisu ex & Pikachu ex": {
+      "Cards": ["A1-096", "A1-096", "A1-104", "A1-104", "A2-061", "A2-061", "A2-062", "A2-062", "A2-147", "A2-147", "A2-148", "A2-148", "A2-150", "A2-150", "PROMO-A-002", "PROMO-A-002", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Lightning"]
+    },
+    "Mismagius ex & Gardevoir": {
+      "Cards": ["A1-129", "A1-129", "A1-132", "A1-132", "A1a-068", "A1a-068", "A2-066", "A2-066", "A2-067", "A2-067", "A2-068", "A2-068", "A2-069", "A2-069", "A2-150", "A2-150", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Psychic"]
+    },
+    "Gallade ex & Lucario": {
+      "Cards": ["A1-155", "A1-155", "A2-068", "A2-068", "A2-069", "A2-069", "A2-091", "A2-091", "A2-092", "A2-092", "A2-095", "A2-095", "A2-147", "A2-147", "A2-150", "A2-150", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Fighting"]
+    },
+    "Darkrai ex & Weavile ex": {
+      "Cards": ["A1-198", "A1-198", "A2-098", "A2-098", "A2-099", "A2-099", "A2-110", "A2-110", "A2-148", "A2-148", "A2-150", "A2-150", "A2-154", "A2-154", "PROMO-A-002", "PROMO-A-002", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Darkness"]
+    },
+    "Dialga ex & Melmetal": {
+      "Cards": ["A1-181", "A1-181", "A1-182", "A1-182", "A2-111", "A2-111", "A2-119", "A2-119", "A2-147", "A2-147", "A2-148", "A2-148", "A2-150", "A2-150", "PROMO-A-002", "PROMO-A-002", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Metal"]
+    }
+  },
   "A2 Custom": {
     "Magnezone & Pachirisu ex": {
       "Cards": ["A1-098", "A1-098", "A2-051", "A2-051", "A2-053", "A2-053", "A2-061", "A2-061", "A2-146", "A2-146", "A2-147", "A2-147", "A2-148", "A2-148", "A2-150", "A2-155", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
