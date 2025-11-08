@@ -13,8 +13,6 @@
 
 <script setup lang="ts">
 import type { PlayingCard } from "@/core";
-import { computed } from "vue";
-import PlayingCardImage from "./PlayingCardImage.vue";
 
 export interface Props {
   heightPx?: number;

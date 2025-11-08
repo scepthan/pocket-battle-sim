@@ -7,7 +7,6 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from "vue";
 import { useDeckStore, usePlayingCardStore } from "./stores";
 
 const cardStore = usePlayingCardStore();

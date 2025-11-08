@@ -15,7 +15,6 @@
 
 <script setup lang="ts">
 import type { PlayingCard } from "@/core";
-import { computed } from "vue";
 
 export interface Props {
   card: PlayingCard;

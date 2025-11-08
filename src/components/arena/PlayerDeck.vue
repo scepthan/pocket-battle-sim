@@ -21,10 +21,7 @@
 
 <script setup lang="ts">
 import type { PlayingCard as TPlayingCard } from "@/core";
-import { computed, mergeProps, ref } from "vue";
-import PlayingCard from "../common/PlayingCard.vue";
-import CardDisplayDialog from "./CardDisplayDialog.vue";
-import InPlayCardSlot from "./InPlayCardSlot.vue";
+import { mergeProps } from "vue";
 
 export interface Props {
   deck: TPlayingCard[];

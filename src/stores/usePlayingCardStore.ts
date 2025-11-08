@@ -1,7 +1,6 @@
 import { allCards as inputCards } from "@/assets";
 import { parseCard, type InputCard, type PlayingCard } from "@/core";
 import { defineStore } from "pinia";
-import { ref } from "vue";
 
 export const usePlayingCardStore = defineStore("playing-cards", () => {
   console.log("Starting playing card store");

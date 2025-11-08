@@ -16,7 +16,6 @@
 
 <script setup lang="ts">
 import type { PlayingCard } from "@/core";
-import SelectableCard from "./SelectableCard.vue";
 
 defineModel<PlayingCard[]>("selected-cards", { required: true });
 </script>

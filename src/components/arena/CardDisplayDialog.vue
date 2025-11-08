@@ -19,7 +19,6 @@
 
 <script setup lang="ts">
 import type { PlayingCard as TPlayingCard } from "@/core";
-import PlayingCard from "../common/PlayingCard.vue";
 
 export interface Props {
   title: string;

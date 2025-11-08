@@ -431,12 +431,7 @@
 </template>
 
 <script setup lang="ts">
-import CardName from "@/components/common/CardName.vue";
-import CardNameList from "@/components/common/CardNameList.vue";
-import CountDisplay from "@/components/common/CountDisplay.vue";
-import EnergyIcon from "@/components/common/EnergyIcon.vue";
 import type { GameLogger } from "@/core";
-import HpChange from "./HpChange.vue";
 
 export interface Props {
   gameLog?: GameLogger;

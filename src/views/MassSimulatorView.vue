@@ -28,7 +28,6 @@ import { allAgents, removeElement } from "@/core";
 import { useDeckStore } from "@/stores";
 import type { BattleRecord, MassSimulatorFromWorkerMessage } from "@/types";
 import { MassAgentSimulatorWorker, MassDeckSimulatorWorker } from "@/workers";
-import { computed, onMounted, reactive, ref } from "vue";
 
 interface DeckRecord {
   gamesPlayed: number;
@@ -54,7 +53,7 @@ const filteredRecords = computed(() =>
 onMounted(() => {
   const allEntrants = useAgents.value
     ? Object.keys(allAgents)
-    : Object.keys(deckStore.AllDecks).filter((x) => x.includes("Meta"));
+    : Object.keys(deckStore.AllDecks).filter((x) => x.includes("A1"));
   entrants.value = allEntrants.slice();
   selectedEntrant.value = allEntrants[0] ?? "none";
 

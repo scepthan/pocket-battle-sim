@@ -36,11 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import EnergyIcon from "@/components/common/EnergyIcon.vue";
-import PlayingCard from "@/components/common/PlayingCard.vue";
 import type { EmptyCardSlot, InPlayPokemonCard } from "@/core";
-import { computed } from "vue";
-import PlayingCardImage from "../common/PlayingCardImage.vue";
 
 export interface Props {
   heightPx?: number;

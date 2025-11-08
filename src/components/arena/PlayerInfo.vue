@@ -26,11 +26,6 @@
 
 <script setup lang="ts">
 import type { Player } from "@/core";
-import EnergyZone from "./EnergyZone.vue";
-import PlayerDeck from "./PlayerDeck.vue";
-import PlayerDiscard from "./PlayerDiscard.vue";
-import PlayerHandHidden from "./PlayerHandHidden.vue";
-import PlayerHandVisible from "./PlayerHandVisible.vue";
 
 export interface Props {
   player: Player | undefined;

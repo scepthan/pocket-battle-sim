@@ -22,9 +22,6 @@
 
 <script setup lang="ts">
 import { type Game } from "@/core";
-import GameLog from "./GameLog.vue";
-import PlayerInfo from "./PlayerInfo.vue";
-import PlayerPokemon from "./PlayerPokemon.vue";
 
 export interface Props {
   game: Game | undefined;

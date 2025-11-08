@@ -21,7 +21,6 @@
 <script setup lang="ts">
 import { type PlayingCard } from "@/core";
 import { usePlayingCardStore } from "@/stores";
-import { computed, ref } from "vue";
 
 export interface Props {
   cardsPerRow?: number;

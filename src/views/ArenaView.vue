@@ -5,7 +5,6 @@
 <script setup lang="ts">
 import { BetterRandomAgent, Game, RandomAgent, randomElement } from "@/core";
 import { useDeckStore, usePlayingCardStore } from "@/stores";
-import { onMounted, ref } from "vue";
 
 const cardStore = usePlayingCardStore();
 const deckStore = useDeckStore();
@@ -27,8 +26,8 @@ onMounted(() => {
 
   // For testing purposes, you can set playerDeck and opponentDeck to specific deck names
   // Otherwise, they will be selected at random from the available decks
-  const playerDeck: string | undefined = undefined;
-  const opponentDeck: string | undefined = undefined;
+  const playerDeck: string | undefined = "A1 Custom - Venusaur & Victreebel";
+  const opponentDeck: string | undefined = "A1a Solo Battles - Gyarados ex & Vaporeon";
 
   setInterval(() => {
     if (game.value && !game.value.GameOver) return;

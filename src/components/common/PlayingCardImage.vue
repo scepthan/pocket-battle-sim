@@ -4,7 +4,6 @@
 
 <script setup lang="ts">
 import cardBackUrl from "@/assets/img/cardback.jpg";
-import { computed } from "vue";
 
 export interface Props {
   cardId?: string;

@@ -1,8 +1,6 @@
-<template>{{ count }} {{ count === 1 ? single : (plural ?? single + "s") }}</template>
+<template>{{ count }} {{ count === 1 ? single : plural ?? single + "s" }}</template>
 
 <script setup lang="ts">
-import { computed } from "vue";
-
 export interface Props {
   count: Array<unknown> | number;
   single: string;

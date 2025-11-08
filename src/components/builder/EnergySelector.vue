@@ -44,7 +44,6 @@
 
 <script setup lang="ts">
 import { type Energy, EnergyMap } from "@/core";
-import { computed, ref } from "vue";
 
 const energyDialog = ref(false);
 

@@ -11,7 +11,6 @@
 
 <script setup lang="ts">
 import type { DeckInfo } from "@/core";
-import { ref } from "vue";
 
 const props = defineProps<{
   deck: DeckInfo;

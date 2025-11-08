@@ -32,12 +32,6 @@
 
 <script setup lang="ts">
 import { type Energy, type PlayingCard } from "@/core";
-import { ref } from "vue";
-import CopyJsonButton from "./CopyJsonButton.vue";
-import DeckDisplay from "./DeckDisplay.vue";
-import EnergySelector from "./EnergySelector.vue";
-import ResetDeckButton from "./ResetDeckButton.vue";
-import SearchPanel from "./SearchPanel.vue";
 
 const selectedCards = ref<PlayingCard[]>([]);
 const deckName = ref("");

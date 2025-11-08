@@ -10,7 +10,7 @@
 import type { PlayingCard } from "@/core";
 
 export interface Props {
-  cards: PlayingCard[] | number;
+  cards: PlayingCard[];
 }
 defineProps<Props>();
 </script>

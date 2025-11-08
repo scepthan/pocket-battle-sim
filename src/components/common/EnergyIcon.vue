@@ -5,7 +5,6 @@
 <script setup lang="ts">
 import * as Energies from "@/assets/img/energy";
 import type { Energy } from "@/core";
-import { computed } from "vue";
 
 export interface Props {
   energy: Energy;
