@@ -43,6 +43,10 @@ export class Game {
   AttackDamagedPokemon: Set<InPlayPokemonCard> = new Set();
   AttackKnockedOutPokemon: Set<InPlayPokemonCard> = new Set();
 
+  get InPlayPokemon() {
+    return [...this.AttackingPlayer.InPlayPokemon, ...this.DefendingPlayer.InPlayPokemon];
+  }
+
   GameRules: GameRules = {
     DeckSize: 20,
     InitialHandSize: 5,
@@ -244,6 +248,14 @@ export class Game {
       return;
     }
 
+    // Trigger turn end effects
+    for (const pokemon of this.InPlayPokemon) {
+      for (const tool of pokemon.AttachedToolCards) {
+        if (tool.Effect.trigger === "OnTurnEnd" && tool.Effect.conditions.every((c) => c(pokemon)))
+          await tool.Effect.effect(this, pokemon);
+      }
+    }
+
     // Apply poison damage
     for (const pokemon of [attacker, defender]) {
       if (pokemon.SecondaryConditions.has("Poisoned")) {
@@ -377,10 +389,9 @@ export class Game {
     for (const player of [this.DefendingPlayer, this.AttackingPlayer]) {
       for (const status of player.PlayerStatuses) {
         if (status.source === "Ability") {
-          const triggeringPokemon = [
-            ...this.DefendingPlayer.InPlayPokemon,
-            ...this.AttackingPlayer.InPlayPokemon,
-          ].filter((p) => p.ActivePlayerStatuses.some((s) => s.id === status.id));
+          const triggeringPokemon = this.InPlayPokemon.filter((p) =>
+            p.ActivePlayerStatuses.some((s) => s.id === status.id)
+          );
 
           let validPokemon = false;
           for (const pokemon of triggeringPokemon) {

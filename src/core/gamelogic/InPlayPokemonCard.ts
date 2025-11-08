@@ -142,18 +142,25 @@ export class InPlayPokemonCard {
   }
 
   /**
-   * Recovers this Pokemon from all Special Conditions and removes all "Effect" PokemonStatuses.
+   * Recovers this Pokemon from all Special Conditions.
    */
-  removeAllSpecialConditionsAndStatuses() {
+  removeAllSpecialConditions() {
     const conditions = this.CurrentConditions;
     if (conditions.length == 0) return;
 
     this.PrimaryCondition = undefined;
     this.SecondaryConditions = new Set();
 
-    this.PokemonStatuses = this.PokemonStatuses.filter((status) => status.source != "Effect");
-
     this.logger.specialConditionEnded(this, conditions);
+  }
+
+  /**
+   * Recovers this Pokemon from all Special Conditions and removes all "Effect" PokemonStatuses.
+   */
+  removeAllSpecialConditionsAndStatuses() {
+    this.removeAllSpecialConditions();
+
+    this.PokemonStatuses = this.PokemonStatuses.filter((status) => status.source != "Effect");
   }
 
   /**
