@@ -146,14 +146,11 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         const fullType = parseEnergy(energyType);
         const pt = parseEnergy(pokemonType);
 
+        ability.conditions.push((self) => self.player.activeOrThrow().Type === pt);
         ability.effect = {
           type: "Standard",
           effect: async (game, self) => {
             const pokemon = self.player.activeOrThrow();
-            if (pokemon.Type != pt) {
-              game.GameLog.noValidTargets(self.player);
-              return;
-            }
             await self.player.attachEnergy(pokemon, [fullType], "energyZone");
           },
         };
@@ -162,6 +159,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     {
       pattern: /heal (\d+) damage from each of your Pokémon\.$/i,
       transform: (_, healing) => {
+        ability.conditions.push((self) => self.player.InPlayPokemon.some((p) => p.isDamaged()));
         ability.effect = {
           type: "Standard",
           effect: async (game, self) => {
@@ -227,6 +225,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       pattern:
         /^switch out your opponent’s Active Pokémon to the Bench\. \(Your opponent chooses the new Active Pokémon\.\)$/i,
       transform: () => {
+        ability.conditions.push((self) => self.player.opponent.BenchedPokemon.length > 0);
         ability.effect = {
           type: "Standard",
           effect: async (game, self) => {
@@ -238,6 +237,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     {
       pattern: /^look at the top card of your deck\.$/i,
       transform: () => {
+        ability.conditions.push((self) => self.player.Deck.length > 0);
         ability.effect = {
           type: "Standard",
           effect: async (game, self) => {
