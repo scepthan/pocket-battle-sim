@@ -28,6 +28,7 @@ export const parsePokemonToolEffect = (cardText: string): ParsedResult<PokemonTo
         /^If the(?: {(\w)})? Pokémon this card is attached to is in the Active Spot and is damaged by an attack from your opponent’s Pokémon, /i,
       transform: (_, energyType) => {
         effect.trigger = "OnAttackDamage";
+        effect.conditions.push((pokemon) => pokemon === pokemon.player.ActivePokemon);
         if (energyType) {
           const fullType = parseEnergy(energyType);
           effect.conditions.push((pokemon) => pokemon.Type === fullType);

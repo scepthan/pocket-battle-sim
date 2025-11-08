@@ -309,7 +309,11 @@ export class InPlayPokemonCard {
       if (this.game.DefendingPlayer.InPlayPokemon.includes(this)) await this.triggerAbility();
     }
     for (const tool of this.AttachedToolCards) {
-      if (tool.Effect.trigger === "OnAttackDamage") await this.triggerPokemonTool(tool);
+      if (
+        tool.Effect.trigger === "OnAttackDamage" &&
+        tool.Effect.conditions.every((cond) => cond(this))
+      )
+        await this.triggerPokemonTool(tool);
     }
   }
 }
