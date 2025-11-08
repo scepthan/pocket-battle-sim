@@ -177,7 +177,7 @@ interface GenerateNextEnergyEvent {
   currentEnergy: Energy | "none";
   nextEnergy: Energy;
 }
-export type AttachEnergySource = "player" | "energyZone" | "discard" | "pokemon";
+export type AttachEnergySource = "turn" | "energyZone" | "discard" | "pokemon";
 interface AttachEnergyEvent {
   type: "attachEnergy";
   player: string;

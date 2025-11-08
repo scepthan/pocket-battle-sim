@@ -72,7 +72,7 @@
               <CardName :card-id="entry.fromPokemon!.cardId" /> to
               <CardName :card-id="entry.targetPokemon.cardId" />:
             </span>
-            <span v-else-if="entry.from == 'player'">
+            <span v-else-if="entry.from == 'turn'">
               <b>{{ entry.player }}</b> attaches energy to
               <CardName :card-id="entry.targetPokemon.cardId" />:
             </span>

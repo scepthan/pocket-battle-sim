@@ -310,7 +310,7 @@ export class Player {
     if (!this.AvailableEnergy) {
       throw new Error("No energy available to attach");
     }
-    await this.attachEnergy(pokemon, [this.AvailableEnergy], "player");
+    await this.attachEnergy(pokemon, [this.AvailableEnergy], "turn");
     this.AvailableEnergy = undefined;
   }
 
@@ -321,7 +321,7 @@ export class Player {
     fromPokemon?: InPlayPokemonCard
   ) {
     pokemon.attachEnergy(energy);
-    if (from === "energyZone") await pokemon.onEnergyZoneAttach(energy);
+    if (from === "turn" || from === "energyZone") await pokemon.onEnergyZoneAttach(energy);
     this.logger.attachEnergy(this, pokemon, energy, from, fromPokemon);
   }
 
