@@ -191,9 +191,10 @@ export class Game {
     }
 
     // Log the Special Conditions that will affect the Active Pokemon
-    const status = this.AttackingPlayer.activeOrThrow().PrimaryCondition;
+    const attackingPokemon = this.AttackingPlayer.activeOrThrow();
+    const status = attackingPokemon.PrimaryCondition;
     if (status == "Asleep" || status == "Paralyzed") {
-      this.GameLog.specialConditionEffective(this.AttackingPlayer);
+      this.GameLog.specialConditionEffective(attackingPokemon);
     }
 
     // Draw a card into the attacking player's hand
@@ -246,10 +247,9 @@ export class Game {
       if (pokemon.SecondaryConditions.has("Poisoned")) {
         const initialHP = pokemon.CurrentHP;
         const damage = 10;
-        const player = pokemon.player;
 
         pokemon.applyDamage(damage);
-        this.GameLog.specialConditionDamage(player, "Poisoned", initialHP, damage);
+        this.GameLog.specialConditionDamage(attacker, "Poisoned", initialHP, damage);
       }
     }
 
@@ -258,14 +258,13 @@ export class Game {
       if (pokemon.SecondaryConditions.has("Burned")) {
         const initialHP = pokemon.CurrentHP;
         const damage = 20;
-        const player = pokemon.player;
 
         pokemon.applyDamage(damage);
-        this.GameLog.specialConditionDamage(player, "Burned", initialHP, damage);
+        this.GameLog.specialConditionDamage(attacker, "Burned", initialHP, damage);
 
-        if (player.flipCoin()) {
+        if (pokemon.player.flipCoin()) {
           pokemon.SecondaryConditions.delete("Burned");
-          this.GameLog.specialConditionEnded(player, ["Burned"]);
+          this.GameLog.specialConditionEnded(attacker, ["Burned"]);
         }
       }
     }
@@ -273,10 +272,9 @@ export class Game {
     // Flip to wake up sleeping Pokemon
     for (const pokemon of [attacker, defender]) {
       if (pokemon.PrimaryCondition == "Asleep") {
-        const player = pokemon.player;
-        if (player.flipCoin()) {
+        if (pokemon.player.flipCoin()) {
           pokemon.PrimaryCondition = undefined;
-          this.GameLog.specialConditionEnded(player, ["Asleep"]);
+          this.GameLog.specialConditionEnded(attacker, ["Asleep"]);
         }
       }
     }
@@ -284,7 +282,7 @@ export class Game {
     // Remove paralysis status from attacking player's Active Pokemon
     if (attacker.PrimaryCondition == "Paralyzed") {
       attacker.PrimaryCondition = undefined;
-      this.GameLog.specialConditionEnded(this.AttackingPlayer, ["Paralyzed"]);
+      this.GameLog.specialConditionEnded(attacker, ["Paralyzed"]);
     }
 
     // Check for player and Pokemon statuses and remove if expired
@@ -634,7 +632,7 @@ export class Game {
       (status) => status.type === "CoinFlipToAttack"
     ).length;
     if (attacker.PrimaryCondition === "Confused") {
-      this.GameLog.specialConditionEffective(this.AttackingPlayer);
+      this.GameLog.specialConditionEffective(attacker);
       coinFlipsToAttack += 1;
     }
 

@@ -153,7 +153,7 @@ export class InPlayPokemonCard {
 
     this.PokemonStatuses = this.PokemonStatuses.filter((status) => status.source != "Effect");
 
-    this.logger.specialConditionEnded(this.player, conditions);
+    this.logger.specialConditionEnded(this, conditions);
   }
 
   /**

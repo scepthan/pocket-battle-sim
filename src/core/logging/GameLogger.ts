@@ -267,27 +267,26 @@ export class GameLogger {
     });
   }
 
-  specialConditionEffective(player: Player) {
+  specialConditionEffective(pokemon: InPlayPokemonCard) {
     this.addEntry({
       type: "specialConditionEffective",
-      player: player.Name,
-      targetPokemon: player.pokemonToDescriptor(player.activeOrThrow()),
-      specialCondition: player.activeOrThrow().PrimaryCondition!,
+      player: pokemon.player.Name,
+      targetPokemon: pokemon.player.pokemonToDescriptor(pokemon),
+      specialCondition: pokemon.PrimaryCondition!,
     });
   }
 
   specialConditionDamage(
-    player: Player,
+    pokemon: InPlayPokemonCard,
     condition: SecondaryCondition,
     initialHP: number,
     damage: number
   ) {
-    const pokemon = player.activeOrThrow();
     this.addEntry({
       type: "specialConditionDamage",
-      player: player.Name,
+      player: pokemon.player.Name,
       specialCondition: condition,
-      targetPokemon: player.pokemonToDescriptor(pokemon),
+      targetPokemon: pokemon.player.pokemonToDescriptor(pokemon),
       initialHP: initialHP,
       damageDealt: damage,
       finalHP: pokemon.CurrentHP,
@@ -295,12 +294,11 @@ export class GameLogger {
     });
   }
 
-  specialConditionEnded(player: Player, conditions: SpecialCondition[]) {
-    const pokemon = player.activeOrThrow();
+  specialConditionEnded(pokemon: InPlayPokemonCard, conditions: SpecialCondition[]) {
     this.addEntry({
       type: "specialConditionEnded",
-      player: player.Name,
-      targetPokemon: player.pokemonToDescriptor(pokemon),
+      player: pokemon.player.Name,
+      targetPokemon: pokemon.player.pokemonToDescriptor(pokemon),
       specialConditions: conditions,
       currentConditionList: pokemon.CurrentConditions,
     });
