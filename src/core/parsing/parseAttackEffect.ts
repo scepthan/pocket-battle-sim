@@ -678,7 +678,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
             type: "ReduceAttackDamage",
             amount: Number(damageReduction),
             source: "Effect",
-            keepNextTurn: true,
+            turnsToKeep: 1,
           })
         );
       },
@@ -691,7 +691,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
           game.AttackingPlayer.applyActivePokemonStatus({
             type: "PreventAttackDamageAndEffects",
             source: "Effect",
-            keepNextTurn: true,
+            turnsToKeep: 1,
           })
         );
       },
@@ -705,7 +705,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
             type: "ReduceOwnAttackDamage",
             amount: Number(damageReduction),
             source: "Effect",
-            keepNextTurn: true,
+            turnsToKeep: 1,
           })
         );
       },
@@ -719,7 +719,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
           game.DefendingPlayer.applyActivePokemonStatus({
             type: "CannotAttack",
             source: "Effect",
-            keepNextTurn: true,
+            turnsToKeep: 1,
           })
         );
       },
@@ -731,7 +731,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
           game.DefendingPlayer.applyActivePokemonStatus({
             type: "CannotRetreat",
             source: "Effect",
-            keepNextTurn: true,
+            turnsToKeep: 1,
           })
         );
       },
@@ -744,7 +744,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
           game.DefendingPlayer.applyActivePokemonStatus({
             type: "CoinFlipToAttack",
             source: "Effect",
-            keepNextTurn: true,
+            turnsToKeep: 1,
           })
         );
       },
@@ -756,7 +756,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
           game.AttackingPlayer.applyActivePokemonStatus({
             type: "CannotAttack",
             source: "Effect",
-            keepNextTurn: true,
+            turnsToKeep: 2,
           })
         );
       },
@@ -769,7 +769,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
             type: "CannotUseSpecificAttack",
             attackName,
             source: "Effect",
-            keepNextTurn: true,
+            turnsToKeep: 2,
           })
         );
       },
@@ -783,7 +783,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
             attackName,
             amount: Number(increaseAmount),
             source: "Effect",
-            keepNextTurn: true,
+            turnsToKeep: 2,
           })
         );
       },

@@ -318,8 +318,8 @@ export class Game {
         const newStatuses: PokemonStatus[] = [];
         for (const status of pokemon.PokemonStatuses) {
           if (status.source == "Effect") {
-            if (status.keepNextTurn) {
-              status.keepNextTurn = false;
+            if (status.turnsToKeep) {
+              status.turnsToKeep -= 1;
               newStatuses.push(status);
             }
           } else {

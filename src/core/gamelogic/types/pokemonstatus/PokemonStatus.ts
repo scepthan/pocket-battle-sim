@@ -5,7 +5,7 @@ import type { OtherPokemonStatus } from "./OtherPokemonStatus";
 export interface BasePokemonStatus {
   id?: string;
   source: "Effect" | "Ability" | "PokemonTool";
-  keepNextTurn?: boolean;
+  turnsToKeep?: number;
 }
 
 export type PokemonStatus = DefensePokemonStatus | AttackPokemonStatus | OtherPokemonStatus;
