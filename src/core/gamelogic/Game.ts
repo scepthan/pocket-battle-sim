@@ -136,6 +136,8 @@ export class Game {
     await this.Player1.setupPokemon(setup1);
     await this.Player2.setupPokemon(setup2);
 
+    await this.afterAction();
+
     await this.delay();
 
     while (this.TurnNumber < this.GameRules.TurnLimit && !this.GameOver) {
