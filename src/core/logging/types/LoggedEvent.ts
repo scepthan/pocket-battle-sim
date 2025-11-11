@@ -177,6 +177,11 @@ interface GenerateNextEnergyEvent {
   currentEnergy: Energy | "none";
   nextEnergy: Energy;
 }
+interface ChangeNextEnergyEvent {
+  type: "changeNextEnergy";
+  player: string;
+  nextEnergy: Energy;
+}
 export type AttachEnergySource = "turn" | "energyZone" | "discard" | "pokemon";
 interface AttachEnergyEvent {
   type: "attachEnergy";
@@ -344,6 +349,7 @@ export type LoggedEvent =
   | EvolvePokemonEvent
   | ViewCardsEvent
   | GenerateNextEnergyEvent
+  | ChangeNextEnergyEvent
   | AttachEnergyEvent
   | DiscardEnergyEvent
   | TriggerAbilityEvent

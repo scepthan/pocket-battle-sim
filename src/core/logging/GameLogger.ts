@@ -63,6 +63,14 @@ export class GameLogger {
     });
   }
 
+  changeNextEnergy(player: Player) {
+    this.addEntry({
+      type: "changeNextEnergy",
+      player: player.Name,
+      nextEnergy: player.NextEnergy,
+    });
+  }
+
   playToActive(player: Player, card: PokemonCard) {
     this.addEntry({
       type: "playToActive",

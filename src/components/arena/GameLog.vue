@@ -96,6 +96,11 @@
           </p>
         </div>
 
+        <div v-else-if="entry.type == 'changeNextEnergy'">
+          Next energy for <b>{{ entry.player }}</b> changed to
+          <EnergyIcon inline :energy="entry.nextEnergy" />!
+        </div>
+
         <div v-else-if="entry.type == 'discardEnergy'">
           <p v-if="entry.energyTypes.length == 0">No energy could be discarded.</p>
           <p v-else>
@@ -298,8 +303,12 @@
         <div v-else-if="entry.type == 'applyPokemonStatus'">
           <CardName :card-id="entry.targetPokemon.cardId" />
           <span v-if="entry.status.type == 'ReduceAttackDamage'">
-            will take &minus;{{ entry.status.amount }} damage from attacks</span
-          >
+            will take &minus;{{ entry.status.amount }} damage from attacks<span
+              v-if="entry.status.attackerCondition"
+            >
+              from {{ entry.status.attackerCondition.descriptor }}</span
+            >
+          </span>
           <span v-else-if="entry.status.type == 'PreventAttackDamageAndEffects'">
             cannot be affected by attacks</span
           >

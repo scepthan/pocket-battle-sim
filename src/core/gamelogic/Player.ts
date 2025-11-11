@@ -101,6 +101,11 @@ export class Player {
     this.logger.generateNextEnergy(this);
   }
 
+  changeNextEnergy(newEnergy: Energy) {
+    this.NextEnergy = newEnergy;
+    this.logger.changeNextEnergy(this);
+  }
+
   async setupPokemon(setup: PlayerGameSetup) {
     // Set up the active Pokémon
     if (!this.Hand.includes(setup.active)) {

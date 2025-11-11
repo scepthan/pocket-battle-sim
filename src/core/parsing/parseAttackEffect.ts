@@ -823,7 +823,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
           .split(/, or |, /)
           .map((x) => parseEnergy(x.slice(1, 2)));
         addSideEffect(async (game) => {
-          game.DefendingPlayer.NextEnergy = randomElement(possibleEnergies);
+          game.DefendingPlayer.changeNextEnergy(randomElement(possibleEnergies));
         });
       },
     },
