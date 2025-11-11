@@ -449,12 +449,19 @@ export class Player {
   async returnPokemonToHand(pokemon: InPlayPokemonCard) {
     await this.removePokemonFromField(pokemon);
 
+    const discardedCards: PlayingCard[] = [];
     for (const card of pokemon.InPlayCards) {
       removeElement(this.InPlay, card);
-      this.Hand.push(card);
+      if (card.CardType == "PokemonTool") {
+        this.Discard.push(card);
+        discardedCards.push(card);
+      } else {
+        this.Hand.push(card);
+      }
     }
 
     this.logger.returnInPlayPokemonToHand(this, pokemon);
+    if (discardedCards.length > 0) this.logger.discardFromPlay(this, discardedCards);
 
     this.discardEnergy(pokemon.AttachedEnergy, "removedFromField");
   }
@@ -462,12 +469,19 @@ export class Player {
   async shufflePokemonIntoDeck(pokemon: InPlayPokemonCard) {
     await this.removePokemonFromField(pokemon);
 
+    const discardedCards: PlayingCard[] = [];
     for (const card of pokemon.InPlayCards) {
       removeElement(this.InPlay, card);
-      this.Deck.push(card);
+      if (card.CardType == "PokemonTool") {
+        this.Discard.push(card);
+        discardedCards.push(card);
+      } else {
+        this.Deck.push(card);
+      }
     }
 
     this.logger.returnInPlayPokemonToDeck(this, pokemon);
+    if (discardedCards.length > 0) this.logger.discardFromPlay(this, discardedCards);
 
     this.discardEnergy(pokemon.AttachedEnergy, "removedFromField");
 
