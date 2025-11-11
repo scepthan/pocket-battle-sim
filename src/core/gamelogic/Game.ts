@@ -348,7 +348,7 @@ export class Game {
   private async afterAction(): Promise<void> {
     await this.checkForKnockOuts();
 
-    this.removeOutdatedPlayerStatuses();
+    this.removeOutdatedStatuses();
 
     this.checkStatusAbilityConditions();
 
@@ -385,7 +385,18 @@ export class Game {
    * Checks all player statuses applied by abilities and removes those whose inflictors are no
    * longer in play.
    */
-  private removeOutdatedPlayerStatuses() {
+  private removeOutdatedStatuses() {
+    for (const pokemon of this.InPlayPokemon) {
+      for (const status of pokemon.PokemonStatuses) {
+        if (status.source === "Ability") {
+          const ability = pokemon.Ability;
+          if (ability?.type !== "Status" || ability.effect.status.id !== status.id) {
+            pokemon.removePokemonStatus(status);
+          }
+        }
+      }
+    }
+
     for (const player of [this.DefendingPlayer, this.AttackingPlayer]) {
       for (const status of player.PlayerStatuses) {
         if (status.source === "Ability") {
