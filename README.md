@@ -6,7 +6,7 @@ Backend todo:
   - [x] A1: 237/237 (100%)
   - [x] A1a: 70/70 (100%)
   - [x] A2: 157/157 (100.0%)
-  - [ ] A2a: 68/76 (89.5%)
+  - [ ] A2a: 69/76 (90.8%)
     - [ ] Abilities
       - [x] New conditional: specific mon in play (Arceus Link)
       - [x] New trigger: between turns
@@ -24,7 +24,7 @@ Backend todo:
       - [x] Poisoned+
       - [x] Discard N random energy
       - [x] Make self Asleep
-      - [ ] Prevent attack damage next turn (Promo Nosepass)
+      - [x] Prevent attack damage next turn (Promo Nosepass)
     - [ ] Trainers
       - [ ] Heal damage from mon with specific energy attached
       - [ ] Return random mon from discard to hand

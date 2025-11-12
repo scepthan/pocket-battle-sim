@@ -698,6 +698,19 @@ export const parseAttackEffect = (attack: Attack): boolean => {
     },
     {
       pattern:
+        /during your opponent’s next turn, prevent all damage done to this Pokémon by attacks\./i,
+      transform: () => {
+        addSideEffect(async (game) =>
+          game.AttackingPlayer.applyActivePokemonStatus({
+            type: "PreventAttackDamage",
+            source: "Effect",
+            turnsToKeep: 1,
+          })
+        );
+      },
+    },
+    {
+      pattern:
         /^during your opponent’s next turn, prevent all damage from—and effects of—attacks done to this Pokémon\./i,
       transform: () => {
         addSideEffect(async (game) =>
