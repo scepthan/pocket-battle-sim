@@ -474,6 +474,18 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       },
     },
     {
+      pattern:
+        /^your opponent reveals a random card from their hand and shuffles it into their deck\./i,
+      transform: () => {
+        addSideEffect(async (game) => {
+          if (game.DefendingPlayer.Hand.length === 0) return;
+          const card = randomElement(game.DefendingPlayer.Hand);
+          await game.showCards(game.AttackingPlayer, [card]);
+          game.DefendingPlayer.returnToDeck([card]);
+        });
+      },
+    },
+    {
       pattern: /^Your opponent reveals their hand\./,
       transform: () => {
         addSideEffect(async (game) => {
