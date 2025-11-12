@@ -6,7 +6,7 @@ Backend todo:
   - [x] A1: 237/237 (100%)
   - [x] A1a: 70/70 (100%)
   - [x] A2: 157/157 (100%)
-  - [ ] A2a: 76/76 (100%)
+  - [ ] A2a: 77/77 (100%)
     - [x] Abilities
       - [x] New conditionals
         - [x] Specific mon in play (Arceus Link)
