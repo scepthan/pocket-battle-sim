@@ -14,6 +14,7 @@ interface AbilityTransformer {
 }
 
 const selfActive: PokemonConditional = (self) => self.player.ActivePokemon == self;
+const selfBenched: PokemonConditional = (self) => self.player.BenchedPokemon.includes(self);
 
 export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Ability> => {
   let ability: Ability = {
@@ -92,6 +93,12 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       pattern: /(If|^As long as) this Pokémon is in the Active Spot, /i,
       transform: () => {
         ability.conditions.push(selfActive);
+      },
+    },
+    {
+      pattern: /(If|^As long as) this Pokémon is on your Bench, /i,
+      transform: () => {
+        ability.conditions.push(selfBenched);
       },
     },
     {
@@ -495,6 +502,28 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           status: {
             type: "IncreaseAttack",
             amount: Number(amount),
+            source: "Ability",
+          },
+        });
+      },
+    },
+    {
+      pattern: /^your Active (.+?)’s Retreat Cost is (\d+) less\./i,
+      transform: (_, specifier, amount) => {
+        const appliesToPokemon = parsePokemonPredicate(
+          specifier,
+          (p) => p === p.player.ActivePokemon
+        );
+
+        convertToStatusAbility({
+          type: "PlayerStatus",
+          opponent: false,
+          status: {
+            category: "Pokemon",
+            type: "DecreaseRetreatCost",
+            amount: Number(amount),
+            appliesToPokemon,
+            descriptor: "Active " + specifier,
             source: "Ability",
           },
         });

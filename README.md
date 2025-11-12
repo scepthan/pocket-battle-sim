@@ -6,16 +6,18 @@ Backend todo:
   - [x] A1: 237/237 (100%)
   - [x] A1a: 70/70 (100%)
   - [x] A2: 157/157 (100.0%)
-  - [ ] A2a: 71/76 (93.4%)
+  - [ ] A2a: 72/76 (94.7%)
     - [ ] Abilities
-      - [x] New conditional: specific mon in play (Arceus Link)
+      - [x] New conditionals
+        - [x] Specific mon in play (Arceus Link)
+        - [x] On Bench
       - [x] New trigger: between turns
       - [x] New mon status
         - [x] Reduce cost of own attacks
         - [x] Increase own attack damage
         - [x] Prevent Special Conditions
-      - [ ] New player status
-        - [ ] Reduce retreat cost
+      - [x] New player status
+        - [x] Reduce retreat cost
       - [ ] New effect
         - [x] Attach energy to mon
         - [ ] Choose player, look at top card of deck
