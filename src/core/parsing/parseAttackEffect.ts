@@ -493,9 +493,10 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       },
     },
     {
-      pattern: /^Discard a random Energy from this Pokémon\./i,
-      transform: () => {
-        addSideEffect(async (game, self) => game.discardRandomEnergy(self));
+      pattern: /^Discard (a|\d+) random Energy from this Pokémon\./i,
+      transform: (_, count) => {
+        const energyCount = count == "a" ? 1 : Number(count);
+        addSideEffect(async (game, self) => game.discardRandomEnergy(self, energyCount));
       },
     },
     {
