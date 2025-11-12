@@ -182,6 +182,26 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
       },
     },
     {
+      pattern: /^Heal (\d+) damage from each of your (.+?) that has any {(\w)} Energy attached\.$/,
+      transform: (_, modifier, specifier, energyType) => {
+        const fullType = parseEnergy(energyType);
+        const predicate = parsePokemonPredicate(
+          specifier,
+          (p) => p.isDamaged() && p.AttachedEnergy.includes(fullType)
+        );
+
+        return {
+          type: "Conditional",
+          condition: (game) => game.AttackingPlayer.InPlayPokemon.some(predicate),
+          effect: async (game: Game) => {
+            for (const pokemon of game.AttackingPlayer.InPlayPokemon.filter(predicate)) {
+              game.healPokemon(pokemon, Number(modifier));
+            }
+          },
+        };
+      },
+    },
+    {
       pattern:
         /^Choose 1 of your {(\w)} Pokémon, and flip a coin until you get tails\. For each heads, take a {(\w)} Energy from your Energy Zone and attach it to that Pokémon\.$/,
       transform: (_, pokemonType, energyType) => {

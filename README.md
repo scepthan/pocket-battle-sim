@@ -6,7 +6,7 @@ Backend todo:
   - [x] A1: 237/237 (100%)
   - [x] A1a: 70/70 (100%)
   - [x] A2: 157/157 (100.0%)
-  - [ ] A2a: 74/76 (97.4%)
+  - [ ] A2a: 75/76 (98.7%)
     - [x] Abilities
       - [x] New conditionals
         - [x] Specific mon in play (Arceus Link)
@@ -28,7 +28,7 @@ Backend todo:
       - [x] Make self Asleep
       - [x] Prevent attack damage next turn (Promo Nosepass)
     - [ ] Trainers
-      - [ ] Heal damage from mon with specific energy attached
+      - [x] Heal damage from mon with specific energy attached
       - [ ] Return random mon from discard to hand
       - [x] Reduce attack cost for specific mon
       - [x] Reduce damage done to mon of type
