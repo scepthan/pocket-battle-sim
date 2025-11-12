@@ -674,6 +674,12 @@ export const parseAttackEffect = (attack: Attack): boolean => {
         addSideEffect(async (game) => game.confuseDefendingPokemon());
       },
     },
+    {
+      pattern: /^This Pokémon is now Asleep\./i,
+      transform: () => {
+        addSideEffect(async (game, self) => self.player.sleepActivePokemon());
+      },
+    },
 
     // Other status effects
     {
