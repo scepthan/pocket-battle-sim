@@ -122,6 +122,40 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       },
     },
     {
+      pattern:
+        /take a {(\w)} Energy from your Energy Zone and attach it to the {(\w)} Pokémon in the Active Spot\./i,
+      transform: (_, energyType, pokemonType) => {
+        const fullType = parseEnergy(energyType);
+        const pt = parseEnergy(pokemonType);
+
+        ability.conditions.push((self) => self.player.activeOrThrow().Type === pt);
+        ability.effect = {
+          type: "Standard",
+          effect: async (game, self) => {
+            const pokemon = self.player.activeOrThrow();
+            await self.player.attachEnergy(pokemon, [fullType], "energyZone");
+          },
+        };
+      },
+    },
+    {
+      pattern: /take a {(\w)} Energy from your Energy Zone and attach it to 1 of your ([^.]+?)\./i,
+      transform: (_, energyType, specifier) => {
+        const fullType = parseEnergy(energyType);
+        const predicate = parsePokemonPredicate(specifier);
+
+        ability.effect = {
+          type: "Targeted",
+          findValidTargets: (game, self) => self.player.InPlayPokemon.filter(predicate),
+          effect: async (game, self, target) => {
+            if (!target.isPokemon) throw new Error("Not a valid target");
+
+            await self.player.attachEnergy(target, [fullType], "energyZone");
+          },
+        };
+      },
+    },
+    {
       pattern: /move a {(\w)} Energy from 1 of your Benched (.+?) to your Active (.+?)\./i,
       transform: (_, energyType, benchedSpecifier, activeSpecifier) => {
         const fullType = parseEnergy(energyType);
@@ -139,23 +173,6 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
             const active = self.player.activeOrThrow();
 
             await self.player.transferEnergy(target, active, [fullType]);
-          },
-        };
-      },
-    },
-    {
-      pattern:
-        /take a {(\w)} Energy from your Energy Zone and attach it to the {(\w)} Pokémon in the Active Spot\./i,
-      transform: (_, energyType, pokemonType) => {
-        const fullType = parseEnergy(energyType);
-        const pt = parseEnergy(pokemonType);
-
-        ability.conditions.push((self) => self.player.activeOrThrow().Type === pt);
-        ability.effect = {
-          type: "Standard",
-          effect: async (game, self) => {
-            const pokemon = self.player.activeOrThrow();
-            await self.player.attachEnergy(pokemon, [fullType], "energyZone");
           },
         };
       },
