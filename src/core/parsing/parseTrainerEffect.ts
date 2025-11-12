@@ -148,21 +148,25 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     },
     {
       pattern:
-        /^During your opponent’s next turn, all of your Pokémon take −(\d+) damage from attacks from your opponent’s Pokémon\.$/,
-      transform: (_, modifier) => ({
-        type: "Conditional",
-        condition: () => true,
-        effect: async (game: Game) => {
-          game.AttackingPlayer.applyPlayerStatus({
-            type: "IncreaseDefense",
-            category: "Pokemon",
-            appliesToPokemon: () => true,
-            source: "Effect",
-            amount: Number(modifier),
-            keepNextTurn: true,
-          });
-        },
-      }),
+        /^During your opponent’s next turn, all of your (.+?) take −(\d+) damage from attacks from your opponent’s Pokémon\.$/,
+      transform: (_, specifier, modifier) => {
+        const appliesToPokemon = parsePokemonPredicate(specifier);
+
+        return {
+          type: "Conditional",
+          condition: () => true,
+          effect: async (game: Game) => {
+            game.AttackingPlayer.applyPlayerStatus({
+              type: "IncreaseDefense",
+              category: "Pokemon",
+              appliesToPokemon,
+              source: "Effect",
+              amount: Number(modifier),
+              keepNextTurn: true,
+            });
+          },
+        };
+      },
     },
     {
       pattern: /^Heal (\d+) damage from 1 of your ([^.]+?)\.$/,
