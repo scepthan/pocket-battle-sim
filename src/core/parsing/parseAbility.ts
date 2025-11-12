@@ -403,6 +403,22 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         });
       },
     },
+    {
+      pattern: /^attacks used by this Pokémon cost (\d+) less {(\w)} Energy\./i,
+      transform: (_, amount, energyType) => {
+        const fullType = parseEnergy(energyType);
+
+        convertToStatusAbility({
+          type: "PokemonStatus",
+          status: {
+            type: "ReduceAttackCost",
+            energyType: fullType,
+            amount: Number(amount),
+            source: "Ability",
+          },
+        });
+      },
+    },
 
     // Opponent player statuses
     {

@@ -1,3 +1,4 @@
+import { removeElement } from "../util";
 import type { EmptyCardSlot } from "./EmptyCardSlot";
 import type { Game } from "./Game";
 import { InPlayPokemonCard } from "./InPlayPokemonCard";
@@ -191,7 +192,16 @@ export class PlayerGameView {
     if (attack.extraConditions.some((condition) => !condition(this.#game, realActive)))
       return false;
 
-    return this.selfActive.hasSufficientEnergy(attack.requiredEnergy);
+    const requiredEnergy = [...attack.requiredEnergy];
+    for (const status of this.selfActive.PokemonStatuses) {
+      if (status.type == "ReduceAttackCost") {
+        for (let i = 0; i < status.amount; i++) {
+          if (requiredEnergy.includes(status.energyType))
+            removeElement(requiredEnergy, status.energyType);
+        }
+      }
+    }
+    return this.selfActive.hasSufficientEnergy(requiredEnergy);
   }
   canUseAbility(pokemon: PlayerPokemonView, ability: Ability): boolean {
     if (!this.canPlay) return false;

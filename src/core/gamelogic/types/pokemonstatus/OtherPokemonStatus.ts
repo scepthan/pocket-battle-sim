@@ -1,3 +1,4 @@
+import type { Energy } from "../Energy";
 import type { BasePokemonStatus } from "./PokemonStatus";
 
 // Other statuses
@@ -11,8 +12,14 @@ interface IncreaseMaxHPPokemonStatus extends BasePokemonStatus {
   type: "IncreaseMaxHP";
   amount: number;
 }
+interface ReduceAttackCostPokemonStatus extends BasePokemonStatus {
+  type: "ReduceAttackCost";
+  energyType: Energy;
+  amount: number;
+}
 
 export type OtherPokemonStatus =
   | CannotRetreatPokemonStatus
   | NoRetreatCostPokemonStatus
-  | IncreaseMaxHPPokemonStatus;
+  | IncreaseMaxHPPokemonStatus
+  | ReduceAttackCostPokemonStatus;
