@@ -27,10 +27,16 @@ interface DoubleEnergyPlayerStatus extends BasePokemonPlayerStatus {
   energyType: Energy;
   doesNotStack: true;
 }
+interface ReduceAttackCostPlayerStatus extends BasePokemonPlayerStatus {
+  type: "ReduceAttackCost";
+  energyType: Energy;
+  amount: number;
+}
 
 export type PokemonPlayerStatus =
   | IncreaseAttackPlayerStatus
   | IncreaseDefensePlayerStatus
   | DecreaseRetreatCostPlayerStatus
   | CannotEvolvePlayerStatus
-  | DoubleEnergyPlayerStatus;
+  | DoubleEnergyPlayerStatus
+  | ReduceAttackCostPlayerStatus;

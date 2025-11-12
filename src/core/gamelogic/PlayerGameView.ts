@@ -193,8 +193,10 @@ export class PlayerGameView {
       return false;
 
     const requiredEnergy = [...attack.requiredEnergy];
-    for (const status of this.selfActive.PokemonStatuses) {
+    for (const status of [...this.selfActive.PokemonStatuses, ...this.#player.PlayerStatuses]) {
       if (status.type == "ReduceAttackCost") {
+        if ("appliesToPokemon" in status && !status.appliesToPokemon(realActive, this.#game))
+          continue;
         for (let i = 0; i < status.amount; i++) {
           if (requiredEnergy.includes(status.energyType))
             removeElement(requiredEnergy, status.energyType);

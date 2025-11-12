@@ -6,7 +6,7 @@ Backend todo:
   - [x] A1: 237/237 (100%)
   - [x] A1a: 70/70 (100%)
   - [x] A2: 157/157 (100.0%)
-  - [ ] A2a: 67/76 (88.2%)
+  - [ ] A2a: 68/76 (89.5%)
     - [ ] Abilities
       - [x] New conditional: specific mon in play (Arceus Link)
       - [x] New trigger: between turns
@@ -28,7 +28,7 @@ Backend todo:
     - [ ] Trainers
       - [ ] Heal damage from mon with specific energy attached
       - [ ] Return random mon from discard to hand
-      - [ ] Reduce attack cost for specific mon
+      - [x] Reduce attack cost for specific mon
       - [ ] Reduce damage done to mon of type
   - [ ] A2b
   - [ ] A3

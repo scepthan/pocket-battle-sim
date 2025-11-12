@@ -124,6 +124,29 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
       },
     },
     {
+      pattern: /^During this turn, attacks used by your (.+?) cost (\d+) less {(\w)} Energy\.$/,
+      transform: (_, specifier, count, energy) => {
+        const appliesToPokemon = parsePokemonPredicate(specifier);
+        const fullType = parseEnergy(energy);
+
+        return {
+          type: "Conditional",
+          condition: () => true,
+          effect: async (game: Game) => {
+            game.AttackingPlayer.applyPlayerStatus({
+              type: "ReduceAttackCost",
+              category: "Pokemon",
+              appliesToPokemon,
+              descriptor: specifier,
+              source: "Effect",
+              energyType: fullType,
+              amount: Number(count),
+            });
+          },
+        };
+      },
+    },
+    {
       pattern:
         /^During your opponent’s next turn, all of your Pokémon take −(\d+) damage from attacks from your opponent’s Pokémon\.$/,
       transform: (_, modifier) => ({

@@ -6,7 +6,7 @@ export type InPlayPokemonPredicate = Predicate<InPlayPokemonCard>;
 export type PlayingCardPredicate = Predicate<PlayingCard>;
 
 const parsePokemonNames = (text: string): string[] => {
-  const names = text.split(/, or | or |, /);
+  const names = text.split(/, or | or |, and | and |, /);
 
   const unknownNames = names.filter((name) => !allCards.some((card) => card.name === name));
   if (unknownNames.length > 0) {
