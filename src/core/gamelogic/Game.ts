@@ -258,9 +258,9 @@ export class Game {
 
     // Apply poison damage
     for (const pokemon of [attacker, defender]) {
-      if (pokemon.SecondaryConditions.has("Poisoned")) {
+      if (pokemon.isPoisoned()) {
         const initialHP = pokemon.CurrentHP;
-        const damage = 10;
+        const damage = pokemon.SecondaryConditions.has("Poisoned+") ? 20 : 10;
 
         pokemon.applyDamage(damage);
         this.GameLog.specialConditionDamage(pokemon, "Poisoned", initialHP, damage);
@@ -269,7 +269,7 @@ export class Game {
 
     // Apply burn damage and flip to recover
     for (const pokemon of [attacker, defender]) {
-      if (pokemon.SecondaryConditions.has("Burned")) {
+      if (pokemon.isBurned()) {
         const initialHP = pokemon.CurrentHP;
         const damage = 20;
 
@@ -962,11 +962,12 @@ export class Game {
   }
 
   /**
-   * Makes the Defending Pokémon Poisoned.
+   * Makes the Defending Pokémon Poisoned. If `poisonPlus` is true, applies Poisoned+ instead.
    */
-  poisonDefendingPokemon() {
+  poisonDefendingPokemon(poisonPlus: boolean = false) {
     if (this.shouldPreventEffects(this.DefendingPlayer.activeOrThrow())) return;
-    this.DefendingPlayer.poisonActivePokemon();
+    if (poisonPlus) this.DefendingPlayer.poisonPlusActivePokemon();
+    else this.DefendingPlayer.poisonActivePokemon();
   }
   /**
    * Makes the Defending Pokémon Burned.

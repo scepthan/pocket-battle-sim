@@ -141,6 +141,13 @@ export class InPlayPokemonCard {
     for (const e of energy) removeElement(this.AttachedEnergy, e);
   }
 
+  isPoisoned() {
+    return this.SecondaryConditions.has("Poisoned") || this.SecondaryConditions.has("Poisoned+");
+  }
+  isBurned() {
+    return this.SecondaryConditions.has("Burned");
+  }
+
   /**
    * Recovers this Pokemon from all Special Conditions.
    */

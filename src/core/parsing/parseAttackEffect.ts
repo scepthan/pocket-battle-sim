@@ -157,8 +157,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
     {
       pattern: /^If your opponent’s Active Pokémon is Poisoned,/i,
       transform: () => {
-        conditionalForNextEffect = (game) =>
-          game.DefendingPlayer.activeOrThrow().SecondaryConditions.has("Poisoned");
+        conditionalForNextEffect = (game) => game.DefendingPlayer.activeOrThrow().isPoisoned();
       },
     },
     {
@@ -638,9 +637,16 @@ export const parseAttackEffect = (attack: Attack): boolean => {
 
     // Special Condition effects
     {
+      pattern:
+        /^Your opponent’s Active Pokémon is now Poisoned\. Do 20 damage to this Pokémon instead of the usual amount for this Special Condition\./i,
+      transform: () => {
+        addSideEffect(async (game) => game.poisonDefendingPokemon(true));
+      },
+    },
+    {
       pattern: /^Your opponent’s Active Pokémon is now Poisoned\./i,
       transform: () => {
-        addSideEffect(async (game) => game.poisonDefendingPokemon());
+        addSideEffect(async (game) => game.poisonDefendingPokemon(false));
       },
     },
     {

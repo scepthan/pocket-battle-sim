@@ -540,6 +540,12 @@ export class Player {
 
   poisonActivePokemon() {
     this.activeOrThrow().SecondaryConditions.add("Poisoned");
+    this.activeOrThrow().SecondaryConditions.delete("Poisoned+");
+    this.logger.specialConditionApplied(this, "Poisoned");
+  }
+  poisonPlusActivePokemon() {
+    this.activeOrThrow().SecondaryConditions.add("Poisoned+");
+    this.activeOrThrow().SecondaryConditions.delete("Poisoned");
     this.logger.specialConditionApplied(this, "Poisoned");
   }
   burnActivePokemon() {
