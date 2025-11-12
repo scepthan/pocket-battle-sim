@@ -130,6 +130,8 @@ export class BetterRandomAgent extends PlayerAgent {
       await game.useAbility(pokemon, pokemon.Ability!);
     }
 
+    ownPokemon = game.selfInPlayPokemon;
+
     const active = game.selfActive;
     if (!active.isPokemon) return;
 
