@@ -16,7 +16,7 @@ export const cardData = { A1, A1a, A2, A2a, A2b, A3, A3a, A3b, A4, A4a } as Reco
 >;
 
 export const allCards = Object.values(cardData)
-  .slice(0, 3)
+  .slice(0, 4)
   .reduce((acc, cardList) => {
     return acc.concat(cardList);
   }, [] as InputCard[]);

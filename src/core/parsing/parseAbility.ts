@@ -55,24 +55,16 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       },
     },
     {
-      pattern: /^If this Pokémon is in the Active Spot, /i,
-      transform: () => {
-        ability.conditions.push(selfActive);
-      },
-    },
-    {
-      pattern: /^Once during your turn, if this Pokémon is in the Active Spot, you may /i,
-      transform: () => {
-        if (ability.type === "Status") throw new Error("Cannot set trigger on Status Ability");
-        ability.trigger = { type: "Manual", multiUse: false };
-        ability.conditions.push(selfActive);
-      },
-    },
-    {
       pattern: /^As often as you like during your turn, you may /i,
       transform: () => {
         if (ability.type === "Status") throw new Error("Cannot set trigger on Status Ability");
         ability.trigger = { type: "Manual", multiUse: true };
+      },
+    },
+    {
+      pattern: /(If|^As long as) this Pokémon is in the Active Spot, /i,
+      transform: () => {
+        ability.conditions.push(selfActive);
       },
     },
     {
@@ -81,12 +73,6 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       transform: () => {
         if (ability.type === "Status") throw new Error("Cannot set trigger on Status Ability");
         ability.trigger = { type: "AfterDamagedByAttack" };
-        ability.conditions.push(selfActive);
-      },
-    },
-    {
-      pattern: /^As long as this Pokémon is in the Active Spot, /i,
-      transform: () => {
         ability.conditions.push(selfActive);
       },
     },
@@ -102,6 +88,13 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         if (ability.type === "Status") throw new Error("Cannot set trigger on Status Ability");
         const fullType = parseEnergy(energyType);
         ability.trigger = { type: "OnEnergyZoneAttach", energy: fullType };
+      },
+    },
+    {
+      pattern: /If you have (.+?) in play, /i,
+      transform: (_, specifier) => {
+        const predicate = parsePokemonPredicate(specifier);
+        ability.conditions.push((self) => self.player.InPlayPokemon.some(predicate));
       },
     },
 
@@ -363,7 +356,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       },
     },
     {
-      pattern: /^it has no Retreat Cost\.$/i,
+      pattern: /^(it|this Pokémon) has no Retreat Cost\.$/i,
       transform: () => {
         convertToStatusAbility({
           type: "PokemonStatus",
@@ -425,6 +418,20 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
             source: "Ability",
             appliesToPokemon: predicate,
             descriptor: specifier,
+          },
+        });
+      },
+    },
+    {
+      pattern:
+        /^attacks used by this Pokémon do \+(\d+) damage to your opponent’s Active Pokémon\.$/i,
+      transform: (_, amount) => {
+        convertToStatusAbility({
+          type: "PokemonStatus",
+          status: {
+            type: "IncreaseAttack",
+            amount: Number(amount),
+            source: "Ability",
           },
         });
       },

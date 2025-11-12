@@ -6,57 +6,29 @@ Backend todo:
   - [x] A1: 237/237 (100%)
   - [x] A1a: 70/70 (100%)
   - [x] A2: 157/157 (100.0%)
-    - [x] Pokémon Tools
-    - [x] New Special Conditions
-      - [x] Confused
-        - [x] Promo Misdreavus
-      - [x] Burned
-    - [x] New Pokemon statuses
-      - [x] Prevent from using attack next turn
-      - [x] Take -N damage from typed mon
-      - [x] Prevent non-damage effects of attacks
-      - [x] Attack does extra damage next turn
-      - [x] Remove retreat cost
-    - [x] New player status
-      - [x] Attacks of specific type do +N damage
-    - [x] New attack conditionals
-      - [x] If defending mon is specific type
-      - [x] If attacking mon has Tool attached
-      - [x] If defending mon has Tool attached
-      - [x] If defending mon is knocked out
-      - [x] If N or more heads
-    - [x] New attack effects
-      - [x] Discard random energy from self
-      - [x] Prevent self from attacking next turn
-      - [x] Discard all energy of type from self
-      - [x] Also do damage to 1 of opponent's Benched mon
-      - [x] Discard energy and damage all Benched mon
-      - [x] Attach energy to 2 Benched mon
-      - [x] Attach energy to specific mon
-      - [x] Attack only works with specific mon on bench
-      - [x] Discard cards from own deck
-      - [x] Do N damage to each of opponent's mon
-      - [x] Flip coin for each own mon in play
-      - [x] Attach N energy to Benched mon
-      - [x] Change opponent's next energy
-      - [x] Remove opposing mon's Tool
-      - [x] Halve opposing mon's HP
-      - [x] Choose a card from your opponent's hand to discard
-      - [x] Put opposing mon back in opponent's hand
-      - [x] Do extra damage based on own damage
-    - [x] New Trainer effects
-      - [x] Swap mon in hand for random mon in deck
-      - [x] Bring in opponent's damaged Benched mon
-      - [x] Attach energy from discard to specific mon
-      - [x] Move energy from Benched mon to Active mon
-      - [x] Make opponent redraw for their remaining prize points
-    - [x] Abilities
-      - [x] Absorb damage from other mon
-      - [x] Damage/heal on energy attach
-        - [x] Promo Cresselia ex
-      - [x] Flip coin to reduce damage
-      - [x] Discard to draw
-  - [ ] A2a
+  - [ ] A2a: 61/76 (80.3%)
+    - [ ] Abilities
+      - [x] New conditional: specific mon in play (Arceus Link)
+      - [ ] New trigger: between turns
+      - [ ] New mon status
+        - [ ] Reduce cost of own attacks
+        - [x] Increase own attack damage
+        - [ ] Prevent Special Conditions
+      - [ ] New player status
+        - [ ] Reduce retreat cost
+      - [ ] New effect
+        - [ ] Attach energy to mon
+        - [ ] Choose player, look at top card of deck
+    - [ ] Attacks
+      - [ ] Shuffle random card from opponent's hand into deck
+      - [ ] Poisoned+
+      - [ ] Discard N random energy
+      - [ ] Make self Asleep
+    - [ ] Trainers
+      - [ ] Heal damage from mon with specific energy attached
+      - [ ] Return random mon from discard to hand
+      - [ ] Reduce attack cost for specific mon
+      - [ ] Reduce damage done to mon of type
   - [ ] A2b
   - [ ] A3
   - [ ] A3a

@@ -5,7 +5,11 @@ interface ReduceOwnAttackDamagePokemonStatus extends BasePokemonStatus {
   type: "ReduceOwnAttackDamage";
   amount: number;
 }
-interface IncreaseDamageOfAttack extends BasePokemonStatus {
+interface IncreaseAttackPokemonStatus extends BasePokemonStatus {
+  type: "IncreaseAttack";
+  amount: number;
+}
+interface IncreaseDamageOfAttackPokemonStatus extends BasePokemonStatus {
   type: "IncreaseDamageOfAttack";
   attackName: string;
   amount: number;
@@ -23,7 +27,8 @@ interface CannotAttackPokemonStatus extends BasePokemonStatus {
 
 export type AttackPokemonStatus =
   | ReduceOwnAttackDamagePokemonStatus
-  | IncreaseDamageOfAttack
+  | IncreaseAttackPokemonStatus
+  | IncreaseDamageOfAttackPokemonStatus
   | CoinFlipToAttackPokemonStatus
   | CannotUseSpecificAttackPokemonStatus
   | CannotAttackPokemonStatus;
