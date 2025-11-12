@@ -47,6 +47,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
   let abilityText = inputAbility.text;
   let parseSuccessful = true;
   const dictionary: AbilityTransformer[] = [
+    // Triggers
     {
       pattern: /^Once during your turn, you may /i,
       transform: () => {
@@ -62,24 +63,12 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       },
     },
     {
-      pattern: /(If|^As long as) this Pokémon is in the Active Spot, /i,
-      transform: () => {
-        ability.conditions.push(selfActive);
-      },
-    },
-    {
       pattern:
         /^If this Pokémon is in the Active Spot and is damaged by an attack from your opponent’s Pokémon, /i,
       transform: () => {
         if (ability.type === "Status") throw new Error("Cannot set trigger on Status Ability");
         ability.trigger = { type: "AfterDamagedByAttack" };
         ability.conditions.push(selfActive);
-      },
-    },
-    {
-      pattern: /^If this Pokémon has any Energy attached, /i,
-      transform: () => {
-        ability.conditions.push((self) => self.AttachedEnergy.length > 0);
       },
     },
     {
@@ -91,6 +80,27 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       },
     },
     {
+      pattern: /^During Pokémon Checkup, /i,
+      transform: () => {
+        if (ability.type === "Status") throw new Error("Cannot set trigger on Status Ability");
+        ability.trigger = { type: "OnPokemonCheckup" };
+      },
+    },
+
+    // Conditions
+    {
+      pattern: /(If|^As long as) this Pokémon is in the Active Spot, /i,
+      transform: () => {
+        ability.conditions.push(selfActive);
+      },
+    },
+    {
+      pattern: /^If this Pokémon has any Energy attached, /i,
+      transform: () => {
+        ability.conditions.push((self) => self.AttachedEnergy.length > 0);
+      },
+    },
+    {
       pattern: /If you have (.+?) in play, /i,
       transform: (_, specifier) => {
         const predicate = parsePokemonPredicate(specifier);
@@ -98,6 +108,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       },
     },
 
+    // Energy effects
     {
       pattern: /^take a {(\w)} Energy from your Energy Zone and attach it to this Pokémon\.$/i,
       transform: (_, energyType) => {
@@ -149,6 +160,8 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         };
       },
     },
+
+    // Healing effects
     {
       pattern: /heal (\d+) damage from each of your Pokémon\.$/i,
       transform: (_, healing) => {
@@ -178,6 +191,25 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       },
     },
     {
+      pattern:
+        /^choose 1 of your Pokémon that has damage on it, and move all of its damage to this Pokémon\.$/i,
+      transform: () => {
+        ability.effect = {
+          type: "Targeted",
+          findValidTargets: (game, self) =>
+            self.player.InPlayPokemon.filter((p) => p.isDamaged() && p !== self),
+          effect: async (game, self, target) => {
+            if (!target.isPokemon) throw new Error("Not a valid target");
+            const damage = target.currentDamage();
+            game.applyDamage(self, damage, false);
+            game.healPokemon(target, damage);
+          },
+        };
+      },
+    },
+
+    // Damage effects
+    {
       pattern: /do (\d+) damage to (?:the Attacking Pokémon|your opponent’s Active Pokémon)\.$/i,
       transform: (_, damage) => {
         ability.effect = {
@@ -201,15 +233,26 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         };
       },
     },
+
+    // Special Condition effects
     {
       pattern: /^flip a coin\. If heads, your opponent’s Active Pokémon is now Asleep\.$/i,
       transform: () => {
         ability.effect = {
           type: "Standard",
           effect: async (game, self) => {
-            if (self.player.flipCoin()) {
-              self.player.opponent.sleepActivePokemon();
-            }
+            if (self.player.flipCoin()) self.player.opponent.sleepActivePokemon();
+          },
+        };
+      },
+    },
+    {
+      pattern: /^make your opponent’s Active Pokémon Poisoned\.$/i,
+      transform: () => {
+        ability.effect = {
+          type: "Standard",
+          effect: async (game, self) => {
+            self.player.opponent.poisonActivePokemon();
           },
         };
       },
@@ -227,6 +270,8 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         };
       },
     },
+
+    // Deck-related effects
     {
       pattern: /^look at the top card of your deck\.$/i,
       transform: () => {
@@ -258,17 +303,8 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         };
       },
     },
-    {
-      pattern: /^make your opponent’s Active Pokémon Poisoned\.$/i,
-      transform: () => {
-        ability.effect = {
-          type: "Standard",
-          effect: async (game, self) => {
-            self.player.opponent.poisonActivePokemon();
-          },
-        };
-      },
-    },
+
+    // Other effects
     {
       pattern: /^switch in 1 of your opponent’s Benched Basic Pokémon to the Active Spot\.$/i,
       transform: () => {
@@ -283,23 +319,6 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
               "opponentEffect",
               game.AttackingPlayer.Name
             );
-          },
-        };
-      },
-    },
-    {
-      pattern:
-        /^choose 1 of your Pokémon that has damage on it, and move all of its damage to this Pokémon\.$/i,
-      transform: () => {
-        ability.effect = {
-          type: "Targeted",
-          findValidTargets: (game, self) =>
-            self.player.InPlayPokemon.filter((p) => p.isDamaged() && p !== self),
-          effect: async (game, self, target) => {
-            if (!target.isPokemon) throw new Error("Not a valid target");
-            const damage = target.currentDamage();
-            game.applyDamage(self, damage, false);
-            game.healPokemon(target, damage);
           },
         };
       },

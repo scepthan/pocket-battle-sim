@@ -254,6 +254,11 @@ export class Game {
         if (tool.Effect.trigger === "OnTurnEnd" && tool.Effect.conditions.every((c) => c(pokemon)))
           await tool.Effect.effect(this, pokemon);
       }
+
+      const ability = pokemon.Ability;
+      if (ability?.type === "Standard" && ability.trigger.type === "OnPokemonCheckup") {
+        await pokemon.useAbility(false);
+      }
     }
 
     // Apply poison damage
