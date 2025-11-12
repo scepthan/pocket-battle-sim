@@ -6,14 +6,14 @@ Backend todo:
   - [x] A1: 237/237 (100%)
   - [x] A1a: 70/70 (100%)
   - [x] A2: 157/157 (100.0%)
-  - [ ] A2a: 70/76 (92.1%)
+  - [ ] A2a: 71/76 (93.4%)
     - [ ] Abilities
       - [x] New conditional: specific mon in play (Arceus Link)
       - [x] New trigger: between turns
-      - [ ] New mon status
+      - [x] New mon status
         - [x] Reduce cost of own attacks
         - [x] Increase own attack damage
-        - [ ] Prevent Special Conditions
+        - [x] Prevent Special Conditions
       - [ ] New player status
         - [ ] Reduce retreat cost
       - [ ] New effect

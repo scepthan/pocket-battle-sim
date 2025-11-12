@@ -17,9 +17,13 @@ interface ReduceAttackCostPokemonStatus extends BasePokemonStatus {
   energyType: Energy;
   amount: number;
 }
+interface PreventSpecialConditionsPokemonStatus extends BasePokemonStatus {
+  type: "PreventSpecialConditions";
+}
 
 export type OtherPokemonStatus =
   | CannotRetreatPokemonStatus
   | NoRetreatCostPokemonStatus
   | IncreaseMaxHPPokemonStatus
-  | ReduceAttackCostPokemonStatus;
+  | ReduceAttackCostPokemonStatus
+  | PreventSpecialConditionsPokemonStatus;

@@ -392,6 +392,18 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       },
     },
     {
+      pattern: /^This Pokémon can’t be affected by any Special Conditions\.$/i,
+      transform: () => {
+        convertToStatusAbility({
+          type: "PokemonStatus",
+          status: {
+            type: "PreventSpecialConditions",
+            source: "Ability",
+          },
+        });
+      },
+    },
+    {
       pattern: /^(it|this Pokémon) has no Retreat Cost\.$/i,
       transform: () => {
         convertToStatusAbility({

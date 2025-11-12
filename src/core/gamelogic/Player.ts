@@ -538,29 +538,39 @@ export class Player {
     this.logger.discardFromDeck(this, discarded);
   }
 
+  shouldPreventSpecialConditions(pokemon: InPlayPokemonCard): boolean {
+    return pokemon.PokemonStatuses.some((status) => status.type === "PreventSpecialConditions");
+  }
+
   poisonActivePokemon() {
+    if (this.shouldPreventSpecialConditions(this.activeOrThrow())) return;
     this.activeOrThrow().SecondaryConditions.add("Poisoned");
     this.activeOrThrow().SecondaryConditions.delete("Poisoned+");
     this.logger.specialConditionApplied(this, "Poisoned");
   }
   poisonPlusActivePokemon() {
+    if (this.shouldPreventSpecialConditions(this.activeOrThrow())) return;
     this.activeOrThrow().SecondaryConditions.add("Poisoned+");
     this.activeOrThrow().SecondaryConditions.delete("Poisoned");
     this.logger.specialConditionApplied(this, "Poisoned");
   }
   burnActivePokemon() {
+    if (this.shouldPreventSpecialConditions(this.activeOrThrow())) return;
     this.activeOrThrow().SecondaryConditions.add("Burned");
     this.logger.specialConditionApplied(this, "Burned");
   }
   sleepActivePokemon() {
+    if (this.shouldPreventSpecialConditions(this.activeOrThrow())) return;
     this.activeOrThrow().PrimaryCondition = "Asleep";
     this.logger.specialConditionApplied(this, "Asleep");
   }
   paralyzeActivePokemon() {
+    if (this.shouldPreventSpecialConditions(this.activeOrThrow())) return;
     this.activeOrThrow().PrimaryCondition = "Paralyzed";
     this.logger.specialConditionApplied(this, "Paralyzed");
   }
   confuseActivePokemon() {
+    if (this.shouldPreventSpecialConditions(this.activeOrThrow())) return;
     this.activeOrThrow().PrimaryCondition = "Confused";
     this.logger.specialConditionApplied(this, "Confused");
   }
