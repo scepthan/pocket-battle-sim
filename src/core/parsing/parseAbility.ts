@@ -309,6 +309,26 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       },
     },
     {
+      pattern: /choose either player\. Look at the top card of that player’s deck\./i,
+      transform: () => {
+        ability.conditions.push(
+          (self) => self.player.Deck.length > 0 || self.player.opponent.Deck.length > 0
+        );
+        ability.effect = {
+          type: "Standard",
+          effect: async (game, self) => {
+            const choice = await game.choose(self.player, ["Self", "Opponent"]);
+            if (!choice) throw new Error("No player chosen");
+
+            const chosenPlayer = choice === "Self" ? self.player : self.player.opponent;
+            if (chosenPlayer.Deck.length > 0) {
+              await game.showCards(self.player, chosenPlayer.Deck.slice(0, 1));
+            }
+          },
+        };
+      },
+    },
+    {
       pattern:
         /You must discard a card from your hand in order to use this Ability\. Once during your turn, you may draw a card\./i,
       transform: () => {

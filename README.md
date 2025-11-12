@@ -6,8 +6,8 @@ Backend todo:
   - [x] A1: 237/237 (100%)
   - [x] A1a: 70/70 (100%)
   - [x] A2: 157/157 (100.0%)
-  - [ ] A2a: 72/76 (94.7%)
-    - [ ] Abilities
+  - [ ] A2a: 73/76 (96.1%)
+    - [x] Abilities
       - [x] New conditionals
         - [x] Specific mon in play (Arceus Link)
         - [x] On Bench
@@ -18,9 +18,9 @@ Backend todo:
         - [x] Prevent Special Conditions
       - [x] New player status
         - [x] Reduce retreat cost
-      - [ ] New effect
+      - [x] New effect
         - [x] Attach energy to mon
-        - [ ] Choose player, look at top card of deck
+        - [x] Choose player, look at top card of deck
     - [ ] Attacks
       - [ ] Shuffle random card from opponent's hand into deck
       - [x] Poisoned+
