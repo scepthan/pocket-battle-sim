@@ -5,8 +5,8 @@ Backend todo:
 - [x] Parse cards
   - [x] A1: 237/237 (100%)
   - [x] A1a: 70/70 (100%)
-  - [x] A2: 157/157 (100.0%)
-  - [ ] A2a: 75/76 (98.7%)
+  - [x] A2: 157/157 (100%)
+  - [ ] A2a: 76/76 (100%)
     - [x] Abilities
       - [x] New conditionals
         - [x] Specific mon in play (Arceus Link)
@@ -27,9 +27,9 @@ Backend todo:
       - [x] Discard N random energy
       - [x] Make self Asleep
       - [x] Prevent attack damage next turn (Promo Nosepass)
-    - [ ] Trainers
+    - [x] Trainers
       - [x] Heal damage from mon with specific energy attached
-      - [ ] Return random mon from discard to hand
+      - [x] Return random mon from discard to hand
       - [x] Reduce attack cost for specific mon
       - [x] Reduce damage done to mon of type
   - [ ] A2b
