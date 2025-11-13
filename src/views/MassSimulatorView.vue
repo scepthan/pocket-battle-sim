@@ -1,25 +1,36 @@
 <template>
   <v-container>
-    <v-row v-for="(record, deck) in overallRecords" :key="deck">
-      <v-col cols="3">{{ deck }}</v-col>
-      <v-col cols="2">{{ record.wins }}</v-col>
-      <v-col cols="2">{{ record.losses }}</v-col>
-      <v-col cols="2">{{ record.ties }}</v-col>
-      <v-col cols="2">{{ record.gamesPlayed }}</v-col>
-      <v-col cols="1"> {{ ((record.wins / record.gamesPlayed) * 100).toFixed(2) }}% </v-col>
-    </v-row>
+    <v-data-table
+      :items="overallData"
+      :headers="[
+        { title: 'Deck', value: 'deck' },
+        { title: 'Wins', value: 'wins' },
+        { title: 'Losses', value: 'losses' },
+        { title: 'Ties', value: 'ties' },
+        { title: 'Total', value: 'gamesPlayed' },
+        { title: 'Winrate', value: 'winrate' },
+      ]"
+      class="mb-4"
+      density="compact"
+      :items-per-page="25"
+    />
 
     <hr />
 
     <v-select v-model="selectedEntrant" :items="entrants"> </v-select>
 
-    <v-row v-for="[matchup, record] in filteredRecords" :key="matchup">
-      <v-col cols="4">{{ matchup }}</v-col>
-      <v-col cols="2">{{ record.firstWins }}</v-col>
-      <v-col cols="2">{{ record.secondWins }}</v-col>
-      <v-col cols="2">{{ record.ties }}</v-col>
-      <v-col cols="2">{{ record.gamesPlayed }}</v-col>
-    </v-row>
+    <v-data-table
+      :items="matchupData"
+      :headers="[
+        { title: 'Matchup', value: 'matchup' },
+        { title: '1st Wins', value: 'firstWins' },
+        { title: '2nd Wins', value: 'secondWins' },
+        { title: 'Ties', value: 'ties' },
+        { title: 'Total', value: 'gamesPlayed' },
+      ]"
+      density="compact"
+      :items-per-page="25"
+    />
   </v-container>
 </template>
 
@@ -50,10 +61,31 @@ const filteredRecords = computed(() =>
   )
 );
 
+const overallData = computed(() =>
+  Object.entries(overallRecords).map(([deck, record]) => ({
+    deck: deck,
+    wins: record.wins,
+    losses: record.losses,
+    ties: record.ties,
+    gamesPlayed: record.gamesPlayed,
+    winrate: ((record.wins / record.gamesPlayed || 0) * 100).toFixed(2) + "%",
+  }))
+);
+
+const matchupData = computed(() =>
+  filteredRecords.value.map(([matchup, record]) => ({
+    matchup: matchup,
+    firstWins: record.firstWins,
+    secondWins: record.secondWins,
+    ties: record.ties,
+    gamesPlayed: record.gamesPlayed,
+  }))
+);
+
 onMounted(() => {
   const allEntrants = useAgents.value
     ? Object.keys(allAgents)
-    : Object.keys(deckStore.AllDecks).filter((x) => x.includes("Meta"));
+    : Object.keys(deckStore.AllDecks).filter((x) => x.includes("Meta "));
   entrants.value = allEntrants.slice();
   selectedEntrant.value = allEntrants[0] ?? "none";
 

@@ -43,6 +43,10 @@ Backend todo:
 - [x] Bring in newer sets
 - [x] Single battle simulation
 - [ ] Basic logic-based AI opponent (at least as competitive as Auto Mode)
+  - [ ] Evolve multiple mon per turn
+  - [ ] Avoid putting down multiple of the same mon if others are available
+  - [ ] Properly calculate energy costs for attacking
+  - [ ] Why is the bot not switching into mon that are ready to attack?
 - [x] Mass battle simulation
 - [ ] Deck fine-tuning via iteration
 
