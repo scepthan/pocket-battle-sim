@@ -159,6 +159,15 @@
               next turn</span
             >!
           </p>
+          <p v-else-if="entry.status.type == 'ReduceAttackCost'">
+            All of <b>{{ entry.player }}</b
+            >'s {{ entry.status.descriptor ?? "Pokemon" }} have their attack cost reduced by
+            {{ entry.status.amount }} <EnergyIcon inline :energy="entry.status.energyType" /><span
+              v-if="entry.status.source == 'Effect'"
+            >
+              this turn</span
+            >!
+          </p>
           <p v-else>Unknown player status: {{ entry.status.type }}</p>
         </div>
 

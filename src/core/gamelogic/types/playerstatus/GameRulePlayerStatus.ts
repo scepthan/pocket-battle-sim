@@ -11,4 +11,12 @@ interface CannotUseItemPlayerStatus extends BaseGameRulePlayerStatus {
   type: "CannotUseItem";
 }
 
-export type GameRulePlayerStatus = CannotUseSupporterPlayerStatus | CannotUseItemPlayerStatus;
+// A dummy status so the v-else in the game log works correctly
+interface DummyPlayerStatus extends BaseGameRulePlayerStatus {
+  type: "Dummy";
+}
+
+export type GameRulePlayerStatus =
+  | CannotUseSupporterPlayerStatus
+  | CannotUseItemPlayerStatus
+  | DummyPlayerStatus;
