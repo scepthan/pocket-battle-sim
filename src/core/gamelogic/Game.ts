@@ -863,7 +863,7 @@ export class Game {
     if (totalDamage > 0) {
       if (owner === this.DefendingPlayer) {
         for (const status of this.DefendingPlayer.PlayerStatuses) {
-          if (status.type === "IncreaseDefense" && status.appliesToPokemon(attacker, this))
+          if (status.type === "IncreaseDefense" && status.appliesToPokemon(defender, this))
             totalDamage -= status.amount;
         }
       }

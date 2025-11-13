@@ -150,6 +150,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
               type: "IncreaseDefense",
               category: "Pokemon",
               appliesToPokemon,
+              descriptor: specifier,
               source: "Effect",
               amount: Number(modifier),
               keepNextTurn: true,
