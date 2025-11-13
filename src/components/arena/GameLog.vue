@@ -283,7 +283,7 @@
             <CardName :card-id="entry.targetPokemon.cardId" /> is now {{ condition }}!
           </p>
           <p v-if="entry.currentConditionList.length > entry.specialConditions.length">
-            Current special conditions: {{ entry.currentConditionList.join(", ") }}.
+            Current Special Conditions: {{ entry.currentConditionList.join(", ") }}.
           </p>
         </div>
 
@@ -304,7 +304,7 @@
             <CardName :card-id="entry.targetPokemon.cardId" /> recovered from being {{ condition }}!
           </p>
           <p v-if="entry.currentConditionList.length > 0">
-            Remaining special conditions: {{ entry.currentConditionList.join(", ") }}.
+            Remaining Special Conditions: {{ entry.currentConditionList.join(", ") }}.
           </p>
         </div>
 
@@ -348,7 +348,7 @@
             has its max HP increased by {{ entry.status.amount }}</span
           >
           <span v-else-if="entry.status.type == 'PreventSpecialConditions'">
-            cannot be affected by special conditions</span
+            cannot be affected by Special Conditions</span
           >
           <span v-else-if="entry.status.type == 'ReduceAttackCost'">
             has its attack cost reduced by {{ entry.status.amount }}
