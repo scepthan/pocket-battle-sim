@@ -568,25 +568,29 @@ export class Game {
 
   private shouldPreventDamage(pokemon: InPlayPokemonCard): boolean {
     if (!this.CurrentAttack) return false;
-    return pokemon.PokemonStatuses.some(
+    const result = pokemon.PokemonStatuses.some(
       (status) =>
         (status.type === "PreventAttackDamage" ||
           status.type === "PreventAttackDamageAndEffects") &&
         (!status.attackerCondition ||
           status.attackerCondition.test(this.AttackingPlayer.activeOrThrow()))
     );
+    if (result) this.GameLog.damagePrevented(this.DefendingPlayer, pokemon);
+    return result;
   }
 
   private shouldPreventEffects(pokemon: InPlayPokemonCard): boolean {
     if (!this.CurrentAttack) return false;
     if (!this.DefendingPlayer.InPlayPokemon.includes(pokemon)) return false;
-    return pokemon.PokemonStatuses.some(
+    const result = pokemon.PokemonStatuses.some(
       (status) =>
         (status.type === "PreventAttackEffects" ||
           status.type === "PreventAttackDamageAndEffects") &&
         (!status.attackerCondition ||
           status.attackerCondition.test(this.AttackingPlayer.activeOrThrow()))
     );
+    if (result) this.GameLog.effectPrevented(this.DefendingPlayer, pokemon);
+    return result;
   }
 
   /**

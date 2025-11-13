@@ -117,11 +117,9 @@
 
         <div v-else-if="entry.type == 'applyPlayerStatus'">
           <p v-if="entry.status.type == 'DecreaseRetreatCost'">
-            Retreat cost is {{ entry.status.amount }} less<span
-              v-if="entry.status.source == 'Effect'"
-            >
-              for this turn</span
-            >!
+            Retreat cost is {{ entry.status.amount }} less<span v-if="entry.status.descriptor">
+              for <b>{{ entry.player }}'s</b> {{ entry.status.descriptor }}</span
+            ><span v-if="entry.status.source == 'Effect'"> for this turn</span>!
           </p>
           <p v-else-if="entry.status.type == 'IncreaseAttack'">
             Attacks used<span v-if="entry.status.descriptor">
@@ -153,6 +151,13 @@
             All of <b>{{ entry.player }}</b
             >'s {{ entry.status.descriptor ?? "Pokemon" }} now have their
             <EnergyIcon inline :energy="entry.status.energyType" /> count as double!
+          </p>
+          <p v-else-if="entry.status.type == 'CannotUseItem'">
+            <b>{{ entry.player }}</b> cannot use Item cards from their hand<span
+              v-if="entry.status.source == 'Effect'"
+            >
+              next turn</span
+            >!
           </p>
           <p v-else>Unknown player status: {{ entry.status.type }}</p>
         </div>
@@ -246,8 +251,11 @@
 
         <div v-else-if="entry.type == 'damagePrevented'">
           <p>
-            <CardName :card-id="entry.targetPokemon.cardId" /> prevented damage and effects of the
-            attack!
+            <CardName :card-id="entry.targetPokemon.cardId" /> prevented
+            <span v-if="entry.damageType == 'Damage'"> damage</span>
+            <span v-else-if="entry.damageType == 'Effect'"> an effect</span>
+            <span v-else-if="entry.damageType == 'SpecialCondition'"> a Special Condition</span>
+            from the attack!
           </p>
         </div>
 
@@ -303,12 +311,11 @@
         <div v-else-if="entry.type == 'applyPokemonStatus'">
           <CardName :card-id="entry.targetPokemon.cardId" />
           <span v-if="entry.status.type == 'ReduceAttackDamage'">
-            will take &minus;{{ entry.status.amount }} damage from attacks<span
-              v-if="entry.status.attackerCondition"
-            >
-              from {{ entry.status.attackerCondition.descriptor }}</span
-            >
-          </span>
+            will take &minus;{{ entry.status.amount }} damage from attacks</span
+          >
+          <span v-else-if="entry.status.type == 'ReduceAttackDamageOnCoinFlip'">
+            will flip a coin to take &minus;{{ entry.status.amount }} damage from attacks</span
+          >
           <span v-else-if="entry.status.type == 'PreventAttackDamageAndEffects'">
             cannot be affected by attacks</span
           >
@@ -321,6 +328,13 @@
           <span v-else-if="entry.status.type == 'ReduceOwnAttackDamage'">
             will attack for &minus;{{ entry.status.amount }} damage</span
           >
+          <span v-else-if="entry.status.type == 'IncreaseAttack'">
+            will attack for +{{ entry.status.amount }} damage</span
+          >
+          <span v-else-if="entry.status.type == 'IncreaseDamageOfAttack'">
+            will attack for +{{ entry.status.amount }} damage with
+            {{ entry.status.attackName }}</span
+          >
           <span v-else-if="entry.status.type == 'CannotAttack'"> cannot attack</span>
           <span v-else-if="entry.status.type == 'CannotUseSpecificAttack'">
             cannot use {{ entry.status.attackName }}</span
@@ -329,10 +343,22 @@
             must flip a coin to attack</span
           >
           <span v-else-if="entry.status.type == 'CannotRetreat'"> cannot retreat</span>
+          <span v-else-if="entry.status.type == 'NoRetreatCost'"> has no retreat cost</span>
           <span v-else-if="entry.status.type == 'IncreaseMaxHP'">
             has its max HP increased by {{ entry.status.amount }}</span
           >
+          <span v-else-if="entry.status.type == 'PreventSpecialConditions'">
+            cannot be affected by special conditions</span
+          >
+          <span v-else-if="entry.status.type == 'ReduceAttackCost'">
+            has its attack cost reduced by {{ entry.status.amount }}
+            <EnergyIcon :energy="entry.status.energyType"
+          /></span>
           <span v-else> has unknown status "{{ entry.status.type }}" applied to it</span
+          ><span
+            v-if="'attackerCondition' in entry.status && entry.status.attackerCondition?.descriptor"
+          >
+            from {{ entry.status.attackerCondition.descriptor }}</span
           ><span v-if="entry.status.source == 'Effect'"> next turn</span>!
         </div>
 

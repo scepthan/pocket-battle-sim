@@ -302,6 +302,7 @@ interface AttackFailedEvent {
 }
 interface DamagePreventedEvent {
   type: "damagePrevented";
+  damageType: "Damage" | "Effect" | "SpecialCondition";
   player: string;
   targetPokemon: InPlayPokemonDescriptor;
 }

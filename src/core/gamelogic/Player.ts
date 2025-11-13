@@ -539,7 +539,11 @@ export class Player {
   }
 
   shouldPreventSpecialConditions(pokemon: InPlayPokemonCard): boolean {
-    return pokemon.PokemonStatuses.some((status) => status.type === "PreventSpecialConditions");
+    const result = pokemon.PokemonStatuses.some(
+      (status) => status.type === "PreventSpecialConditions"
+    );
+    if (result) this.logger.specialConditionPrevented(this, pokemon);
+    return result;
   }
 
   poisonActivePokemon() {

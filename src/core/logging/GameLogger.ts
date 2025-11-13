@@ -506,6 +506,25 @@ export class GameLogger {
   damagePrevented(player: Player, pokemon: InPlayPokemonCard) {
     this.addEntry({
       type: "damagePrevented",
+      damageType: "Damage",
+      player: player.Name,
+      targetPokemon: player.pokemonToDescriptor(pokemon),
+    });
+  }
+
+  effectPrevented(player: Player, pokemon: InPlayPokemonCard) {
+    this.addEntry({
+      type: "damagePrevented",
+      damageType: "Effect",
+      player: player.Name,
+      targetPokemon: player.pokemonToDescriptor(pokemon),
+    });
+  }
+
+  specialConditionPrevented(player: Player, pokemon: InPlayPokemonCard) {
+    this.addEntry({
+      type: "damagePrevented",
+      damageType: "SpecialCondition",
       player: player.Name,
       targetPokemon: player.pokemonToDescriptor(pokemon),
     });
