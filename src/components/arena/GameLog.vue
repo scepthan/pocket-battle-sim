@@ -12,12 +12,12 @@
 
         <div v-else-if="entry.type == 'nextTurn'">
           <h2>Turn {{ entry.turnNumber }}</h2>
-          <p>
+          <p class="sub-entry">
             <b>{{ entry.attackingPlayer }}</b> is now the attacking player!
           </p>
         </div>
 
-        <p v-else-if="entry.type == 'drawToHand'">
+        <p v-else-if="entry.type == 'drawToHand'" class="sub-entry">
           <b>{{ entry.player }}</b> draws <CountDisplay :count="entry.cardIds" single="card" /> to
           their
 
@@ -38,7 +38,7 @@
           <span v-else> hand. </span>
         </p>
 
-        <p v-else-if="entry.type == 'putIntoHand'">
+        <p v-else-if="entry.type == 'putIntoHand'" class="sub-entry">
           <b>{{ entry.player }}</b> puts <CountDisplay :count="entry.cardIds" single="card" /> into
           their hand<span v-if="shownPlayers.includes(entry.player)"
             >: <CardNameList :card-ids="entry.cardIds" /> </span
@@ -65,7 +65,10 @@
           </p>
         </div>
 
-        <div v-else-if="entry.type == 'attachEnergy'">
+        <div
+          v-else-if="entry.type == 'attachEnergy'"
+          :class="entry.from === 'turn' ? '' : 'sub-entry'"
+        >
           <p>
             <span v-if="entry.from == 'pokemon'">
               Energy transferred from
@@ -73,7 +76,7 @@
               <CardName :card-id="entry.targetPokemon.cardId" />:
             </span>
             <span v-else-if="entry.from == 'turn'">
-              <b>{{ entry.player }}</b> attaches energy to
+              <b>{{ entry.player }}</b> attaches Energy to
               <CardName :card-id="entry.targetPokemon.cardId" />:
             </span>
             <span v-else>
@@ -84,9 +87,9 @@
           </p>
         </div>
 
-        <div v-else-if="entry.type == 'generateNextEnergy'">
+        <div v-else-if="entry.type == 'generateNextEnergy'" class="sub-entry">
           <p v-if="entry.currentEnergy == 'none'">
-            Next energy for <b>{{ entry.player }}</b
+            Next Energy for <b>{{ entry.player }}</b
             >:
             <EnergyIcon inline :energy="entry.nextEnergy" />
           </p>
@@ -96,16 +99,16 @@
           </p>
         </div>
 
-        <div v-else-if="entry.type == 'changeNextEnergy'">
+        <div v-else-if="entry.type == 'changeNextEnergy'" class="sub-entry">
           Next energy for <b>{{ entry.player }}</b> changed to
           <EnergyIcon inline :energy="entry.nextEnergy" />!
         </div>
 
-        <div v-else-if="entry.type == 'discardEnergy'">
-          <p v-if="entry.energyTypes.length == 0">No energy could be discarded.</p>
+        <div v-else-if="entry.type == 'discardEnergy'" class="sub-entry">
+          <p v-if="entry.energyTypes.length == 0">No Energy could be discarded.</p>
           <p v-else>
             <span v-if="entry.source == 'energyZone'">
-              <b>{{ entry.player }}</b> discards an energy from their energy zone:
+              <b>{{ entry.player }}</b> discards an Energy from their Energy Zone:
             </span>
             <span v-else-if="entry.targetPokemon">
               Energy discarded from <CardName :card-id="entry.targetPokemon.cardId" />:
@@ -115,7 +118,7 @@
           </p>
         </div>
 
-        <div v-else-if="entry.type == 'applyPlayerStatus'">
+        <div v-else-if="entry.type == 'applyPlayerStatus'" class="sub-entry">
           <p v-if="entry.status.type == 'DecreaseRetreatCost'">
             Retreat cost is {{ entry.status.amount }} less<span v-if="entry.status.descriptor">
               for <b>{{ entry.player }}'s</b> {{ entry.status.descriptor }}</span
@@ -171,11 +174,14 @@
           <p v-else>Unknown player status: {{ entry.status.type }}</p>
         </div>
 
-        <div v-else-if="entry.type == 'removePlayerStatus'">
+        <div v-else-if="entry.type == 'removePlayerStatus'" class="sub-entry">
           <p>Player status removed from {{ entry.player }}: {{ entry.status.type }}</p>
         </div>
 
-        <div v-else-if="entry.type == 'swapActivePokemon'">
+        <div
+          v-else-if="entry.type == 'swapActivePokemon'"
+          :class="entry.reason === 'retreat' ? '' : 'sub-entry'"
+        >
           <p v-if="entry.reason == 'retreat'">
             <b>{{ entry.player }}</b> retreats their active
             <CardName :card-id="entry.fromPokemon.cardId" /> and puts in
@@ -204,21 +210,27 @@
           </p>
         </div>
 
-        <div v-else-if="entry.type == 'triggerPokemonTool'">
+        <div v-else-if="entry.type == 'triggerPokemonTool'" class="sub-entry">
           <p><CardName :card-id="entry.cardId" />'s effect is triggered!</p>
         </div>
 
-        <div v-else-if="entry.type == 'removePokemonTool'">
+        <div v-else-if="entry.type == 'removePokemonTool'" class="sub-entry">
           <p>
             <CardName :card-id="entry.cardId" /> is removed from
             <CardName :card-id="entry.targetPokemon.cardId" />!
           </p>
         </div>
 
-        <div v-else-if="entry.type == 'useAttack' || entry.type == 'copyAttack'">
+        <div v-else-if="entry.type == 'useAttack'">
           <p>
-            <CardName :card-id="entry.attackingPokemon.cardId" />
-            {{ entry.type == "copyAttack" ? "copies" : "uses" }}
+            <CardName :card-id="entry.attackingPokemon.cardId" /> uses <b>{{ entry.attackName }}</b
+            >!
+          </p>
+        </div>
+
+        <div v-else-if="entry.type == 'copyAttack'" class="sub-entry">
+          <p>
+            <CardName :card-id="entry.attackingPokemon.cardId" /> copies
             <b>{{ entry.attackName }}</b
             >!
           </p>
@@ -231,18 +243,18 @@
           </p>
         </div>
 
-        <div v-else-if="entry.type == 'triggerAbility'">
+        <div v-else-if="entry.type == 'triggerAbility'" class="sub-entry">
           <p>
             <CardName :card-id="entry.abilityPokemon.cardId" />'s <b>{{ entry.abilityName }}</b> is
             activated!
           </p>
         </div>
 
-        <div v-else-if="entry.type == 'coinFlip'">
+        <div v-else-if="entry.type == 'coinFlip'" class="sub-entry">
           <p>Flipping a coin... {{ entry.result }}!</p>
         </div>
 
-        <div v-else-if="entry.type == 'coinMultiFlip'">
+        <div v-else-if="entry.type == 'coinMultiFlip'" class="sub-entry">
           <p>
             Flipping {{ entry.flips }} {{ entry.flips == 1 ? "coin" : "coins" }}...
             <span v-for="(result, i) in entry.results" :key="i"> {{ result }}! </span>
@@ -250,7 +262,7 @@
           </p>
         </div>
 
-        <div v-else-if="entry.type == 'coinFlipUntilTails'">
+        <div v-else-if="entry.type == 'coinFlipUntilTails'" class="sub-entry">
           <p>
             Flipping until tails...
             <span v-for="(result, i) in entry.results" :key="i"> {{ result }}! </span>
@@ -258,7 +270,7 @@
           </p>
         </div>
 
-        <div v-else-if="entry.type == 'damagePrevented'">
+        <div v-else-if="entry.type == 'damagePrevented'" class="sub-entry">
           <p>
             <CardName :card-id="entry.targetPokemon.cardId" /> prevented
             <span v-if="entry.damageType == 'Damage'"> damage</span>
@@ -268,18 +280,18 @@
           </p>
         </div>
 
-        <div v-else-if="entry.type == 'attackFailed'">
+        <div v-else-if="entry.type == 'attackFailed'" class="sub-entry">
           <p>The attack did nothing...</p>
         </div>
 
-        <div v-else-if="entry.type == 'pokemonHealed'">
+        <div v-else-if="entry.type == 'pokemonHealed'" class="sub-entry">
           <p>
             <CardName :card-id="entry.targetPokemon.cardId" /> is healed for
             {{ entry.healingDealt }} damage! <HpChange :event="entry" />
           </p>
         </div>
 
-        <div v-else-if="entry.type == 'pokemonDamaged'">
+        <div v-else-if="entry.type == 'pokemonDamaged'" class="sub-entry">
           <p v-if="entry.weaknessBoost">It's super effective!</p>
           <p>
             <CardName :card-id="entry.targetPokemon.cardId" /> is hit for
@@ -287,7 +299,7 @@
           </p>
         </div>
 
-        <div v-else-if="entry.type == 'specialConditionApplied'">
+        <div v-else-if="entry.type == 'specialConditionApplied'" class="sub-entry">
           <p v-for="(condition, i) in entry.specialConditions" :key="i">
             <CardName :card-id="entry.targetPokemon.cardId" /> is now {{ condition }}!
           </p>
@@ -296,19 +308,19 @@
           </p>
         </div>
 
-        <div v-else-if="entry.type == 'specialConditionDamage'">
+        <div v-else-if="entry.type == 'specialConditionDamage'" class="sub-entry">
           <p>
             <CardName :card-id="entry.targetPokemon.cardId" /> takes {{ entry.damageDealt }} damage
             from being {{ entry.specialCondition }}! <HpChange :event="entry" />
           </p>
         </div>
 
-        <div v-else-if="entry.type == 'specialConditionEffective'">
+        <div v-else-if="entry.type == 'specialConditionEffective'" class="sub-entry">
           <CardName :card-id="entry.targetPokemon.cardId" /> is {{ entry.specialCondition
           }}<span v-if="entry.specialCondition !== 'Confused'"> and cannot move</span>!
         </div>
 
-        <div v-else-if="entry.type == 'specialConditionEnded'">
+        <div v-else-if="entry.type == 'specialConditionEnded'" class="sub-entry">
           <p v-for="(condition, i) in entry.specialConditions" :key="i">
             <CardName :card-id="entry.targetPokemon.cardId" /> recovered from being {{ condition }}!
           </p>
@@ -317,7 +329,7 @@
           </p>
         </div>
 
-        <div v-else-if="entry.type == 'applyPokemonStatus'">
+        <div v-else-if="entry.type == 'applyPokemonStatus'" class="sub-entry">
           <CardName :card-id="entry.targetPokemon.cardId" />
           <span v-if="entry.status.type == 'ReduceAttackDamage'">
             will take &minus;{{ entry.status.amount }} damage from attacks</span
@@ -361,7 +373,7 @@
           >
           <span v-else-if="entry.status.type == 'ReduceAttackCost'">
             has its attack cost reduced by {{ entry.status.amount }}
-            <EnergyIcon :energy="entry.status.energyType"
+            <EnergyIcon :energy="entry.status.energyType" inline
           /></span>
           <span v-else> has unknown status "{{ entry.status.type }}" applied to it</span
           ><span
@@ -371,11 +383,11 @@
           ><span v-if="entry.status.source == 'Effect'"> next turn</span>!
         </div>
 
-        <div v-else-if="entry.type == 'pokemonKnockedOut'">
+        <div v-else-if="entry.type == 'pokemonKnockedOut'" class="sub-entry">
           <p><CardName :card-id="entry.targetPokemon.cardId" /> is knocked out!</p>
         </div>
 
-        <div v-else-if="entry.type == 'scorePrizePoints'">
+        <div v-else-if="entry.type == 'scorePrizePoints'" class="sub-entry">
           <p>
             <b>{{ entry.player }}</b> scores
             <CountDisplay :count="entry.prizePointsScored" single="prize point" />! (Total:
@@ -383,7 +395,7 @@
           </p>
         </div>
 
-        <div v-else-if="entry.type == 'discardCards'">
+        <div v-else-if="entry.type == 'discardCards'" class="sub-entry">
           <p v-if="entry.source == 'inPlay' || entry.source == 'hand'">
             <CountDisplay :count="entry.cardIds" single="card" /> discarded:
             <CardNameList :card-ids="entry.cardIds" />.
@@ -394,7 +406,10 @@
           </p>
         </div>
 
-        <div v-else-if="entry.type == 'returnToHand' || entry.type == 'returnToDeck'">
+        <div
+          v-else-if="entry.type == 'returnToHand' || entry.type == 'returnToDeck'"
+          class="sub-entry"
+        >
           <p>
             <CountDisplay :count="entry.cardIds" single="card" /> returned to
             <b>{{ entry.player }}</b
@@ -405,7 +420,7 @@
           </p>
         </div>
 
-        <div v-else-if="entry.type == 'returnToBottomOfDeck'">
+        <div v-else-if="entry.type == 'returnToBottomOfDeck'" class="sub-entry">
           <p>
             <CountDisplay :count="entry.cardIds" single="card" /> returned to bottom of
             <b>{{ entry.player }}</b
@@ -415,13 +430,13 @@
           </p>
         </div>
 
-        <div v-else-if="entry.type == 'shuffleDeck'">
+        <div v-else-if="entry.type == 'shuffleDeck'" class="sub-entry">
           <p>
             <b>{{ entry.player }}</b> shuffles their deck.
           </p>
         </div>
 
-        <div v-else-if="entry.type == 'viewCards'">
+        <div v-else-if="entry.type == 'viewCards'" class="sub-entry">
           <p>
             <b>{{ entry.player }}</b> is viewing
             <CountDisplay :count="entry.cardIds" single="card" /><span
@@ -431,7 +446,7 @@
           </p>
         </div>
 
-        <div v-else-if="entry.type == 'selectActivePokemon'">
+        <div v-else-if="entry.type == 'selectActivePokemon'" class="sub-entry">
           <p>
             <b>{{ entry.player }}</b> chooses <CardName :card-id="entry.toPokemon.cardId" /> as
             their next Active Pokemon!
@@ -447,7 +462,7 @@
           <p v-else>Game over: draw... ({{ entry.reason }})</p>
         </div>
 
-        <div v-else-if="entry.type == 'actionFailed'">
+        <div v-else-if="entry.type == 'actionFailed'" class="sub-entry">
           <p v-if="entry.reason == 'partiallyImplemented'">
             An effect of this attack was not triggered... (Not implemented)
           </p>
@@ -491,5 +506,9 @@ defineProps<Props>();
 .energy-icon {
   height: 1.25em;
   margin-bottom: -4px;
+}
+.sub-entry {
+  margin-left: 10px;
+  font-size: 0.9em;
 }
 </style>
