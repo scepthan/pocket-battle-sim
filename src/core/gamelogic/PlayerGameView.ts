@@ -132,7 +132,11 @@ export class PlayerGameView {
   }
   get retreatCostModifier() {
     return this.#player.PlayerStatuses.reduce(
-      (sum, status) => (status.type === "DecreaseRetreatCost" ? sum - status.amount : sum),
+      (sum, status) =>
+        status.type === "DecreaseRetreatCost" &&
+        status.appliesToPokemon(this.#player.activeOrThrow(), this.#game)
+          ? sum - status.amount
+          : sum,
       0
     );
   }

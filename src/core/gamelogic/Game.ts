@@ -445,7 +445,10 @@ export class Game {
           );
 
           if (existingStatus) {
-            if (!applyStatus) statusPlayer.removePlayerStatus(existingStatus.id!);
+            if (!applyStatus) {
+              removeElement(pokemon.ActivePlayerStatuses, existingStatus);
+              statusPlayer.removePlayerStatus(existingStatus.id!);
+            }
           } else {
             if (applyStatus) statusPlayer.applyPlayerStatus(ability.effect.status, pokemon);
           }

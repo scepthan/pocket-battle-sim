@@ -608,7 +608,7 @@ export class Player {
       if (otherPokemonWithStatus.length > 0) return;
     }
 
-    this.PlayerStatuses = this.PlayerStatuses.filter((s) => s.id !== statusId);
+    removeElement(this.PlayerStatuses, status);
     this.logger.removePlayerStatus(this, status);
   }
 
