@@ -18,22 +18,12 @@ onMounted(() => {
   const cards = cardStore.InputCards;
   const encounteredCards = new Set<string>();
   const rarityIndex = (a: string) =>
-    [
-      "Common",
-      "Uncommon",
-      "Rare",
-      "Double Rare",
-      "Art Rare",
-      "Super Rare",
-      "Special Art Rare",
-      "Immersive Rare",
-      "Ultra Rare",
-      "Promo",
-    ].indexOf(a);
+    ["C", "U", "R", "RR", "AR", "SR", "SAR", "IM", "S", "SSR", "UR"].indexOf(a);
 
   const uniqueCards = cards
     .slice()
     .sort((a, b) => rarityIndex(a.rarity) - rarityIndex(b.rarity) || a.id.localeCompare(b.id))
+    .sort((a, b) => (a.id > "PROMO-A-006" ? 1 : 0) - (b.id > "PROMO-A-006" ? 1 : 0))
     .filter((card) => {
       const baseCard = {
         Name: card.name,
