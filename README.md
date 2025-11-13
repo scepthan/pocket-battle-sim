@@ -6,33 +6,24 @@ Backend todo:
   - [x] A1: 237/237 (100%)
   - [x] A1a: 70/70 (100%)
   - [x] A2: 157/157 (100%)
-  - [ ] A2a: 77/77 (100%)
+  - [x] A2a: 77/77 (100%)
+  - [ ] A2b: 73/73 (100%)
     - [x] Abilities
-      - [x] New conditionals
-        - [x] Specific mon in play (Arceus Link)
-        - [x] On Bench
-      - [x] New trigger: between turns
-      - [x] New mon status
-        - [x] Reduce cost of own attacks
-        - [x] Increase own attack damage
-        - [x] Prevent Special Conditions
-      - [x] New player status
-        - [x] Reduce retreat cost
-      - [x] New effect
-        - [x] Attach energy to mon
-        - [x] Choose player, look at top card of deck
+      - [x] New effects
+        - [x] Active mon has no retreat cost
+        - [x] Generate energy and end turn
+        - [x] Flip to poison
+        - [x] Heal active mon
     - [x] Attacks
-      - [x] Shuffle random card from opponent's hand into deck
-      - [x] Poisoned+
-      - [x] Discard N random energy
-      - [x] Make self Asleep
-      - [x] Prevent attack damage next turn (Promo Nosepass)
+      - [x] New predicates
+        - [x] Mon with energy attached
+      - [x] New effects
+        - [x] Attack one of opponent's mon at random
     - [x] Trainers
-      - [x] Heal damage from mon with specific energy attached
-      - [x] Return random mon from discard to hand
-      - [x] Reduce attack cost for specific mon
-      - [x] Reduce damage done to mon of type
-  - [ ] A2b
+      - [x] Each player redraws hand
+      - [x] Heal and remove special conditions
+      - [x] Extra damage to Pokemon ex
+      - [x] Flip until tails to discard energy
   - [ ] A3
   - [ ] A3a
     - [ ] Ultra Beasts

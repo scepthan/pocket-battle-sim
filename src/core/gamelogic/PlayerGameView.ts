@@ -131,14 +131,19 @@ export class PlayerGameView {
     );
   }
   get retreatCostModifier() {
-    return this.#player.PlayerStatuses.reduce(
-      (sum, status) =>
-        status.type === "DecreaseRetreatCost" &&
-        status.appliesToPokemon(this.#player.activeOrThrow(), this.#game)
-          ? sum - status.amount
-          : sum,
-      0
-    );
+    let modifier = 0;
+    const active = this.#player.activeOrThrow();
+
+    for (const status of this.#player.PlayerStatuses) {
+      if (status.type === "NoRetreatCost" && status.appliesToPokemon(active, this.#game)) {
+        return -active.RetreatCost;
+      }
+      if (status.type === "DecreaseRetreatCost" && status.appliesToPokemon(active, this.#game)) {
+        modifier -= status.amount;
+      }
+    }
+
+    return modifier;
   }
 
   // Helper methods

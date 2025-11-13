@@ -9,6 +9,7 @@ interface BasePokemonPlayerStatus extends BasePlayerStatus {
 
 interface IncreaseAttackPlayerStatus extends BasePokemonPlayerStatus {
   type: "IncreaseAttack";
+  appliesToDefender?: (pokemon: InPlayPokemonCard, game: Game) => boolean;
   amount: number;
 }
 interface IncreaseDefensePlayerStatus extends BasePokemonPlayerStatus {
@@ -18,6 +19,9 @@ interface IncreaseDefensePlayerStatus extends BasePokemonPlayerStatus {
 interface DecreaseRetreatCostPlayerStatus extends BasePokemonPlayerStatus {
   type: "DecreaseRetreatCost";
   amount: number;
+}
+interface NoRetreatCostPlayerStatus extends BasePokemonPlayerStatus {
+  type: "NoRetreatCost";
 }
 interface CannotEvolvePlayerStatus extends BasePokemonPlayerStatus {
   type: "CannotEvolve";
@@ -37,6 +41,7 @@ export type PokemonPlayerStatus =
   | IncreaseAttackPlayerStatus
   | IncreaseDefensePlayerStatus
   | DecreaseRetreatCostPlayerStatus
+  | NoRetreatCostPlayerStatus
   | CannotEvolvePlayerStatus
   | DoubleEnergyPlayerStatus
   | ReduceAttackCostPlayerStatus;

@@ -63,8 +63,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         type: "Conditional",
         condition: () => true,
         effect: async (game) => {
-          game.DefendingPlayer.shuffleHandIntoDeck();
-          game.DefendingPlayer.drawCards(Number(count));
+          game.DefendingPlayer.shuffleHandIntoDeckAndDraw(Number(count));
         },
       }),
     },
@@ -93,9 +92,10 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     },
     {
       pattern:
-        /^During this turn, attacks used by your (.+?) do \+(\d+) damage to your opponent’s Active Pokémon\.$/,
-      transform: (_, specifier, modifier) => {
-        const appliesToPokemon = parsePokemonPredicate(specifier);
+        /^During this turn, attacks used by your (.+?) do \+(\d+) damage to your opponent’s (Active .+?)\.$/,
+      transform: (_, selfSpecifier, modifier, opponentSpecifier) => {
+        const appliesToPokemon = parsePokemonPredicate(selfSpecifier);
+        const appliesToDefender = parsePokemonPredicate(opponentSpecifier);
 
         return {
           type: "Conditional",
@@ -105,7 +105,8 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
               type: "IncreaseAttack",
               category: "Pokemon",
               appliesToPokemon,
-              descriptor: specifier,
+              appliesToDefender,
+              descriptor: selfSpecifier,
               source: "Effect",
               amount: Number(modifier),
             });
@@ -155,6 +156,25 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
               amount: Number(modifier),
               keepNextTurn: true,
             });
+          },
+        };
+      },
+    },
+    {
+      pattern:
+        /^Heal (\d+) damage from 1 of your ([^.]+?), and it recovers from all Special Conditions\.$/,
+      transform: (_, modifier, specifier) => {
+        const predicate = parsePokemonPredicate(
+          specifier,
+          (p) => p.isDamaged() || p.CurrentConditions.length > 0
+        );
+        return {
+          type: "Targeted",
+          validTargets: (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
+          effect: async (game, pokemon) => {
+            if (!pokemon.isPokemon) return;
+            game.healPokemon(pokemon, Number(modifier));
+            pokemon.removeAllSpecialConditions();
           },
         };
       },
@@ -372,9 +392,20 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         type: "Conditional",
         condition: () => true,
         effect: async (game) => {
-          game.DefendingPlayer.shuffleHandIntoDeck();
           const cardsToDraw = game.GameRules.PrizePoints - game.DefendingPlayer.GamePoints;
-          game.DefendingPlayer.drawCards(cardsToDraw);
+          game.DefendingPlayer.shuffleHandIntoDeckAndDraw(cardsToDraw);
+        },
+      }),
+    },
+    {
+      pattern:
+        /^Each player shuffles the cards in their hand into their deck, then draws that many cards\.$/i,
+      transform: () => ({
+        type: "Conditional",
+        condition: () => true,
+        effect: async (game) => {
+          game.DefendingPlayer.shuffleHandIntoDeckAndDraw(game.DefendingPlayer.Hand.length);
+          game.AttackingPlayer.shuffleHandIntoDeckAndDraw(game.AttackingPlayer.Hand.length);
         },
       }),
     },
@@ -443,6 +474,19 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
           const energy = await game.choose(player, target.AttachedEnergy);
           if (!energy) return;
           await player.transferEnergy(target, player.activeOrThrow(), [energy]);
+        },
+      }),
+    },
+    {
+      pattern:
+        /^Flip a coin until you get tails\. For each heads, discard a random Energy from your opponent’s Active Pokémon\.$/,
+      transform: () => ({
+        type: "Conditional",
+        condition: () => true,
+        effect: async (game) => {
+          const { heads } = game.AttackingPlayer.flipUntilTails();
+          const active = game.DefendingPlayer.activeOrThrow();
+          await game.DefendingPlayer.discardRandomEnergyFromPokemon(active, heads);
         },
       }),
     },

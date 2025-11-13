@@ -54,6 +54,12 @@ export const parsePokemonPredicate = (
     predicate = (pokemon) => energyTypes.includes(pokemon.Type) && prevPredicate(pokemon);
   }
 
+  if (text.endsWith(" that has any Energy attached")) {
+    const prevPredicate = predicate;
+    predicate = (pokemon) => pokemon.AttachedEnergy.length > 0 && prevPredicate(pokemon);
+    text = text.slice(0, -29);
+  }
+
   if (text === "Pokémon ex") {
     return (pokemon) => pokemon.Name.endsWith(" ex") && predicate(pokemon);
   }

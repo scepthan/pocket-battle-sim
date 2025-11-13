@@ -278,6 +278,15 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       },
     },
     {
+      pattern: /^1 of your opponent’s Pokémon is chosen at random\. Do (\d+) damage to it\./i,
+      transform: (_, damage) => {
+        attack.attackingEffects.push(async (game) => {
+          const pokemon = randomElement(game.DefendingPlayer.InPlayPokemon);
+          game.attackPokemon(pokemon, Number(damage));
+        });
+      },
+    },
+    {
       pattern:
         /^1 of your opponent’s Pokémon is chosen at random (\d+) times\. For each time a Pokémon was chosen, do (\d+) damage to it\./i,
       transform: (_, times, damage) => {
@@ -310,12 +319,13 @@ export const parseAttackEffect = (attack: Attack): boolean => {
 
     // Damage to opponent’s bench
     {
-      pattern: /^This attack also does (\d+) damage to each of your opponent’s Benched Pokémon\./i,
-      transform: (_, benchDamage) => {
+      pattern: /^This attack also does (\d+) damage to each of your opponent’s (Benched [^.]+?)\./i,
+      transform: (_, benchDamage, specifier) => {
         const dmg = Number(benchDamage);
+        const predicate = parsePokemonPredicate(specifier);
         const benchDamageEffect = applyConditionalIfAvailable(async (game) => {
           for (const p of game.DefendingPlayer.BenchedPokemon) {
-            game.attackPokemon(p, dmg);
+            if (predicate(p)) game.attackPokemon(p, dmg);
           }
         });
         attack.attackingEffects.push(benchDamageEffect);

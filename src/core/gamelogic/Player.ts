@@ -188,6 +188,11 @@ export class Player {
     this.shuffleDeck(log);
   }
 
+  shuffleHandIntoDeckAndDraw(count: number) {
+    this.shuffleHandIntoDeck();
+    this.drawCards(count);
+  }
+
   drawCards(count: number, log: boolean = true) {
     const cardsDrawn: PlayingCard[] = [];
     while (cardsDrawn.length < count) {

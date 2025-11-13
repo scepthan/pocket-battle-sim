@@ -117,13 +117,15 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
 
     // Energy effects
     {
-      pattern: /^take a {(\w)} Energy from your Energy Zone and attach it to this Pokémon\.$/i,
-      transform: (_, energyType) => {
+      pattern:
+        /^take a {(\w)} Energy from your Energy Zone and attach it to this Pokémon\.( If you use this Ability, your turn ends\.)?$/i,
+      transform: (_, energyType, endTurn) => {
         const fullType = parseEnergy(energyType);
         ability.effect = {
           type: "Standard",
           effect: async (game, self) => {
             await self.player.attachEnergy(self, [fullType], "energyZone");
+            if (endTurn) game.endTurnResolve(true);
           },
         };
       },
@@ -215,6 +217,18 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       },
     },
     {
+      pattern: /heal (\d+) damage from your Active Pokémon\.$/i,
+      transform: (_, healing) => {
+        ability.conditions.push((self) => self.player.activeOrThrow().isDamaged());
+        ability.effect = {
+          type: "Standard",
+          effect: async (game, self) => {
+            game.healPokemon(self.player.activeOrThrow(), Number(healing));
+          },
+        };
+      },
+    },
+    {
       pattern:
         /^choose 1 of your Pokémon that has damage on it, and move all of its damage to this Pokémon\.$/i,
       transform: () => {
@@ -266,6 +280,17 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           type: "Standard",
           effect: async (game, self) => {
             if (self.player.flipCoin()) self.player.opponent.sleepActivePokemon();
+          },
+        };
+      },
+    },
+    {
+      pattern: /^flip a coin\. If heads, your opponent’s Active Pokémon is now Poisoned\.$/i,
+      transform: () => {
+        ability.effect = {
+          type: "Standard",
+          effect: async (game, self) => {
+            if (self.player.flipCoin()) self.player.opponent.poisonActivePokemon();
           },
         };
       },
@@ -528,12 +553,9 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       },
     },
     {
-      pattern: /^your Active (.+?)’s Retreat Cost is (\d+) less\./i,
+      pattern: /^your (Active .+?)’s Retreat Cost is (\d+) less\./i,
       transform: (_, specifier, amount) => {
-        const appliesToPokemon = parsePokemonPredicate(
-          specifier,
-          (p) => p === p.player.ActivePokemon
-        );
+        const appliesToPokemon = parsePokemonPredicate(specifier);
 
         convertToStatusAbility({
           type: "PlayerStatus",
@@ -543,7 +565,25 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
             type: "DecreaseRetreatCost",
             amount: Number(amount),
             appliesToPokemon,
-            descriptor: "Active " + specifier,
+            descriptor: specifier,
+            source: "Ability",
+          },
+        });
+      },
+    },
+    {
+      pattern: /^your (Active .+?) has no Retreat Cost\./i,
+      transform: (_, specifier) => {
+        const appliesToPokemon = parsePokemonPredicate(specifier);
+
+        convertToStatusAbility({
+          type: "PlayerStatus",
+          opponent: false,
+          status: {
+            category: "Pokemon",
+            type: "NoRetreatCost",
+            appliesToPokemon,
+            descriptor: specifier,
             source: "Ability",
           },
         });
