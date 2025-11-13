@@ -1,5 +1,4 @@
 export const EnergyMap = {
-  C: "Colorless",
   G: "Grass",
   R: "Fire",
   W: "Water",
@@ -9,6 +8,7 @@ export const EnergyMap = {
   D: "Darkness",
   M: "Metal",
   X: "Dragon",
+  C: "Colorless",
 } as const;
 export type EnergyShort = keyof typeof EnergyMap;
 export type Energy = (typeof EnergyMap)[EnergyShort];

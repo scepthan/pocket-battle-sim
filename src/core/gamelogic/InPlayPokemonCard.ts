@@ -3,6 +3,7 @@ import { removeElement } from "../util";
 import type { Game } from "./Game";
 import type { Player } from "./Player";
 import {
+  EnergyMap,
   type Ability,
   type Attack,
   type Energy,
@@ -135,7 +136,17 @@ export class InPlayPokemonCard {
   }
 
   attachEnergy(energy: Energy[]) {
-    this.AttachedEnergy.push(...energy);
+    const energyOrder = Object.values(EnergyMap);
+    for (const e of energy) {
+      const index = this.AttachedEnergy.findIndex(
+        (en) => energyOrder.indexOf(e) < energyOrder.indexOf(en)
+      );
+      if (index !== -1) {
+        this.AttachedEnergy.splice(index, 0, e);
+      } else {
+        this.AttachedEnergy.push(e);
+      }
+    }
   }
   removeEnergy(energy: Energy[]) {
     for (const e of energy) removeElement(this.AttachedEnergy, e);
