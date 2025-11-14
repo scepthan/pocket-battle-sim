@@ -1,5 +1,10 @@
 <template>
-  <v-btn icon="mdi-clipboard-text-outline" size="small" @click="copyJson()" />
+  <TooltipButton
+    tooltip="Copy JSON"
+    icon="mdi-clipboard-text-outline"
+    size="small"
+    @click="copyJson()"
+  />
 
   <v-snackbar v-model="snackbar" timeout="2000" location="top">
     Copied deck JSON to clipboard!

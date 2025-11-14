@@ -4,7 +4,7 @@
 
     <h2>Custom</h2>
     <v-row>
-      <v-col v-for="(deck, name) in deckStore.CustomDecks">
+      <v-col v-for="(deck, name) in deckStore.CustomDecks" :key="name">
         <DeckCard :deck="deck" :name="name" />
       </v-col>
 
@@ -12,10 +12,10 @@
     </v-row>
 
     <h2>Builtin</h2>
-    <v-select v-model="selectedDecklist" :items="decklists" item-title="name" item-value="deck" />
+    <v-select v-model="selectedDecklist" :items="decklists" item-title="name" />
     <div class="d-flex flex-wrap ga-4">
-      <div v-for="(deck, name) in selectedDecklist">
-        <DeckCard :deck="deck" :name="name" />
+      <div v-for="(deck, name) in selectedDecklist.decks" :key="name">
+        <DeckCard :deck="deck" :builtin-list="selectedDecklist.name" :name="name" />
       </div>
     </div>
   </v-container>
@@ -27,8 +27,8 @@ import { useDeckStore } from "@/stores";
 
 const deckStore = useDeckStore();
 const decklists = computed(() =>
-  Object.entries(deckStore.BuiltinDecklists).map(([name, deck]) => ({ name, deck }))
+  Object.entries(deckStore.BuiltinDecklists).map(([name, decks]) => ({ name, decks }))
 );
 
-const selectedDecklist = ref<DeckList>(decklists.value[0]!.deck);
+const selectedDecklist = ref<{ name: string; decks: DeckList }>(decklists.value[0]!);
 </script>

@@ -31,11 +31,23 @@
 </template>
 
 <script setup lang="ts">
-import { type Energy, type PlayingCard } from "@/core";
+import { type DeckInfo, type Energy, type PlayingCard } from "@/core";
+import { usePlayingCardStore } from "@/stores";
 
-const selectedCards = ref<PlayingCard[]>([]);
-const deckName = ref("");
-const energyTypes = ref<Energy[]>(["Grass"]);
+export interface Props {
+  name: string;
+  initialDeck: DeckInfo;
+  editingDeck?: string;
+}
+const props = defineProps<Props>();
+
+const cardStore = usePlayingCardStore();
+
+const selectedCards = ref<PlayingCard[]>(
+  props.initialDeck.Cards.map((id) => cardStore.getCardById(id)).filter((x) => x !== undefined)
+);
+const deckName = ref(props.name);
+const energyTypes = ref<Energy[]>(props.initialDeck.EnergyTypes.slice());
 
 const resetDeck = () => {
   selectedCards.value = [];

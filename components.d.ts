@@ -11,12 +11,15 @@ declare module 'vue' {
     CardDisplayDialog: typeof import('./src/components/arena/CardDisplayDialog.vue')['default']
     CardName: typeof import('./src/components/common/CardName.vue')['default']
     CardNameList: typeof import('./src/components/common/CardNameList.vue')['default']
+    CloneButton: typeof import('./src/components/decks/CloneButton.vue')['default']
     CopyJsonButton: typeof import('./src/components/builder/CopyJsonButton.vue')['default']
     CountDisplay: typeof import('./src/components/common/CountDisplay.vue')['default']
     DeckBuilder: typeof import('./src/components/builder/DeckBuilder.vue')['default']
     DeckCard: typeof import('./src/components/decks/DeckCard.vue')['default']
     DeckDisplay: typeof import('./src/components/builder/DeckDisplay.vue')['default']
     DeckDisplayDialog: typeof import('./src/components/decks/DeckDisplayDialog.vue')['default']
+    DeleteButton: typeof import('./src/components/decks/DeleteButton.vue')['default']
+    EditButton: typeof import('./src/components/decks/EditButton.vue')['default']
     EnergyIcon: typeof import('./src/components/common/EnergyIcon.vue')['default']
     EnergySelector: typeof import('./src/components/builder/EnergySelector.vue')['default']
     EnergyZone: typeof import('./src/components/arena/EnergyZone.vue')['default']
@@ -38,5 +41,6 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     SearchPanel: typeof import('./src/components/builder/SearchPanel.vue')['default']
     SelectableCard: typeof import('./src/components/builder/SelectableCard.vue')['default']
+    TooltipButton: typeof import('./src/components/common/TooltipButton.vue')['default']
   }
 }

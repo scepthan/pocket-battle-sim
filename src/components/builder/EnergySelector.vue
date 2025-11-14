@@ -1,6 +1,5 @@
 <template>
   <v-dialog v-model="energyDialog" max-width="380px">
-    <!-- Energy selector (can select up to 3) -->
     <template #activator="{ props }">
       <v-btn v-bind="props" class="rounded-pill">
         <div class="d-flex ga-2">
@@ -13,8 +12,10 @@
         </div>
       </v-btn>
     </template>
+
     <v-card>
       <v-card-title>Select Energy Types (up to 3)</v-card-title>
+
       <v-card-text>
         <v-chip-group v-model="energyTypes" mandatory multiple column :max="3">
           <v-chip
@@ -34,6 +35,7 @@
           </v-chip>
         </v-chip-group>
       </v-card-text>
+
       <v-card-actions>
         <v-spacer />
         <v-btn @click="energyDialog = false">Close</v-btn>

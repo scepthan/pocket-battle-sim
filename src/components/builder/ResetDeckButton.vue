@@ -1,7 +1,7 @@
 <template>
   <v-dialog v-model="resetDialogOpen" max-width="400px">
     <template #activator="{ props }">
-      <v-btn v-bind="props" icon="mdi-trash-can" size="small" />
+      <TooltipButton v-bind="props" tooltip="Delete All" icon="mdi-trash-can" size="small" />
     </template>
     <v-card>
       <v-card-title>Reset Deck?</v-card-title>

@@ -15,6 +15,12 @@
         <PlayingCard v-for="(card, index) in cards" :key="index" :card="card" :height-px="150" />
       </div>
     </v-card-text>
+
+    <v-card-actions>
+      <EditButton v-if="!builtinList" :name="name" />
+      <CloneButton :name="name" :builtin-list="builtinList" />
+      <DeleteButton v-if="!builtinList" :name="name" />
+    </v-card-actions>
   </v-card>
 </template>
 
@@ -24,8 +30,8 @@ import { usePlayingCardStore } from "@/stores";
 
 export interface Props {
   deck: DeckInfo;
+  builtinList?: string;
   name: string;
-  editable?: boolean;
 }
 const props = defineProps<Props>();
 

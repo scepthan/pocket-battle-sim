@@ -17,7 +17,12 @@
     <div class="deck-name">{{ name }}</div>
 
     <v-dialog v-model="dialog" activator="parent" width="850">
-      <DeckDisplayDialog :deck="deck" :name="name" @close="dialog = false" />
+      <DeckDisplayDialog
+        :deck="deck"
+        :builtin-list="builtinList"
+        :name="name"
+        @close="dialog = false"
+      />
     </v-dialog>
   </v-card>
 </template>
@@ -28,6 +33,7 @@ import { usePlayingCardStore } from "@/stores";
 
 export interface Props {
   deck: DeckInfo;
+  builtinList?: string;
   name: string;
 }
 defineProps<Props>();
