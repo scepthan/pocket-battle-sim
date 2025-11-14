@@ -3,7 +3,7 @@
     <v-toolbar>
       <v-toolbar-title>
         {{ name }}
-        <EnergyIcon v-for="energy in deck.EnergyTypes" :energy="energy" inline />
+        <EnergyIcon v-for="(energy, i) in deck.EnergyTypes" :key="i" :energy="energy" inline />
       </v-toolbar-title>
       <v-toolbar-items>
         <v-btn icon="mdi-close" @click="emit('close')"></v-btn>

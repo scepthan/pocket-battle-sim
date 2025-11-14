@@ -1,5 +1,5 @@
 <template>
-  <v-card class="pa-2 text-center" width="180" height="208" @click="true">
+  <EmptyDeckCard @click="true">
     <div class="d-flex justify-center ga-2 pa-2">
       <div v-for="(card, i) in deck.HighlightCards ?? findHighlightCards(name)" :key="i">
         <PlayingCardImage :card-id="findNamedCard(deck, card)" height="100" />
@@ -18,7 +18,7 @@
         @close="dialog = false"
       />
     </v-dialog>
-  </v-card>
+  </EmptyDeckCard>
 </template>
 
 <script setup lang="ts">

@@ -1,0 +1,55 @@
+<template>
+  <CardName :card-id="entry.targetPokemon.cardId" />
+  <span v-if="entry.status.type == 'ReduceAttackDamage'">
+    will take &minus;{{ entry.status.amount }} damage from attacks</span
+  >
+  <span v-else-if="entry.status.type == 'ReduceAttackDamageOnCoinFlip'">
+    will flip a coin to take &minus;{{ entry.status.amount }} damage from attacks</span
+  >
+  <span v-else-if="entry.status.type == 'PreventAttackDamageAndEffects'">
+    cannot be affected by attacks</span
+  >
+  <span v-else-if="entry.status.type == 'PreventAttackDamage'"> cannot be damaged by attacks</span>
+  <span v-else-if="entry.status.type == 'PreventAttackEffects'">
+    cannot be harmed by effects of attacks</span
+  >
+  <span v-else-if="entry.status.type == 'ReduceOwnAttackDamage'">
+    will attack for &minus;{{ entry.status.amount }} damage</span
+  >
+  <span v-else-if="entry.status.type == 'IncreaseAttack'">
+    will attack for +{{ entry.status.amount }} damage</span
+  >
+  <span v-else-if="entry.status.type == 'IncreaseDamageOfAttack'">
+    will attack for +{{ entry.status.amount }} damage with {{ entry.status.attackName }}</span
+  >
+  <span v-else-if="entry.status.type == 'CannotAttack'"> cannot attack</span>
+  <span v-else-if="entry.status.type == 'CannotUseSpecificAttack'">
+    cannot use {{ entry.status.attackName }}</span
+  >
+  <span v-else-if="entry.status.type == 'CoinFlipToAttack'"> must flip a coin to attack</span>
+  <span v-else-if="entry.status.type == 'CannotRetreat'"> cannot retreat</span>
+  <span v-else-if="entry.status.type == 'NoRetreatCost'"> has no retreat cost</span>
+  <span v-else-if="entry.status.type == 'IncreaseMaxHP'">
+    has its max HP increased by {{ entry.status.amount }}</span
+  >
+  <span v-else-if="entry.status.type == 'PreventSpecialConditions'">
+    cannot be affected by Special Conditions</span
+  >
+  <span v-else-if="entry.status.type == 'ReduceAttackCost'">
+    has its attack cost reduced by {{ entry.status.amount }}
+    <EnergyIcon :energy="entry.status.energyType" inline
+  /></span>
+  <span v-else> has unknown status "{{ entry.status.type }}" applied to it</span
+  ><span v-if="'attackerCondition' in entry.status && entry.status.attackerCondition?.descriptor">
+    from <PokemonDescriptor :text="entry.status.attackerCondition.descriptor" /></span
+  ><span v-if="entry.status.source == 'Effect'"> next turn</span>!
+</template>
+
+<script setup lang="ts">
+import type { LoggedEvent } from "@/core";
+
+export interface Props {
+  entry: LoggedEvent & { type: "applyPokemonStatus" };
+}
+defineProps<Props>();
+</script>

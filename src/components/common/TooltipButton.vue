@@ -1,6 +1,6 @@
 <template>
   <v-tooltip :text="tooltip" location="top">
-    <template v-slot:activator="{ props }">
+    <template #activator="{ props }">
       <v-btn v-bind="mergeProps($attrs, props)" />
     </template>
   </v-tooltip>

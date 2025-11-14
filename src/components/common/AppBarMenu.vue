@@ -27,9 +27,9 @@ const menuOptions = [
   { title: "Mass Simulator", route: "/simulator" },
 ];
 
-const goTo = (route: string) => {
+const goTo = async (route: string) => {
   if (router.currentRoute.value.path !== route) {
-    router.push(route);
+    await router.push(route);
   }
 };
 </script>

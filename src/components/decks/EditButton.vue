@@ -14,7 +14,7 @@ const queryObject = computed(() => ({
   name: props.name,
 }));
 
-const onClick = () => {
-  router.push({ path: "/decks/builder", query: queryObject.value });
+const onClick = async () => {
+  await router.push({ path: "/decks/builder", query: queryObject.value });
 };
 </script>
