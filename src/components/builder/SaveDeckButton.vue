@@ -54,6 +54,9 @@ const onClick = () => {
 };
 const saveDeck = () => {
   deckStore.saveCustomDeck(props.name, props.deck);
+  if (props.editingDeck && props.editingDeck !== props.name) {
+    deckStore.deleteCustomDeck(props.editingDeck);
+  }
   snackbar.value = true;
   dialogOpen.value = false;
   emit("save");
