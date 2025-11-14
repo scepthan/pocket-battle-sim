@@ -1,7 +1,12 @@
 <template>
   <v-container fluid class="pa-2" style="width: 1320px">
     <h1>Deck Builder</h1>
-    <DeckBuilder :name="name" :initial-deck="deck" :editing-deck="editingDeck" />
+    <DeckBuilder
+      :name="name"
+      :initial-deck="deck"
+      :editing-deck="editingDeck"
+      @save="(name) => (editingDeck = name)"
+    />
   </v-container>
 </template>
 
@@ -38,6 +43,4 @@ if (route.query.clone === "1") {
   deck.value = deckInfo;
   editingDeck.value = name.value;
 }
-
-console.log(route.query);
 </script>

@@ -17,6 +17,12 @@
           <CopyJsonButton
             :deck="{ Cards: selectedCards.map((x) => x.ID), EnergyTypes: energyTypes }"
           />
+          <SaveDeckButton
+            :name="deckName"
+            :deck="deck"
+            :editing-deck="editingDeck"
+            @save="emit('save', deckName)"
+          />
         </v-col>
       </v-row>
 
@@ -41,6 +47,11 @@ export interface Props {
 }
 const props = defineProps<Props>();
 
+export interface Emits {
+  (e: "save", name: string): void;
+}
+const emit = defineEmits<Emits>();
+
 const cardStore = usePlayingCardStore();
 
 const selectedCards = ref<PlayingCard[]>(
@@ -48,6 +59,11 @@ const selectedCards = ref<PlayingCard[]>(
 );
 const deckName = ref(props.name);
 const energyTypes = ref<Energy[]>(props.initialDeck.EnergyTypes.slice());
+
+const deck = computed<DeckInfo>(() => ({
+  Cards: selectedCards.value.map((card) => card.ID),
+  EnergyTypes: energyTypes.value.slice(),
+}));
 
 const resetDeck = () => {
   selectedCards.value = [];

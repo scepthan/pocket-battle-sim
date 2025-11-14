@@ -23,10 +23,21 @@ export const useDeckStore = defineStore("decks", () => {
     localStorage.setItem("customDecks", JSON.stringify({}));
   }
 
-  const saveCustomDecks = () => {
+  const saveAllCustomDecks = () => {
     localStorage.setItem("customDecks", JSON.stringify(CustomDecks.value));
     console.log("Custom decks saved:", Object.keys(CustomDecks.value).length);
   };
+  const saveCustomDeck = (name: string, deck: DeckInfo) => {
+    CustomDecks.value[name] = deck;
+    saveAllCustomDecks();
+  };
+  const deleteCustomDeck = (name: string) => {
+    if (!(name in CustomDecks.value))
+      return console.warn(`Could not find custom deck with name "${name}"`);
 
-  return { BuiltinDecklists, BuiltinDecks, CustomDecks, saveCustomDecks };
+    delete CustomDecks.value[name];
+    saveAllCustomDecks();
+  };
+
+  return { BuiltinDecklists, BuiltinDecks, CustomDecks, saveCustomDeck, deleteCustomDeck };
 });

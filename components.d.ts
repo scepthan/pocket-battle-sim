@@ -39,6 +39,7 @@ declare module 'vue' {
     ResetDeckButton: typeof import('./src/components/builder/ResetDeckButton.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SaveDeckButton: typeof import('./src/components/builder/SaveDeckButton.vue')['default']
     SearchPanel: typeof import('./src/components/builder/SearchPanel.vue')['default']
     SelectableCard: typeof import('./src/components/builder/SelectableCard.vue')['default']
     TooltipButton: typeof import('./src/components/common/TooltipButton.vue')['default']
