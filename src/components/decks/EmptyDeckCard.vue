@@ -1,5 +1,5 @@
 <template>
-  <v-card class="pa-2 text-center" width="180" height="216">
+  <v-card class="pa-2 text-center" width="180" height="208">
     <slot />
   </v-card>
 </template>
