@@ -7,6 +7,7 @@
 </template>
 
 <script setup lang="ts">
+import { sortedBy } from "./core";
 import { useDeckStore, usePlayingCardStore } from "./stores";
 
 const cardStore = usePlayingCardStore();
@@ -17,13 +18,12 @@ onMounted(() => {
   const decklists = deckStore.BuiltinDecklists;
   const cards = cardStore.InputCards;
   const encounteredCards = new Set<string>();
-  const rarityIndex = (a: string) =>
-    ["C", "U", "R", "RR", "AR", "SR", "SAR", "IM", "S", "SSR", "UR"].indexOf(a);
+  const rarityOrder = ["C", "U", "R", "RR", "AR", "SR", "SAR", "IM", "S", "SSR", "UR"];
 
-  const uniqueCards = cards
-    .slice()
-    .sort((a, b) => rarityIndex(a.rarity) - rarityIndex(b.rarity) || a.id.localeCompare(b.id))
-    .sort((a, b) => (a.id > "PROMO-A-007" ? 1 : 0) - (b.id > "PROMO-A-007" ? 1 : 0))
+  let sortedCards = sortedBy(cards, (card) => card.rarity, rarityOrder);
+  sortedCards = sortedBy(sortedCards, (a) => a.id > "PROMO-A-007");
+
+  const uniqueCards = sortedCards
     .filter((card) => {
       const baseCard = {
         Name: card.name,

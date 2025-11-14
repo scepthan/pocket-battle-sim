@@ -16,6 +16,7 @@ declare module 'vue' {
     DeckBuilder: typeof import('./src/components/builder/DeckBuilder.vue')['default']
     DeckCard: typeof import('./src/components/decks/DeckCard.vue')['default']
     DeckDisplay: typeof import('./src/components/builder/DeckDisplay.vue')['default']
+    DeckDisplayDialog: typeof import('./src/components/decks/DeckDisplayDialog.vue')['default']
     EnergyIcon: typeof import('./src/components/common/EnergyIcon.vue')['default']
     EnergySelector: typeof import('./src/components/builder/EnergySelector.vue')['default']
     EnergyZone: typeof import('./src/components/arena/EnergyZone.vue')['default']

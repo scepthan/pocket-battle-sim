@@ -1,5 +1,5 @@
 import type { GameLogger } from "../logging";
-import { removeElement } from "../util";
+import { removeElement, sortedBy } from "../util";
 import type { Game } from "./Game";
 import type { Player } from "./Player";
 import {
@@ -241,9 +241,7 @@ export class InPlayPokemonCard {
 
   private energyIsSufficient(energies: Energy[], energyAvailable: Energy[]) {
     // Move Colorless energy to the end of the list so colored Energies are checked first
-    energies = energies
-      .slice()
-      .sort((a, b) => (a == "Colorless" ? 1 : 0) - (b == "Colorless" ? 1 : 0));
+    energies = sortedBy(energies, (a) => a === "Colorless");
     energyAvailable = energyAvailable.slice();
 
     for (const energy of energies) {
