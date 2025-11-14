@@ -85,7 +85,7 @@ const matchupData = computed(() =>
 onMounted(() => {
   const allEntrants = useAgents.value
     ? Object.keys(allAgents)
-    : Object.keys(deckStore.AllDecks).filter((x) => x.includes("Meta "));
+    : Object.keys(deckStore.BuiltinDecks).filter((x) => x.includes("Meta "));
   entrants.value = allEntrants.slice();
   selectedEntrant.value = allEntrants[0] ?? "none";
 

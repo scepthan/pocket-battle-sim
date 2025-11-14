@@ -14,7 +14,7 @@ const opponent = ref<RandomAgent>();
 const game = ref<Game>();
 
 onMounted(() => {
-  const allDecks = deckStore.AllDecks;
+  const allDecks = deckStore.BuiltinDecks;
   const deckNames = Object.keys(allDecks) as (keyof typeof allDecks)[];
   const findDeck = (deckName: string) => {
     const deck = allDecks[deckName];

@@ -5,7 +5,7 @@
       <RouterLink to="/arena">Arena</RouterLink>
     </v-list-item>
     <v-list-item>
-      <RouterLink to="/builder">Deck Builder</RouterLink>
+      <RouterLink to="/decks">Decks</RouterLink>
     </v-list-item>
     <v-list-item>
       <RouterLink to="/simulator">Mass Simulator</RouterLink>

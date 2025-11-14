@@ -64,7 +64,8 @@
     },
     "Myths of Sinnoh": {
       "Cards": ["A2-034", "A2-049", "A2-050", "A2-112", "A2-119", "A2-120", "A2-143", "A2-147", "A2-148", "A2a-023", "A2a-024", "A2a-060", "A2a-070", "A2a-071", "PROMO-A-002", "PROMO-A-004", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
-      "EnergyTypes": ["Water", "Metal"]
+      "EnergyTypes": ["Water", "Metal"],
+      "HighlightCards": ["Origin Forme Palkia", "Origin Forme Dialga"]
     }
   },
   "A2a Custom": {

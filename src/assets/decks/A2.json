@@ -49,7 +49,8 @@
     },
     "Supreme Blast": {
       "Cards": ["A2-075", "A2-075", "A2-076", "A2-076", "A2-077", "A2-077", "A2-078", "A2-132", "A2-132", "A2-133", "A2-133", "A2-134", "A2-134", "A2-146", "A2-154", "PROMO-A-002", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
-      "EnergyTypes": ["Psychic"]
+      "EnergyTypes": ["Psychic"],
+      "HighlightCards": ["Mesprit"]
     },
     "Lickilicky ex": {
       "Cards": ["A2-062", "A2-063", "A2-063", "A2-064", "A2-064", "A2-065", "A2-079", "A2-124", "A2-124", "A2-125", "A2-130", "A2-130", "A2-131", "A2-131", "A2-147", "PROMO-A-001", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],

@@ -14,6 +14,7 @@ declare module 'vue' {
     CopyJsonButton: typeof import('./src/components/builder/CopyJsonButton.vue')['default']
     CountDisplay: typeof import('./src/components/common/CountDisplay.vue')['default']
     DeckBuilder: typeof import('./src/components/builder/DeckBuilder.vue')['default']
+    DeckCard: typeof import('./src/components/decks/DeckCard.vue')['default']
     DeckDisplay: typeof import('./src/components/builder/DeckDisplay.vue')['default']
     EnergyIcon: typeof import('./src/components/common/EnergyIcon.vue')['default']
     EnergySelector: typeof import('./src/components/builder/EnergySelector.vue')['default']

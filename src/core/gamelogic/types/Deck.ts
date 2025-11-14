@@ -6,6 +6,19 @@ export interface Deck {
   EnergyTypes: Energy[];
 }
 export interface DeckInfo {
+  /**
+   * List of IDs of all 20 cards included in the deck.
+   */
   Cards: string[];
+
+  /**
+   * List of Energy types to generate (up to 3).
+   */
   EnergyTypes: Energy[];
+
+  /**
+   * List of names of cards to highlight on the deck selection screen. If not provided, the
+   * highlight cards will be inferred from card names included in the deck name.
+   */
+  HighlightCards?: string[];
 }

@@ -14,7 +14,7 @@ const deckStore = useDeckStore();
 const debugMultiUseCards = false;
 
 onMounted(() => {
-  const decklists = deckStore.Decks;
+  const decklists = deckStore.BuiltinDecklists;
   const cards = cardStore.InputCards;
   const encounteredCards = new Set<string>();
   const rarityIndex = (a: string) =>
@@ -23,7 +23,7 @@ onMounted(() => {
   const uniqueCards = cards
     .slice()
     .sort((a, b) => rarityIndex(a.rarity) - rarityIndex(b.rarity) || a.id.localeCompare(b.id))
-    .sort((a, b) => (a.id > "PROMO-A-006" ? 1 : 0) - (b.id > "PROMO-A-006" ? 1 : 0))
+    .sort((a, b) => (a.id > "PROMO-A-007" ? 1 : 0) - (b.id > "PROMO-A-007" ? 1 : 0))
     .filter((card) => {
       const baseCard = {
         Name: card.name,
@@ -95,7 +95,7 @@ onMounted(() => {
     );
   }
 
-  for (const [deckName, deck] of Object.entries(deckStore.AllDecks)) {
+  for (const [deckName, deck] of Object.entries(deckStore.BuiltinDecks)) {
     if (deck.Cards.length !== 20) {
       console.warn(`Deck "${deckName}" has ${deck.Cards.length} cards (expected 20).`);
     }
