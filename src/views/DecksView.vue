@@ -1,18 +1,17 @@
 <template>
   <v-container fluid class="pa-2" style="max-width: 1320px">
-    <h1>Decks</h1>
-
-    <h2>Custom</h2>
-    <v-row>
-      <v-col v-for="(deck, name) in deckStore.CustomDecks" :key="name">
+    <h2>Custom Decks</h2>
+    <div class="d-flex flex-wrap ga-4 mb-4">
+      <div>
+        <CreateDeckCard />
+      </div>
+      <div v-for="(deck, name) in deckStore.CustomDecks" :key="name">
         <DeckCard :deck="deck" :name="name" />
-      </v-col>
+      </div>
+    </div>
 
-      <v-col v-if="Object.keys(deckStore.CustomDecks).length === 0">None</v-col>
-    </v-row>
-
-    <h2>Builtin</h2>
-    <v-select v-model="selectedDecklist" :items="decklists" item-title="name" />
+    <h2>Builtin Decks</h2>
+    <v-select v-model="selectedDecklist" :items="decklists" item-title="name" return-object />
     <div class="d-flex flex-wrap ga-4">
       <div v-for="(deck, name) in selectedDecklist.decks" :key="name">
         <DeckCard :deck="deck" :builtin-list="selectedDecklist.name" :name="name" />

@@ -1,18 +1,12 @@
 <template>
-  <v-card class="pa-2 text-center" width="180" height="216" @click="true">
+  <v-card class="pa-2 text-center" width="180" height="208" @click="true">
     <div class="d-flex justify-center ga-2 pa-2">
       <div v-for="(card, i) in deck.HighlightCards ?? findHighlightCards(name)" :key="i">
         <PlayingCardImage :card-id="findNamedCard(deck, card)" height="100" />
       </div>
     </div>
     <div>
-      <EnergyIcon
-        v-for="(energy, i) in deck.EnergyTypes"
-        :key="i"
-        :energy="energy"
-        height="24"
-        inline
-      />
+      <EnergyIcon v-for="(energy, i) in deck.EnergyTypes" :key="i" :energy="energy" inline />
     </div>
     <div class="deck-name">{{ name }}</div>
 
@@ -52,5 +46,9 @@ const dialog = ref(false);
 .deck-name {
   height: 3em;
   align-content: center;
+}
+.energy-icon {
+  height: 24px;
+  margin: -4px 2px;
 }
 </style>

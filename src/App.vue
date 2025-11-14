@@ -1,5 +1,13 @@
 <template>
   <v-app>
+    <v-app-bar>
+      <v-app-bar-title style="flex-basis: auto; flex-grow: 0; margin-right: 32px">
+        Pocket Battle Simulator
+      </v-app-bar-title>
+
+      <AppBarMenu />
+    </v-app-bar>
+
     <v-main>
       <RouterView />
     </v-main>

@@ -8,12 +8,14 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AppBarMenu: typeof import('./src/components/common/AppBarMenu.vue')['default']
     CardDisplayDialog: typeof import('./src/components/arena/CardDisplayDialog.vue')['default']
     CardName: typeof import('./src/components/common/CardName.vue')['default']
     CardNameList: typeof import('./src/components/common/CardNameList.vue')['default']
     CloneButton: typeof import('./src/components/decks/CloneButton.vue')['default']
     CopyJsonButton: typeof import('./src/components/builder/CopyJsonButton.vue')['default']
     CountDisplay: typeof import('./src/components/common/CountDisplay.vue')['default']
+    CreateDeckCard: typeof import('./src/components/decks/CreateDeckCard.vue')['default']
     DeckBuilder: typeof import('./src/components/builder/DeckBuilder.vue')['default']
     DeckCard: typeof import('./src/components/decks/DeckCard.vue')['default']
     DeckDisplay: typeof import('./src/components/builder/DeckDisplay.vue')['default']

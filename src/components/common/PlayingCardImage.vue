@@ -11,7 +11,10 @@ export interface Props {
 
 const props = defineProps<Props>();
 
-const cardURL = computed(() =>
-  props.cardId ? `https://static.dotgg.gg/pokepocket/card/${props.cardId}.webp` : cardBackUrl
-);
+const cardURL = computed(() => {
+  if (!props.cardId) return cardBackUrl;
+
+  const cardId = props.cardId.replace("PROMO-A", "PROMO");
+  return `https://static.dotgg.gg/pokepocket/card/${cardId}.webp`;
+});
 </script>
