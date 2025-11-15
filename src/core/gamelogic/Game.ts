@@ -1023,7 +1023,6 @@ export class Game {
       BaseHP: Number(hp),
       Stage: 0,
       RetreatCost: -1,
-      Weakness: "",
       PrizePoints: 1,
       Attacks: [],
       Ability: {

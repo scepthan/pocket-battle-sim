@@ -22,9 +22,10 @@ export interface PokemonInputCard extends BaseInputCard {
   stage: number;
   previousEvolution?: string;
   retreatCost: number;
-  weakness: string;
+  weakness?: string;
   attacks: InputCardAttack[];
   ability?: InputCardAbility;
+  isUltraBeast?: boolean;
 }
 export interface TrainerInputCard extends BaseInputCard {
   cardType: "Item" | "Fossil" | "Supporter" | "PokemonTool";

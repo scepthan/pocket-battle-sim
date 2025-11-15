@@ -1,5 +1,8 @@
 <template>
-  <v-text-field v-model="searchQuery" variant="outlined" label="Search terms" clearable />
+  <div class="d-flex ga-4">
+    <v-text-field v-model="searchQuery" variant="outlined" label="Search terms" clearable />
+    <FilterDialog v-model="searchFilters" />
+  </div>
   <v-virtual-scroll :height="600" :items="cardRows" class="pr-4 no-select">
     <template #default="{ item: row }">
       <v-row class="mb-2">
@@ -21,6 +24,7 @@
 <script setup lang="ts">
 import { type PlayingCard } from "@/core";
 import { usePlayingCardStore } from "@/stores";
+import type { SearchFilters } from "@/types/SearchFilters";
 
 export interface Props {
   cardsPerRow?: number;
@@ -38,14 +42,43 @@ const searchQuery = ref("");
 
 const cardStore = usePlayingCardStore();
 const cardsFiltered = computed(() =>
-  cardStore.Cards.filter(
-    (card) =>
-      searchQuery.value === "" ||
-      searchQuery.value
-        .toLowerCase()
-        .split(" ")
-        .every((term) => JSON.stringify(card).toLowerCase().includes(term))
-  )
+  cardStore.Cards.filter((card) => {
+    if (searchQuery.value && !card.Name.toLowerCase().includes(searchQuery.value.toLowerCase()))
+      return false;
+    if (searchFilters.isPokemon !== null) {
+      if (searchFilters.isPokemon && card.CardType !== "Pokemon") return false;
+      if (!searchFilters.isPokemon && card.CardType === "Pokemon") return false;
+    }
+    if (searchFilters.type.length > 0) {
+      if (card.CardType !== "Pokemon" || !searchFilters.type.includes(card.Type)) return false;
+    }
+    if (searchFilters.stage.length > 0) {
+      if (card.CardType !== "Pokemon" || !searchFilters.stage.includes(card.Stage)) return false;
+    }
+    if (searchFilters.isEx !== null) {
+      if (card.CardType !== "Pokemon") return false;
+      if (searchFilters.isEx !== card.Name.endsWith(" ex")) return false;
+    }
+    if (searchFilters.isMega !== null) {
+      if (card.CardType !== "Pokemon") return false;
+      if (searchFilters.isMega !== card.Name.startsWith("Mega ")) return false;
+    }
+    if (searchFilters.isUltraBeast !== null) {
+      if (card.CardType !== "Pokemon") return false;
+      if (searchFilters.isUltraBeast !== card.isUltraBeast) return false;
+    }
+    if (searchFilters.hasAbility !== null) {
+      if (card.CardType !== "Pokemon") return false;
+      if (searchFilters.hasAbility !== !!card.Ability) return false;
+    }
+    if (searchFilters.weakness.length > 0) {
+      if (card.CardType !== "Pokemon") return false;
+      if (card.Weakness === undefined) {
+        if (!searchFilters.weakness.includes("Dragon")) return false;
+      } else if (!searchFilters.weakness.includes(card.Weakness)) return false;
+    }
+    return true;
+  })
 );
 const cardRows = computed(() => {
   const rows = [];
@@ -53,5 +86,23 @@ const cardRows = computed(() => {
     rows.push(cardsFiltered.value.slice(i, i + props.cardsPerRow));
   }
   return rows;
+});
+
+const searchFilters = reactive<SearchFilters>({
+  isPokemon: null,
+  type: [],
+  stage: [],
+  isEx: null,
+  isMega: null,
+  isUltraBeast: null,
+  hasAbility: null,
+  weakness: [],
+  retreatCost: [],
+  hpMin: null,
+  hpMax: null,
+  trainerType: [],
+  rarity: [],
+  expansion: [],
+  isPromo: null,
 });
 </script>

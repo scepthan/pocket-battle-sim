@@ -15,10 +15,11 @@ export interface PokemonCard extends BaseCard {
   Stage: number;
   EvolvesFrom?: string;
   RetreatCost: number;
-  Weakness: string;
+  Weakness?: Energy;
   PrizePoints: number;
   Attacks: Attack[];
   Ability?: Ability;
+  isUltraBeast?: boolean;
 }
 export interface ItemCard extends BaseCard {
   CardType: "Item";

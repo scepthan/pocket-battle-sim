@@ -29,6 +29,15 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
       parseSuccessful = false;
     }
 
+    let Weakness: Energy | undefined;
+    if (!inputCard.weakness) {
+      Weakness = undefined;
+    } else if (isEnergy(inputCard.weakness)) {
+      Weakness = inputCard.weakness;
+    } else {
+      parseSuccessful = false;
+    }
+
     const outputCard = {
       ID: inputCard.id,
       Name: inputCard.name,
@@ -38,10 +47,11 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
       Stage: inputCard.stage,
       EvolvesFrom: inputCard.previousEvolution,
       RetreatCost: inputCard.retreatCost,
-      Weakness: inputCard.weakness,
+      Weakness,
       PrizePoints: inputCard.name.endsWith(" ex") ? 2 : 1,
       Attacks,
       Ability,
+      isUltraBeast: inputCard.isUltraBeast,
     };
 
     return { value: outputCard, parseSuccessful };
