@@ -43,29 +43,22 @@ Backend todo:
 
 Frontend todo:
 
-- [x] Battle simulator UI (~90%)
+- [x] Battle simulation UI (~90%)
   - [ ] Collapse energy icons when at 5 or more
   - [ ] Display game points somewhere
   - [x] Display discard somewhere
   - [x] Display deck size and opponent hand size
   - [x] Display attached Pokemon Tools
   - [ ] Display statuses and Special Conditions
-- [ ] Allow user control of one or both players in battle simulator
+- [ ] Allow user to select decks for arena
+- [ ] Allow user control of one or both players in arena
+- [ ] Allow user to select set of decks to run in mass simulator
+- [x] Deck list UI
+  - [x] Custom and built-in decks
+  - [x] Show cards and energy types in deck
 - [ ] Deck builder UI
   - [x] Display cards currently in deck
   - [x] Display count on card and allow +/-/x
   - [x] Allow energy selection
-  - [ ] Add ability to save decks and edit existing decks
-
-Other todo:
-
-- [x] Deck library
-  - [x] A1 official
-  - [x] A1 unofficial
-  - [x] A1 meta
-  - [x] A1a official
-  - [x] A1a unofficial
-  - [ ] A1a meta
-  - [ ] A2 official
-  - [ ] A2 unofficial
-  - [ ] A2 meta
+  - [x] Add ability to save decks and edit existing decks
+  - [ ] Advanced search filters

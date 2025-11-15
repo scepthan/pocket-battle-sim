@@ -5,7 +5,7 @@
     </v-chip>
   </v-chip-group>
 
-  <v-switch label="Disable art (saved)" v-model="disableArtFilter" />
+  <v-switch v-model="disableArtFilter" label="Disable art (saved)" class="my-n3" />
 </template>
 
 <script setup lang="ts">

@@ -1018,6 +1018,7 @@ export class Game {
     const pokemon: PlayingCard = {
       ID: card.ID,
       Name: card.Name,
+      Rarity: card.Rarity,
       CardType: "Pokemon",
       Type: type,
       BaseHP: Number(hp),
