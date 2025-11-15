@@ -41,6 +41,7 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
     const outputCard = {
       ID: inputCard.id,
       Name: inputCard.name,
+      Rarity: inputCard.rarity,
       CardType: inputCard.cardType,
       Type,
       BaseHP: inputCard.hp,
@@ -66,6 +67,7 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
     const outputCard = {
       ID: inputCard.id,
       Name: inputCard.name,
+      Rarity: inputCard.rarity,
       CardType: inputCard.cardType,
       Text: inputCard.text,
       Effect: result.value,
@@ -79,6 +81,7 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
     const outputCard = {
       ID: inputCard.id,
       Name: inputCard.name,
+      Rarity: inputCard.rarity,
       CardType: inputCard.cardType,
       Text: inputCard.text,
       Effect: result.value,

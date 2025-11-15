@@ -22,6 +22,7 @@
 </template>
 
 <script setup lang="ts">
+import { useDisableArtFilter } from "@/composables";
 import { type PlayingCard } from "@/core";
 import { usePlayingCardStore } from "@/stores";
 import type { SearchFilters } from "@/types/SearchFilters";
@@ -39,6 +40,7 @@ const emits = defineEmits<{
 }>();
 
 const searchQuery = ref("");
+const { disableArtFilter } = useDisableArtFilter();
 
 const cardStore = usePlayingCardStore();
 const cardsFiltered = computed(() =>
@@ -46,8 +48,7 @@ const cardsFiltered = computed(() =>
     if (searchQuery.value && !card.Name.toLowerCase().includes(searchQuery.value.toLowerCase()))
       return false;
     if (searchFilters.isPokemon !== null) {
-      if (searchFilters.isPokemon && card.CardType !== "Pokemon") return false;
-      if (!searchFilters.isPokemon && card.CardType === "Pokemon") return false;
+      if (searchFilters.isPokemon !== (card.CardType === "Pokemon")) return false;
     }
     if (searchFilters.type.length > 0) {
       if (card.CardType !== "Pokemon" || !searchFilters.type.includes(card.Type)) return false;
@@ -76,6 +77,14 @@ const cardsFiltered = computed(() =>
       if (card.Weakness === undefined) {
         if (!searchFilters.weakness.includes("Dragon")) return false;
       } else if (!searchFilters.weakness.includes(card.Weakness)) return false;
+    }
+    if (searchFilters.trainerType.length > 0) {
+      if (!searchFilters.trainerType.includes(card.CardType)) return false;
+    }
+    if (searchFilters.rarity.length > 0) {
+      if (!searchFilters.rarity.includes(card.Rarity)) return false;
+    } else if (disableArtFilter.value) {
+      if (!["C", "U", "R", "RR"].includes(card.Rarity)) return false;
     }
     return true;
   })

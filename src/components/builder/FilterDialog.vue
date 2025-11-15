@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="filterDialog" max-width="600px">
+  <v-dialog v-model="filterDialog" max-width="640px">
     <template #activator="{ props }">
       <v-btn v-bind="props" icon="mdi-filter" />
     </template>
@@ -34,6 +34,12 @@
             v-model="filters.weakness"
             :disabled="filters.isPokemon === false"
           />
+        </FilterDialogRow>
+        <FilterDialogRow label="Trainer type">
+          <MiniTrainerTypeSelector v-model="filters.trainerType" :disabled="filters.isPokemon" />
+        </FilterDialogRow>
+        <FilterDialogRow label="Card rarity">
+          <MiniRaritySelector v-model="filters.rarity" />
         </FilterDialogRow>
       </v-card-text>
 

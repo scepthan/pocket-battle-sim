@@ -7,6 +7,7 @@ import type { TrainerEffect } from "./TrainerEffect";
 export interface BaseCard {
   ID: string;
   Name: string;
+  Rarity: string;
 }
 export interface PokemonCard extends BaseCard {
   CardType: "Pokemon";
