@@ -7,7 +7,7 @@
       color="#f0f"
       class="d-flex justify-center"
     >
-      <v-avatar size="24" class="mr-2">
+      <v-avatar size="24">
         <EnergyIcon :energy="type" width="24px" />
       </v-avatar>
     </v-chip>

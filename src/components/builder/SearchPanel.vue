@@ -98,6 +98,9 @@ const cardsFiltered = computed(() =>
     } else if (disableArtFilter.value) {
       if (!["C", "U", "R", "RR"].includes(card.Rarity)) return false;
     }
+    if (searchFilters.expansion.length > 0) {
+      if (!searchFilters.expansion.some((set) => card.ID.startsWith(set + "-"))) return false;
+    }
     return true;
   })
 );

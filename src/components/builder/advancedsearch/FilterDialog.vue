@@ -59,6 +59,9 @@
         <FilterDialogRow label="Card rarity">
           <MiniRaritySelector v-model="filters.rarity" />
         </FilterDialogRow>
+        <FilterDialogRow label="Expansion">
+          <ExpansionSelector v-model="filters.expansion" />
+        </FilterDialogRow>
       </v-card-text>
     </v-card>
   </v-dialog>

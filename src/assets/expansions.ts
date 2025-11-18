@@ -1,0 +1,14 @@
+export const allExpansions = {
+  A1: "Genetic Apex",
+  A1a: "Mythical Island",
+  A2: "Space-Time Smackdown",
+  A2a: "Triumphant Light",
+  A2b: "Shining Revelry",
+  A3: "Celestial Guardians",
+  A3a: "Extradimensional Crisis",
+  A3b: "Eevee Grove",
+  A4: "Wisdom of Sea and Sky",
+  A4a: "Secluded Springs",
+  A4b: "Deluxe Pack: ex",
+  B1: "Mega Rising",
+};

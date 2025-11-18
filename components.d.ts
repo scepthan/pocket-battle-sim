@@ -26,6 +26,7 @@ declare module 'vue' {
     EnergyIcon: typeof import('./src/components/common/EnergyIcon.vue')['default']
     EnergySelector: typeof import('./src/components/builder/EnergySelector.vue')['default']
     EnergyZone: typeof import('./src/components/arena/EnergyZone.vue')['default']
+    ExpansionSelector: typeof import('./src/components/builder/advancedsearch/ExpansionSelector.vue')['default']
     FilterDialog: typeof import('./src/components/builder/advancedsearch/FilterDialog.vue')['default']
     FilterDialogRow: typeof import('./src/components/builder/advancedsearch/FilterDialogRow.vue')['default']
     GameLog: typeof import('./src/components/arena/gamelog/GameLog.vue')['default']

@@ -7,7 +7,7 @@
       color="#f0f"
       class="d-flex justify-center"
     >
-      <v-avatar v-if="type !== 'Dragon'" size="24" class="mr-2">
+      <v-avatar v-if="type !== 'Dragon'" size="24">
         <EnergyIcon :energy="type" width="24px" />
       </v-avatar>
       <span v-else>None</span>
