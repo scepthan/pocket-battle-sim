@@ -9,15 +9,13 @@
 </template>
 
 <script setup lang="ts">
+import { allRarities } from "@/assets";
 import { useDisableArtFilter } from "@/composables";
 
 const selectedRarities = defineModel<string[]>();
 
 const rarityOrder = computed(() =>
-  ["C", "U", "R", "RR", "AR", "SR", "SAR", "IM", "S", "SSR", "UR"].slice(
-    0,
-    disableArtFilter.value ? 4 : Infinity
-  )
+  Object.keys(allRarities).slice(0, disableArtFilter.value ? 4 : Infinity)
 );
 
 const { disableArtFilter } = useDisableArtFilter();

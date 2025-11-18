@@ -1,6 +1,7 @@
 <template>
   <div class="d-flex ga-4">
     <v-text-field v-model="searchQuery" variant="outlined" label="Search terms" clearable />
+    <SearchSort v-model="sortBy" />
     <FilterDialog v-model="searchFilters" @reset-filters="resetFilters" />
   </div>
   <v-virtual-scroll :height="600" :items="cardRows" class="pr-4 no-select">
@@ -23,9 +24,10 @@
 
 <script setup lang="ts">
 import { useDisableArtFilter } from "@/composables";
-import { type PlayingCard } from "@/core";
+import { sortedBy, type PlayingCard } from "@/core";
 import { usePlayingCardStore } from "@/stores";
-import type { SearchFilters } from "@/types/SearchFilters";
+import type { SearchFilters } from "@/types";
+import type { CardSorter } from "./SearchSort.vue";
 
 export interface Props {
   cardsPerRow?: number;
@@ -44,65 +46,68 @@ const { disableArtFilter } = useDisableArtFilter();
 
 const cardStore = usePlayingCardStore();
 const cardsFiltered = computed(() =>
-  cardStore.Cards.filter((card) => {
-    if (searchQuery.value && !card.Name.toLowerCase().includes(searchQuery.value.toLowerCase()))
-      return false;
-    if (searchFilters.isPokemon !== null) {
-      if (searchFilters.isPokemon !== (card.CardType === "Pokemon")) return false;
-    }
-    if (searchFilters.type.length > 0) {
-      if (card.CardType !== "Pokemon" || !searchFilters.type.includes(card.Type)) return false;
-    }
-    if (searchFilters.stage.length > 0) {
-      if (card.CardType !== "Pokemon" || !searchFilters.stage.includes(card.Stage)) return false;
-    }
-    if (searchFilters.isEx !== null) {
-      if (card.CardType !== "Pokemon") return false;
-      if (searchFilters.isEx !== card.Name.endsWith(" ex")) return false;
-    }
-    if (searchFilters.isMega !== null) {
-      if (card.CardType !== "Pokemon") return false;
-      if (searchFilters.isMega !== card.Name.startsWith("Mega ")) return false;
-    }
-    if (searchFilters.isUltraBeast !== null) {
-      if (card.CardType !== "Pokemon") return false;
-      if (searchFilters.isUltraBeast !== card.isUltraBeast) return false;
-    }
-    if (searchFilters.hasAbility !== null) {
-      if (card.CardType !== "Pokemon") return false;
-      if (searchFilters.hasAbility !== !!card.Ability) return false;
-    }
-    if (searchFilters.weakness.length > 0) {
-      if (card.CardType !== "Pokemon") return false;
-      if (card.Weakness === undefined) {
-        if (!searchFilters.weakness.includes("Dragon")) return false;
-      } else if (!searchFilters.weakness.includes(card.Weakness)) return false;
-    }
-    if (searchFilters.retreatCost.length > 0) {
-      if (card.CardType !== "Pokemon") return false;
-      if (!searchFilters.retreatCost.includes(card.RetreatCost)) return false;
-    }
-    if (searchFilters.hpMin) {
-      if (card.CardType !== "Pokemon") return false;
-      if (card.BaseHP < searchFilters.hpMin) return false;
-    }
-    if (searchFilters.hpMax) {
-      if (card.CardType !== "Pokemon") return false;
-      if (card.BaseHP > searchFilters.hpMax) return false;
-    }
-    if (searchFilters.trainerType.length > 0) {
-      if (!searchFilters.trainerType.includes(card.CardType)) return false;
-    }
-    if (searchFilters.rarity.length > 0) {
-      if (!searchFilters.rarity.includes(card.Rarity)) return false;
-    } else if (disableArtFilter.value) {
-      if (!["C", "U", "R", "RR"].includes(card.Rarity)) return false;
-    }
-    if (searchFilters.expansion.length > 0) {
-      if (!searchFilters.expansion.some((set) => card.ID.startsWith(set + "-"))) return false;
-    }
-    return true;
-  })
+  sortedBy(
+    cardStore.Cards.filter((card) => {
+      if (searchQuery.value && !card.Name.toLowerCase().includes(searchQuery.value.toLowerCase()))
+        return false;
+      if (searchFilters.isPokemon !== null) {
+        if (searchFilters.isPokemon !== (card.CardType === "Pokemon")) return false;
+      }
+      if (searchFilters.type.length > 0) {
+        if (card.CardType !== "Pokemon" || !searchFilters.type.includes(card.Type)) return false;
+      }
+      if (searchFilters.stage.length > 0) {
+        if (card.CardType !== "Pokemon" || !searchFilters.stage.includes(card.Stage)) return false;
+      }
+      if (searchFilters.isEx !== null) {
+        if (card.CardType !== "Pokemon") return false;
+        if (searchFilters.isEx !== card.Name.endsWith(" ex")) return false;
+      }
+      if (searchFilters.isMega !== null) {
+        if (card.CardType !== "Pokemon") return false;
+        if (searchFilters.isMega !== card.Name.startsWith("Mega ")) return false;
+      }
+      if (searchFilters.isUltraBeast !== null) {
+        if (card.CardType !== "Pokemon") return false;
+        if (searchFilters.isUltraBeast !== card.isUltraBeast) return false;
+      }
+      if (searchFilters.hasAbility !== null) {
+        if (card.CardType !== "Pokemon") return false;
+        if (searchFilters.hasAbility !== !!card.Ability) return false;
+      }
+      if (searchFilters.weakness.length > 0) {
+        if (card.CardType !== "Pokemon") return false;
+        if (card.Weakness === undefined) {
+          if (!searchFilters.weakness.includes("Dragon")) return false;
+        } else if (!searchFilters.weakness.includes(card.Weakness)) return false;
+      }
+      if (searchFilters.retreatCost.length > 0) {
+        if (card.CardType !== "Pokemon") return false;
+        if (!searchFilters.retreatCost.includes(card.RetreatCost)) return false;
+      }
+      if (searchFilters.hpMin) {
+        if (card.CardType !== "Pokemon") return false;
+        if (card.BaseHP < searchFilters.hpMin) return false;
+      }
+      if (searchFilters.hpMax) {
+        if (card.CardType !== "Pokemon") return false;
+        if (card.BaseHP > searchFilters.hpMax) return false;
+      }
+      if (searchFilters.trainerType.length > 0) {
+        if (!searchFilters.trainerType.includes(card.CardType)) return false;
+      }
+      if (searchFilters.rarity.length > 0) {
+        if (!searchFilters.rarity.includes(card.Rarity)) return false;
+      } else if (disableArtFilter.value) {
+        if (!["C", "U", "R", "RR"].includes(card.Rarity)) return false;
+      }
+      if (searchFilters.expansion.length > 0) {
+        if (!searchFilters.expansion.some((set) => card.ID.startsWith(set + "-"))) return false;
+      }
+      return true;
+    }),
+    sortBy.value
+  )
 );
 const cardRows = computed(() => {
   const rows = [];
@@ -131,6 +136,7 @@ const baseFilters: SearchFilters = {
 };
 
 const searchFilters = reactive<SearchFilters>(Object.assign({}, baseFilters));
+const sortBy = ref<CardSorter>((card) => card.ID);
 
 const resetFilters = () => {
   Object.assign(searchFilters, baseFilters);

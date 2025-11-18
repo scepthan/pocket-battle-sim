@@ -1,4 +1,4 @@
-type Sortable = number | string | boolean;
+export type Sortable = number | string | boolean;
 
 export const sortedBy = <T>(arr: T[], fn: (x: T) => Sortable, sortKey?: Sortable[]): T[] => {
   const sortingArray = arr.map((x) => ({
