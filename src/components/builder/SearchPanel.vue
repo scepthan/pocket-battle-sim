@@ -78,6 +78,18 @@ const cardsFiltered = computed(() =>
         if (!searchFilters.weakness.includes("Dragon")) return false;
       } else if (!searchFilters.weakness.includes(card.Weakness)) return false;
     }
+    if (searchFilters.retreatCost.length > 0) {
+      if (card.CardType !== "Pokemon") return false;
+      if (!searchFilters.retreatCost.includes(card.RetreatCost)) return false;
+    }
+    if (searchFilters.hpMin) {
+      if (card.CardType !== "Pokemon") return false;
+      if (card.BaseHP < searchFilters.hpMin) return false;
+    }
+    if (searchFilters.hpMax) {
+      if (card.CardType !== "Pokemon") return false;
+      if (card.BaseHP > searchFilters.hpMax) return false;
+    }
     if (searchFilters.trainerType.length > 0) {
       if (!searchFilters.trainerType.includes(card.CardType)) return false;
     }

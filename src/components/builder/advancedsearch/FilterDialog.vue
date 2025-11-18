@@ -40,6 +40,19 @@
             :disabled="filters.isPokemon === false"
           />
         </FilterDialogRow>
+        <FilterDialogRow label="Retreat Cost">
+          <MiniRetreatCostSelector
+            v-model="filters.retreatCost"
+            :disabled="filters.isPokemon === false"
+          />
+        </FilterDialogRow>
+        <FilterDialogRow label="HP">
+          <HpSelector
+            v-model:min-hp="filters.hpMin"
+            v-model:max-hp="filters.hpMax"
+            :disabled="filters.isPokemon === false"
+          />
+        </FilterDialogRow>
         <FilterDialogRow label="Trainer type">
           <MiniTrainerTypeSelector v-model="filters.trainerType" :disabled="filters.isPokemon" />
         </FilterDialogRow>
