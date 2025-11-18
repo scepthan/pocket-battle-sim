@@ -5,7 +5,12 @@
     </template>
 
     <v-card>
-      <v-card-title>Select Filters</v-card-title>
+      <v-card-title class="d-flex align-center w-100">
+        <span>Select Filters</span>
+        <v-spacer />
+        <v-btn icon="mdi-restore" variant="flat" @click="emit('resetFilters')" />
+        <v-btn icon="mdi-close" variant="flat" @click="filterDialog = false" />
+      </v-card-title>
 
       <v-card-text>
         <FilterDialogRow label="Is Pokémon?">
@@ -42,11 +47,6 @@
           <MiniRaritySelector v-model="filters.rarity" />
         </FilterDialogRow>
       </v-card-text>
-
-      <v-card-actions>
-        <v-spacer />
-        <v-btn @click="filterDialog = false">Close</v-btn>
-      </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
@@ -57,6 +57,8 @@ import type { SearchFilters } from "@/types/SearchFilters";
 const filterDialog = ref(false);
 
 const filters = defineModel<SearchFilters>("modelValue", { required: true });
+
+const emit = defineEmits<{ (e: "resetFilters"): void }>();
 </script>
 
 <style scoped>

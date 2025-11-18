@@ -1,7 +1,7 @@
 <template>
   <div class="d-flex ga-4">
     <v-text-field v-model="searchQuery" variant="outlined" label="Search terms" clearable />
-    <FilterDialog v-model="searchFilters" />
+    <FilterDialog v-model="searchFilters" @reset-filters="resetFilters" />
   </div>
   <v-virtual-scroll :height="600" :items="cardRows" class="pr-4 no-select">
     <template #default="{ item: row }">
@@ -97,7 +97,7 @@ const cardRows = computed(() => {
   return rows;
 });
 
-const searchFilters = reactive<SearchFilters>({
+const baseFilters: SearchFilters = {
   isPokemon: null,
   type: [],
   stage: [],
@@ -113,5 +113,11 @@ const searchFilters = reactive<SearchFilters>({
   rarity: [],
   expansion: [],
   isPromo: null,
-});
+};
+
+const searchFilters = reactive<SearchFilters>(Object.assign({}, baseFilters));
+
+const resetFilters = () => {
+  Object.assign(searchFilters, baseFilters);
+};
 </script>
