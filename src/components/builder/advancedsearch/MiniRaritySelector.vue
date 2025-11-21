@@ -9,14 +9,12 @@
 </template>
 
 <script setup lang="ts">
-import { allRarities } from "@/assets";
+import { rarityShort } from "@/assets";
 import { useDisableArtFilter } from "@/composables";
 
 const selectedRarities = defineModel<string[]>();
 
-const rarityOrder = computed(() =>
-  Object.keys(allRarities).slice(0, disableArtFilter.value ? 4 : Infinity)
-);
+const rarityOrder = computed(() => rarityShort.slice(0, disableArtFilter.value ? 4 : Infinity));
 
 const { disableArtFilter } = useDisableArtFilter();
 </script>

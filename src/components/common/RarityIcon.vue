@@ -4,35 +4,21 @@
 </template>
 
 <script setup lang="ts">
-import { Crown, Diamond, Shiny, Star } from "@/assets/img/rarity";
+import { allRarities } from "@/assets";
+import * as icons from "@/assets/img/rarity";
 
 export interface Props {
-  rarity: string;
+  rarity: keyof typeof allRarities;
 }
 const props = defineProps<Props>();
 
-const rarityOrder = ["C", "U", "R", "RR", "AR", "SR", "SAR", "IM", "S", "SSR", "UR"];
-
-const icon = computed(() => {
-  const rarity = props.rarity;
-  if (rarity === "UR") return Crown;
-  if (rarity === "S" || rarity === "SSR") return Shiny;
-  if (rarity === "AR" || rarity === "SR" || rarity === "SAR" || rarity === "IM") return Star;
-  return Diamond;
-});
+const rarityObj = computed(() => allRarities[props.rarity]);
+const icon = computed(() => icons[rarityObj.value.icon]);
+const count = computed(() => rarityObj.value.count);
 
 const height = ref(20);
-const width = computed(
-  () =>
-    height.value *
-    (icon.value === Shiny ? 0.8 : icon.value === Diamond ? 0.7 : icon.value === Star ? 0.9 : 1)
-);
-
-const count = computed(() => {
-  const rarity = props.rarity;
-  if (rarity === "RR") return 4;
-  if (rarity === "R" || rarity === "IM") return 3;
-  if (rarity === "U" || rarity === "SR" || rarity === "SAR" || rarity === "SSR") return 2;
-  return 1;
+const width = computed(() => {
+  const multiplier = { Diamond: 0.7, Star: 0.9, Shiny: 0.8, Crown: 1 }[rarityObj.value.icon];
+  return height.value * multiplier;
 });
 </script>
