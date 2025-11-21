@@ -401,7 +401,7 @@ defineProps<Props>();
 .game-log {
   max-width: 500px;
 }
-.energy-icon {
+:deep(.energy-icon) {
   height: 1.25em;
   margin-bottom: -4px;
 }

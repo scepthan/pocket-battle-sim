@@ -1,9 +1,9 @@
 <template>
-  <div class="card-container">
-    <div v-for="(card, i) of cards" :key="i" class="hand-card-active">
-      <PlayingCard :card="card" :height-px="200" />
-    </div>
-  </div>
+  <PlayingCardCollection :count="cards.length">
+    <template #card="{ index }">
+      <PlayingCard :card="cards[index - 1]" :height-px="200" />
+    </template>
+  </PlayingCardCollection>
 </template>
 
 <script setup lang="ts">
@@ -16,21 +16,11 @@ defineProps<Props>();
 </script>
 
 <style scoped>
-.card-container {
-  width: 534px;
-  height: 230px;
-}
-.hand-card-active {
+:deep(.hand-card) {
   margin-top: 30px;
-  margin-right: -100px;
-  float: left;
-
   transition: margin-top 0.3s;
 }
-.hand-card-active:hover {
+:deep(.hand-card:hover) {
   margin-top: 0px;
-}
-.hand-card-active:last-child {
-  margin-right: 0px !important;
 }
 </style>
