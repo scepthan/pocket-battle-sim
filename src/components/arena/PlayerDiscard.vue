@@ -16,11 +16,11 @@
 </template>
 
 <script setup lang="ts">
-import type { PlayingCard as TPlayingCard } from "@/core";
+import type { PlayingCard } from "@/core";
 import { mergeProps } from "vue";
 
 export interface Props {
-  cards: TPlayingCard[];
+  cards: PlayingCard[];
 }
 defineProps<Props>();
 

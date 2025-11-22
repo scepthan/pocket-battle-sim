@@ -16,22 +16,22 @@
 </template>
 
 <script setup lang="ts">
-import type { PlayingCard as TPlayingCard } from "@/core";
+import type { PlayingCard } from "@/core";
 import { mergeProps } from "vue";
 
 export interface Props {
-  deck: TPlayingCard[];
+  deck: PlayingCard[];
   handSize?: number;
 }
 const props = defineProps<Props>();
 
 const dialog = ref(false);
 
-const deckSize = computed(() => props.deck.length);
+const deckSize = computed(() => props.deck.length - (props.handSize ?? 0));
 const sortedCards = computed(() => props.deck.slice().sort((a, b) => a.ID.localeCompare(b.ID)));
 
 const dialogTitle = computed(() => {
-  let title = `Cards in Deck (${props.deck.length})`;
+  let title = `Cards in Deck (${deckSize.value})`;
   if (props.handSize !== undefined) title += ` and Hand (${props.handSize})`;
   return title;
 });
