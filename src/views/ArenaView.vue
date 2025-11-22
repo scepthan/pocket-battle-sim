@@ -1,17 +1,23 @@
 <template>
-  <PlayingField v-if="cardStore.Cards.length > 0" :game="game" :shown-players="['Player']" />
+  <PlayingField
+    v-if="cardStore.Cards.length > 0"
+    :game="gameView"
+    :log="game?.GameLog"
+    :shown-players="['Player']"
+  />
 </template>
 
 <script setup lang="ts">
-import { BetterRandomAgent, Game, RandomAgent, randomElement } from "@/core";
+import { BetterRandomAgent, Game, PlayerAgent, PlayerGameView, randomElement } from "@/core";
 import { useDeckStore, usePlayingCardStore } from "@/stores";
 
 const cardStore = usePlayingCardStore();
 const deckStore = useDeckStore();
 
-const player = ref<RandomAgent>();
-const opponent = ref<RandomAgent>();
+const player = ref<PlayerAgent>();
+const opponent = ref<PlayerAgent>();
 const game = ref<Game>();
+const gameView = ref<PlayerGameView>();
 
 onMounted(() => {
   const allDecks = deckStore.BuiltinDecks;
@@ -43,6 +49,8 @@ onMounted(() => {
     game.value = new Game(player.value, opponent.value, {
       DelayPerAction: 1000,
     });
+
+    gameView.value = new PlayerGameView(game.value, game.value.Player1);
 
     setTimeout(async () => {
       if (!game.value) return;

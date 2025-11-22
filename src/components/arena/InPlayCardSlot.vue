@@ -36,11 +36,11 @@
 </template>
 
 <script setup lang="ts">
-import type { EmptyCardSlot, InPlayPokemonCard } from "@/core";
+import type { CardSlotView } from "@/core";
 
 export interface Props {
   heightPx?: number;
-  card?: InPlayPokemonCard | EmptyCardSlot;
+  card?: CardSlotView;
 }
 const props = defineProps<Props>();
 
@@ -49,7 +49,7 @@ const height = computed(() => props.heightPx ?? 200);
 const width = computed(() => height.value * ratio);
 
 const hpPercent = computed(() =>
-  props.card && "BaseCard" in props.card ? (props.card.CurrentHP / props.card.MaxHP) * 100 : 0
+  props.card?.isPokemon ? (props.card.CurrentHP / props.card.MaxHP) * 100 : 0
 );
 
 const cardStyle = computed(() => ({

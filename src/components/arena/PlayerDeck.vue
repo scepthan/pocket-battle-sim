@@ -11,11 +11,7 @@
       </v-tooltip>
     </template>
 
-    <CardDisplayDialog
-      :title="`Cards in Deck (${deck.length})` + (hand ? ` and Hand (${hand.length})` : '')"
-      :cards="sortedCards"
-      @close="dialog = false"
-    />
+    <CardDisplayDialog :title="dialogTitle" :cards="sortedCards" @close="dialog = false" />
   </v-dialog>
 </template>
 
@@ -25,14 +21,18 @@ import { mergeProps } from "vue";
 
 export interface Props {
   deck: TPlayingCard[];
-  hand?: TPlayingCard[];
+  handSize?: number;
 }
 const props = defineProps<Props>();
 
 const dialog = ref(false);
 
 const deckSize = computed(() => props.deck.length);
-const sortedCards = computed(() =>
-  props.deck.concat(props.hand ?? []).sort((a, b) => a.ID.localeCompare(b.ID))
-);
+const sortedCards = computed(() => props.deck.slice().sort((a, b) => a.ID.localeCompare(b.ID)));
+
+const dialogTitle = computed(() => {
+  let title = `Cards in Deck (${props.deck.length})`;
+  if (props.handSize !== undefined) title += ` and Hand (${props.handSize})`;
+  return title;
+});
 </script>
