@@ -1,14 +1,14 @@
-import { allDecks, decks, type DeckRecord } from "@/assets";
+import { allDecks, decks, type DeckList, type DeckRecord } from "@/assets";
 import type { DeckInfo } from "@/core";
 import { defineStore } from "pinia";
 
 export const useDeckStore = defineStore("decks", () => {
   const BuiltinDecklists = ref<DeckRecord>(decks);
-  const BuiltinDecks = ref<Record<string, DeckInfo>>(allDecks);
+  const BuiltinDecks = ref<DeckList>(allDecks);
 
   console.log("Pre-built decks loaded:", Object.keys(BuiltinDecks.value).length);
 
-  const CustomDecks = ref<Record<string, DeckInfo>>({});
+  const CustomDecks = ref<DeckList>({});
 
   const storedDecks = localStorage.getItem("customDecks");
   if (storedDecks) {

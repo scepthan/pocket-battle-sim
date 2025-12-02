@@ -5,69 +5,71 @@
         <div class="d-flex w-100 justify-center flex-row">
           <div class="d-flex flex-column align-center ga-2">
             <PlayerPokemon
-              :active="game?.opponentActive"
-              :bench="game?.opponentBench ?? []"
+              :active="gameView?.opponentActive"
+              :bench="gameView?.opponentBench ?? []"
               reverse
             />
 
-            <PlayerPokemon :active="game?.selfActive" :bench="game?.selfBench ?? []" />
+            <PlayerPokemon :active="gameView?.selfActive" :bench="gameView?.selfBench ?? []" />
           </div>
 
           <div class="h-100 d-flex flex-column align-center justify-space-between">
             <div class="d-flex flex-row align-start">
               <div class="d-flex flex-column align-center ga-2" style="width: 180px">
-                <span>{{ game?.opponentName }}</span>
+                <span>{{ gameView?.opponentName }}</span>
                 <EnergyZone
                   class="ml-5"
-                  :current-energy="game?.opponentAvailableEnergy"
-                  :next-energy="game?.opponentNextEnergy"
+                  :current-energy="gameView?.opponentAvailableEnergy"
+                  :next-energy="gameView?.opponentNextEnergy"
                 />
                 <div class="d-flex flex-row ga-2">
                   <PlayerDeck
-                    :deck="game?.opponentUnseenCards ?? []"
-                    :hand-size="game?.opponentHandSize"
+                    :deck="gameView?.opponentUnseenCards ?? []"
+                    :hand-size="gameView?.opponentHandSize"
                   />
-                  <PlayerDiscard :cards="game?.selfDiscard.slice().reverse() ?? []" />
+                  <PlayerDiscard :cards="gameView?.opponentDiscard.slice().reverse() ?? []" />
                 </div>
               </div>
-              <PlayerHandHidden :cards="game?.opponentHandSize ?? 0" />
+              <PlayerHandHidden :cards="gameView?.opponentHandSize ?? 0" />
             </div>
 
             <div class="flex-grow-1 w-100 d-flex flex-column-reverse overflow-y-auto">
-              <GameLog :game-log="log" :shown-players="game ? [game.selfName] : []" />
+              <GameLog :game-log="log" :shown-players="gameView ? [gameView.selfName] : []" />
             </div>
 
             <div class="d-flex flex-row align-end">
               <div class="d-flex flex-column align-center ga-2" style="width: 180px">
                 <div class="d-flex flex-row ga-2">
-                  <PlayerDeck :deck="game?.selfDeck.slice() ?? []" />
-                  <PlayerDiscard :cards="game?.selfDiscard.slice().reverse() ?? []" />
+                  <PlayerDeck :deck="gameView?.selfDeck.slice() ?? []" />
+                  <PlayerDiscard :cards="gameView?.selfDiscard.slice().reverse() ?? []" />
                 </div>
                 <EnergyZone
                   class="ml-5"
-                  :current-energy="game?.selfAvailableEnergy"
-                  :next-energy="game?.selfNextEnergy"
+                  :current-energy="gameView?.selfAvailableEnergy"
+                  :next-energy="gameView?.selfNextEnergy"
                 />
-                <span>{{ game?.selfName }}</span>
+                <span>{{ gameView?.selfName }}</span>
               </div>
-              <PlayerHandVisible :cards="game?.selfHand ?? []" />
+              <PlayerHandVisible :cards="gameView?.selfHand ?? []" />
             </div>
           </div>
         </div>
       </div>
       <div class="d-flex align-end" style="width: 500px">
-        <PlayerControls v-if="game" :game="game" player="Player" />
+        <PlayerControls v-if="gameView" v-model:agent="agent" :game="gameView" player="Player" />
       </div>
     </div>
   </v-container>
 </template>
 
 <script setup lang="ts">
-import { GameLogger, PlayerGameView } from "@/core";
+import { GameLogger, PlayerAgent, PlayerGameView } from "@/core";
 
 export interface Props {
-  game?: PlayerGameView;
+  gameView?: PlayerGameView;
   log?: GameLogger;
 }
 defineProps<Props>();
+
+const agent = defineModel<PlayerAgent>("agent");
 </script>

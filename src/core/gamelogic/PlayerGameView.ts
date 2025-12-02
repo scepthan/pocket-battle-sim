@@ -39,13 +39,13 @@ export class PlayerGameView {
     this.opponent = player.opponent;
   }
 
-  #pokemonFromView(view: PlayerPokemonView): InPlayPokemonCard {
+  private pokemonFromView(view: PlayerPokemonView): InPlayPokemonCard {
     for (const pokemon of [...this.player.InPlayPokemon, ...this.opponent.InPlayPokemon])
       if (view.is(pokemon)) return pokemon;
     throw new Error("Could not find Pokemon: " + view.Name);
   }
-  #pokemonOrEmpty(slot: CardSlotView): CardSlot {
-    if (slot.isPokemon) return this.#pokemonFromView(slot);
+  private pokemonOrEmpty(slot: CardSlotView): CardSlot {
+    if (slot.isPokemon) return this.pokemonFromView(slot);
     return slot;
   }
 
@@ -236,7 +236,7 @@ export class PlayerGameView {
 
     if (pokemon.Ability !== ability) return false;
     if (ability.type !== "Standard" || ability.trigger.type !== "Manual") return false;
-    const realPokemon = this.#pokemonFromView(pokemon);
+    const realPokemon = this.pokemonFromView(pokemon);
     if (!ability.trigger.multiUse) {
       if (this.game.UsedAbilities.has(realPokemon)) return false;
     }
@@ -265,7 +265,7 @@ export class PlayerGameView {
     if (!this.canPlay && !ignoreCanPlay) return false;
 
     if (!pokemon.ReadyToEvolve) return false;
-    const realPokemon = this.#pokemonFromView(pokemon);
+    const realPokemon = this.pokemonFromView(pokemon);
     if (
       this.player.PlayerStatuses.some(
         (status) => status.type == "CannotEvolve" && status.appliesToPokemon(realPokemon, this.game)
@@ -289,7 +289,7 @@ export class PlayerGameView {
     if (!this.canPlay) return false;
 
     if (this.selfAvailableEnergy) {
-      const realPokemon = this.#pokemonFromView(pokemon);
+      const realPokemon = this.pokemonFromView(pokemon);
       await this.game.delay();
       await this.game.attachAvailableEnergy(realPokemon);
       return true;
@@ -314,7 +314,7 @@ export class PlayerGameView {
     if (!this.canEvolve(inPlayPokemon)) return false;
 
     if (pokemon.EvolvesFrom == inPlayPokemon.Name) {
-      const realPokemon = this.#pokemonFromView(inPlayPokemon);
+      const realPokemon = this.pokemonFromView(inPlayPokemon);
       await this.game.delay();
       await this.game.evolvePokemon(realPokemon, pokemon);
       return true;
@@ -325,7 +325,7 @@ export class PlayerGameView {
     if (!this.canUseAbility(pokemon, ability)) return false;
     await this.game.delay();
 
-    const realPokemon = this.#pokemonFromView(pokemon);
+    const realPokemon = this.pokemonFromView(pokemon);
     await this.game.useAbility(realPokemon, ability);
     return true;
   }
@@ -356,13 +356,13 @@ export class PlayerGameView {
       }
     }
 
-    const realPokemon = this.#pokemonFromView(benchedPokemon);
+    const realPokemon = this.pokemonFromView(benchedPokemon);
     await this.game.retreatActivePokemon(realPokemon, energy);
     return true;
   }
   async playItemCard(card: ItemCard | FossilCard, target?: CardSlotView): Promise<boolean> {
     if (!this.canPlayCard(card)) return false;
-    const realTarget = target && this.#pokemonOrEmpty(target);
+    const realTarget = target && this.pokemonOrEmpty(target);
     if (card.Effect.type === "Targeted") {
       if (!realTarget || !card.Effect.validTargets(this.game).includes(realTarget)) return false;
     }
@@ -373,7 +373,7 @@ export class PlayerGameView {
   }
   async playSupporterCard(card: SupporterCard, target?: CardSlotView): Promise<boolean> {
     if (!this.canPlayCard(card)) return false;
-    const realTarget = target && this.#pokemonOrEmpty(target);
+    const realTarget = target && this.pokemonOrEmpty(target);
     if (card.Effect.type === "Targeted") {
       if (!realTarget || !card.Effect.validTargets(this.game).includes(realTarget)) return false;
     }
@@ -387,7 +387,7 @@ export class PlayerGameView {
     if (target.AttachedToolCards.length >= target.MaxToolCards) return false;
     await this.game.delay();
 
-    const realPokemon = this.#pokemonFromView(target);
+    const realPokemon = this.pokemonFromView(target);
     await this.game.playTrainer(card, realPokemon);
     return true;
   }

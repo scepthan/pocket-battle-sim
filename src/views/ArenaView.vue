@@ -1,9 +1,9 @@
 <template>
   <PlayingField
     v-if="cardStore.Cards.length > 0"
-    :game="gameView"
+    v-model:agent="player"
+    :game-view="gameView"
     :log="game?.GameLog"
-    :shown-players="['Player']"
   />
 </template>
 
@@ -56,7 +56,7 @@ onMounted(() => {
       if (!game.value) return;
 
       void game.value.start();
-    }, 3000);
+    }, 0);
   }, 1000);
 });
 </script>
