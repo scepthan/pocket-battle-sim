@@ -1,67 +1,128 @@
 <template>
   <div v-if="stage === 'selectCard'">
-    <p>{{ cardSelectText ?? "Select a card:" }}</p>
+    <p>{{ cardSelector.text ?? "Select a card:" }}</p>
     <div class="d-flex flex-wrap ga-2">
-      <v-btn v-for="(pokemon, i) in availableCards" :key="i" @click="selectCard(pokemon)">{{
-        pokemon.Name
-      }}</v-btn>
-      <v-btn v-if="addReadyButton" color="green" @click="selectCard(null)">Ready</v-btn>
-      <v-btn v-if="addCancelButton" color="red" @click="selectCard('cancel')">Cancel</v-btn>
+      <v-btn
+        v-for="(card, i) in cardSelector.options.value"
+        :key="i"
+        @click="cardSelector.select(card)"
+      >
+        {{ card.Name }}
+      </v-btn>
+      <v-btn v-if="addReadyButton" color="green" @click="cardSelector.select(null)"> Ready </v-btn>
+      <v-btn v-if="addCancelButton" color="red" @click="cardSelector.select('cancel')">
+        Cancel
+      </v-btn>
     </div>
   </div>
-  <div v-else-if="game?.currentTurnNumber === 0">Waiting to start...</div>
-  <div v-else-if="game?.isSelfTurn">
+
+  <div v-else-if="stage === 'selectPokemon'">
+    <p>{{ pokemonSelector.text ?? "Select a Pokémon:" }}</p>
+    <div class="d-flex flex-wrap ga-2">
+      <v-btn
+        v-for="(pokemon, i) in pokemonSelector.options.value as PlayerPokemonView[]"
+        :key="i"
+        @click="pokemonSelector.select(pokemon)"
+      >
+        {{ pokemon.Name }}
+      </v-btn>
+      <v-btn v-if="addCancelButton" color="red" @click="pokemonSelector.select('cancel')">
+        Cancel
+      </v-btn>
+    </div>
+  </div>
+
+  <div v-else-if="stage === 'selectAny'">
+    <p>{{ baseSelector.text ?? "Select one:" }}</p>
+    <div class="d-flex flex-wrap ga-2">
+      <v-btn
+        v-for="(option, i) in baseSelector.options.value"
+        :key="i"
+        @click="baseSelector.select(option)"
+      >
+        {{ option }}
+      </v-btn>
+      <v-btn v-if="addCancelButton" color="red" @click="baseSelector.select('cancel')">
+        Cancel
+      </v-btn>
+    </div>
+  </div>
+
+  <div v-else-if="stage === 'doTurn'">
     <p>What would you like to do?</p>
 
     <div class="d-flex flex-wrap ga-2">
-      <v-btn :disabled="playableCards.length === 0">Play Card</v-btn>
-      <v-btn :disabled="!game.selfAvailableEnergy">Attach Energy</v-btn>
-      <v-btn :disabled="usableAbilities.length === 0">Use Ability</v-btn>
-      <v-btn :disabled="usableAttacks.length === 0">Attack</v-btn>
-      <v-btn :disabled="!game.canRetreat(true)">Retreat</v-btn>
-      <v-btn :color="actionsLeft ? 'red' : 'default'">End Turn</v-btn>
+      <v-btn :disabled="playableCards.length === 0" @click="actionSelector.select('playCard')">
+        Play Card
+      </v-btn>
+      <v-btn
+        :disabled="!game?.selfAvailableEnergy"
+        @click="actionSelector.select('attachTurnEnergy')"
+      >
+        Attach Energy
+      </v-btn>
+      <v-btn :disabled="usableAbilities.length === 0" @click="actionSelector.select('useAbility')">
+        Use Ability
+      </v-btn>
+      <v-btn :disabled="!game?.canRetreat(true)" @click="actionSelector.select('retreat')">
+        Retreat
+      </v-btn>
+      <v-btn :disabled="usableAttacks.length === 0" @click="actionSelector.select('attack')">
+        Attack
+      </v-btn>
+      <v-btn :color="actionsLeft ? 'red' : 'default'" @click="actionSelector.select('endTurn')">
+        End Turn
+      </v-btn>
     </div>
   </div>
+
+  <div v-else-if="game?.currentTurnNumber === 0">
+    <p>Waiting to start...</p>
+  </div>
+
+  <div v-else-if="game?.isSelfTurn">
+    <p>Executing...</p>
+  </div>
+
   <div v-else>
     <p>Waiting for opponent...</p>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useSelectionHandler } from "@/composables";
 import {
   PlayerAgent,
+  PlayerGameView,
+  PlayerPokemonView,
   removeElement,
   type GameInitState,
-  type PlayerGameView,
   type PlayingCard,
   type PokemonCard,
 } from "@/core";
 
-export interface Props {
-  game?: PlayerGameView;
-}
-const props = defineProps<Props>();
 const agent = defineModel<PlayerAgent>("agent");
+const game = ref<PlayerGameView>();
 
 const playableCards = computed(
-  () => props.game?.selfHand.filter((card) => props.game?.canPlayCard(card, true)) ?? []
+  () => game.value?.selfHand.filter((card) => game.value?.canPlayCard(card, true)) ?? []
 );
 const usableAbilities = computed(
   () =>
-    props.game?.selfInPlayPokemon.filter(
-      (pokemon) => pokemon.Ability && props.game?.canUseAbility(pokemon, pokemon.Ability, true)
+    game.value?.selfInPlayPokemon.filter(
+      (pokemon) => pokemon.Ability && game.value?.canUseAbility(pokemon, pokemon.Ability, true)
     ) ?? []
 );
 const usableAttacks = computed(() =>
-  props.game?.selfActive.isPokemon
-    ? props.game.selfActive.Attacks.filter((attack) => props.game?.canUseAttack(attack, true)) ?? []
+  game.value?.selfActive.isPokemon
+    ? game.value.selfActive.Attacks.filter((attack) => game.value?.canUseAttack(attack, true)) ?? []
     : []
 );
 
 const actionsLeft = computed(
   () =>
     playableCards.value.length > 0 ||
-    props.game?.selfAvailableEnergy ||
+    game.value?.selfAvailableEnergy ||
     usableAbilities.value.length > 0 ||
     usableAttacks.value.length > 0
 );
@@ -72,14 +133,10 @@ const pokemonSetup = defineModel<{ active?: PokemonCard; bench: PokemonCard[] }>
   required: true,
 });
 
-const availableCards = ref<PlayingCard[]>([]);
-const selectCard = (card: PlayingCard | null | "cancel") => cardSelectResolver.value(card);
-const cardSelectResolver = ref<(card: PlayingCard | null | "cancel") => void>(() => {});
-const cardSelectionPromise = () =>
-  new Promise<PlayingCard | null | "cancel">((resolve) => {
-    cardSelectResolver.value = resolve;
-  });
-const cardSelectText = ref<string>();
+const actionSelector = useSelectionHandler<string>();
+const cardSelector = useSelectionHandler<PlayingCard>();
+const pokemonSelector = useSelectionHandler<PlayerPokemonView>();
+const baseSelector = useSelectionHandler<string>();
 
 const addReadyButton = ref<boolean>(false);
 const addCancelButton = ref<boolean>(false);
@@ -90,24 +147,24 @@ const setupAgent = () => {
   agent.value.setupPokemon = async (gameView: GameInitState) => {
     while (true) {
       stage.value = "selectCard";
-      cardSelectText.value = "Select your Active Pokémon:";
-      availableCards.value = gameView.hand.filter(
+      cardSelector.text.value = "Select your Active Pokémon:";
+      cardSelector.options.value = gameView.hand.filter(
         (card) => card.CardType === "Pokemon" && card.Stage === 0
       );
 
-      const active = (await cardSelectionPromise()) as PokemonCard;
+      const active = (await cardSelector.selectionPromise()) as PokemonCard;
       pokemonSetup.value.active = active;
-      removeElement(availableCards.value, active);
+      removeElement(cardSelector.options.value, active);
 
       const bench: PokemonCard[] = [];
-      cardSelectText.value = "Select your Benched Pokémon:";
+      cardSelector.text.value = "Select your Benched Pokémon:";
       addReadyButton.value = true;
       addCancelButton.value = true;
 
       let cancelling = false;
 
       while (true) {
-        const selectedPokemon = await cardSelectionPromise();
+        const selectedPokemon = await cardSelector.selectionPromise();
         if (selectedPokemon === null) break;
         if (selectedPokemon === "cancel") {
           cancelling = true;
@@ -117,19 +174,121 @@ const setupAgent = () => {
         bench.push(selectedPokemon as PokemonCard);
         pokemonSetup.value.bench.push(selectedPokemon as PokemonCard);
 
-        if (bench.length >= 3) availableCards.value = [];
-        else removeElement(availableCards.value, selectedPokemon);
+        if (bench.length >= 3) cardSelector.options.value = [];
+        else removeElement(cardSelector.options.value, selectedPokemon);
       }
 
       stage.value = "idle";
-      availableCards.value = [];
-      cardSelectText.value = undefined;
+      cardSelector.options.value = [];
+      cardSelector.text.value = undefined;
       addReadyButton.value = false;
       addCancelButton.value = false;
       pokemonSetup.value.active = undefined;
       pokemonSetup.value.bench = [];
 
       if (!cancelling) return { active, bench };
+    }
+  };
+
+  agent.value.doTurn = async (gameView: PlayerGameView) => {
+    game.value = gameView;
+    while (true) {
+      stage.value = "doTurn";
+
+      const action = await actionSelector.selectionPromise();
+      if (action === "endTurn") {
+        stage.value = "idle";
+        return;
+      } else if (action === "attachTurnEnergy") {
+        stage.value = "selectPokemon";
+        pokemonSelector.text.value = "Select a Pokémon to attach energy to:";
+        pokemonSelector.options.value = gameView.selfInPlayPokemon;
+        addCancelButton.value = true;
+
+        const selectedPokemon = await pokemonSelector.selectionPromise();
+
+        stage.value = "idle";
+        pokemonSelector.text.value = undefined;
+        pokemonSelector.options.value = [];
+        addCancelButton.value = false;
+
+        if (selectedPokemon === "cancel") {
+          continue;
+        } else if (selectedPokemon?.isPokemon) {
+          await gameView.attachAvailableEnergy(selectedPokemon);
+        }
+      } else if (action === "useAbility") {
+        stage.value = "selectPokemon";
+        pokemonSelector.text.value = "Select a Pokémon to use its ability:";
+        pokemonSelector.options.value = usableAbilities.value;
+        addCancelButton.value = true;
+
+        const selectedPokemon = await pokemonSelector.selectionPromise();
+
+        stage.value = "idle";
+        pokemonSelector.text.value = undefined;
+        pokemonSelector.options.value = [];
+        addCancelButton.value = false;
+
+        if (selectedPokemon === "cancel") {
+          continue;
+        } else if (selectedPokemon?.isPokemon) {
+          await gameView.useAbility(selectedPokemon, selectedPokemon.Ability!);
+        }
+      } else if (action === "retreat") {
+        stage.value = "selectPokemon";
+        pokemonSelector.text.value = "Select a Pokémon to swap in:";
+        pokemonSelector.options.value = gameView.selfBenched;
+        addCancelButton.value = true;
+
+        const selectedPokemon = await pokemonSelector.selectionPromise();
+
+        stage.value = "idle";
+        pokemonSelector.text.value = undefined;
+        pokemonSelector.options.value = [];
+        addCancelButton.value = false;
+
+        if (selectedPokemon === "cancel") {
+          continue;
+        } else if (selectedPokemon?.isPokemon) {
+          await gameView.retreatActivePokemon(selectedPokemon);
+        }
+      } else if (action === "attack") {
+        let attackName: string | null = null;
+
+        if (usableAttacks.value.length === 1) {
+          attackName = usableAttacks.value[0]!.name;
+        } else {
+          stage.value = "selectAny";
+          baseSelector.text.value = "Select an attack:";
+          baseSelector.options.value = usableAttacks.value.map((attack) => attack.name);
+          addCancelButton.value = true;
+
+          attackName = await baseSelector.selectionPromise();
+
+          stage.value = "idle";
+          baseSelector.text.value = undefined;
+          baseSelector.options.value = [];
+          addCancelButton.value = false;
+        }
+
+        if (attackName === "cancel") {
+          continue;
+        } else if (attackName) {
+          const attack = usableAttacks.value.find((a) => a.name === attackName);
+          if (attack) {
+            await gameView.useAttack(attack);
+            return;
+          }
+        }
+      } else {
+        console.log(`Player selected action: ${action}`);
+      }
+
+      if (!gameView.isSelfTurn) {
+        stage.value = "idle";
+        return;
+      }
     }
   };
 };

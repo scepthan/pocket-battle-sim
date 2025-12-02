@@ -290,8 +290,9 @@ export class PlayerGameView {
 
     if (this.selfAvailableEnergy) {
       const realPokemon = this.pokemonFromView(pokemon);
-      await this.game.delay();
       await this.game.attachAvailableEnergy(realPokemon);
+
+      await this.game.delay();
       return true;
     }
     return false;
@@ -300,8 +301,9 @@ export class PlayerGameView {
     if (!this.canPlay) return false;
 
     if (pokemon.Stage == 0 && !this.selfBench[index]?.isPokemon) {
-      await this.game.delay();
       await this.game.putPokemonOnBench(pokemon, index);
+
+      await this.game.delay();
       return true;
     }
     return false;
@@ -315,25 +317,28 @@ export class PlayerGameView {
 
     if (pokemon.EvolvesFrom == inPlayPokemon.Name) {
       const realPokemon = this.pokemonFromView(inPlayPokemon);
-      await this.game.delay();
       await this.game.evolvePokemon(realPokemon, pokemon);
+
+      await this.game.delay();
       return true;
     }
     return false;
   }
   async useAbility(pokemon: PlayerPokemonView, ability: Ability): Promise<boolean> {
     if (!this.canUseAbility(pokemon, ability)) return false;
-    await this.game.delay();
 
     const realPokemon = this.pokemonFromView(pokemon);
     await this.game.useAbility(realPokemon, ability);
+
+    await this.game.delay();
     return true;
   }
   async useAttack(attack: Attack): Promise<boolean> {
     if (!this.canUseAttack(attack)) return false;
-    await this.game.delay();
 
     await this.game.useAttack(attack);
+
+    await this.game.delay();
     return true;
   }
   async retreatActivePokemon(
@@ -341,7 +346,6 @@ export class PlayerGameView {
     energy?: Energy[]
   ): Promise<boolean> {
     if (!this.canRetreat()) return false;
-    await this.game.delay();
 
     if (!energy) {
       let retreatCost = this.selfActive.RetreatCost;
@@ -358,6 +362,8 @@ export class PlayerGameView {
 
     const realPokemon = this.pokemonFromView(benchedPokemon);
     await this.game.retreatActivePokemon(realPokemon, energy);
+
+    await this.game.delay();
     return true;
   }
   async playItemCard(card: ItemCard | FossilCard, target?: CardSlotView): Promise<boolean> {
@@ -366,9 +372,10 @@ export class PlayerGameView {
     if (card.Effect.type === "Targeted") {
       if (!realTarget || !card.Effect.validTargets(this.game).includes(realTarget)) return false;
     }
-    await this.game.delay();
 
     await this.game.playTrainer(card, realTarget);
+
+    await this.game.delay();
     return true;
   }
   async playSupporterCard(card: SupporterCard, target?: CardSlotView): Promise<boolean> {
@@ -377,18 +384,20 @@ export class PlayerGameView {
     if (card.Effect.type === "Targeted") {
       if (!realTarget || !card.Effect.validTargets(this.game).includes(realTarget)) return false;
     }
-    await this.game.delay();
 
     await this.game.playTrainer(card, realTarget);
+
+    await this.game.delay();
     return true;
   }
   async playPokemonToolCard(card: PokemonToolCard, target: PlayerPokemonView): Promise<boolean> {
     if (!this.canPlayCard(card)) return false;
     if (target.AttachedToolCards.length >= target.MaxToolCards) return false;
-    await this.game.delay();
-
     const realPokemon = this.pokemonFromView(target);
+
     await this.game.playTrainer(card, realPokemon);
+
+    await this.game.delay();
     return true;
   }
 }
