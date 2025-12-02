@@ -10,7 +10,16 @@
               reverse
             />
 
-            <PlayerPokemon :active="gameView?.selfActive" :bench="gameView?.selfBench ?? []" />
+            <PlayerPokemon
+              v-if="gameView?.currentTurnNumber === 0 && pokemonSetup.active"
+              :active="pokemonSetup.active"
+              :bench="pokemonSetup.bench"
+            />
+            <PlayerPokemon
+              v-else
+              :active="gameView?.selfActive"
+              :bench="gameView?.selfBench ?? []"
+            />
           </div>
 
           <div class="h-100 d-flex flex-column align-center justify-space-between">
@@ -50,26 +59,49 @@
                 />
                 <span>{{ gameView?.selfName }}</span>
               </div>
-              <PlayerHandVisible :cards="gameView?.selfHand ?? []" />
+              <PlayerHandVisible :cards="selfHand" />
             </div>
           </div>
         </div>
       </div>
       <div class="d-flex align-end" style="width: 500px">
-        <PlayerControls v-if="gameView" v-model:agent="agent" :game="gameView" player="Player" />
+        <PlayerControls
+          v-if="gameView"
+          v-model:agent="agent"
+          v-model:setup="pokemonSetup"
+          :game="gameView"
+          player="Player"
+        />
       </div>
     </div>
   </v-container>
 </template>
 
 <script setup lang="ts">
-import { GameLogger, PlayerAgent, PlayerGameView } from "@/core";
+import { GameLogger, PlayerAgent, PlayerGameView, removeElement, type PokemonCard } from "@/core";
 
 export interface Props {
   gameView?: PlayerGameView;
   log?: GameLogger;
 }
-defineProps<Props>();
+const props = defineProps<Props>();
 
 const agent = defineModel<PlayerAgent>("agent");
+const pokemonSetup = ref<{ active?: PokemonCard; bench: PokemonCard[] }>({
+  active: undefined,
+  bench: [],
+});
+
+const selfHand = computed(() => {
+  const hand = props.gameView?.selfHand ?? [];
+
+  if (pokemonSetup.value.active) {
+    removeElement(hand, pokemonSetup.value.active);
+  }
+  for (const benched of pokemonSetup.value.bench) {
+    removeElement(hand, benched);
+  }
+
+  return hand;
+});
 </script>

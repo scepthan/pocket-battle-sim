@@ -15,11 +15,11 @@
 </template>
 
 <script setup lang="ts">
-import { EmptyCardSlot, type CardSlotView } from "@/core";
+import { EmptyCardSlot, type CardSlotView, type PokemonCard } from "@/core";
 
 export interface Props {
-  active?: CardSlotView;
-  bench: CardSlotView[];
+  active?: PokemonCard | CardSlotView;
+  bench: PokemonCard[] | CardSlotView[];
   reverse?: boolean;
 }
 defineProps<Props>();

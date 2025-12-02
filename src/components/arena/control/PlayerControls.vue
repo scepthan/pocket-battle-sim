@@ -67,6 +67,10 @@ const actionsLeft = computed(
 
 const stage = ref<string>("idle");
 
+const pokemonSetup = defineModel<{ active?: PokemonCard; bench: PokemonCard[] }>("setup", {
+  required: true,
+});
+
 const availableCards = ref<PlayingCard[]>([]);
 const selectCard = (card: PlayingCard | null) => cardSelectResolver.value(card);
 const cardSelectResolver = ref<(card: PlayingCard | null) => void>(() => {});
@@ -88,6 +92,7 @@ const setupAgent = () => {
       (card) => card.CardType === "Pokemon" && card.Stage === 0
     );
     const active = (await cardSelectionPromise()) as PokemonCard;
+    pokemonSetup.value.active = active;
     removeElement(availableCards.value, active);
 
     const bench: PokemonCard[] = [];
@@ -97,6 +102,7 @@ const setupAgent = () => {
       const selectedPokemon = await cardSelectionPromise();
       if (selectedPokemon === null) break;
       bench.push(selectedPokemon as PokemonCard);
+      pokemonSetup.value.bench.push(selectedPokemon as PokemonCard);
       removeElement(availableCards.value, selectedPokemon);
     }
 
@@ -104,6 +110,8 @@ const setupAgent = () => {
     availableCards.value = [];
     cardSelectText.value = undefined;
     addReadyButton.value = false;
+    pokemonSetup.value.active = undefined;
+    pokemonSetup.value.bench = [];
 
     return { active, bench };
   };

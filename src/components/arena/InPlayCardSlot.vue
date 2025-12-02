@@ -1,5 +1,8 @@
 <template>
-  <div v-if="card?.isPokemon" class="stacked" :style="cardStyle">
+  <div v-if="card && !('isPokemon' in card)">
+    <PlayingCard :card="card" :height-px="heightPx" />
+  </div>
+  <div v-else-if="card?.isPokemon" class="stacked" :style="cardStyle">
     <PlayingCard :card="card.BaseCard" :height-px="heightPx" />
 
     <div class="card-hp d-flex flex-column align-end">
@@ -36,11 +39,11 @@
 </template>
 
 <script setup lang="ts">
-import type { CardSlotView } from "@/core";
+import type { CardSlotView, PokemonCard } from "@/core";
 
 export interface Props {
   heightPx?: number;
-  card?: CardSlotView;
+  card?: PokemonCard | CardSlotView;
 }
 const props = defineProps<Props>();
 
@@ -49,7 +52,9 @@ const height = computed(() => props.heightPx ?? 200);
 const width = computed(() => height.value * ratio);
 
 const hpPercent = computed(() =>
-  props.card?.isPokemon ? (props.card.CurrentHP / props.card.MaxHP) * 100 : 0
+  props.card && "isPokemon" in props.card && props.card.isPokemon
+    ? (props.card.CurrentHP / props.card.MaxHP) * 100
+    : 0
 );
 
 const cardStyle = computed(() => ({
