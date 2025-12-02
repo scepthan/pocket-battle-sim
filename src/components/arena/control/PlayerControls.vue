@@ -6,6 +6,7 @@
         pokemon.Name
       }}</v-btn>
       <v-btn v-if="addReadyButton" color="green" @click="selectCard(null)">Ready</v-btn>
+      <v-btn v-if="addCancelButton" color="red" @click="selectCard('cancel')">Cancel</v-btn>
     </div>
   </div>
   <div v-else-if="game?.currentTurnNumber === 0">Waiting to start...</div>
@@ -72,48 +73,64 @@ const pokemonSetup = defineModel<{ active?: PokemonCard; bench: PokemonCard[] }>
 });
 
 const availableCards = ref<PlayingCard[]>([]);
-const selectCard = (card: PlayingCard | null) => cardSelectResolver.value(card);
-const cardSelectResolver = ref<(card: PlayingCard | null) => void>(() => {});
+const selectCard = (card: PlayingCard | null | "cancel") => cardSelectResolver.value(card);
+const cardSelectResolver = ref<(card: PlayingCard | null | "cancel") => void>(() => {});
 const cardSelectionPromise = () =>
-  new Promise<PlayingCard | null>((resolve) => {
+  new Promise<PlayingCard | null | "cancel">((resolve) => {
     cardSelectResolver.value = resolve;
   });
 const cardSelectText = ref<string>();
 
 const addReadyButton = ref<boolean>(false);
+const addCancelButton = ref<boolean>(false);
 
 const setupAgent = () => {
   if (!agent.value) return;
 
   agent.value.setupPokemon = async (gameView: GameInitState) => {
-    stage.value = "selectCard";
-    cardSelectText.value = "Select your Active Pokémon:";
-    availableCards.value = gameView.hand.filter(
-      (card) => card.CardType === "Pokemon" && card.Stage === 0
-    );
-    const active = (await cardSelectionPromise()) as PokemonCard;
-    pokemonSetup.value.active = active;
-    removeElement(availableCards.value, active);
+    while (true) {
+      stage.value = "selectCard";
+      cardSelectText.value = "Select your Active Pokémon:";
+      availableCards.value = gameView.hand.filter(
+        (card) => card.CardType === "Pokemon" && card.Stage === 0
+      );
 
-    const bench: PokemonCard[] = [];
-    cardSelectText.value = "Select your Benched Pokémon:";
-    addReadyButton.value = true;
-    while (availableCards.value.length > 0) {
-      const selectedPokemon = await cardSelectionPromise();
-      if (selectedPokemon === null) break;
-      bench.push(selectedPokemon as PokemonCard);
-      pokemonSetup.value.bench.push(selectedPokemon as PokemonCard);
-      removeElement(availableCards.value, selectedPokemon);
+      const active = (await cardSelectionPromise()) as PokemonCard;
+      pokemonSetup.value.active = active;
+      removeElement(availableCards.value, active);
+
+      const bench: PokemonCard[] = [];
+      cardSelectText.value = "Select your Benched Pokémon:";
+      addReadyButton.value = true;
+      addCancelButton.value = true;
+
+      let cancelling = false;
+
+      while (true) {
+        const selectedPokemon = await cardSelectionPromise();
+        if (selectedPokemon === null) break;
+        if (selectedPokemon === "cancel") {
+          cancelling = true;
+          break;
+        }
+
+        bench.push(selectedPokemon as PokemonCard);
+        pokemonSetup.value.bench.push(selectedPokemon as PokemonCard);
+
+        if (bench.length >= 3) availableCards.value = [];
+        else removeElement(availableCards.value, selectedPokemon);
+      }
+
+      stage.value = "idle";
+      availableCards.value = [];
+      cardSelectText.value = undefined;
+      addReadyButton.value = false;
+      addCancelButton.value = false;
+      pokemonSetup.value.active = undefined;
+      pokemonSetup.value.bench = [];
+
+      if (!cancelling) return { active, bench };
     }
-
-    stage.value = "idle";
-    availableCards.value = [];
-    cardSelectText.value = undefined;
-    addReadyButton.value = false;
-    pokemonSetup.value.active = undefined;
-    pokemonSetup.value.bench = [];
-
-    return { active, bench };
   };
 };
 
