@@ -250,6 +250,7 @@ export class PlayerGameView {
     if (!this.hasActivePokemon()) return false;
     if (!this.canPlay && !ignoreCanPlay) return false;
 
+    if (!this.game.CanRetreat) return false;
     if (this.selfBenched.length == 0) return false;
     if (this.selfActive.RetreatCost == -1) return false;
     if (this.selfActive.PrimaryCondition == "Asleep") return false;

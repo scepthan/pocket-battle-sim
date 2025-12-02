@@ -67,10 +67,17 @@
       <v-btn :disabled="!game?.canRetreat(true)" @click="actionSelector.select('retreat')">
         Retreat
       </v-btn>
-      <v-btn :disabled="usableAttacks.length === 0" @click="actionSelector.select('attack')">
+      <v-btn
+        :disabled="usableAttacks.length === 0"
+        :color="usableAttacks.length > 0 && actionsLeft ? 'red' : 'default'"
+        @click="actionSelector.select('attack')"
+      >
         Attack
       </v-btn>
-      <v-btn :color="actionsLeft ? 'red' : 'default'" @click="actionSelector.select('endTurn')">
+      <v-btn
+        :color="actionsLeft || usableAttacks.length > 0 ? 'red' : 'default'"
+        @click="actionSelector.select('endTurn')"
+      >
         End Turn
       </v-btn>
     </div>
@@ -121,10 +128,9 @@ const usableAttacks = computed(() =>
 
 const actionsLeft = computed(
   () =>
-    playableCards.value.length > 0 ||
+    playableCards.value.some((x) => x.CardType === "Supporter" || x.CardType === "Pokemon") ||
     game.value?.selfAvailableEnergy ||
-    usableAbilities.value.length > 0 ||
-    usableAttacks.value.length > 0
+    usableAbilities.value.length > 0
 );
 
 const stage = ref<string>("idle");
@@ -266,11 +272,11 @@ const setupAgent = () => {
 
           attackName = await baseSelector.selectionPromise();
 
-          stage.value = "idle";
           baseSelector.text.value = undefined;
           baseSelector.options.value = [];
           addCancelButton.value = false;
         }
+        stage.value = "idle";
 
         if (attackName === "cancel") {
           continue;

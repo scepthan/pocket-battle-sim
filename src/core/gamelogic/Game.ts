@@ -754,6 +754,7 @@ export class Game {
    */
   async retreatActivePokemon(benchedPokemon: InPlayPokemonCard, energy: Energy[]): Promise<void> {
     await this.AttackingPlayer.retreatActivePokemon(benchedPokemon, energy);
+    this.CanRetreat = false;
     await this.afterAction();
   }
 
