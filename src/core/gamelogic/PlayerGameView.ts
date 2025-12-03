@@ -152,6 +152,12 @@ export class PlayerGameView {
       }
     }
 
+    for (const status of active.PokemonStatuses) {
+      if (status.type === "NoRetreatCost") {
+        return -active.RetreatCost;
+      }
+    }
+
     return modifier;
   }
 
@@ -170,7 +176,7 @@ export class PlayerGameView {
       if (card.Stage == 0) {
         return this.selfBenched.length < 3;
       } else {
-        return this.selfBenched.some(
+        return this.selfInPlayPokemon.some(
           (pokemon) => card.EvolvesFrom == pokemon?.Name && this.canEvolve(pokemon, ignoreCanPlay)
         );
       }
@@ -185,8 +191,8 @@ export class PlayerGameView {
     } else if (card.CardType == "Fossil") {
       return this.selfBench.some((slot) => !slot.isPokemon);
     } else if (card.CardType == "PokemonTool") {
-      return this.selfBench.some(
-        (slot) => slot.isPokemon && slot.AttachedToolCards.length < slot.MaxToolCards
+      return this.selfInPlayPokemon.some(
+        (pokemon) => pokemon.AttachedToolCards.length < pokemon.MaxToolCards
       );
     }
 
@@ -255,6 +261,8 @@ export class PlayerGameView {
     if (this.selfActive.RetreatCost == -1) return false;
     if (this.selfActive.PrimaryCondition == "Asleep") return false;
     if (this.selfActive.PrimaryCondition == "Paralyzed") return false;
+    if (this.selfActive.PokemonStatuses.some((status) => status.type == "CannotRetreat"))
+      return false;
     if (this.selfActive.PokemonStatuses.some((status) => status.type == "CannotRetreat"))
       return false;
     return (

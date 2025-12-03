@@ -103,6 +103,7 @@ import {
   PlayerGameView,
   PlayerPokemonView,
   removeElement,
+  type CardSlotView,
   type GameInitState,
   type PlayingCard,
   type PokemonCard,
@@ -222,6 +223,108 @@ const setupAgent = () => {
           continue;
         } else if (selectedPokemon?.isPokemon) {
           await gameView.attachAvailableEnergy(selectedPokemon);
+        }
+      } else if (action === "playCard") {
+        stage.value = "selectCard";
+        cardSelector.text.value = "Select a card to play:";
+        cardSelector.options.value = playableCards.value.slice();
+        addCancelButton.value = true;
+
+        const selectedCard = await cardSelector.selectionPromise();
+
+        stage.value = "idle";
+        cardSelector.text.value = undefined;
+        cardSelector.options.value = [];
+        addCancelButton.value = false;
+
+        if (selectedCard === "cancel" || selectedCard === null) {
+          continue;
+        }
+
+        switch (selectedCard.CardType) {
+          case "Pokemon":
+            if (selectedCard.Stage === 0) {
+              const index = gameView.selfBench.findIndex((p) => !p.isPokemon);
+              await gameView.playPokemonToBench(selectedCard, index);
+            } else {
+              const evolvablePokemon = gameView.selfInPlayPokemon.filter(
+                (p) => p.isPokemon && p.Name === selectedCard.EvolvesFrom
+              );
+              if (evolvablePokemon.length === 0) {
+                console.log("No valid Pokémon to evolve.");
+                break;
+              }
+              let targetPokemon = evolvablePokemon[0]!;
+              if (evolvablePokemon.length > 1) {
+                stage.value = "selectPokemon";
+                pokemonSelector.text.value = "Select a Pokémon to evolve:";
+                pokemonSelector.options.value = evolvablePokemon;
+                addCancelButton.value = true;
+
+                const selectedPokemon = await pokemonSelector.selectionPromise();
+
+                stage.value = "idle";
+                pokemonSelector.text.value = undefined;
+                pokemonSelector.options.value = [];
+                addCancelButton.value = false;
+
+                if (selectedPokemon === "cancel") {
+                  break;
+                } else if (selectedPokemon?.isPokemon) {
+                  targetPokemon = selectedPokemon;
+                }
+              }
+              await gameView.playPokemonToEvolve(selectedCard, targetPokemon);
+            }
+            break;
+
+          case "Fossil":
+            const slot = gameView.selfBench.find((p) => !p.isPokemon);
+            await gameView.playItemCard(selectedCard, slot);
+            break;
+
+          case "Item":
+          case "Supporter":
+          case "PokemonTool":
+            const playSelectedCard = async (target?: CardSlotView) => {
+              if (selectedCard.CardType === "Supporter") {
+                await gameView.playSupporterCard(selectedCard, target);
+              } else if (selectedCard.CardType === "Item") {
+                await gameView.playItemCard(selectedCard, target);
+              } else {
+                if (!target || !target.isPokemon)
+                  throw new Error("No target selected for PokemonTool card");
+                await gameView.playPokemonToolCard(selectedCard, target);
+              }
+            };
+
+            if (
+              selectedCard.CardType === "PokemonTool" ||
+              selectedCard.Effect.type === "Targeted"
+            ) {
+              stage.value = "selectPokemon";
+              pokemonSelector.text.value = "Select a Pokémon to use it on:";
+              pokemonSelector.options.value = gameView.validTargets(
+                selectedCard
+              ) as PlayerPokemonView[];
+              addCancelButton.value = true;
+
+              const selectedPokemon = await pokemonSelector.selectionPromise();
+
+              stage.value = "idle";
+              pokemonSelector.text.value = undefined;
+              pokemonSelector.options.value = [];
+              addCancelButton.value = false;
+
+              if (selectedPokemon === "cancel") {
+                break;
+              } else if (selectedPokemon?.isPokemon) {
+                await playSelectedCard(selectedPokemon);
+              }
+            } else {
+              await playSelectedCard();
+            }
+            break;
         }
       } else if (action === "useAbility") {
         stage.value = "selectPokemon";
