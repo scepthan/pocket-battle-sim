@@ -292,6 +292,24 @@ export class PlayerGameView {
     }
     return [];
   }
+  getAttackDamageDisplay(attack: Attack): string {
+    if (!this.hasActivePokemon()) return "";
+    const pokemon = this.pokemonFromView(this.selfActive);
+    const baseDamage = attack.calculateDamage
+      ? attack.calculateDamage(this.game, pokemon, attack.type === "CoinFlipForDamage" ? 1 : 0)
+      : attack.baseDamage ?? 0;
+    const modifiedBaseDamage = this.game.calculateModifiedBaseDamage(baseDamage);
+
+    if (attack.type === "CoinFlipForAddedDamage") {
+      return modifiedBaseDamage + "+";
+    } else if (attack.type === "CoinFlipForDamage") {
+      return modifiedBaseDamage + "x";
+    } else if (attack.type === "CoinFlipOrDoNothing") {
+      return modifiedBaseDamage + "?";
+    } else {
+      return modifiedBaseDamage.toString();
+    }
+  }
 
   // Action methods
   async attachAvailableEnergy(pokemon: PlayerPokemonView): Promise<boolean> {

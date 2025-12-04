@@ -655,6 +655,29 @@ export class Game {
       await effect(this, attacker, flippedHeads, chosenPokemon);
   }
 
+  calculateModifiedBaseDamage(totalDamage: number): number {
+    if (totalDamage <= 0) return totalDamage;
+
+    const attacker = this.AttackingPlayer.activeOrThrow();
+    const defender = this.DefendingPlayer.activeOrThrow();
+    for (const status of this.AttackingPlayer.PlayerStatuses) {
+      if (status.type === "IncreaseAttack" && status.appliesToPokemon(attacker, this))
+        if (!status.appliesToDefender || status.appliesToDefender(defender, this))
+          totalDamage += status.amount;
+    }
+    for (const status of attacker.PokemonStatuses) {
+      if (status.type == "ReduceOwnAttackDamage") {
+        totalDamage -= status.amount;
+      } else if (status.type == "IncreaseAttack") {
+        totalDamage += status.amount;
+      } else if (status.type == "IncreaseDamageOfAttack") {
+        if (status.attackName == this.CurrentAttack?.name) totalDamage += status.amount;
+      }
+    }
+
+    return totalDamage;
+  }
+
   // Methods to cover any action a player can take and execute the proper follow-up effects
 
   /**
@@ -837,20 +860,7 @@ export class Game {
     // First, apply any of the attacker's own damage modification statuses
     // Currently all modifications only affect the opponent's Active Pokemon--this may change
     if (totalDamage > 0 && attackingActive) {
-      for (const status of this.AttackingPlayer.PlayerStatuses) {
-        if (status.type === "IncreaseAttack" && status.appliesToPokemon(attacker, this))
-          if (!status.appliesToDefender || status.appliesToDefender(defender, this))
-            totalDamage += status.amount;
-      }
-      for (const status of attacker.PokemonStatuses) {
-        if (status.type == "ReduceOwnAttackDamage") {
-          totalDamage -= status.amount;
-        } else if (status.type == "IncreaseAttack") {
-          totalDamage += status.amount;
-        } else if (status.type == "IncreaseDamageOfAttack") {
-          if (status.attackName == this.CurrentAttack?.name) totalDamage += status.amount;
-        }
-      }
+      totalDamage = this.calculateModifiedBaseDamage(totalDamage);
     }
 
     // Next, add weakness boost

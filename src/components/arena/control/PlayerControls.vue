@@ -73,6 +73,9 @@
         @click="actionSelector.select('attack')"
       >
         Attack
+        <span v-if="usableAttacks.length === 1">
+          ({{ game?.getAttackDamageDisplay(usableAttacks[0]!) }})
+        </span>
       </v-btn>
       <v-btn
         :color="actionsLeft || usableAttacks.length > 0 ? 'red' : 'default'"
