@@ -361,7 +361,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       transform: () => {
         if (ability.type === "Status") throw new Error("Cannot set trigger on Status Ability");
         ability.trigger = { type: "Manual", multiUse: false };
-        ability.conditions.push((self) => self.player.Hand.length > 0);
+        ability.conditions.push((self) => self.player.canDraw(true) && self.player.Hand.length > 0);
         ability.effect = {
           type: "Standard",
           effect: async (game, self) => {
