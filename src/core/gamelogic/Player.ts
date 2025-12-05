@@ -396,6 +396,29 @@ export class Player {
     return this.ActivePokemon;
   }
 
+  get effectiveRetreatCost(): number {
+    const active = this.activeOrThrow();
+    let retreatCost = active.RetreatCost;
+
+    for (const status of this.PlayerStatuses) {
+      if (status.type === "NoRetreatCost" && status.appliesToPokemon(active, this.game)) {
+        return 0;
+      }
+      if (status.type === "DecreaseRetreatCost" && status.appliesToPokemon(active, this.game)) {
+        retreatCost -= status.amount;
+      }
+    }
+
+    for (const status of active.PokemonStatuses) {
+      if (status.type === "NoRetreatCost") {
+        return 0;
+      }
+    }
+
+    if (retreatCost < 0) retreatCost = 0;
+    return retreatCost;
+  }
+
   async retreatActivePokemon(newActive: InPlayPokemonCard, energyToDiscard: Energy[]) {
     const currentActive = this.activeOrThrow();
     if (currentActive.RetreatCost == -1) {
@@ -411,14 +434,8 @@ export class Player {
       throw new Error("Energy not attached to active Pokemon");
     }
 
-    let modifiedCost = currentActive.RetreatCost;
-    for (const status of this.PlayerStatuses) {
-      if (status.type === "DecreaseRetreatCost") modifiedCost -= status.amount;
-    }
-    if (modifiedCost < 0) modifiedCost = 0;
-
     const effectiveEnergyToDiscard = currentActive.calculateEffectiveEnergy(energyToDiscard);
-    if (modifiedCost > effectiveEnergyToDiscard.length)
+    if (this.effectiveRetreatCost > effectiveEnergyToDiscard.length)
       throw new Error("Not enough energy provided");
 
     currentActive.removeEnergy(energyToDiscard);

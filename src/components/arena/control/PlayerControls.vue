@@ -252,7 +252,7 @@ const setupAgent = () => {
               await gameView.playPokemonToBench(selectedCard, index);
             } else {
               const evolvablePokemon = gameView.selfInPlayPokemon.filter(
-                (p) => p.isPokemon && p.Name === selectedCard.EvolvesFrom
+                (p) => p.isPokemon && p.Name === selectedCard.EvolvesFrom && gameView.canEvolve(p)
               );
               if (evolvablePokemon.length === 0) {
                 console.log("No valid Pokémon to evolve.");

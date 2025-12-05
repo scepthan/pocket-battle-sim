@@ -139,22 +139,16 @@ export class PlayerGameView {
       !this.player.PlayerStatuses.some((status) => status.type == "CannotUseSupporter")
     );
   }
+  get effectiveRetreatCost() {
+    return this.player.effectiveRetreatCost;
+  }
   get retreatCostModifier() {
     let modifier = 0;
     const active = this.player.activeOrThrow();
 
     for (const status of this.player.PlayerStatuses) {
-      if (status.type === "NoRetreatCost" && status.appliesToPokemon(active, this.game)) {
-        return -active.RetreatCost;
-      }
       if (status.type === "DecreaseRetreatCost" && status.appliesToPokemon(active, this.game)) {
         modifier -= status.amount;
-      }
-    }
-
-    for (const status of active.PokemonStatuses) {
-      if (status.type === "NoRetreatCost") {
-        return -active.RetreatCost;
       }
     }
 
@@ -265,10 +259,7 @@ export class PlayerGameView {
       return false;
     if (this.selfActive.PokemonStatuses.some((status) => status.type == "CannotRetreat"))
       return false;
-    return (
-      this.selfActive.RetreatCost + this.retreatCostModifier <=
-      this.selfActive.EffectiveEnergy.length
-    );
+    return this.player.effectiveRetreatCost <= this.selfActive.EffectiveEnergy.length;
   }
   canEvolve(pokemon: PlayerPokemonView, ignoreCanPlay: boolean = false): boolean {
     if (!this.canPlay && !ignoreCanPlay) return false;
@@ -375,7 +366,6 @@ export class PlayerGameView {
     if (!this.canRetreat()) return false;
 
     if (!energy) {
-      const retreatCost = Math.max(this.selfActive.RetreatCost + this.retreatCostModifier, 0);
       const canSelectFewer = this.player.PlayerStatuses.some(
         (status) =>
           status.type == "DoubleEnergy" &&
@@ -385,7 +375,7 @@ export class PlayerGameView {
       energy = await this.game.chooseNEnergy(
         this.player,
         this.selfActive.AttachedEnergy,
-        retreatCost,
+        this.player.effectiveRetreatCost,
         canSelectFewer
       );
     }
