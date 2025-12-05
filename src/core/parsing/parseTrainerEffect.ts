@@ -14,7 +14,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
       pattern: /^Draw (a|\d+) cards?\.$/,
       transform: (_, count) => ({
         type: "Conditional",
-        condition: (game) => game.AttackingPlayer.canDraw(),
+        condition: (game) => game.AttackingPlayer.canDraw(true),
         effect: async (game) => game.AttackingPlayer.drawCards(count == "a" ? 1 : Number(count)),
       }),
     },
@@ -24,7 +24,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         const predicate = parsePlayingCardPredicate(specifier);
         return {
           type: "Conditional",
-          condition: (game) => game.AttackingPlayer.canDraw(),
+          condition: (game) => game.AttackingPlayer.canDraw(true),
           effect: async (game) => {
             game.AttackingPlayer.drawRandomFiltered(predicate);
           },

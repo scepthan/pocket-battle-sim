@@ -81,8 +81,8 @@ export class Player {
     }
   }
 
-  canDraw() {
-    return this.Deck.length > 0 && this.Hand.length < this.game.GameRules.MaxHandSize;
+  canDraw(usingCard: boolean = false) {
+    return this.Deck.length > 0 && this.Hand.length - +usingCard < this.game.GameRules.MaxHandSize;
   }
 
   hasBasicPokemon() {
