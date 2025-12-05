@@ -5,7 +5,7 @@ import type { PlayerGameView } from "../PlayerGameView";
 import type { PlayerPokemonView } from "../PlayerPokemonView";
 import type { DeckInfo } from "./Deck";
 import type { Energy } from "./Energy";
-import type { BaseCard, PlayingCard, PokemonCard } from "./PlayingCard";
+import type { PlayingCard, PokemonCard } from "./PlayingCard";
 
 export type BenchSetup = (PokemonCard | undefined)[];
 export interface PlayerGameSetup {
@@ -86,7 +86,7 @@ export abstract class PlayerAgent {
    *
    * By default, calls `this.chooseNCards()` (random unless this function is user-defined).
    */
-  async chooseCard<T extends BaseCard>(cards: T[]): Promise<T> {
+  async chooseCard(cards: PlayingCard[]): Promise<PlayingCard> {
     const output = await this.chooseNCards(cards, 1);
     if (output.length !== 1) throw new Error("chooseNCards(1) did not return exactly one card");
     return output[0]!;
@@ -96,7 +96,7 @@ export abstract class PlayerAgent {
    *
    * By default, returns n random cards.
    */
-  async chooseNCards<T extends BaseCard>(cards: T[], n: number): Promise<T[]> {
+  async chooseNCards(cards: PlayingCard[], n: number): Promise<PlayingCard[]> {
     return randomElements(cards, n);
   }
   /**

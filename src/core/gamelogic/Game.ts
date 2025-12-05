@@ -9,7 +9,6 @@ import { PlayerPokemonView } from "./PlayerPokemonView";
 import type {
   Ability,
   Attack,
-  BaseCard,
   CardSlot,
   CoinFlipIndicator,
   Energy,
@@ -1167,7 +1166,7 @@ export class Game {
   /**
    * Asks a player to choose from a selection of cards.
    */
-  async chooseCard<T extends BaseCard>(player: Player, options: T[]): Promise<T | undefined> {
+  async chooseCard(player: Player, options: PlayingCard[]): Promise<PlayingCard | undefined> {
     if (options.length == 0) {
       this.GameLog.noValidTargets(player);
       return;
@@ -1185,7 +1184,7 @@ export class Game {
   /**
    * Asks a player to choose N options from a selection of cards.
    */
-  async chooseNCards<T extends BaseCard>(player: Player, options: T[], n: number): Promise<T[]> {
+  async chooseNCards(player: Player, options: PlayingCard[], n: number): Promise<PlayingCard[]> {
     if (options.length == 0) {
       this.GameLog.noValidTargets(player);
       return [];

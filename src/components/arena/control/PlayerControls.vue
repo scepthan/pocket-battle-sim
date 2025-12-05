@@ -1,6 +1,6 @@
 <template>
   <div v-if="stage === 'selectCard'">
-    <p>{{ cardSelector.text ?? "Select a card:" }}</p>
+    <p>{{ cardSelector.text.value ?? "Select a card:" }}</p>
     <div class="d-flex flex-wrap ga-2">
       <v-btn
         v-for="(card, i) in cardSelector.options.value"
@@ -17,7 +17,7 @@
   </div>
 
   <div v-else-if="stage === 'selectPokemon'">
-    <p>{{ pokemonSelector.text ?? "Select a Pokémon:" }}</p>
+    <p>{{ pokemonSelector.text.value ?? "Select a Pokémon:" }}</p>
     <div class="d-flex flex-wrap ga-2">
       <v-btn
         v-for="(pokemon, i) in pokemonSelector.options.value as PlayerPokemonView[]"
@@ -26,6 +26,7 @@
       >
         {{ pokemon.Name }}
       </v-btn>
+      <v-btn v-if="addReadyButton" color="green" @click="cardSelector.select(null)"> Ready </v-btn>
       <v-btn v-if="addCancelButton" color="red" @click="pokemonSelector.select('cancel')">
         Cancel
       </v-btn>
@@ -33,7 +34,7 @@
   </div>
 
   <div v-else-if="stage === 'selectAny'">
-    <p>{{ baseSelector.text ?? "Select one:" }}</p>
+    <p>{{ baseSelector.text.value ?? "Select one:" }}</p>
     <div class="d-flex flex-wrap ga-2">
       <v-btn
         v-for="(option, i) in baseSelector.options.value"
@@ -402,6 +403,132 @@ const setupAgent = () => {
         return;
       }
     }
+  };
+
+  agent.value.swapActivePokemon = async (gameView: PlayerGameView) => {
+    stage.value = "selectPokemon";
+    pokemonSelector.text.value = "Select a Pokémon to swap in:";
+    pokemonSelector.options.value = gameView.selfBenched;
+
+    const selectedPokemon = await pokemonSelector.selectionPromise();
+
+    stage.value = "idle";
+    pokemonSelector.text.value = undefined;
+    pokemonSelector.options.value = [];
+
+    if (selectedPokemon === "cancel" || !selectedPokemon?.isPokemon) {
+      throw new Error("No Pokémon selected to swap in.");
+    }
+
+    return selectedPokemon;
+  };
+
+  agent.value.choosePokemon = async (pokemon: PlayerPokemonView[]) => {
+    stage.value = "selectPokemon";
+    pokemonSelector.options.value = pokemon;
+
+    const selectedPokemon = await pokemonSelector.selectionPromise();
+
+    stage.value = "idle";
+    pokemonSelector.options.value = [];
+
+    if (selectedPokemon === "cancel" || !selectedPokemon?.isPokemon) {
+      throw new Error("No Pokémon selected.");
+    }
+
+    return selectedPokemon;
+  };
+
+  agent.value.chooseNPokemon = async (pokemon: PlayerPokemonView[], n: number) => {
+    stage.value = "selectPokemon";
+    pokemonSelector.text.value = `Select ${n} Pokémon:`;
+    pokemonSelector.options.value = pokemon.slice();
+    addReadyButton.value = true;
+    addCancelButton.value = true;
+
+    const selectedPokemon: PlayerPokemonView[] = [];
+    while (true) {
+      const pick = await pokemonSelector.selectionPromise();
+      if (pick === "cancel") {
+        pokemonSelector.options.value = pokemon.slice();
+        selectedPokemon.length = 0;
+      } else if (pick === null) {
+        break;
+      } else if (selectedPokemon.length < n) {
+        selectedPokemon.push(pick);
+        removeElement(pokemonSelector.options.value, pick);
+      }
+    }
+
+    stage.value = "idle";
+    pokemonSelector.text.value = undefined;
+    pokemonSelector.options.value = [];
+    addReadyButton.value = false;
+    addCancelButton.value = false;
+
+    return selectedPokemon;
+  };
+
+  agent.value.chooseCard = async (cards: PlayingCard[]) => {
+    stage.value = "selectCard";
+    cardSelector.options.value = cards;
+
+    const selectedCard = await cardSelector.selectionPromise();
+
+    stage.value = "idle";
+    cardSelector.options.value = [];
+
+    if (selectedCard === "cancel" || !selectedCard) {
+      throw new Error("No card selected.");
+    }
+
+    return selectedCard;
+  };
+
+  agent.value.chooseNCards = async (cards: PlayingCard[], n: number) => {
+    stage.value = "selectCard";
+    cardSelector.text.value = `Select ${n} cards:`;
+    cardSelector.options.value = cards.slice();
+    addReadyButton.value = true;
+    addCancelButton.value = true;
+
+    const selectedCards: PlayingCard[] = [];
+    while (true) {
+      const pick = await cardSelector.selectionPromise();
+      if (pick === "cancel") {
+        cardSelector.options.value = cards.slice();
+        selectedCards.length = 0;
+      } else if (pick === null) {
+        break;
+      } else if (selectedCards.length < n) {
+        selectedCards.push(pick);
+        removeElement(cardSelector.options.value, pick);
+      }
+    }
+
+    stage.value = "idle";
+    cardSelector.text.value = undefined;
+    cardSelector.options.value = [];
+    addReadyButton.value = false;
+    addCancelButton.value = false;
+
+    return selectedCards;
+  };
+
+  agent.value.choose = async (options: string[]) => {
+    stage.value = "selectAny";
+    baseSelector.options.value = options;
+
+    const selectedOption = await baseSelector.selectionPromise();
+
+    stage.value = "idle";
+    baseSelector.options.value = [];
+
+    if (selectedOption === "cancel" || !selectedOption) {
+      throw new Error("No option selected.");
+    }
+
+    return selectedOption;
   };
 };
 

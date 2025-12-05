@@ -321,10 +321,10 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
           if (benchIndex < 0) return;
           const validCards = game.DefendingPlayer.Discard.filter(
             (card) => card.CardType == "Pokemon" && card.Stage == 0
-          ) as PokemonCard[];
+          );
           const card = await game.chooseCard(game.AttackingPlayer, validCards);
           if (!card) return;
-          await game.DefendingPlayer.putPokemonOnBench(card, benchIndex, card);
+          await game.DefendingPlayer.putPokemonOnBench(card as PokemonCard, benchIndex, card);
         },
       }),
     },
