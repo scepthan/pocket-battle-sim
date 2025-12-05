@@ -322,7 +322,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
           const validCards = game.DefendingPlayer.Discard.filter(
             (card) => card.CardType == "Pokemon" && card.Stage == 0
           ) as PokemonCard[];
-          const card = await game.choose(game.AttackingPlayer, validCards);
+          const card = await game.chooseCard(game.AttackingPlayer, validCards);
           if (!card) return;
           await game.DefendingPlayer.putPokemonOnBench(card, benchIndex, card);
         },
@@ -416,7 +416,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         condition: (game) => game.AttackingPlayer.Hand.some((c) => c.CardType == "Pokemon"),
         effect: async (game) => {
           const handPokemon = game.AttackingPlayer.Hand.filter((c) => c.CardType == "Pokemon");
-          const chosen = await game.choose(game.AttackingPlayer, handPokemon);
+          const chosen = await game.chooseCard(game.AttackingPlayer, handPokemon);
           if (!chosen) return;
 
           const deckPokemon = game.AttackingPlayer.Deck.filter((c) => c.CardType == "Pokemon");
@@ -471,9 +471,8 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         effect: async (game, target) => {
           const player = game.AttackingPlayer;
           if (!target.isPokemon) return;
-          const energy = await game.choose(player, target.AttachedEnergy);
-          if (!energy) return;
-          await player.transferEnergy(target, player.activeOrThrow(), [energy]);
+          const energy = await game.chooseNEnergy(player, target.AttachedEnergy, 1);
+          await player.transferEnergy(target, player.activeOrThrow(), energy);
         },
       }),
     },

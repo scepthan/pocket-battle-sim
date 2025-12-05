@@ -342,10 +342,12 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         ability.effect = {
           type: "Standard",
           effect: async (game, self) => {
-            const choice = await game.choose(self.player, ["Self", "Opponent"]);
-            if (!choice) throw new Error("No player chosen");
+            const chosenPlayer = await game.choose(self.player, {
+              Self: self.player,
+              Opponent: self.player.opponent,
+            });
+            if (!chosenPlayer) throw new Error("No player chosen");
 
-            const chosenPlayer = choice === "Self" ? self.player : self.player.opponent;
             if (chosenPlayer.Deck.length > 0) {
               await game.showCards(self.player, chosenPlayer.Deck.slice(0, 1));
             }
@@ -364,7 +366,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           type: "Standard",
           effect: async (game, self) => {
             const player = self.player;
-            const cardToDiscard = await game.choose(player, player.Hand);
+            const cardToDiscard = await game.chooseCard(player, player.Hand);
             if (!cardToDiscard) throw new Error("No card chosen to discard");
             player.discardCardsFromHand([cardToDiscard]);
             player.drawCards(1);

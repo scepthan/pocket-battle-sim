@@ -89,7 +89,8 @@ export class BetterRandomAgent extends PlayerAgent {
       await game.playPokemonToolCard(card, target);
     }
 
-    // Retreat with 100% chance if retreat cost is 0; 50% chance if cost is reduced; 12.5% chance if cost is normal
+    // Retreat with 100% chance if retreat cost is reduced to 0; 50% chance if cost is reduced
+    // but positive; 25% chance times another 50% for each energy required if cost is normal
     if (game.canRetreat()) {
       if (
         game.retreatCostModifier < 0

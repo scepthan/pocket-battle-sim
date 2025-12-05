@@ -375,16 +375,19 @@ export class PlayerGameView {
     if (!this.canRetreat()) return false;
 
     if (!energy) {
-      let retreatCost = this.selfActive.RetreatCost;
-      retreatCost += this.retreatCostModifier;
-      if (retreatCost < 0) retreatCost = 0;
-      energy = [];
-      let i = 0;
-      while (this.selfActive.calculateEffectiveEnergy(energy).length < retreatCost) {
-        const nextEnergy = this.selfActive.AttachedEnergy[i++];
-        if (!nextEnergy) throw new Error("Not enough energy to retreat");
-        energy.push(nextEnergy);
-      }
+      const retreatCost = Math.max(this.selfActive.RetreatCost + this.retreatCostModifier, 0);
+      const canSelectFewer = this.player.PlayerStatuses.some(
+        (status) =>
+          status.type == "DoubleEnergy" &&
+          status.appliesToPokemon(this.pokemonFromView(this.selfActive), this.game)
+      );
+
+      energy = await this.game.chooseNEnergy(
+        this.player,
+        this.selfActive.AttachedEnergy,
+        retreatCost,
+        canSelectFewer
+      );
     }
 
     const realPokemon = this.pokemonFromView(benchedPokemon);

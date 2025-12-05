@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { randomElement, removeElement } from "@/core/util";
+import { randomElement, randomElements } from "@/core/util";
 import { parseDeck } from "../../parsing";
 import type { PlayerGameView } from "../PlayerGameView";
 import type { PlayerPokemonView } from "../PlayerPokemonView";
 import type { DeckInfo } from "./Deck";
 import type { Energy } from "./Energy";
-import type { PlayingCard, PokemonCard } from "./PlayingCard";
+import type { BaseCard, PlayingCard, PokemonCard } from "./PlayingCard";
 
 export type BenchSetup = (PokemonCard | undefined)[];
 export interface PlayerGameSetup {
@@ -52,52 +52,66 @@ export abstract class PlayerAgent {
   }
 
   /**
-   * Given a list of options, choose an element from it. The list is guaranteed to be non-empty.
+   * Given a list of options presented as strings, choose an element from it. The list is
+   * guaranteed to be non-empty.
    *
    * By default, returns a random element.
    */
-  async choose<T>(options: T[]): Promise<T> {
+  async choose(options: string[]): Promise<string> {
     return randomElement(options);
   }
   /**
    * Given a list of some Pokémon currently in play, choose one of them. The list is guaranteed to
    * be non-empty.
    *
-   * By default, calls `this.choose()` (random unless this function is user-defined).
+   * By default, calls `this.chooseNPokemon()` (random unless this function is user-defined).
    */
   async choosePokemon(pokemon: PlayerPokemonView[]): Promise<PlayerPokemonView> {
-    return this.choose(pokemon);
+    const output = await this.chooseNPokemon(pokemon, 1);
+    if (output.length !== 1)
+      throw new Error("chooseNPokemon(1) did not return exactly one Pokémon");
+    return output[0]!;
   }
   /**
-   * Given a list of options, choose n unique elements from it. The list is guaranteed to be of
-   * length > n.
+   * Given a list of some Pokémon currently in play, choose n of them. The list is guaranteed to be
+   * of length > n.
    *
-   * By default, returns n random elements.
-   */
-  async chooseN<T>(options: T[], n: number): Promise<T[]> {
-    const input = options.slice();
-    const output: T[] = [];
-    for (let i = 0; i < n; i++) {
-      const choice = randomElement(input);
-      output.push(choice);
-      removeElement(input, choice);
-    }
-    return output;
-  }
-  /**
-   * Given a list of some Pokémon currently in play, choose n unique Pokémon from it. The list is
-   * guaranteed to be of length > n.
-   *
-   * By default, calls `this.chooseN()` (random unless this function is user-defined).
+   * By default, returns n random Pokémon.
    */
   async chooseNPokemon(pokemon: PlayerPokemonView[], n: number): Promise<PlayerPokemonView[]> {
-    return this.chooseN(pokemon, n);
+    return randomElements(pokemon, n);
   }
-
+  /**
+   * Given a list of playing cards, choose one of them. The list is guaranteed to be non-empty.
+   *
+   * By default, calls `this.chooseNCards()` (random unless this function is user-defined).
+   */
+  async chooseCard<T extends BaseCard>(cards: T[]): Promise<T> {
+    const output = await this.chooseNCards(cards, 1);
+    if (output.length !== 1) throw new Error("chooseNCards(1) did not return exactly one card");
+    return output[0]!;
+  }
+  /**
+   * Given a list of playing cards, choose n of them. The list is guaranteed to be of length > n.
+   *
+   * By default, returns n random cards.
+   */
+  async chooseNCards<T extends BaseCard>(cards: T[], n: number): Promise<T[]> {
+    return randomElements(cards, n);
+  }
   /**
    * View some cards (e.g., from deck, discard pile, etc.). By default, does nothing.
    */
   async viewCards(cards: PlayingCard[]): Promise<void> {}
+
+  /**
+   * Given a list of Energy, choose n of them. The list is guaranteed to be of length > n.
+   *
+   * By default, returns n random Energy.
+   */
+  async chooseNEnergy(energy: Energy[], n: number): Promise<Energy[]> {
+    return randomElements(energy, n);
+  }
 
   /**
    * Distribute a selection of energy among given Pokémon. By default, distributes randomly.

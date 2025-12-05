@@ -285,10 +285,11 @@ export class InPlayPokemonCard {
     if (ability.effect.type === "Targeted") {
       const validTargets = ability.effect.findValidTargets(this.player.game, this);
       if (validTargets.length === 0) return;
+      if (!validTargets.every((x) => x.isPokemon)) {
+        throw new Error("Targeted ability effect has non-Pokemon valid targets");
+      }
 
-      const target = validTargets.every((x) => x.isPokemon)
-        ? await this.player.game.choosePokemon(this.player, validTargets)
-        : await this.player.game.choose(this.player, validTargets);
+      const target = await this.player.game.choosePokemon(this.player, validTargets);
       if (!target || !validTargets.includes(target)) {
         throw new Error("Invalid target for targeted effect");
       }

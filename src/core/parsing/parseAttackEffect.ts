@@ -477,7 +477,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
         /^Your opponent reveals their hand\. Choose a card you find there and shuffle it into your opponent’s deck\./i,
       transform: () => {
         addSideEffect(async (game) => {
-          const card = await game.choose(game.AttackingPlayer, game.DefendingPlayer.Hand);
+          const card = await game.chooseCard(game.AttackingPlayer, game.DefendingPlayer.Hand);
           if (!card) return;
           game.DefendingPlayer.returnToDeck([card]);
         });
@@ -889,7 +889,8 @@ export const parseAttackEffect = (attack: Attack): boolean => {
             game.GameLog.attackFailed(game.AttackingPlayer);
             return;
           }
-          const chosenAttack = await game.choose(game.AttackingPlayer, chosenPokemon.Attacks);
+          const attacks = Object.fromEntries(chosenPokemon.Attacks.map((a) => [a.name, a]));
+          const chosenAttack = await game.choose(game.AttackingPlayer, attacks);
           if (!chosenAttack) {
             game.GameLog.attackFailed(game.AttackingPlayer);
             return;
