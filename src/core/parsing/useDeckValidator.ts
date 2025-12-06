@@ -22,30 +22,33 @@ export const useDeckValidator = (rules: GameRules) => {
     );
 
   const validateDeck = (deck: Deck) => {
+    const errors = [];
+
     if (!hasCorrectAmountOfCards(deck)) {
-      return `Deck must consist of exactly ${rules.DeckSize} cards`;
+      errors.push(`Deck must consist of exactly ${rules.DeckSize} cards`);
     }
 
     if (!hasBasicPokemon(deck)) {
-      return "Cannot use a deck with no Basic Pokemon";
+      errors.push("Cannot use a deck with no Basic Pokemon");
     }
 
     if (!hasNoMoreThanTwoWithSameName(deck)) {
-      return "Cannot use more than two cards with the same name";
+      errors.push("Cannot use more than two cards with the same name");
     }
 
     if (!anyCanUseAnyAttack(deck)) {
-      return "Must be able to use at least one attack";
+      errors.push("Must be able to use at least one attack");
     }
 
     if (rules.ExtraValidation) {
       const extraValidation = rules.ExtraValidation(deck);
       if (extraValidation !== true) {
-        return extraValidation;
+        errors.push(extraValidation);
       }
     }
 
-    return true;
+    if (errors.length > 0) return errors;
+    else return true;
   };
   return { validateDeck };
 };

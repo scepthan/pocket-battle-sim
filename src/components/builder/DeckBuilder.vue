@@ -18,7 +18,7 @@
             :deck="{ Cards: selectedCards.map((x) => x.ID), EnergyTypes: energyTypes }"
           />
           <SaveDeckButton
-            :name="deckName"
+            :deck-name="deckName"
             :deck="deck"
             :editing-deck="editingDeck"
             @save="emit('save', deckName)"

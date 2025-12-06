@@ -78,11 +78,11 @@ export class Game {
 
     const validation1 = validateDeck(deck1);
     if (validation1 !== true) {
-      throw new Error("Player 1 has an invalid deck: " + validation1);
+      throw new Error("Player 1 has an invalid deck: " + validation1.join("; "));
     }
     const validation2 = validateDeck(deck2);
     if (validation2 !== true) {
-      throw new Error("Player 2 has an invalid deck: " + validation2);
+      throw new Error("Player 2 has an invalid deck: " + validation2.join("; "));
     }
 
     const name1 = agent1.Name || "Player 1";
