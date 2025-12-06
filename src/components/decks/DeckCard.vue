@@ -14,7 +14,7 @@
       <DeckDisplayDialog
         :deck="deck"
         :builtin-name="builtinName"
-        :name="deckName"
+        :deck-name="deckName"
         @close="dialog = false"
       />
     </v-dialog>

@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
 export interface Props {
-  name: string;
+  deckName: string;
   builtinList?: string;
 }
 const props = defineProps<Props>();
@@ -14,7 +14,7 @@ const router = useRouter();
 const queryObject = computed(() => {
   return Object.assign(props.builtinList ? { builtinList: props.builtinList } : {}, {
     clone: 1,
-    name: props.name,
+    name: props.deckName,
   });
 });
 

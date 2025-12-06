@@ -4,14 +4,14 @@
 
 <script setup lang="ts">
 export interface Props {
-  name: string;
+  deckName: string;
 }
 const props = defineProps<Props>();
 
 const router = useRouter();
 
 const queryObject = computed(() => ({
-  name: props.name,
+  name: props.deckName,
 }));
 
 const onClick = async () => {

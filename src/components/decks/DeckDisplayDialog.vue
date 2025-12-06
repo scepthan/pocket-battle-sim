@@ -2,7 +2,7 @@
   <v-card>
     <v-toolbar>
       <v-toolbar-title>
-        {{ name }}
+        {{ deckName }}
         <EnergyIcon v-for="(energy, i) in deck.EnergyTypes" :key="i" :energy="energy" inline />
       </v-toolbar-title>
       <v-toolbar-items>
@@ -17,9 +17,9 @@
     </v-card-text>
 
     <v-card-actions>
-      <EditButton v-if="!builtinName" :name="name" />
-      <CloneButton :name="name" :builtin-list="builtinName" />
-      <DeleteButton v-if="!builtinName" :name="name" />
+      <EditButton v-if="!builtinName" :deck-name="deckName" />
+      <CloneButton :deck-name="deckName" :builtin-list="builtinName" />
+      <DeleteButton v-if="!builtinName" :deck-name="deckName" />
     </v-card-actions>
   </v-card>
 </template>
@@ -31,7 +31,7 @@ import { usePlayingCardStore } from "@/stores";
 export interface Props {
   deck: DeckInfo;
   builtinName?: string;
-  name: string;
+  deckName: string;
 }
 const props = defineProps<Props>();
 

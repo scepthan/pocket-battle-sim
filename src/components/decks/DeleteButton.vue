@@ -11,10 +11,12 @@
     </template>
     <v-card>
       <v-card-title>Delete Custom Deck?</v-card-title>
-      <v-card-text>This will permanently remove "{{ name }}" from your storage.</v-card-text>
+      <v-card-text>This will permanently remove "{{ deckName }}" from your storage.</v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn variant="elevated" color="error" @click="deleteCustomDeck(name)">Yes, delete</v-btn>
+        <v-btn variant="elevated" color="error" @click="deleteCustomDeck(deckName)"
+          >Yes, delete</v-btn
+        >
         <v-btn @click="dialogOpen = false">Cancel</v-btn>
       </v-card-actions>
     </v-card>
@@ -25,7 +27,7 @@
 import { useDeckStore } from "@/stores";
 
 export interface Props {
-  name: string;
+  deckName: string;
 }
 defineProps<Props>();
 
