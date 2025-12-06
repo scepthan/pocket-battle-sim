@@ -17,9 +17,9 @@
     </v-card-text>
 
     <v-card-actions>
-      <EditButton v-if="!builtinList" :name="name" />
-      <CloneButton :name="name" :builtin-list="builtinList" />
-      <DeleteButton v-if="!builtinList" :name="name" />
+      <EditButton v-if="!builtinName" :name="name" />
+      <CloneButton :name="name" :builtin-list="builtinName" />
+      <DeleteButton v-if="!builtinName" :name="name" />
     </v-card-actions>
   </v-card>
 </template>
@@ -30,7 +30,7 @@ import { usePlayingCardStore } from "@/stores";
 
 export interface Props {
   deck: DeckInfo;
-  builtinList?: string;
+  builtinName?: string;
   name: string;
 }
 const props = defineProps<Props>();

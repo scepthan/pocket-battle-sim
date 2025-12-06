@@ -29,11 +29,11 @@ export const useDeckValidator = (rules: GameRules) => {
     }
 
     if (!hasBasicPokemon(deck)) {
-      errors.push("Cannot use a deck with no Basic Pokemon");
+      errors.push("Deck must contain at least 1 Basic Pokémon");
     }
 
     if (!hasNoMoreThanTwoWithSameName(deck)) {
-      errors.push("Cannot use more than two cards with the same name");
+      errors.push("Deck cannot contain more than two cards with the same name");
     }
 
     if (!anyCanUseAnyAttack(deck)) {

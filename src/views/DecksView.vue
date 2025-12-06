@@ -6,7 +6,7 @@
         <CreateDeckCard />
       </div>
       <div v-for="(deck, name) in deckStore.CustomDecks" :key="name">
-        <DeckCard :deck="deck" :name="name" />
+        <DeckCard :deck="deck" :deck-name="name" />
       </div>
     </div>
 
@@ -14,7 +14,7 @@
     <v-select v-model="selectedDecklist" :items="decklists" item-title="name" return-object />
     <div class="d-flex flex-wrap ga-4">
       <div v-for="(deck, name) in selectedDecklist.decks" :key="name">
-        <DeckCard :deck="deck" :builtin-list="selectedDecklist.name" :name="name" />
+        <DeckCard :deck="deck" :builtin-name="selectedDecklist.name" :deck-name="name" />
       </div>
     </div>
   </v-container>
