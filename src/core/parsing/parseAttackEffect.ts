@@ -896,7 +896,9 @@ export const parseAttackEffect = (attack: Attack): boolean => {
             return;
           }
           game.GameLog.copyAttack(game.AttackingPlayer, chosenAttack.name);
-          let attackFailed = chosenAttack.text?.includes("use it as this attack");
+          let attackFailed =
+            chosenAttack.text?.includes("use it as this attack") ||
+            chosenAttack.extraConditions.some((cond) => !cond(game, chosenPokemon));
           if (energyRequired) {
             const active = game.AttackingPlayer.activeOrThrow();
             if (!active.hasSufficientEnergy(chosenAttack.requiredEnergy)) attackFailed = true;
