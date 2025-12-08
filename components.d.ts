@@ -60,6 +60,7 @@ declare module 'vue' {
     SearchPanel: typeof import('./src/components/builder/SearchPanel.vue')['default']
     SearchSort: typeof import('./src/components/builder/SearchSort.vue')['default']
     SelectableCard: typeof import('./src/components/builder/SelectableCard.vue')['default']
+    SelectionMenu: typeof import('./src/components/arena/control/SelectionMenu.vue')['default']
     Toggle3Way: typeof import('./src/components/builder/advancedsearch/Toggle3Way.vue')['default']
     TooltipButton: typeof import('./src/components/common/TooltipButton.vue')['default']
   }
