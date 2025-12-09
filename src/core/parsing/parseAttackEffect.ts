@@ -4,7 +4,6 @@ import {
   type Attack,
   type Energy,
   type Game,
-  type PokemonCard,
   type SideEffect,
 } from "../gamelogic";
 import { randomElement } from "../util";
@@ -433,7 +432,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       transform: (_, specifier) => {
         const predicate = parsePlayingCardPredicate(specifier);
         addSideEffect(async (game) => {
-          game.AttackingPlayer.drawRandomFiltered(predicate);
+          game.AttackingPlayer.drawRandomFilteredToHand(predicate);
         });
       },
     },
@@ -441,18 +440,8 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       pattern: /^Put 1 random (.+?) from your deck onto your bench\./i,
       transform: (_, specifier) => {
         const predicate = parsePlayingCardPredicate(specifier);
-
         addSideEffect(async (game) => {
-          const benchSlot = game.AttackingPlayer.Bench.find((s) => !s.isPokemon);
-          if (benchSlot === undefined) {
-            game.GameLog.benchFull(game.AttackingPlayer);
-            return;
-          }
-
-          const card = game.AttackingPlayer.drawRandomFiltered(predicate);
-          if (card === undefined) return;
-
-          await game.AttackingPlayer.putPokemonOnBench(card as PokemonCard, benchSlot.index);
+          await game.AttackingPlayer.playRandomFilteredToBench(predicate);
         });
       },
     },

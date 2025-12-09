@@ -205,15 +205,21 @@ export class Player {
     this.Hand.push(...cardsDrawn);
   }
 
-  drawRandomFiltered(predicate: (card: PlayingCard) => boolean) {
-    const filteredCards = this.Deck.filter(predicate);
-    let card = undefined;
+  pullRandomCard(cards: PlayingCard[], predicate: (card: PlayingCard) => boolean) {
+    const filteredCards = cards.filter(predicate);
     if (filteredCards.length > 0) {
-      card = randomElement(filteredCards);
-      removeElement(this.Deck, card);
-      this.Hand.push(card);
+      const card = randomElement(filteredCards);
+      removeElement(cards, card);
+      return card;
+    } else {
+      this.logger.noValidCards(this);
     }
+  }
 
+  drawRandomFilteredToHand(predicate: (card: PlayingCard) => boolean) {
+    const card = this.pullRandomCard(this.Deck, predicate);
+    if (!card) return;
+    this.Hand.push(card);
     this.logger.drawRandomFiltered(this, card);
 
     this.shuffleDeck();
@@ -221,19 +227,29 @@ export class Player {
     return card;
   }
 
-  discardRandomFiltered(predicate: (card: PlayingCard) => boolean = () => true) {
-    const filteredCards = this.Hand.filter(predicate);
-    const discarded: PlayingCard[] = [];
-    if (filteredCards.length > 0) {
-      const card = randomElement(filteredCards);
-      discarded.push(card);
-      removeElement(this.Hand, card);
-      this.Discard.push(card);
+  async playRandomFilteredToBench(predicate: (card: PlayingCard) => boolean) {
+    const benchIndex = this.Bench.findIndex((slot) => !slot.isPokemon);
+    if (this.BenchedPokemon.length >= 3) {
+      this.logger.benchFull(this);
+      return;
     }
 
-    this.logger.discardFromHand(this, discarded);
+    const card = this.pullRandomCard(this.Deck, predicate);
+    if (!card) return;
+    await this.putPokemonOnBench(card as PokemonCard, benchIndex);
 
-    return discarded;
+    this.shuffleDeck();
+
+    return card;
+  }
+
+  discardRandomFiltered(predicate: (card: PlayingCard) => boolean = () => true) {
+    const card = this.pullRandomCard(this.Hand, predicate);
+    if (!card) return [];
+    this.Discard.push(card);
+    this.logger.discardFromHand(this, [card]);
+
+    return [card];
   }
 
   returnToDeck(cards: PlayingCard[]) {

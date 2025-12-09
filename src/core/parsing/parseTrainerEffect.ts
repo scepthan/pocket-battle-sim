@@ -26,7 +26,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
           type: "Conditional",
           condition: (game) => game.AttackingPlayer.canDraw(true),
           effect: async (game) => {
-            game.AttackingPlayer.drawRandomFiltered(predicate);
+            game.AttackingPlayer.drawRandomFilteredToHand(predicate);
           },
         };
       },
