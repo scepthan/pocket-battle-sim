@@ -1,18 +1,24 @@
 <template>
-  <div v-if="!game" class="h-100 d-flex flex-column justify-center align-center ga-4">
-    <div class="d-flex ga-8 justify-center align-center">
-      <div class="d-flex flex-column align-center ga-2">
-        Your deck:
-        <PlayerDeckSelector v-model:deck="playerDeck" v-model:deck-name="playerDeckName" />
-      </div>
-      <div class="pt-8">vs.</div>
-      <div class="d-flex flex-column align-center ga-2">
-        Opponent's deck:
-        <PlayerDeckSelector v-model:deck="opponentDeck" v-model:deck-name="opponentDeckName" />
-      </div>
-    </div>
+  <div v-if="!game" class="h-100 d-flex justify-center align-center">
+    <v-card class="pa-4" style="width: 700px">
+      <v-card-text class="d-flex flex-column align-center ga-4">
+        <h1>Battle Simulator</h1>
 
-    <v-btn color="green" @click="startGame">Go</v-btn>
+        <div class="d-flex ga-8 justify-center align-center">
+          <div class="d-flex flex-column align-center ga-2">
+            Your deck:
+            <PlayerDeckSelector v-model:deck="playerDeck" v-model:deck-name="playerDeckName" />
+          </div>
+          <div class="pt-8">vs.</div>
+          <div class="d-flex flex-column align-center ga-2">
+            Opponent's deck:
+            <PlayerDeckSelector v-model:deck="opponentDeck" v-model:deck-name="opponentDeckName" />
+          </div>
+        </div>
+
+        <v-btn color="green" @click="startGame">Go</v-btn>
+      </v-card-text>
+    </v-card>
   </div>
 
   <PlayingField

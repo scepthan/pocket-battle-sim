@@ -10,7 +10,7 @@
     Random...?
   </EmptyDeckCard>
 
-  <v-dialog v-model="dialog" width="800">
+  <v-dialog v-model="dialog" width="850">
     <v-card class="pa-4" style="max-height: 600px">
       <v-card-text>
         <v-select v-model="selectedDecklist" :items="decklists" item-title="name" return-object />
@@ -31,7 +31,7 @@
       </v-card-text>
 
       <v-card-actions>
-        <v-btn variant="elevated" color="red" @click="setRandomDeck"> Random Deck </v-btn>
+        <v-btn variant="elevated" color="blue" @click="setRandomDeck"> Random Deck </v-btn>
         <v-btn @click="dialog = false"> Close </v-btn>
       </v-card-actions>
     </v-card>
@@ -65,4 +65,12 @@ const setRandomDeck = () => {
   selectedDeckName.value = undefined;
   dialog.value = false;
 };
+
+onMounted(() => {
+  if (selectedDeckName.value) {
+    selectedDecklist.value = decklists.value.find((list) =>
+      selectedDeckName.value!.startsWith(list.name + " - ")
+    )!;
+  }
+});
 </script>
