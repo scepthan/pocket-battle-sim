@@ -139,6 +139,7 @@ const baseSelector = useSelectionHandler<string>();
 
 const setupAgent = () => {
   if (!agent.value) return;
+  game.value = undefined;
 
   agent.value.setupPokemon = async (gameView: GameInitState) => {
     while (true) {
