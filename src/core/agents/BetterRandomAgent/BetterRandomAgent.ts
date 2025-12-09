@@ -125,9 +125,16 @@ export class BetterRandomAgent extends PlayerAgent {
     const pokemonWithAbilities = ownPokemon.filter(
       (x) => x.Ability && game.canUseAbility(x, x.Ability)
     );
+    let endTurnAbilityPokemon: PlayerPokemonView | null = null;
     for (const pokemon of pokemonWithAbilities) {
       // Fossils are given a pseudo-Ability to discard themselves; don't use it unless in the Active Spot
       if (pokemon.RetreatCost === -1 && pokemon != game.selfActive) continue;
+
+      if (pokemon.Ability!.text.includes("your turn ends")) {
+        endTurnAbilityPokemon = pokemon;
+        continue;
+      }
+
       await game.useAbility(pokemon, pokemon.Ability!);
     }
 
@@ -197,6 +204,8 @@ export class BetterRandomAgent extends PlayerAgent {
     }
     if (chosenAttack) {
       await game.useAttack(chosenAttack);
+    } else if (endTurnAbilityPokemon) {
+      await game.useAbility(endTurnAbilityPokemon, endTurnAbilityPokemon.Ability!);
     }
     return;
   }
