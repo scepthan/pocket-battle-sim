@@ -32,6 +32,7 @@ export class Game {
   GameLog: GameLogger = new GameLogger();
 
   TurnNumber: number = 0;
+  TurnOver: boolean = false;
   AttackingPlayer: Player;
   DefendingPlayer: Player;
   CanRetreat: boolean = true;
@@ -189,6 +190,7 @@ export class Game {
 
     // Log the turn change
     this.GameLog.nextTurn(this.TurnNumber, this.AttackingPlayer, this.DefendingPlayer);
+    this.TurnOver = false;
 
     // Generate next energy for the attacking player
     if (this.TurnNumber > 1) {
@@ -226,6 +228,7 @@ export class Game {
       this.GameLog.turnError(this.AttackingPlayer, String(error));
     }
 
+    this.TurnOver = true;
     if (this.GameOver) return;
 
     // Discard energy if player did not use it

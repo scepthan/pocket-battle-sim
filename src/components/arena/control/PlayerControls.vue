@@ -189,6 +189,11 @@ const setupAgent = () => {
   agent.value.doTurn = async (gameView: PlayerGameView) => {
     game.value = gameView;
     while (true) {
+      if (!gameView.canPlay) {
+        stage.value = "idle";
+        return;
+      }
+
       stage.value = "doTurn";
 
       const action = await actionSelector.selectionPromise();
@@ -381,11 +386,6 @@ const setupAgent = () => {
         }
       } else {
         console.log(`Player selected action: ${action}`);
-      }
-
-      if (!gameView.isSelfTurn) {
-        stage.value = "idle";
-        return;
       }
     }
   };

@@ -64,7 +64,8 @@ export class PlayerGameView {
       this.isSelfTurn &&
       this.game.TurnNumber > 0 &&
       this.game.TurnNumber == this.turnNumber &&
-      !this.game.GameOver
+      !this.game.GameOver &&
+      !this.game.TurnOver
     );
   }
   get selfName() {
