@@ -329,12 +329,12 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
       }),
     },
     {
-      pattern: /^Put 1 random (.+?) from your discard pile into your hand\.$/,
+      pattern: /^Put (?:a|1) random (.+?) from your discard pile into your hand\.$/,
       transform: (_, specifier) => {
         const predicate = parsePlayingCardPredicate(specifier);
         return {
           type: "Conditional",
-          condition: (game, self) => self.Discard.some(predicate),
+          condition: (_game, self) => self.Discard.some(predicate),
           effect: async (game) => {
             const validCards = game.AttackingPlayer.Discard.filter(predicate);
             const card = randomElement(validCards);

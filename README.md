@@ -8,7 +8,72 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3
+  - [ ] A3: 115/157 (73.2%)
+    - [ ] Abilities
+      - [ ] New triggers
+        - [ ] On Knocked Out
+      - [ ] New conditionals
+        - [ ] During your first turn
+      - [ ] New effects
+        - [ ] Heal all mon of type
+        - [ ] Prevent damage from ex mon
+        - [ ] Apply HealSpecialConditions status to player (mon with Energy of type attached)
+        - [ ] Move all Energy of type from Benched mon to Active mon
+        - [ ] Flip coin to set self HP to 10 (need to investigate OOO in-game)
+        - [ ] Move all Energy of type from self to Benched mon
+        - [ ] Switch with Active mon
+        - [ ] Put self to sleep
+    - [ ] Attacks
+      - [ ] New conditionals
+        - [ ] Moved to the Active Spot on this turn
+        - [ ] At least 1 heads
+        - [ ] Opposing mon has more HP than self
+        - [ ] Opposing mon has Special Condition
+        - [ ] Opposing mon has Ability
+        - [ ] Any of own Benched mon have damage
+      - [ ] New targeting
+        - [ ] Opposing mon that has damage
+      - [ ] New effects
+        - [ ] Discard random Energy from both Active mon
+        - [ ] Poison and Burn
+        - [ ] Apply Counterattack status to self
+        - [ ] Apply CannotUseItem status to opponent
+        - [ ] Switch with Benched mon
+        - [ ] Apply CannotAttachEnergy status to opponent (active)
+        - [ ] Also do damage to any of own mon
+        - [ ] Do damage to any opposing mon for each Energy attached to it
+        - [ ] Discard random filtered card from opponent's hand
+        - [ ] Apply random Special Condition to opposing mon
+        - [ ] Apply IncreaseAttackDamage status to self
+        - [ ] Apply IncreaseAttackCost and IncreaseRetreatCost statuses to opposing mon
+        - [ ] Confuse self
+    - [ ] Items/Supporters
+      - [ ] Heal damage and remove random Special Condition
+      - [ ] Evolve Basic mon to Stage 2
+      - [ ] Look at top card and choose to shuffle
+      - [ ] Move damage from own mon to opposing mon
+      - [ ] Put damaged mon into hand
+      - [ ] Attach Energy to mon and end turn
+      - [ ] Discard all of opponent's Pokemon Tools
+      - [ ] If mon in play, switch in opponent's Benched mon of choice
+      - [ ] Heal all damage and discard all Energy from mon
+    - [ ] Pokemon Tools
+      - [ ] Poison attacker when damaged
+    - [ ] New Player Statuses
+      - [ ] CannotAttachEnergy (PokemonPlayerStatus)
+      - [ ] HealSpecialConditions (PokemonPlayerStatus)
+    - [ ] New Pokemon Statuses
+      - [ ] IncreaseAttackDamage (DefensePokemonStatus)
+      - [ ] IncreaseAttackCost (BasePokemonStatus)
+      - [ ] IncreaseRetreatCost (BasePokemonStatus)
+    - [ ] New Pokemon predicates
+      - [ ] Stage 2
+    - [ ] New card predicates
+      - [ ] Card that evolves from mon
+      - [ ] Item card (need to investigate if Fossils count)
+    - [x] Unique promo cards
+      - [x] Rayquaza
+      - [x] Rayquaza ex
   - [ ] A3a
     - [ ] Ultra Beasts
   - [ ] A3b
@@ -34,6 +99,8 @@ Frontend todo:
   - [x] Display deck size and opponent hand size
   - [x] Display attached Pokemon Tools
   - [ ] Display statuses and Special Conditions
+  - [ ] Concede/quit button
+  - [ ] Auto mode toggle? (Will need to adjust BetterRandomAgent to be able to stop and start in the middle of a turn)
 - [x] Allow user to select decks for arena
 - [x] Allow user control of one or both players in arena
 - [ ] Allow user to select set of decks to run in mass simulator
