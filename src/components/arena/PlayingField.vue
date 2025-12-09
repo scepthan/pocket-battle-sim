@@ -71,6 +71,8 @@
           v-model:setup="pokemonSetup"
           :game="gameView"
           player="Player"
+          @play-again="emit('playAgain')"
+          @change-decks="emit('changeDecks')"
         />
       </div>
     </div>
@@ -85,6 +87,11 @@ export interface Props {
   log?: GameLogger;
 }
 const props = defineProps<Props>();
+
+const emit = defineEmits<{
+  (e: "playAgain"): void;
+  (e: "changeDecks"): void;
+}>();
 
 const agent = defineModel<PlayerAgent>("agent");
 const pokemonSetup = ref<{ active?: PokemonCard; bench: PokemonCard[] }>({

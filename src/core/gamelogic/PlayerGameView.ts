@@ -56,6 +56,9 @@ export class PlayerGameView {
   get isSelfTurn() {
     return this.game.AttackingPlayer == this.player;
   }
+  get isGameOver() {
+    return this.game.GameOver;
+  }
   get canPlay() {
     return (
       this.isSelfTurn &&

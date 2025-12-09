@@ -1,5 +1,14 @@
 <template>
-  <div v-if="stage === 'selectCard'">
+  <div v-if="game?.isGameOver">
+    <p>Game over!</p>
+
+    <div class="d-flex flex-wrap ga-2">
+      <v-btn @click="emit('playAgain')"> Play Again </v-btn>
+      <v-btn @click="emit('changeDecks')"> Change Decks </v-btn>
+    </div>
+  </div>
+
+  <div v-else-if="stage === 'selectCard'">
     <SelectionMenu
       :selector="cardSelector"
       :button-text="(card: PlayingCard) => card.Name"
@@ -86,6 +95,11 @@ import {
   type PlayingCard,
   type PokemonCard,
 } from "@/core";
+
+const emit = defineEmits<{
+  (e: "playAgain"): void;
+  (e: "changeDecks"): void;
+}>();
 
 const agent = defineModel<PlayerAgent>("agent");
 const game = ref<PlayerGameView>();

@@ -10,7 +10,7 @@
     </div>
     <div class="deck-name">{{ deckName }}</div>
 
-    <v-dialog v-model="dialog" activator="parent" width="850">
+    <v-dialog v-if="!noDialog" v-model="dialog" activator="parent" width="850">
       <DeckDisplayDialog
         :deck="deck"
         :builtin-name="builtinName"
@@ -29,6 +29,7 @@ export interface Props {
   deck: DeckInfo;
   builtinName?: string;
   deckName: string;
+  noDialog?: boolean;
 }
 const props = defineProps<Props>();
 

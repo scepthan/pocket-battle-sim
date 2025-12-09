@@ -41,6 +41,7 @@ declare module 'vue' {
     MiniWeaknessSelector: typeof import('./src/components/builder/advancedsearch/MiniWeaknessSelector.vue')['default']
     PlayerControls: typeof import('./src/components/arena/control/PlayerControls.vue')['default']
     PlayerDeck: typeof import('./src/components/arena/PlayerDeck.vue')['default']
+    PlayerDeckSelector: typeof import('./src/components/decks/PlayerDeckSelector.vue')['default']
     PlayerDiscard: typeof import('./src/components/arena/PlayerDiscard.vue')['default']
     PlayerHandHidden: typeof import('./src/components/arena/PlayerHandHidden.vue')['default']
     PlayerHandVisible: typeof import('./src/components/arena/PlayerHandVisible.vue')['default']
