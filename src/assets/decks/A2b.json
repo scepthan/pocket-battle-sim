@@ -36,5 +36,43 @@
       "Cards": ["A2-119", "A2-119", "A2-135", "A2-135", "A2-147", "A2-147", "A2b-060", "A2b-060", "A2b-061", "A2b-061", "A2b-065", "A2b-065", "A2b-070", "A2b-070", "PROMO-A-001", "PROMO-A-001", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
       "EnergyTypes": ["Metal"]
     }
+  },
+  "A2b Rentals": {
+    "Beedrill ex": {
+      "Cards": ["A2b-001", "A2b-001", "A2b-002", "A2b-002", "A2b-003", "A2b-004", "A2b-005", "A2b-005", "A2b-006", "A2b-006", "A2b-007", "A2b-066", "A2b-066", "A2b-067", "A2b-071", "PROMO-A-002", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Grass"]
+    },
+    "Charizard ex": {
+      "Cards": ["A2b-008", "A2b-008", "A2b-009", "A2b-009", "A2b-010", "A2b-011", "A2b-011", "A2b-012", "A2b-013", "A2b-013", "A2b-058", "A2b-058", "A2b-059", "A2b-068", "A2b-071", "PROMO-A-002", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Fire"]
+    },
+    "Wugtrio ex": {
+      "Cards": ["A2b-014", "A2b-014", "A2b-015", "A2b-016", "A2b-016", "A2b-017", "A2b-018", "A2b-018", "A2b-019", "A2b-020", "A2b-021", "A2b-058", "A2b-058", "A2b-059", "A2b-069", "PROMO-A-002", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Water"]
+    },
+    "Pikachu ex": {
+      "Cards": ["A2b-022", "A2b-023", "A2b-023", "A2b-024", "A2b-025", "A2b-025", "A2b-026", "A2b-026", "A2b-027", "A2b-027", "A2b-028", "A2b-062", "A2b-062", "A2b-063", "A2b-071", "PROMO-A-002", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Lightning"]
+    },
+    "Giratina ex": {
+      "Cards": ["A2b-029", "A2b-029", "A2b-030", "A2b-030", "A2b-031", "A2b-032", "A2b-032", "A2b-033", "A2b-033", "A2b-034", "A2b-035", "A2b-062", "A2b-062", "A2b-063", "A2b-070", "PROMO-A-002", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Psychic"]
+    },
+    "Lucario ex": {
+      "Cards": ["A2b-037", "A2b-037", "A2b-038", "A2b-038", "A2b-039", "A2b-040", "A2b-041", "A2b-042", "A2b-042", "A2b-043", "A2b-044", "A2b-066", "A2b-066", "A2b-067", "A2b-071", "PROMO-A-002", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Fighting"]
+    },
+    "Paldean Clodsire ex": {
+      "Cards": ["A2b-045", "A2b-045", "A2b-046", "A2b-047", "A2b-047", "A2b-048", "A2b-049", "A2b-049", "A2b-050", "A2b-050", "A2b-051", "A2b-062", "A2b-062", "A2b-063", "A2b-072", "PROMO-A-002", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Darkness"]
+    },
+    "Tinkaton ex": {
+      "Cards": ["A2b-036", "A2b-036", "A2b-052", "A2b-052", "A2b-053", "A2b-053", "A2b-054", "A2b-055", "A2b-055", "A2b-056", "A2b-057", "A2b-066", "A2b-066", "A2b-067", "A2b-072", "PROMO-A-002", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Metal"]
+    },
+    "Bibarel ex": {
+      "Cards": ["A2b-033", "A2b-033", "A2b-034", "A2b-060", "A2b-060", "A2b-061", "A2b-064", "A2b-064", "A2b-065", "A2b-066", "A2b-066", "A2b-067", "A2b-068", "A2b-068", "A2b-070", "PROMO-A-002", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Psychic"]
+    }
   }
 }

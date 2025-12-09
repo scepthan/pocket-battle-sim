@@ -53,6 +53,14 @@
       this turn</span
     >!
   </p>
+  <p v-else-if="entry.status.type == 'NoRetreatCost'">
+    All of <b>{{ entry.player }}</b
+    >'s <PokemonDescriptor :text="entry.status.descriptor" /> have no Retreat Cost<span
+      v-if="entry.status.source == 'Effect'"
+    >
+      this turn</span
+    >!
+  </p>
   <p v-else>Unknown player status: {{ entry.status.type }}</p>
 </template>
 

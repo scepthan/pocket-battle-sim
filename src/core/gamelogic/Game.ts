@@ -846,10 +846,7 @@ export class Game {
    * Hits a Pokémon for a base amount of damage, after applying weakness and status effects.
    */
   attackPokemon(defender: InPlayPokemonCard, HP: number): void {
-    if (this.shouldPreventDamage(defender)) {
-      this.GameLog.damagePrevented(this.DefendingPlayer, defender);
-      return;
-    }
+    if (this.shouldPreventDamage(defender)) return;
 
     const attacker = this.AttackingPlayer.activeOrThrow();
     const type = attacker.Type;
@@ -923,10 +920,7 @@ export class Game {
    * Directly knocks out a Pokémon from any amount of remaining HP.
    */
   async knockOutPokemon(pokemon: InPlayPokemonCard): Promise<void> {
-    if (this.shouldPreventEffects(pokemon)) {
-      this.GameLog.damagePrevented(pokemon.player, pokemon);
-      return;
-    }
+    if (this.shouldPreventEffects(pokemon)) return;
 
     await this.handleKnockOut(pokemon, false);
   }
