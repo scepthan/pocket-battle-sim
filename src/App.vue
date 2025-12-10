@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import { sortedBy } from "./core";
+import { sortedBy, type InputCard } from "./core";
 import { useDeckStore, usePlayingCardStore } from "./stores";
 
 const cardStore = usePlayingCardStore();
@@ -73,9 +73,22 @@ onMounted(() => {
       )
   );
 
+  const unusedCardGroups: Record<string, InputCard[]> = {};
+  for (const card of unusedCards) {
+    const key = card.cardType === "Pokemon" ? card.type : card.cardType;
+    if (!unusedCardGroups[key]) unusedCardGroups[key] = [];
+    unusedCardGroups[key].push(card);
+  }
+
   console.log(
-    `Found ${unusedCards.length} unused cards:`,
-    unusedCards.map((card) => `${card.id} (${card.name})`).join("; ")
+    `Found ${unusedCards.length} unused cards:\n${Object.entries(unusedCardGroups)
+      .map(
+        ([key, cards]) =>
+          `- ${key} (${cards.length}): ${cards
+            .map((card) => `${card.id} (${card.name})`)
+            .join("; ")}`
+      )
+      .join("\n")}`
   );
 
   if (debugMultiUseCards) {

@@ -4,11 +4,12 @@ import A1a from "./A1a.json";
 import A2 from "./A2.json";
 import A2a from "./A2a.json";
 import A2b from "./A2b.json";
+import A3 from "./A3.json";
 
 export type DeckList = Record<string, DeckInfo>;
 export type DeckRecord = Record<string, DeckList>;
 
-export const decks = { ...A1, ...A1a, ...A2, ...A2a, ...A2b } as DeckRecord;
+export const decks = { ...A1, ...A1a, ...A2, ...A2a, ...A2b, ...A3 } as DeckRecord;
 
 export const allDecks = Object.entries(decks).reduce((acc, [setName, deckList]) => {
   Object.entries(deckList).forEach(([deckName, deckInfo]) => {
