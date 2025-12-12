@@ -8,7 +8,7 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 126/157 (80.3%)
+  - [ ] A3: 127/157 (80.9%)
     - [ ] Abilities
       - [ ] New triggers
         - [ ] Before Knocked Out
@@ -42,7 +42,7 @@ Backend todo:
         - [ ] Also do damage to any of own mon
         - [ ] Do damage to any opposing mon for each Energy attached to it
         - [ ] Discard random filtered card from opponent's hand
-        - [ ] Apply random Special Condition to opposing mon
+        - [x] Apply random Special Condition to opposing mon
         - [ ] Apply IncreaseAttackDamage status to self
         - [ ] Apply IncreaseAttackCost and IncreaseRetreatCost statuses to opposing mon
         - [ ] Confuse self
