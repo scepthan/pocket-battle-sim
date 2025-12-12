@@ -539,9 +539,18 @@ export const parseAttackEffect = (attack: Attack): boolean => {
     {
       pattern: /^Discard a random Energy from your opponent’s Active Pokémon\./i,
       transform: () => {
-        addSideEffect(async (game) =>
-          game.discardRandomEnergy(game.DefendingPlayer.activeOrThrow())
+        addSideEffect(
+          async (game) => await game.discardRandomEnergy(game.DefendingPlayer.activeOrThrow())
         );
+      },
+    },
+    {
+      pattern: /^Discard a random Energy from both Active Pokémon\./i,
+      transform: () => {
+        addSideEffect(async (game) => {
+          await game.discardRandomEnergy(game.AttackingPlayer.activeOrThrow());
+          await game.discardRandomEnergy(game.DefendingPlayer.activeOrThrow());
+        });
       },
     },
     {
