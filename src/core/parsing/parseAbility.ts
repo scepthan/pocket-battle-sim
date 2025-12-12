@@ -175,8 +175,8 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       },
     },
     {
-      pattern: /move a {(\w)} Energy from 1 of your Benched (.+?) to your Active (.+?)\./i,
-      transform: (_, energyType, benchedSpecifier, activeSpecifier) => {
+      pattern: /move (a|all) {(\w)} Energy from 1 of your Benched (.+?) to your Active (.+?)\./i,
+      transform: (_, amount, energyType, benchedSpecifier, activeSpecifier) => {
         const fullType = parseEnergy(energyType);
         const benchPredicate = parsePokemonPredicate(benchedSpecifier, (p) =>
           p.AttachedEnergy.includes(fullType)
@@ -191,7 +191,9 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
             if (!target.isPokemon) throw new Error("Not a valid target");
             const active = self.player.activeOrThrow();
 
-            await self.player.transferEnergy(target, active, [fullType]);
+            const energyToMove =
+              amount === "all" ? target.AttachedEnergy.filter((e) => e === fullType) : [fullType];
+            await self.player.transferEnergy(target, active, energyToMove);
           },
         };
       },

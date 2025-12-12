@@ -8,7 +8,7 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 116/157 (73.9%)
+  - [ ] A3: 117/157 (74.5%)
     - [ ] Abilities
       - [ ] New triggers
         - [ ] On Knocked Out
@@ -18,7 +18,7 @@ Backend todo:
         - [ ] Heal all mon of type
         - [ ] Prevent damage from ex mon
         - [ ] Apply HealSpecialConditions status to player (mon with Energy of type attached)
-        - [ ] Move all Energy of type from Benched mon to Active mon
+        - [x] Move all Energy of type from Benched mon to Active mon
         - [ ] Flip coin to set self HP to 10 (need to investigate OOO in-game)
         - [ ] Move all Energy of type from self to Benched mon
         - [ ] Switch with Active mon

@@ -48,7 +48,11 @@
       <v-btn :disabled="usableAbilities.length === 0" @click="actionSelector.select('useAbility')">
         Use Ability
       </v-btn>
-      <v-btn :disabled="!game?.canRetreat(true)" @click="actionSelector.select('retreat')">
+      <v-btn
+        :disabled="!game?.canRetreat(true)"
+        :color="game?.canRetreat(true) && game.retreatCostModifier < 0 ? 'green' : 'default'"
+        @click="actionSelector.select('retreat')"
+      >
         Retreat
       </v-btn>
       <v-btn
