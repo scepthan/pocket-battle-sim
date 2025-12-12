@@ -143,6 +143,9 @@ export class PlayerGameView {
       !this.player.PlayerStatuses.some((status) => status.type == "CannotUseSupporter")
     );
   }
+  get canPlayItem() {
+    return !this.player.PlayerStatuses.some((status) => status.type == "CannotUseItem");
+  }
   get effectiveRetreatCost() {
     return this.player.effectiveRetreatCost;
   }
@@ -179,7 +182,7 @@ export class PlayerGameView {
         );
       }
     } else if (card.CardType == "Supporter" || card.CardType == "Item") {
-      if (card.CardType == "Supporter" && !this.canPlaySupporter) return false;
+      if (card.CardType == "Supporter" ? !this.canPlaySupporter : !this.canPlayItem) return false;
       if (card.Effect.condition && !card.Effect.condition(this.game, this.player)) return false;
       if (card.Effect.type == "Targeted") {
         const validTargets = card.Effect.validTargets(this.game);

@@ -914,6 +914,20 @@ export const parseAttackEffect = (attack: Attack): boolean => {
         });
       },
     },
+    {
+      pattern:
+        /^During your opponent’s next turn, they can’t play any Item cards from their hand\./i,
+      transform: () => {
+        addSideEffect(async (game) => {
+          game.DefendingPlayer.applyPlayerStatus({
+            type: "CannotUseItem",
+            source: "Effect",
+            category: "GameRule",
+            keepNextTurn: true,
+          });
+        });
+      },
+    },
 
     // Other side effects
     {
