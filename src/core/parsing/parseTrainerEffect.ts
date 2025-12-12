@@ -117,7 +117,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         const predicate = parsePlayingCardPredicate(specifier);
         return {
           type: "Conditional",
-          condition: (_game, self) => self.Discard.some(predicate),
+          condition: (game, self) => self.Discard.some(predicate),
           effect: async (game) => {
             const validCards = game.AttackingPlayer.Discard.filter(predicate);
             const card = randomElement(validCards);
@@ -453,7 +453,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         type: "Conditional",
         condition: (game) => game.DefendingPlayer.BenchedPokemon.length > 0,
         effect: async (game) => {
-          await game.swapActivePokemon(game.DefendingPlayer, "opponentEffect");
+          await game.chooseNewActivePokemon(game.DefendingPlayer);
         },
       }),
     },

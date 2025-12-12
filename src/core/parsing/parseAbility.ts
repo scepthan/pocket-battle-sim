@@ -356,7 +356,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         ability.effect = {
           type: "Standard",
           effect: async (game, self) => {
-            await game.swapActivePokemon(self.player.opponent, "opponentEffect");
+            await game.chooseNewActivePokemon(self.player.opponent);
           },
         };
       },

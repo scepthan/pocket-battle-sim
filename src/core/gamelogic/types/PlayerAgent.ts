@@ -44,9 +44,9 @@ export abstract class PlayerAgent {
    *
    * By default, calls `this.choosePokemon()` with the current Benched Pokémon.
    */
-  async swapActivePokemon(
+  async chooseNewActivePokemon(
     game: PlayerGameView,
-    reason: "selfEffect" | "opponentEffect" | "activeKnockedOut"
+    reason: "opponentEffect" | "activeKnockedOut"
   ): Promise<PlayerPokemonView> {
     return this.choosePokemon(game.selfBenched);
   }

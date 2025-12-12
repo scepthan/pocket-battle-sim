@@ -395,7 +395,7 @@ const setupAgent = () => {
     }
   };
 
-  agent.value.swapActivePokemon = async (gameView: PlayerGameView) => {
+  agent.value.chooseNewActivePokemon = async (gameView: PlayerGameView) => {
     stage.value = "selectPokemon";
     pokemonSelector.text.value = "Select a Pokémon to swap in:";
     pokemonSelector.options.value = gameView.selfBenched;

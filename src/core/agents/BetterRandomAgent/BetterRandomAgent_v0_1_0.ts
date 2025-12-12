@@ -189,27 +189,6 @@ export class BetterRandomAgent_v0_1_0 extends PlayerAgent {
     return;
   }
 
-  async swapActivePokemon(game: PlayerGameView) {
-    const bench = game.selfBenched;
-    return rand(bench);
-  }
-  async choosePokemon(pokemon: PlayerPokemonView[]) {
-    return rand(pokemon);
-  }
-  async choose<T>(options: T[]) {
-    return rand(options);
-  }
-  async viewCards() {
-    //await new Promise((resolve) => setTimeout(resolve, 1000));
-  }
-  async distributeEnergy(pokemon: PlayerPokemonView[], energy: Energy[]): Promise<Energy[][]> {
-    const distribution: Energy[][] = pokemon.map(() => []);
-    for (const en of energy) {
-      rand(distribution).push(en);
-    }
-    return distribution;
-  }
-
   findPotentialEvolutions(game: PlayerGameView, pokemon: PlayerPokemonView) {
     const allPokemon: PokemonCard[] = [];
     let currentPokemon = [pokemon.Name];

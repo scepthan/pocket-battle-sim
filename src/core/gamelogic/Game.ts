@@ -518,13 +518,13 @@ export class Game {
   private async ensureActivePokemon(): Promise<void> {
     const promises = [];
     if (!this.Player1.ActivePokemon.isPokemon) {
-      promises[0] = this.Agent1.swapActivePokemon(
+      promises[0] = this.Agent1.chooseNewActivePokemon(
         new PlayerGameView(this, this.Player1),
         "activeKnockedOut"
       );
     }
     if (!this.Player2.ActivePokemon.isPokemon) {
-      promises[1] = this.Agent2.swapActivePokemon(
+      promises[1] = this.Agent2.chooseNewActivePokemon(
         new PlayerGameView(this, this.Player2),
         "activeKnockedOut"
       );
@@ -1063,10 +1063,7 @@ export class Game {
    * Asks a player to choose a new Active Pokémon from among their Benched Pokémon.
    * If they have no Benched Pokémon, this does nothing.
    */
-  async swapActivePokemon(
-    player: Player,
-    reason: "selfEffect" | "opponentEffect"
-  ): Promise<boolean> {
+  async chooseNewActivePokemon(player: Player): Promise<boolean> {
     if (this.shouldPreventEffects(player.activeOrThrow())) return false;
     await this.delay();
     if (player.BenchedPokemon.length == 0) {
@@ -1077,11 +1074,14 @@ export class Game {
     let newActive = player.BenchedPokemon[0]!;
     if (player.BenchedPokemon.length > 1) {
       const agent = this.findAgent(player);
-      const newActiveView = await agent.swapActivePokemon(new PlayerGameView(this, player), reason);
+      const newActiveView = await agent.chooseNewActivePokemon(
+        new PlayerGameView(this, player),
+        "opponentEffect"
+      );
       newActive = this.viewToPokemon(newActiveView, player.BenchedPokemon);
     }
 
-    await player.swapActivePokemon(newActive, reason);
+    await player.swapActivePokemon(newActive, "opponentEffect");
     return true;
   }
 

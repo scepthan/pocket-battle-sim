@@ -634,10 +634,16 @@ export const parseAttackEffect = (attack: Attack): boolean => {
 
     // Switching effects
     {
-      pattern: /^Switch this Pokémon with 1 of your Benched Pokémon\./i,
-      transform: () => {
+      pattern: /^Switch this Pokémon with 1 of your Benched (.+?)\./i,
+      transform: (_, specifier) => {
+        const predicate = parsePokemonPredicate(specifier);
         addSideEffect(async (game) => {
-          await game.swapActivePokemon(game.AttackingPlayer, "selfEffect");
+          const pokemon = await game.choosePokemon(
+            game.AttackingPlayer,
+            game.AttackingPlayer.BenchedPokemon.filter(predicate)
+          );
+          if (!pokemon) return;
+          await game.AttackingPlayer.swapActivePokemon(pokemon, "selfEffect");
         });
       },
     },
@@ -646,7 +652,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
         /^Switch out your opponent’s Active Pokémon to the Bench\. \(Your opponent chooses the new Active Pokémon\.\)/i,
       transform: () => {
         addSideEffect(async (game) => {
-          await game.swapActivePokemon(game.DefendingPlayer, "opponentEffect");
+          await game.chooseNewActivePokemon(game.DefendingPlayer);
         });
       },
     },
