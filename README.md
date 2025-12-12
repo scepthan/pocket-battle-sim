@@ -8,7 +8,7 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 133/157 (84.7%)
+  - [ ] A3: 135/157 (86.0%)
     - [ ] Abilities
       - [ ] New triggers
         - [ ] Before Knocked Out
@@ -27,7 +27,7 @@ Backend todo:
     - [ ] Attacks
       - [ ] New conditionals
         - [ ] Moved to the Active Spot on this turn
-        - [ ] At least 1 heads
+        - [x] At least 1 heads
         - [ ] Opposing mon has more HP than self
         - [x] Opposing mon has Special Condition
         - [ ] Opposing mon has Ability
@@ -52,7 +52,7 @@ Backend todo:
       - [ ] Look at top card and choose to shuffle
       - [ ] Move damage from own mon to opposing mon
       - [ ] Put damaged mon into hand
-      - [ ] Attach Energy to mon and end turn
+      - [x] Attach Energy to mon and end turn
       - [ ] Discard all of opponent's Pokemon Tools
       - [ ] If mon in play, switch in opponent's Benched mon of choice
       - [x] Heal all damage and discard all Energy from mon

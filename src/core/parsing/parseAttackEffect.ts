@@ -234,7 +234,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       },
     },
     {
-      pattern: /^If at least (\d+) of them are heads,/i,
+      pattern: /^If at least (\d+) of them (?:is|are) heads,/i,
       transform: (_, headsNeeded) => {
         conditionalForNextEffect = (game, self, heads) => heads >= Number(headsNeeded);
       },

@@ -405,25 +405,20 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     },
     {
       pattern:
-        /^Move all {(\w)} Energy from your Benched Pokémon to your (.+?) in the Active Spot\.$/,
-      transform: (_, energyType, specifier) => {
-        const fullType = parseEnergy(energyType);
+        /^Choose 1 of your (.+?)\. Take (\d+) \{(\w)\} Energy from your Energy Zone and attach it to that Pokémon\.( Your turn ends\.)$/,
+      transform: (_, specifier, count, energyType, endTurn) => {
         const predicate = parsePokemonPredicate(specifier);
+        const fullType = parseEnergy(energyType);
+        const energyToAttach = new Array(Number(count)).fill(fullType);
 
         return {
-          type: "Conditional",
-          condition: (game) => predicate(game.AttackingPlayer.activeOrThrow()),
-          effect: async (game) => {
-            for (const pokemon of game.AttackingPlayer.BenchedPokemon) {
-              const energyToMove = pokemon.AttachedEnergy.filter((e) => e == fullType);
-              if (energyToMove.length > 0) {
-                await game.AttackingPlayer.transferEnergy(
-                  pokemon,
-                  game.AttackingPlayer.activeOrThrow(),
-                  energyToMove
-                );
-              }
-            }
+          type: "Targeted",
+          validTargets: (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
+          condition: (game) => game.AttackingPlayer.DiscardedEnergy.some((e) => e == fullType),
+          effect: async (game, pokemon) => {
+            if (!pokemon.isPokemon) return;
+            await game.AttackingPlayer.attachEnergy(pokemon, energyToAttach, "energyZone");
+            if (endTurn) game.endTurnResolve(true);
           },
         };
       },
@@ -448,6 +443,31 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
               removeElement(game.AttackingPlayer.DiscardedEnergy, fullType);
             }
             await game.AttackingPlayer.attachEnergy(pokemon, energyToAttach, "discard");
+          },
+        };
+      },
+    },
+    {
+      pattern:
+        /^Move all {(\w)} Energy from your Benched Pokémon to your (.+?) in the Active Spot\.$/,
+      transform: (_, energyType, specifier) => {
+        const fullType = parseEnergy(energyType);
+        const predicate = parsePokemonPredicate(specifier);
+
+        return {
+          type: "Conditional",
+          condition: (game) => predicate(game.AttackingPlayer.activeOrThrow()),
+          effect: async (game) => {
+            for (const pokemon of game.AttackingPlayer.BenchedPokemon) {
+              const energyToMove = pokemon.AttachedEnergy.filter((e) => e == fullType);
+              if (energyToMove.length > 0) {
+                await game.AttackingPlayer.transferEnergy(
+                  pokemon,
+                  game.AttackingPlayer.activeOrThrow(),
+                  energyToMove
+                );
+              }
+            }
           },
         };
       },

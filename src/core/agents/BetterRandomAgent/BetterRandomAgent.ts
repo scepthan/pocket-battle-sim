@@ -29,6 +29,7 @@ export class BetterRandomAgent extends PlayerAgent {
 
     // Play Professor's Research if available
     const professor = game.selfHand.find((x) => x.Name == "Professor’s Research");
+    let endTurnSupporter: SupporterCard | null = null;
     if (professor) {
       await game.playSupporterCard(professor as SupporterCard);
     } else if (Math.random() > 0.5) {
@@ -38,11 +39,15 @@ export class BetterRandomAgent extends PlayerAgent {
       ) as SupporterCard[];
       if (supporterCards.length > 0) {
         const card = rand(supporterCards);
-        let target: CardSlotView | undefined;
-        if (card.Effect.type === "Targeted") {
-          target = rand(game.validTargets(card));
+        if (card.Text.includes("Your turn ends")) {
+          endTurnSupporter = card;
+        } else {
+          let target: CardSlotView | undefined;
+          if (card.Effect.type === "Targeted") {
+            target = rand(game.validTargets(card));
+          }
+          await game.playSupporterCard(card, target);
         }
-        await game.playSupporterCard(card, target);
       }
     }
 
@@ -206,6 +211,12 @@ export class BetterRandomAgent extends PlayerAgent {
       await game.useAttack(chosenAttack);
     } else if (endTurnAbilityPokemon) {
       await game.useAbility(endTurnAbilityPokemon, endTurnAbilityPokemon.Ability!);
+    } else if (endTurnSupporter) {
+      let target: CardSlotView | undefined;
+      if (endTurnSupporter.Effect.type === "Targeted") {
+        target = rand(game.validTargets(endTurnSupporter));
+      }
+      await game.playSupporterCard(endTurnSupporter, target);
     }
     return;
   }
