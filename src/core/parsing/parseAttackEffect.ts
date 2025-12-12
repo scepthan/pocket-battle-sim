@@ -352,6 +352,21 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       },
     },
     {
+      pattern:
+        /^This attack does (\d+) damage to 1 of your opponent’s (.+?) for each Energy attached to that Pokémon\./i,
+      transform: (_, damagePerEnergy, specifier) => {
+        const predicate = parsePokemonPredicate(specifier);
+
+        attack.choosePokemonToAttack = (game) =>
+          game.DefendingPlayer.InPlayPokemon.filter(predicate);
+        attack.attackingEffects.push(async (game, self, heads, target) => {
+          if (!target) return;
+          const energyCount = target.EffectiveEnergy.length;
+          game.attackPokemon(target, energyCount * Number(damagePerEnergy));
+        });
+      },
+    },
+    {
       pattern: /^This attack(?: also)? does (\d+) damage to 1 of your opponent’s (.+?)\./i,
       transform: (_, damage, specifier) => {
         const predicate = parsePokemonPredicate(specifier);
