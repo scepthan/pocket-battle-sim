@@ -281,6 +281,11 @@ export class PlayerGameView {
       return false;
     return true;
   }
+  canAttachFromEnergyZone(pokemon: PlayerPokemonView, ignoreCanPlay: boolean = false) {
+    if (!this.canPlay && !ignoreCanPlay) return false;
+
+    return this.player.canAttachFromEnergyZone(this.pokemonFromView(pokemon));
+  }
   validTargets(card: ItemCard | FossilCard | SupporterCard | PokemonToolCard): CardSlotView[] {
     if (card.CardType === "PokemonTool") {
       return this.selfInPlayPokemon.filter((p) => p.AttachedToolCards.length < p.MaxToolCards);
@@ -315,6 +320,8 @@ export class PlayerGameView {
 
     if (this.selfAvailableEnergy) {
       const realPokemon = this.pokemonFromView(pokemon);
+      if (!this.player.canAttachFromEnergyZone(realPokemon)) return false;
+
       await this.game.attachAvailableEnergy(realPokemon);
 
       await this.game.delay();

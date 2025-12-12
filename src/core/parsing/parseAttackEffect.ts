@@ -943,6 +943,22 @@ export const parseAttackEffect = (attack: Attack): boolean => {
         });
       },
     },
+    {
+      pattern:
+        /^During your opponent’s next turn, they can’t take any Energy from their Energy Zone to attach to their Active Pokémon\./i,
+      transform: () => {
+        addSideEffect(async (game) => {
+          game.DefendingPlayer.applyPlayerStatus({
+            type: "CannotAttachFromEnergyZone",
+            source: "Effect",
+            category: "Pokemon",
+            keepNextTurn: true,
+            appliesToPokemon: (pokemon) => pokemon === pokemon.player.ActivePokemon,
+            descriptor: "Active Pokémon",
+          });
+        });
+      },
+    },
 
     // Other side effects
     {

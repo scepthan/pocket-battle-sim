@@ -208,7 +208,9 @@ const setupAgent = () => {
       } else if (action === "attachTurnEnergy") {
         stage.value = "selectPokemon";
         pokemonSelector.text.value = "Select a Pokémon to attach energy to:";
-        pokemonSelector.options.value = gameView.selfInPlayPokemon;
+        pokemonSelector.options.value = gameView.selfInPlayPokemon.filter((p) =>
+          gameView.canAttachFromEnergyZone(p, true)
+        );
         pokemonSelector.addCancelButton.value = true;
 
         const selectedPokemon = await pokemonSelector.selectionPromise();

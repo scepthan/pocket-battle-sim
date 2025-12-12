@@ -332,6 +332,19 @@ export class Player {
     await pokemon.onEnterPlay();
   }
 
+  canAttachFromEnergyZone(pokemon: InPlayPokemon) {
+    if (
+      this.PlayerStatuses.some(
+        (status) =>
+          status.type === "CannotAttachFromEnergyZone" &&
+          status.appliesToPokemon(pokemon, this.game)
+      )
+    )
+      return false;
+
+    return true;
+  }
+
   async attachAvailableEnergy(pokemon: InPlayPokemon) {
     if (!this.AvailableEnergy) {
       throw new Error("No energy available to attach");
@@ -346,6 +359,11 @@ export class Player {
     from: AttachEnergySource,
     fromPokemon?: InPlayPokemon
   ) {
+    if ((from === "turn" || from === "energyZone") && !this.canAttachFromEnergyZone(pokemon)) {
+      // Log prevention?
+      return;
+    }
+
     pokemon.attachEnergy(energy);
     this.logger.attachEnergy(this, pokemon, energy, from, fromPokemon);
     if (from === "turn" || from === "energyZone") await pokemon.onEnergyZoneAttach(energy);

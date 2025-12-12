@@ -26,6 +26,9 @@ interface NoRetreatCostPlayerStatus extends BasePokemonPlayerStatus {
 interface CannotEvolvePlayerStatus extends BasePokemonPlayerStatus {
   type: "CannotEvolve";
 }
+interface CannotAttachFromEnergyZoneStatus extends BasePokemonPlayerStatus {
+  type: "CannotAttachFromEnergyZone";
+}
 interface DoubleEnergyPlayerStatus extends BasePokemonPlayerStatus {
   type: "DoubleEnergy";
   energyType: Energy;
@@ -43,5 +46,6 @@ export type PokemonPlayerStatus =
   | DecreaseRetreatCostPlayerStatus
   | NoRetreatCostPlayerStatus
   | CannotEvolvePlayerStatus
+  | CannotAttachFromEnergyZoneStatus
   | DoubleEnergyPlayerStatus
   | ReduceAttackCostPlayerStatus;

@@ -32,17 +32,25 @@
       next turn</span
     >!
   </p>
-  <p v-else-if="entry.status.type == 'DoubleEnergy'">
-    All of <b>{{ entry.player }}</b
-    >'s <PokemonDescriptor :text="entry.status.descriptor" /> now have their
-    <EnergyIcon inline :energy="entry.status.energyType" /> count as double!
-  </p>
   <p v-else-if="entry.status.type == 'CannotUseItem'">
     <b>{{ entry.player }}</b> cannot use Item cards from their hand<span
       v-if="entry.status.source == 'Effect'"
     >
       next turn</span
     >!
+  </p>
+  <p v-else-if="entry.status.type == 'CannotAttachFromEnergyZone'">
+    <b>{{ entry.player }}</b> cannot attach Energy from their Energy Zone to their
+    <PokemonDescriptor :text="entry.status.descriptor" /><span
+      v-if="entry.status.source == 'Effect'"
+    >
+      next turn</span
+    >!
+  </p>
+  <p v-else-if="entry.status.type == 'DoubleEnergy'">
+    All of <b>{{ entry.player }}</b
+    >'s <PokemonDescriptor :text="entry.status.descriptor" /> now have their
+    <EnergyIcon inline :energy="entry.status.energyType" /> count as double!
   </p>
   <p v-else-if="entry.status.type == 'ReduceAttackCost'">
     All of <b>{{ entry.player }}</b

@@ -8,7 +8,7 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 138/157 (87.9%)
+  - [ ] A3: 139/157 (88.5%)
     - [ ] Abilities
       - [ ] New triggers
         - [ ] Before Knocked Out
@@ -38,7 +38,7 @@ Backend todo:
         - [ ] Apply Counterattack status to self
         - [x] Apply CannotUseItem status to opponent
         - [x] Switch with Benched mon of type
-        - [ ] Apply CannotAttachEnergy status to opponent (active)
+        - [x] Apply CannotAttachEnergy status to opponent (active)
         - [ ] Also do damage to any of own mon
         - [x] Do damage to any opposing mon for each Energy attached to it
         - [ ] Discard random filtered card from opponent's hand
@@ -59,7 +59,7 @@ Backend todo:
     - [ ] Pokemon Tools
       - [x] Poison attacker when damaged
     - [ ] New Player Statuses
-      - [ ] CannotAttachEnergy (PokemonPlayerStatus)
+      - [x] CannotAttachEnergy (PokemonPlayerStatus)
       - [ ] HealSpecialConditions (PokemonPlayerStatus)
     - [ ] New Pokemon Statuses
       - [ ] IncreaseAttackDamage (DefensePokemonStatus)

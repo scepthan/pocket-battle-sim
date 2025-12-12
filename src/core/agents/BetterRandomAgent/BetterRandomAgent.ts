@@ -150,6 +150,7 @@ export class BetterRandomAgent extends PlayerAgent {
 
     // Play energy
     if (
+      game.canAttachFromEnergyZone(active) &&
       active.Attacks.some((a) =>
         this.findRemainingEnergy(active, a.requiredEnergy).some(
           (e) => e == game.selfAvailableEnergy || e == "Colorless"
