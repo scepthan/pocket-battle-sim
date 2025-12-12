@@ -528,6 +528,27 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
       }),
     },
     {
+      pattern:
+        /^You can use this card only if you have (.+?) in play\. Switch in 1 of your opponent’s Benched Pokémon to the Active Spot\.$/i,
+      transform: (_, specifier) => {
+        const predicate = parsePokemonPredicate(specifier);
+
+        return {
+          type: "Targeted",
+          condition: (game) => game.AttackingPlayer.InPlayPokemon.some(predicate),
+          validTargets: (game) => game.DefendingPlayer.BenchedPokemon,
+          effect: async (game, target) => {
+            if (!target.isPokemon) return;
+            await game.DefendingPlayer.swapActivePokemon(
+              target,
+              "opponentEffect",
+              game.AttackingPlayer.Name
+            );
+          },
+        };
+      },
+    },
+    {
       pattern: /^Put your (.+?) in the Active Spot into your hand\.$/,
       transform: (_, specifier) => {
         const predicate = parsePokemonPredicate(specifier);
