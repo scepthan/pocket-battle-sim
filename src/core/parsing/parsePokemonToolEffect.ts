@@ -25,7 +25,7 @@ export const parsePokemonToolEffect = (cardText: string): ParsedResult<PokemonTo
   const dictionary: EffectTransformer[] = [
     {
       pattern:
-        /^If the(?: {(\w)})? Pokémon this card is attached to is in the Active Spot and is damaged by an attack from your opponent’s Pokémon, /i,
+        /^If the(?: {(\w)})? Pokémon this card is attached to is (?:in the Active Spot|your Active Pokémon) and is damaged by an attack from your opponent’s Pokémon, /i,
       transform: (_, energyType) => {
         effect.trigger = "OnAttackDamage";
         effect.conditions.push((pokemon) => pokemon === pokemon.player.ActivePokemon);
@@ -50,6 +50,15 @@ export const parsePokemonToolEffect = (cardText: string): ParsedResult<PokemonTo
         };
       },
     },
+    {
+      pattern: /^the Attacking Pokémon is now Poisoned\./i,
+      transform: () => {
+        effect.effect = async (game) => {
+          if (game.AttackingPokemon) game.AttackingPokemon.player.poisonActivePokemon();
+        };
+      },
+    },
+
     {
       pattern: /^The(?: {(\w)})? Pokémon this card is attached to gets \+(\d+) HP\./i,
       transform: (_, energyType, hp) => {
