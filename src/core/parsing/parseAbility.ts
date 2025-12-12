@@ -201,14 +201,16 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
 
     // Healing effects
     {
-      pattern: /heal (\d+) damage from each of your Pokémon\.$/i,
-      transform: (_, healing) => {
-        ability.conditions.push((self) => self.player.InPlayPokemon.some((p) => p.isDamaged()));
+      pattern: /heal (\d+) damage from each of your (.+?)\.$/i,
+      transform: (_, healing, specifier) => {
+        const predicate = parsePokemonPredicate(specifier, (p) => p.isDamaged());
+
+        ability.conditions.push((self) => self.player.InPlayPokemon.some(predicate));
         ability.effect = {
           type: "Standard",
           effect: async (game, self) => {
             for (const pokemon of self.player.InPlayPokemon) {
-              if (pokemon.isDamaged()) {
+              if (predicate(pokemon)) {
                 game.healPokemon(pokemon, Number(healing));
               }
             }
