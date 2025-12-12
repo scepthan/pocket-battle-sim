@@ -1,7 +1,7 @@
 import { removeElement } from "../util";
 import type { EmptyCardSlot } from "./EmptyCardSlot";
 import type { Game } from "./Game";
-import { InPlayPokemonCard } from "./InPlayPokemonCard";
+import { InPlayPokemon } from "./InPlayPokemon";
 import type { Player } from "./Player";
 import { PlayerPokemonView } from "./PlayerPokemonView";
 import type {
@@ -39,7 +39,7 @@ export class PlayerGameView {
     this.opponent = player.opponent;
   }
 
-  private pokemonFromView(view: PlayerPokemonView): InPlayPokemonCard {
+  private pokemonFromView(view: PlayerPokemonView): InPlayPokemon {
     for (const pokemon of [...this.player.InPlayPokemon, ...this.opponent.InPlayPokemon])
       if (view.is(pokemon)) return pokemon;
     throw new Error("Could not find Pokemon: " + view.Name);

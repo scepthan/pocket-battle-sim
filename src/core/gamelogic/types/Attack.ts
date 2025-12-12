@@ -1,20 +1,20 @@
 import type { Game } from "../Game";
-import type { InPlayPokemonCard } from "../InPlayPokemonCard";
+import type { InPlayPokemon } from "../InPlayPokemon";
 import type { Energy } from "./Energy";
 
 export type CoinFlipIndicator =
   | number
   | "UntilTails"
-  | ((game: Game, self: InPlayPokemonCard) => number);
+  | ((game: Game, self: InPlayPokemon) => number);
 
 export type SideEffect = (
   game: Game,
-  self: InPlayPokemonCard,
+  self: InPlayPokemon,
   heads: number,
-  target?: InPlayPokemonCard
+  target?: InPlayPokemon
 ) => Promise<void>;
 
-type DamageCalculation = (game: Game, self: InPlayPokemonCard, heads: number) => number;
+type DamageCalculation = (game: Game, self: InPlayPokemon, heads: number) => number;
 
 interface BaseAttack {
   // Properties inherited from InputAttack
@@ -46,7 +46,7 @@ interface BaseAttack {
    * A method that determines which Pokémon the player can choose to do damage to whenever this
    * applies, such as "This attack also does 20 damage to one of your opponent's Benched Pokémon."
    */
-  choosePokemonToAttack?: (game: Game, self: InPlayPokemonCard) => InPlayPokemonCard[];
+  choosePokemonToAttack?: (game: Game, self: InPlayPokemon) => InPlayPokemon[];
 
   /**
    * Effects to apply when attacking before any damage is done.
@@ -67,7 +67,7 @@ interface BaseAttack {
    * Extraneous conditions that must be met for the attack to be used (other than the default
    * Energy and status condition requirements).
    */
-  extraConditions: ((game: Game, self: InPlayPokemonCard) => boolean)[];
+  extraConditions: ((game: Game, self: InPlayPokemon) => boolean)[];
 }
 
 // Flip a coin. If tails, this attack does nothing.

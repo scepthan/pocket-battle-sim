@@ -1,16 +1,16 @@
-import type { InPlayPokemonCard } from "./InPlayPokemonCard";
+import type { InPlayPokemon } from "./InPlayPokemon";
 import type { Energy } from "./types";
 
 export class PlayerPokemonView {
-  private self: InPlayPokemonCard;
+  private self: InPlayPokemon;
 
   isPokemon = true as const;
 
-  constructor(pokemon: InPlayPokemonCard) {
+  constructor(pokemon: InPlayPokemon) {
     this.self = pokemon;
   }
 
-  is(pokemon: InPlayPokemonCard) {
+  is(pokemon: InPlayPokemon) {
     return pokemon === this.self;
   }
 

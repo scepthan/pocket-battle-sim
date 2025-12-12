@@ -1,15 +1,15 @@
-import type { Energy, Game, InPlayPokemonCard } from "@/core";
+import type { Energy, Game, InPlayPokemon } from "@/core";
 import type { BasePlayerStatus } from "./PlayerStatus";
 
 interface BasePokemonPlayerStatus extends BasePlayerStatus {
   category: "Pokemon";
-  appliesToPokemon: (pokemon: InPlayPokemonCard, game: Game) => boolean;
+  appliesToPokemon: (pokemon: InPlayPokemon, game: Game) => boolean;
   descriptor?: string;
 }
 
 interface IncreaseAttackPlayerStatus extends BasePokemonPlayerStatus {
   type: "IncreaseAttack";
-  appliesToDefender?: (pokemon: InPlayPokemonCard, game: Game) => boolean;
+  appliesToDefender?: (pokemon: InPlayPokemon, game: Game) => boolean;
   amount: number;
 }
 interface IncreaseDefensePlayerStatus extends BasePokemonPlayerStatus {

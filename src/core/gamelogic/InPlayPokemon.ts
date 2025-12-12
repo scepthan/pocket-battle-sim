@@ -16,7 +16,7 @@ import {
   type SecondaryCondition,
 } from "./types";
 
-export class InPlayPokemonCard {
+export class InPlayPokemon {
   BaseCard: PokemonCard;
   player: Player;
   game: Game;

@@ -2,7 +2,7 @@ import { GameLogger } from "../logging";
 import { useDeckValidator } from "../parsing";
 import { isSubset, removeElement } from "../util";
 
-import type { InPlayPokemonCard } from "./InPlayPokemonCard";
+import type { InPlayPokemon } from "./InPlayPokemon";
 import { Player } from "./Player";
 import { PlayerGameView } from "./PlayerGameView";
 import { PlayerPokemonView } from "./PlayerPokemonView";
@@ -39,10 +39,10 @@ export class Game {
   CanPlaySupporter: boolean = true;
   ActiveTrainerCard?: TrainerCard;
   CurrentAttack: Attack | undefined;
-  AttackingPokemon?: InPlayPokemonCard;
-  UsedAbilities: Set<InPlayPokemonCard> = new Set();
-  AttackDamagedPokemon: Set<InPlayPokemonCard> = new Set();
-  AttackKnockedOutPokemon: Set<InPlayPokemonCard> = new Set();
+  AttackingPokemon?: InPlayPokemon;
+  UsedAbilities: Set<InPlayPokemon> = new Set();
+  AttackDamagedPokemon: Set<InPlayPokemon> = new Set();
+  AttackKnockedOutPokemon: Set<InPlayPokemon> = new Set();
 
   get InPlayPokemon() {
     return [...this.AttackingPlayer.InPlayPokemon, ...this.DefendingPlayer.InPlayPokemon];
@@ -118,10 +118,7 @@ export class Game {
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
-  private viewToPokemon(
-    view: PlayerPokemonView,
-    validPokemon: InPlayPokemonCard[]
-  ): InPlayPokemonCard {
+  private viewToPokemon(view: PlayerPokemonView, validPokemon: InPlayPokemon[]): InPlayPokemon {
     const pokemon = validPokemon.find((p) => view.is(p));
     if (!pokemon) throw new Error("Invalid Pokémon selected");
     return pokemon;
@@ -547,7 +544,7 @@ export class Game {
    * Handles knocking out of a Pokémon that has had its HP reduced to 0.
    * @param fromAttack whether the knockout is considered by the game to be "from an attack".
    */
-  private async handleKnockOut(pokemon: InPlayPokemonCard, fromAttack: boolean): Promise<void> {
+  private async handleKnockOut(pokemon: InPlayPokemon, fromAttack: boolean): Promise<void> {
     await pokemon.player.handleKnockOut(pokemon, fromAttack);
 
     pokemon.player.opponent.GamePoints += pokemon.PrizePoints;
@@ -569,7 +566,7 @@ export class Game {
     return this.AttackingPlayer.flipMultiCoins(actualCount).heads;
   }
 
-  private shouldPreventDamage(pokemon: InPlayPokemonCard): boolean {
+  private shouldPreventDamage(pokemon: InPlayPokemon): boolean {
     if (!this.CurrentAttack) return false;
     const result = pokemon.PokemonStatuses.some(
       (status) =>
@@ -582,7 +579,7 @@ export class Game {
     return result;
   }
 
-  private shouldPreventEffects(pokemon: InPlayPokemonCard): boolean {
+  private shouldPreventEffects(pokemon: InPlayPokemon): boolean {
     if (!this.CurrentAttack) return false;
     if (!this.DefendingPlayer.InPlayPokemon.includes(pokemon)) return false;
     const result = pokemon.PokemonStatuses.some(
@@ -618,7 +615,7 @@ export class Game {
       }
     }
 
-    let chosenPokemon: InPlayPokemonCard | undefined;
+    let chosenPokemon: InPlayPokemon | undefined;
     if (attack.choosePokemonToAttack) {
       const validPokemon = attack.choosePokemonToAttack(this, attacker);
       chosenPokemon = await this.choosePokemon(this.AttackingPlayer, validPokemon);
@@ -728,7 +725,7 @@ export class Game {
   /**
    * Manually triggers a Pokémon's Ability.
    */
-  async useAbility(pokemon: InPlayPokemonCard, ability: Ability): Promise<void> {
+  async useAbility(pokemon: InPlayPokemon, ability: Ability): Promise<void> {
     if (pokemon.Ability !== ability) {
       throw new Error("Pokemon does not have this ability");
     }
@@ -754,7 +751,7 @@ export class Game {
   /**
    * Attaches the player's current Energy from their Energy Zone to one of their Pokémon.
    */
-  async attachAvailableEnergy(pokemon: InPlayPokemonCard): Promise<void> {
+  async attachAvailableEnergy(pokemon: InPlayPokemon): Promise<void> {
     await this.AttackingPlayer.attachAvailableEnergy(pokemon);
     await this.afterAction();
   }
@@ -770,7 +767,7 @@ export class Game {
   /**
    * Plays an Evolution Pokémon from the player's hand to evolve one of their Pokémon.
    */
-  async evolvePokemon(inPlayPokemon: InPlayPokemonCard, pokemon: PokemonCard): Promise<void> {
+  async evolvePokemon(inPlayPokemon: InPlayPokemon, pokemon: PokemonCard): Promise<void> {
     await this.AttackingPlayer.evolvePokemon(inPlayPokemon, pokemon);
     await this.afterAction();
   }
@@ -778,7 +775,7 @@ export class Game {
   /**
    * Retreats the player's Active Pokémon using the given Energy to pay the Retreat Cost.
    */
-  async retreatActivePokemon(benchedPokemon: InPlayPokemonCard, energy: Energy[]): Promise<void> {
+  async retreatActivePokemon(benchedPokemon: InPlayPokemon, energy: Energy[]): Promise<void> {
     await this.AttackingPlayer.retreatActivePokemon(benchedPokemon, energy);
     this.CanRetreat = false;
     await this.afterAction();
@@ -845,7 +842,7 @@ export class Game {
   /**
    * Hits a Pokémon for a base amount of damage, after applying weakness and status effects.
    */
-  attackPokemon(defender: InPlayPokemonCard, HP: number): void {
+  attackPokemon(defender: InPlayPokemon, HP: number): void {
     if (this.shouldPreventDamage(defender)) return;
 
     const attacker = this.AttackingPlayer.activeOrThrow();
@@ -909,7 +906,7 @@ export class Game {
    * Applies a set amount of damage directly to a Pokémon, ignoring weakness or status effects.
    * @param fromAttack whether the damage is considered by the game to be "from an attack".
    */
-  applyDamage(target: InPlayPokemonCard, HP: number, fromAttack: boolean): void {
+  applyDamage(target: InPlayPokemon, HP: number, fromAttack: boolean): void {
     const initialHP = target.CurrentHP;
 
     target.applyDamage(HP);
@@ -919,7 +916,7 @@ export class Game {
   /**
    * Directly knocks out a Pokémon from any amount of remaining HP.
    */
-  async knockOutPokemon(pokemon: InPlayPokemonCard): Promise<void> {
+  async knockOutPokemon(pokemon: InPlayPokemon): Promise<void> {
     if (this.shouldPreventEffects(pokemon)) return;
 
     await this.handleKnockOut(pokemon, false);
@@ -928,21 +925,21 @@ export class Game {
   /**
    * Discards (up to) a given amount of a given type of Energy from a Pokémon.
    */
-  async discardEnergy(pokemon: InPlayPokemonCard, type: Energy, count: number): Promise<void> {
+  async discardEnergy(pokemon: InPlayPokemon, type: Energy, count: number): Promise<void> {
     if (this.shouldPreventEffects(pokemon)) return;
     await pokemon.player.discardEnergyFromPokemon(pokemon, type, count);
   }
   /**
    * Discards all Energy from a Pokémon.
    */
-  async discardAllEnergy(pokemon: InPlayPokemonCard): Promise<void> {
+  async discardAllEnergy(pokemon: InPlayPokemon): Promise<void> {
     if (this.shouldPreventEffects(pokemon)) return;
     await pokemon.player.discardAllEnergyFromPokemon(pokemon);
   }
   /**
    * Discards 1 or more random Energy from a Pokémon.
    */
-  async discardRandomEnergy(pokemon: InPlayPokemonCard, count: number = 1): Promise<void> {
+  async discardRandomEnergy(pokemon: InPlayPokemon, count: number = 1): Promise<void> {
     if (this.shouldPreventEffects(pokemon)) return;
     await pokemon.player.discardRandomEnergyFromPokemon(pokemon, count);
   }
@@ -951,7 +948,7 @@ export class Game {
    * Discards a given tool or tools from a Pokémon. Discards all by default.
    */
   async discardPokemonTools(
-    pokemon: InPlayPokemonCard,
+    pokemon: InPlayPokemon,
     tools: PokemonToolCard[] = pokemon.AttachedToolCards.slice()
   ): Promise<void> {
     if (this.shouldPreventEffects(pokemon)) return;
@@ -967,7 +964,7 @@ export class Game {
   /**
    * Applies a given PokemonStatus to a Pokémon.
    */
-  applyPokemonStatus(pokemon: InPlayPokemonCard, status: PokemonStatus) {
+  applyPokemonStatus(pokemon: InPlayPokemon, status: PokemonStatus) {
     if (this.shouldPreventEffects(pokemon)) return;
     pokemon.applyPokemonStatus(status);
   }
@@ -1032,7 +1029,7 @@ export class Game {
         text: "Discard this Pokémon from play.",
         effect: {
           type: "Standard",
-          effect: async (game: Game, self: InPlayPokemonCard) => {
+          effect: async (game: Game, self: InPlayPokemon) => {
             await game.AttackingPlayer.discardPokemonFromPlay(self);
           },
         },
@@ -1080,8 +1077,8 @@ export class Game {
    */
   async choosePokemon(
     player: Player,
-    validPokemon: InPlayPokemonCard[]
-  ): Promise<InPlayPokemonCard | undefined> {
+    validPokemon: InPlayPokemon[]
+  ): Promise<InPlayPokemon | undefined> {
     if (validPokemon.length == 0) {
       this.GameLog.noValidTargets(player);
       return;
@@ -1128,9 +1125,9 @@ export class Game {
    */
   async chooseNPokemon(
     player: Player,
-    options: InPlayPokemonCard[],
+    options: InPlayPokemon[],
     n: number
-  ): Promise<InPlayPokemonCard[]> {
+  ): Promise<InPlayPokemon[]> {
     if (options.length == 0) {
       this.GameLog.noValidTargets(player);
       return [];
@@ -1227,7 +1224,7 @@ export class Game {
   /**
    * Asks a player to distribute a set of Energy among a set of Pokémon.
    */
-  async distributeEnergy(player: Player, energy: Energy[], validPokemon: InPlayPokemonCard[]) {
+  async distributeEnergy(player: Player, energy: Energy[], validPokemon: InPlayPokemon[]) {
     const agent = this.findAgent(player);
     const distribution = await agent.distributeEnergy(
       validPokemon.map((p) => new PlayerPokemonView(p)),

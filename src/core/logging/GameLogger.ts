@@ -1,6 +1,6 @@
 import type {
   Energy,
-  InPlayPokemonCard,
+  InPlayPokemon,
   Player,
   PlayerStatus,
   PlayingCard,
@@ -98,8 +98,8 @@ export class GameLogger {
 
   swapActivePokemon(
     player: Player,
-    fromPokemon: InPlayPokemonCard,
-    toPokemon: InPlayPokemonCard,
+    fromPokemon: InPlayPokemon,
+    toPokemon: InPlayPokemon,
     reason: SwapActivePokemonReason,
     choosingPlayer?: string
   ) {
@@ -113,7 +113,7 @@ export class GameLogger {
     });
   }
 
-  evolvePokemon(player: Player, pokemon: InPlayPokemonCard, card: PokemonCard) {
+  evolvePokemon(player: Player, pokemon: InPlayPokemon, card: PokemonCard) {
     this.addEntry({
       type: "evolvePokemon",
       player: player.Name,
@@ -198,7 +198,7 @@ export class GameLogger {
     });
   }
 
-  returnInPlayPokemonToHand(player: Player, pokemon: InPlayPokemonCard) {
+  returnInPlayPokemonToHand(player: Player, pokemon: InPlayPokemon) {
     this.addEntry({
       type: "returnToHand",
       player: player.Name,
@@ -207,7 +207,7 @@ export class GameLogger {
     });
   }
 
-  returnInPlayPokemonToDeck(player: Player, pokemon: InPlayPokemonCard) {
+  returnInPlayPokemonToDeck(player: Player, pokemon: InPlayPokemon) {
     this.addEntry({
       type: "returnToDeck",
       player: player.Name,
@@ -235,10 +235,10 @@ export class GameLogger {
 
   attachEnergy(
     player: Player,
-    targetPokemon: InPlayPokemonCard,
+    targetPokemon: InPlayPokemon,
     energyTypes: Energy[],
     from: AttachEnergySource,
-    fromPokemon?: InPlayPokemonCard
+    fromPokemon?: InPlayPokemon
   ) {
     this.addEntry({
       type: "attachEnergy",
@@ -254,7 +254,7 @@ export class GameLogger {
     player: Player,
     energyTypes: Energy[],
     source: DiscardEnergySource,
-    targetPokemon?: InPlayPokemonCard
+    targetPokemon?: InPlayPokemon
   ) {
     this.addEntry({
       type: "discardEnergy",
@@ -275,7 +275,7 @@ export class GameLogger {
     });
   }
 
-  specialConditionEffective(pokemon: InPlayPokemonCard) {
+  specialConditionEffective(pokemon: InPlayPokemon) {
     this.addEntry({
       type: "specialConditionEffective",
       player: pokemon.player.Name,
@@ -285,7 +285,7 @@ export class GameLogger {
   }
 
   specialConditionDamage(
-    pokemon: InPlayPokemonCard,
+    pokemon: InPlayPokemon,
     condition: SecondaryCondition,
     initialHP: number,
     damage: number
@@ -302,7 +302,7 @@ export class GameLogger {
     });
   }
 
-  specialConditionEnded(pokemon: InPlayPokemonCard, conditions: SpecialCondition[]) {
+  specialConditionEnded(pokemon: InPlayPokemon, conditions: SpecialCondition[]) {
     this.addEntry({
       type: "specialConditionEnded",
       player: pokemon.player.Name,
@@ -346,7 +346,7 @@ export class GameLogger {
     });
   }
 
-  useAbility(player: Player, pokemon: InPlayPokemonCard, ability: string) {
+  useAbility(player: Player, pokemon: InPlayPokemon, ability: string) {
     this.addEntry({
       type: "useAbility",
       player: player.Name,
@@ -355,7 +355,7 @@ export class GameLogger {
     });
   }
 
-  triggerAbility(player: Player, pokemon: InPlayPokemonCard, ability: string) {
+  triggerAbility(player: Player, pokemon: InPlayPokemon, ability: string) {
     this.addEntry({
       type: "triggerAbility",
       player: player.Name,
@@ -373,7 +373,7 @@ export class GameLogger {
     });
   }
 
-  attachPokemonTool(player: Player, card: PlayingCard, targetPokemon: InPlayPokemonCard) {
+  attachPokemonTool(player: Player, card: PlayingCard, targetPokemon: InPlayPokemon) {
     this.addEntry({
       type: "attachPokemonTool",
       player: player.Name,
@@ -382,7 +382,7 @@ export class GameLogger {
     });
   }
 
-  triggerPokemonTool(player: Player, tool: PlayingCard, pokemon: InPlayPokemonCard) {
+  triggerPokemonTool(player: Player, tool: PlayingCard, pokemon: InPlayPokemon) {
     this.addEntry({
       type: "triggerPokemonTool",
       player: player.Name,
@@ -391,7 +391,7 @@ export class GameLogger {
     });
   }
 
-  removePokemonTool(player: Player, card: PlayingCard, targetPokemon: InPlayPokemonCard) {
+  removePokemonTool(player: Player, card: PlayingCard, targetPokemon: InPlayPokemon) {
     this.addEntry({
       type: "removePokemonTool",
       player: player.Name,
@@ -411,7 +411,7 @@ export class GameLogger {
 
   attackDamage(
     player: Player,
-    pokemon: InPlayPokemonCard,
+    pokemon: InPlayPokemon,
     initialHP: number,
     damageDealt: number,
     weaknessBoost?: boolean
@@ -421,7 +421,7 @@ export class GameLogger {
 
   pokemonDamaged(
     player: Player,
-    pokemon: InPlayPokemonCard,
+    pokemon: InPlayPokemon,
     initialHP: number,
     damageDealt: number,
     fromAttack: boolean,
@@ -440,7 +440,7 @@ export class GameLogger {
     });
   }
 
-  pokemonHealed(player: Player, pokemon: InPlayPokemonCard, initialHP: number, HP: number) {
+  pokemonHealed(player: Player, pokemon: InPlayPokemon, initialHP: number, HP: number) {
     this.addEntry({
       type: "pokemonHealed",
       player: player.Name,
@@ -452,7 +452,7 @@ export class GameLogger {
     });
   }
 
-  pokemonKnockedOut(player: Player, pokemon: InPlayPokemonCard, fromAttack: boolean) {
+  pokemonKnockedOut(player: Player, pokemon: InPlayPokemon, fromAttack: boolean) {
     this.addEntry({
       type: "pokemonKnockedOut",
       player: player.Name,
@@ -461,7 +461,7 @@ export class GameLogger {
     });
   }
 
-  applyPokemonStatus(player: Player, pokemon: InPlayPokemonCard, status: PokemonStatus) {
+  applyPokemonStatus(player: Player, pokemon: InPlayPokemon, status: PokemonStatus) {
     this.addEntry({
       type: "applyPokemonStatus",
       player: player.Name,
@@ -503,7 +503,7 @@ export class GameLogger {
     });
   }
 
-  damagePrevented(player: Player, pokemon: InPlayPokemonCard) {
+  damagePrevented(player: Player, pokemon: InPlayPokemon) {
     this.addEntry({
       type: "damagePrevented",
       damageType: "Damage",
@@ -512,7 +512,7 @@ export class GameLogger {
     });
   }
 
-  effectPrevented(player: Player, pokemon: InPlayPokemonCard) {
+  effectPrevented(player: Player, pokemon: InPlayPokemon) {
     this.addEntry({
       type: "damagePrevented",
       damageType: "Effect",
@@ -521,7 +521,7 @@ export class GameLogger {
     });
   }
 
-  specialConditionPrevented(player: Player, pokemon: InPlayPokemonCard) {
+  specialConditionPrevented(player: Player, pokemon: InPlayPokemon) {
     this.addEntry({
       type: "damagePrevented",
       damageType: "SpecialCondition",

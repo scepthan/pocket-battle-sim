@@ -1,6 +1,6 @@
 import {
   Game,
-  InPlayPokemonCard,
+  InPlayPokemon,
   parseEnergy,
   type PokemonStatus,
   type PokemonToolEffect,
@@ -116,7 +116,7 @@ export const parsePokemonToolEffect = (cardText: string): ParsedResult<PokemonTo
   };
 };
 
-const removePokemonStatus = (pokemon: InPlayPokemonCard, status: PokemonStatus) => {
+const removePokemonStatus = (pokemon: InPlayPokemon, status: PokemonStatus) => {
   const foundStatus = pokemon.PokemonStatuses.find(
     (s) => s.type === status.type && s.source === status.source
   );

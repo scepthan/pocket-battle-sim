@@ -1,3 +1,3 @@
-import type { EmptyCardSlot, InPlayPokemonCard } from "..";
+import type { EmptyCardSlot, InPlayPokemon } from "..";
 
-export type CardSlot = InPlayPokemonCard | EmptyCardSlot;
+export type CardSlot = InPlayPokemon | EmptyCardSlot;

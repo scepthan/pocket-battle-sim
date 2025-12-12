@@ -2,7 +2,7 @@ import type {
   CardSlot,
   Energy,
   Game,
-  InPlayPokemonCard,
+  InPlayPokemon,
   PokemonEffect,
   TargetedPokemonEffect,
 } from "@/core";
@@ -23,7 +23,7 @@ interface StandardAbilityEffect {
 }
 interface TargetedAbilityEffect {
   type: "Targeted";
-  findValidTargets: (game: Game, self: InPlayPokemonCard) => CardSlot[];
+  findValidTargets: (game: Game, self: InPlayPokemon) => CardSlot[];
   effect: TargetedPokemonEffect;
 }
 

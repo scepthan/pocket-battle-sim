@@ -1,5 +1,5 @@
 import {
-  InPlayPokemonCard,
+  InPlayPokemon,
   parseEnergy,
   type Attack,
   type Energy,
@@ -31,7 +31,7 @@ const attackTargetIfExists: (damage: number) => SideEffect =
 export const parseAttackEffect = (attack: Attack): boolean => {
   let parseSuccessful = true;
   let conditionalForNextEffect:
-    | ((game: Game, self: InPlayPokemonCard, heads: number) => boolean)
+    | ((game: Game, self: InPlayPokemon, heads: number) => boolean)
     | undefined = undefined;
 
   /**
@@ -562,7 +562,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
             ...game.AttackingPlayer.InPlayPokemon,
             ...game.DefendingPlayer.InPlayPokemon,
           ];
-          const allEnergy: { pokemon: InPlayPokemonCard; energy: Energy }[] = [];
+          const allEnergy: { pokemon: InPlayPokemon; energy: Energy }[] = [];
           for (const p of allPokemon) {
             for (const e of p.AttachedEnergy) {
               allEnergy.push({ pokemon: p, energy: e });
