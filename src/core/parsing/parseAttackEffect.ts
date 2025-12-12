@@ -345,12 +345,11 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       },
     },
     {
-      pattern:
-        /^This attack(?: also)? does (\d+) damage to 1 of your opponent’s( Benched)? Pokémon\./i,
-      transform: (_, damage, benched) => {
-        attack.choosePokemonToAttack = benched
-          ? (game) => game.DefendingPlayer.BenchedPokemon
-          : (game) => game.DefendingPlayer.InPlayPokemon;
+      pattern: /^This attack(?: also)? does (\d+) damage to 1 of your opponent’s (.+?)\./i,
+      transform: (_, damage, specifier) => {
+        const predicate = parsePokemonPredicate(specifier);
+        attack.choosePokemonToAttack = (game) =>
+          game.DefendingPlayer.InPlayPokemon.filter(predicate);
         attack.attackingEffects.push(attackTargetIfExists(Number(damage)));
       },
     },

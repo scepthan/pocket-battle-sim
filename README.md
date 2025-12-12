@@ -8,7 +8,7 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 119/157 (75.8%)
+  - [ ] A3: 120/157 (76.4%)
     - [ ] Abilities
       - [ ] New triggers
         - [ ] On Knocked Out
@@ -31,8 +31,6 @@ Backend todo:
         - [ ] Opposing mon has Special Condition
         - [ ] Opposing mon has Ability
         - [ ] Any of own Benched mon have damage
-      - [ ] New targeting
-        - [ ] Opposing mon that has damage
       - [ ] New effects
         - [ ] Discard random Energy from both Active mon
         - [ ] Poison and Burn
@@ -68,6 +66,7 @@ Backend todo:
       - [ ] IncreaseRetreatCost (BasePokemonStatus)
     - [x] New Pokemon predicates
       - [x] Stage 2
+      - [x] Has damage on it
     - [ ] New card predicates
       - [ ] Card that evolves from mon
       - [ ] Item card (need to investigate if Fossils count)

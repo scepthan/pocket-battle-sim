@@ -67,6 +67,12 @@ export const parsePokemonPredicate = (
     text = text.slice(0, -29);
   }
 
+  if (text.endsWith(" that have damage on them")) {
+    const prevPredicate = predicate;
+    predicate = (pokemon) => pokemon.isDamaged() && prevPredicate(pokemon);
+    text = text.slice(0, -25);
+  }
+
   if (text === "Pokémon ex") {
     return {
       parseSuccessful: true,

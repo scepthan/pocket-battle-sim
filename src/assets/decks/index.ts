@@ -9,7 +9,7 @@ import A3 from "./A3.json";
 export type DeckList = Record<string, DeckInfo>;
 export type DeckRecord = Record<string, DeckList>;
 
-export const decks = { ...A1, ...A1a, ...A2, ...A2a, ...A2b, ...A3 } as DeckRecord;
+export const decks = { ...A3, ...A2b, ...A2a, ...A2, ...A1a, ...A1 } as DeckRecord;
 
 export const allDecks = Object.entries(decks).reduce((acc, [setName, deckList]) => {
   Object.entries(deckList).forEach(([deckName, deckInfo]) => {
