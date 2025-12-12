@@ -1,3 +1,4 @@
+import { allCards } from "@/assets";
 import type { Energy, FossilCard, PokemonCard, TrainerEffect } from "../gamelogic";
 import { parseEnergy } from "../gamelogic";
 import { randomElement, removeElement } from "../util";
@@ -7,6 +8,14 @@ import {
   type InPlayPokemonPredicate,
 } from "./parsePredicates";
 import type { ParsedResult } from "./types";
+
+const findBasicForStage2 = (stage2: PokemonCard) => {
+  const stage1Name = stage2.EvolvesFrom;
+  if (!stage1Name) return null;
+  const stage1 = allCards.find((card) => card.name === stage1Name);
+  if (!stage1 || stage1.cardType !== "Pokemon") return null;
+  return stage1.previousEvolution ?? null;
+};
 
 interface EffectTransformer {
   pattern: RegExp;
@@ -498,6 +507,38 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
           const card = await game.chooseCard(game.AttackingPlayer, validCards);
           if (!card) return;
           await game.DefendingPlayer.putPokemonOnBench(card as PokemonCard, benchIndex, card);
+        },
+      }),
+    },
+    {
+      pattern:
+        /^Choose 1 of your Basic Pokémon in play. If you have a Stage 2 card in your hand that evolves from that Pokémon, put that card onto the Basic Pokémon to evolve it, skipping the Stage 1. You can’t use this card during your first turn or on a Basic Pokémon that was put into play this turn.$/,
+      transform: () => ({
+        type: "Targeted",
+        validTargets: (game) => {
+          const validBasicNames = game.AttackingPlayer.Hand.filter(
+            (card) => card.CardType === "Pokemon" && card.Stage == 2
+          )
+            .map((card) => findBasicForStage2(card as PokemonCard))
+            .filter((name) => name !== null);
+
+          return game.AttackingPlayer.InPlayPokemon.filter(
+            (p) => p.Stage == 0 && p.ReadyToEvolve && validBasicNames.includes(p.Name)
+          );
+        },
+        effect: async (game, target) => {
+          if (!target.isPokemon) return;
+
+          const validCards = game.AttackingPlayer.Hand.filter(
+            (card) =>
+              card.CardType === "Pokemon" &&
+              card.Stage == 2 &&
+              findBasicForStage2(card as PokemonCard) === target.Name
+          );
+          const card = await game.chooseCard(game.AttackingPlayer, validCards);
+          if (!card) return;
+
+          await game.AttackingPlayer.evolvePokemon(target, card as PokemonCard, true);
         },
       }),
     },

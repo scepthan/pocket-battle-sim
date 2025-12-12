@@ -8,7 +8,7 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 117/157 (74.5%)
+  - [ ] A3: 118/157 (75.2%)
     - [ ] Abilities
       - [ ] New triggers
         - [ ] On Knocked Out
@@ -49,7 +49,7 @@ Backend todo:
         - [ ] Confuse self
     - [ ] Items/Supporters
       - [ ] Heal damage and remove random Special Condition
-      - [ ] Evolve Basic mon to Stage 2
+      - [x] Evolve Basic mon to Stage 2
       - [ ] Look at top card and choose to shuffle
       - [ ] Move damage from own mon to opposing mon
       - [ ] Put damaged mon into hand

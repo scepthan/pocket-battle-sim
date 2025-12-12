@@ -303,11 +303,11 @@ export class Player {
     await pokemon.onEnterPlay();
   }
 
-  async evolvePokemon(pokemon: InPlayPokemonCard, card: PokemonCard) {
+  async evolvePokemon(pokemon: InPlayPokemonCard, card: PokemonCard, skipStage1: boolean = false) {
     if (!this.Hand.includes(card)) {
       throw new Error("Card not in hand");
     }
-    if (card.EvolvesFrom != pokemon.Name) {
+    if (card.EvolvesFrom != pokemon.Name && !skipStage1) {
       throw new Error("Card does not evolve from this Pokemon");
     }
     if (!pokemon.ReadyToEvolve) {
