@@ -1,19 +1,22 @@
 import { allCards } from "@/assets";
 import { parseEnergy, type Energy, type InPlayPokemonCard, type PlayingCard } from "../gamelogic";
+import type { ParsedResult } from "./types";
 
 export type Predicate<T> = (obj: T) => boolean;
 export type InPlayPokemonPredicate = Predicate<InPlayPokemonCard>;
 export type PlayingCardPredicate = Predicate<PlayingCard>;
 
-const parsePokemonNames = (text: string): string[] => {
+const parsePokemonNames = (text: string): ParsedResult<string[]> => {
   const names = text.split(/, or | or |, and | and |, /);
+  let parseSuccessful = true;
 
   const unknownNames = names.filter((name) => !allCards.some((card) => card.name === name));
   if (unknownNames.length > 0) {
     console.error(`Unknown Pokémon names in card effect: ${unknownNames.join(", ")}`);
+    parseSuccessful = false;
   }
 
-  return names;
+  return { parseSuccessful, value: names };
 };
 
 /**
@@ -25,7 +28,7 @@ const parsePokemonNames = (text: string): string[] => {
 export const parsePokemonPredicate = (
   text: string,
   basePredicate: InPlayPokemonPredicate = () => true
-): InPlayPokemonPredicate => {
+): ParsedResult<InPlayPokemonPredicate> => {
   let predicate: InPlayPokemonPredicate = basePredicate;
 
   if (text.startsWith("Benched ")) {
@@ -40,6 +43,10 @@ export const parsePokemonPredicate = (
     const prevPredicate = predicate;
     predicate = (pokemon) => pokemon.Stage === 0 && prevPredicate(pokemon);
     text = text.slice(6);
+  } else if (text.startsWith("Stage 2 ")) {
+    const prevPredicate = predicate;
+    predicate = (pokemon) => pokemon.Stage === 2 && prevPredicate(pokemon);
+    text = text.slice(8);
   }
 
   const energyTypes: Energy[] = [];
@@ -61,14 +68,20 @@ export const parsePokemonPredicate = (
   }
 
   if (text === "Pokémon ex") {
-    return (pokemon) => pokemon.Name.endsWith(" ex") && predicate(pokemon);
+    return {
+      parseSuccessful: true,
+      value: (pokemon) => pokemon.Name.endsWith(" ex") && predicate(pokemon),
+    };
   }
   if (text === "Pokémon") {
-    return predicate;
+    return { parseSuccessful: true, value: predicate };
   }
 
-  const names = parsePokemonNames(text);
-  return (pokemon) => names.includes(pokemon.Name) && predicate(pokemon);
+  const { parseSuccessful, value: names } = parsePokemonNames(text);
+  return {
+    parseSuccessful,
+    value: (pokemon) => names.includes(pokemon.Name) && predicate(pokemon),
+  };
 };
 
 /**
@@ -79,7 +92,7 @@ export const parsePokemonPredicate = (
 export const parsePlayingCardPredicate = (
   text: string,
   basePredicate: PlayingCardPredicate = () => true
-): PlayingCardPredicate => {
+): ParsedResult<PlayingCardPredicate> => {
   let predicate: PlayingCardPredicate = basePredicate;
 
   if (text.startsWith("Basic ")) {
@@ -98,9 +111,15 @@ export const parsePlayingCardPredicate = (
   }
 
   if (text === "Pokémon") {
-    return (card: PlayingCard) => card.CardType == "Pokemon" && predicate(card);
+    return {
+      parseSuccessful: true,
+      value: (card: PlayingCard) => card.CardType == "Pokemon" && predicate(card),
+    };
   }
 
-  const names = parsePokemonNames(text);
-  return (card: PlayingCard) => names.includes(card.Name) && predicate(card);
+  const { parseSuccessful, value: names } = parsePokemonNames(text);
+  return {
+    parseSuccessful,
+    value: (card: PlayingCard) => names.includes(card.Name) && predicate(card),
+  };
 };

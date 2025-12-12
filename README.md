@@ -8,7 +8,7 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 115/157 (73.2%)
+  - [ ] A3: 116/157 (73.9%)
     - [ ] Abilities
       - [ ] New triggers
         - [ ] On Knocked Out
@@ -66,8 +66,8 @@ Backend todo:
       - [ ] IncreaseAttackDamage (DefensePokemonStatus)
       - [ ] IncreaseAttackCost (BasePokemonStatus)
       - [ ] IncreaseRetreatCost (BasePokemonStatus)
-    - [ ] New Pokemon predicates
-      - [ ] Stage 2
+    - [x] New Pokemon predicates
+      - [x] Stage 2
     - [ ] New card predicates
       - [ ] Card that evolves from mon
       - [ ] Item card (need to investigate if Fossils count)

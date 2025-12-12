@@ -7,7 +7,10 @@ import {
   type SideEffect,
 } from "../gamelogic";
 import { randomElement } from "../util";
-import { parsePlayingCardPredicate, parsePokemonPredicate } from "./parsePredicates";
+import {
+  parsePlayingCardPredicate as _cardParse,
+  parsePokemonPredicate as _pokemonParse,
+} from "./parsePredicates";
 
 interface EffectTransformer {
   pattern: RegExp;
@@ -52,6 +55,17 @@ export const parseAttackEffect = (attack: Attack): boolean => {
 
   const addSideEffect = (effect: SideEffect) => {
     attack.sideEffects.push(applyConditionalIfAvailable(effect));
+  };
+
+  const parsePokemonPredicate = (specifier: string) => {
+    const { parseSuccessful: success, value } = _pokemonParse(specifier);
+    if (!success) parseSuccessful = false;
+    return value;
+  };
+  const parsePlayingCardPredicate = (specifier: string) => {
+    const { parseSuccessful: success, value } = _cardParse(specifier);
+    if (!success) parseSuccessful = false;
+    return value;
   };
 
   const dictionary: EffectTransformer[] = [

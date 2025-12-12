@@ -1,7 +1,11 @@
 import type { Energy, FossilCard, PokemonCard, TrainerEffect } from "../gamelogic";
 import { parseEnergy } from "../gamelogic";
 import { randomElement, removeElement } from "../util";
-import { parsePlayingCardPredicate, parsePokemonPredicate } from "./parsePredicates";
+import {
+  parsePlayingCardPredicate as _cardParse,
+  parsePokemonPredicate as _pokemonParse,
+  type InPlayPokemonPredicate,
+} from "./parsePredicates";
 import type { ParsedResult } from "./types";
 
 interface EffectTransformer {
@@ -9,6 +13,19 @@ interface EffectTransformer {
   transform: (...args: string[]) => TrainerEffect;
 }
 export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect> => {
+  let parseSuccessful = true;
+
+  const parsePokemonPredicate = (specifier: string, initial?: InPlayPokemonPredicate) => {
+    const { parseSuccessful: success, value } = _pokemonParse(specifier, initial);
+    if (!success) parseSuccessful = false;
+    return value;
+  };
+  const parsePlayingCardPredicate = (specifier: string) => {
+    const { parseSuccessful: success, value } = _cardParse(specifier);
+    if (!success) parseSuccessful = false;
+    return value;
+  };
+
   const dictionary: EffectTransformer[] = [
     {
       pattern: /^Draw (a|\d+) cards?\.$/,
@@ -495,10 +512,8 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     const result = cardText.match(pattern);
 
     if (result) {
-      return {
-        parseSuccessful: true,
-        value: transform(...result),
-      };
+      const value = transform(...result);
+      return { parseSuccessful, value };
     }
   }
 

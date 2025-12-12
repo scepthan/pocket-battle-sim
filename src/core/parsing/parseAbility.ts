@@ -5,7 +5,10 @@ import {
   type PokemonConditional,
   type StatusAbilityEffect,
 } from "../gamelogic";
-import { parsePokemonPredicate } from "./parsePredicates";
+import {
+  parsePokemonPredicate as _pokemonParse,
+  type InPlayPokemonPredicate,
+} from "./parsePredicates";
 import type { InputCardAbility, ParsedResult } from "./types";
 
 interface AbilityTransformer {
@@ -47,6 +50,13 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
 
   let abilityText = inputAbility.text;
   let parseSuccessful = true;
+
+  const parsePokemonPredicate = (specifier: string, initial?: InPlayPokemonPredicate) => {
+    const { parseSuccessful: success, value } = _pokemonParse(specifier, initial);
+    if (!success) parseSuccessful = false;
+    return value;
+  };
+
   const dictionary: AbilityTransformer[] = [
     // Triggers
     {
