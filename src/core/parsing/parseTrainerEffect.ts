@@ -310,6 +310,22 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
       },
     },
     {
+      pattern:
+        /^Heal all damage from 1 of your ([^.]+?)\. If you do, discard all Energy from that Pokémon\.$/,
+      transform: (_, specifier) => {
+        const predicate = parsePokemonPredicate(specifier, (p) => p.isDamaged());
+        return {
+          type: "Targeted",
+          validTargets: (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
+          effect: async (game, pokemon) => {
+            if (!pokemon.isPokemon) return;
+            game.healPokemon(pokemon, pokemon.MaxHP - pokemon.CurrentHP);
+            await game.discardAllEnergy(pokemon);
+          },
+        };
+      },
+    },
+    {
       pattern: /^Heal (\d+) damage from each of your (.+?) that has any {(\w)} Energy attached\.$/,
       transform: (_, modifier, specifier, energyType) => {
         const fullType = parseEnergy(energyType);

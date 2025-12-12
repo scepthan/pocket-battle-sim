@@ -8,7 +8,7 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 128/157 (81.5%)
+  - [ ] A3: 129/157 (82.2%)
     - [ ] Abilities
       - [ ] New triggers
         - [ ] Before Knocked Out
@@ -55,7 +55,7 @@ Backend todo:
       - [ ] Attach Energy to mon and end turn
       - [ ] Discard all of opponent's Pokemon Tools
       - [ ] If mon in play, switch in opponent's Benched mon of choice
-      - [ ] Heal all damage and discard all Energy from mon
+      - [x] Heal all damage and discard all Energy from mon
     - [ ] Pokemon Tools
       - [x] Poison attacker when damaged
     - [ ] New Player Statuses
