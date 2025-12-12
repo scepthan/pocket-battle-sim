@@ -283,14 +283,14 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
       transform: (_, modifier, specifier) => {
         const predicate = parsePokemonPredicate(
           specifier,
-          (p) => p.isDamaged() || p.CurrentConditions.length > 0
+          (p) => p.isDamaged() || p.hasSpecialCondition()
         );
         return {
           type: "Targeted",
           validTargets: (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
           effect: async (game, pokemon) => {
             if (!pokemon.isPokemon) return;
-            game.healPokemon(pokemon, Number(modifier));
+            pokemon.healDamage(Number(modifier));
             pokemon.removeAllSpecialConditions();
           },
         };
@@ -304,7 +304,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
           type: "Targeted",
           validTargets: (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
           effect: async (game, pokemon) => {
-            if (pokemon.isPokemon) game.healPokemon(pokemon, Number(modifier));
+            if (pokemon.isPokemon) pokemon.healDamage(Number(modifier));
           },
         };
       },
@@ -319,8 +319,26 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
           validTargets: (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
           effect: async (game, pokemon) => {
             if (!pokemon.isPokemon) return;
-            game.healPokemon(pokemon, pokemon.MaxHP - pokemon.CurrentHP);
+            pokemon.healDamage(pokemon.MaxHP - pokemon.CurrentHP);
             await game.discardAllEnergy(pokemon);
+          },
+        };
+      },
+    },
+    {
+      pattern:
+        /^Heal (\d+) damage and remove a random Special Condition from your Active Pokémon\.$/,
+      transform: (_, modifier) => {
+        return {
+          type: "Conditional",
+          condition: (game) => {
+            const active = game.AttackingPlayer.activeOrThrow();
+            return active.isDamaged() || active.hasSpecialCondition();
+          },
+          effect: async (game) => {
+            const active = game.AttackingPlayer.activeOrThrow();
+            active.healDamage(Number(modifier));
+            active.removeRandomSpecialCondition();
           },
         };
       },
@@ -339,7 +357,7 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
           condition: (game) => game.AttackingPlayer.InPlayPokemon.some(predicate),
           effect: async (game) => {
             for (const pokemon of game.AttackingPlayer.InPlayPokemon.filter(predicate)) {
-              game.healPokemon(pokemon, Number(modifier));
+              pokemon.healDamage(Number(modifier));
             }
           },
         };

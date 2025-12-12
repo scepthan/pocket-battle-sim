@@ -177,7 +177,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       pattern: /^If your opponent’s Active Pokémon is affected by a Special Condition,/i,
       transform: () => {
         conditionalForNextEffect = (game) =>
-          game.DefendingPlayer.activeOrThrow().CurrentConditions.length > 0;
+          game.DefendingPlayer.activeOrThrow().hasSpecialCondition();
       },
     },
     {
@@ -396,7 +396,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
     {
       pattern: /^Heal (\d+) damage from this Pokémon\./,
       transform: (_, healing) => {
-        addSideEffect(async (game, self) => game.healPokemon(self, Number(healing)));
+        addSideEffect(async (game, self) => self.healDamage(Number(healing)));
       },
     },
     {
@@ -414,7 +414,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
               event.fromAttack
           );
           if (!activeAttackEvent) return;
-          game.healPokemon(self, activeAttackEvent.damageDealt);
+          self.healDamage(activeAttackEvent.damageDealt);
         });
       },
     },
@@ -423,7 +423,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       transform: (_, HP) => {
         addSideEffect(async (game) => {
           for (const pokemon of game.AttackingPlayer.InPlayPokemon) {
-            if (pokemon.isDamaged()) game.healPokemon(pokemon, Number(HP));
+            if (pokemon.isDamaged()) pokemon.healDamage(Number(HP));
           }
         });
       },
@@ -736,7 +736,12 @@ export const parseAttackEffect = (attack: Attack): boolean => {
         addSideEffect(async (game) => {
           const conditions = (
             ["Asleep", "Burned", "Confused", "Paralyzed", "Poisoned"] as const
-          ).filter((c) => !game.DefendingPlayer.activeOrThrow().CurrentConditions.includes(c));
+          ).filter(
+            (c) =>
+              !game.DefendingPlayer.activeOrThrow()
+                .CurrentConditions.map((c2) => c2.replace(/\+$/, ""))
+                .includes(c)
+          );
 
           const condition = randomElement(conditions);
           if (condition === "Asleep") {

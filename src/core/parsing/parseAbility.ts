@@ -240,7 +240,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           effect: async (game, self) => {
             for (const pokemon of self.player.InPlayPokemon) {
               if (predicate(pokemon)) {
-                game.healPokemon(pokemon, Number(healing));
+                pokemon.healDamage(Number(healing));
               }
             }
           },
@@ -254,7 +254,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         ability.effect = {
           type: "Standard",
           effect: async (game, self) => {
-            game.healPokemon(self, Number(healing));
+            self.healDamage(Number(healing));
           },
         };
       },
@@ -266,7 +266,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         ability.effect = {
           type: "Standard",
           effect: async (game, self) => {
-            game.healPokemon(self.player.activeOrThrow(), Number(healing));
+            self.player.activeOrThrow().healDamage(Number(healing));
           },
         };
       },
@@ -283,7 +283,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
             if (!target.isPokemon) throw new Error("Not a valid target");
             const damage = target.currentDamage();
             game.applyDamage(self, damage, false);
-            game.healPokemon(target, damage);
+            target.healDamage(damage);
           },
         };
       },

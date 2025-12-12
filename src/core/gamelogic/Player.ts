@@ -347,8 +347,8 @@ export class Player {
     fromPokemon?: InPlayPokemonCard
   ) {
     pokemon.attachEnergy(energy);
-    if (from === "turn" || from === "energyZone") await pokemon.onEnergyZoneAttach(energy);
     this.logger.attachEnergy(this, pokemon, energy, from, fromPokemon);
+    if (from === "turn" || from === "energyZone") await pokemon.onEnergyZoneAttach(energy);
   }
 
   async transferEnergy(

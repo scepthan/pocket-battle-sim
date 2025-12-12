@@ -1,5 +1,5 @@
 import type { GameLogger } from "../logging";
-import { removeElement, sortedBy } from "../util";
+import { randomElement, removeElement, sortedBy } from "../util";
 import type { Game } from "./Game";
 import type { Player } from "./Player";
 import {
@@ -131,9 +131,17 @@ export class InPlayPokemonCard {
     this.CurrentHP -= HP;
     if (this.CurrentHP < 0) this.CurrentHP = 0;
   }
+
+  /**
+   * Heals a set amount of damage from this Pokémon.
+   */
   healDamage(HP: number) {
+    const initialHP = this.CurrentHP;
+
     this.CurrentHP += HP;
     if (this.CurrentHP > this.MaxHP) this.CurrentHP = this.MaxHP;
+
+    this.logger.pokemonHealed(this.player, this, initialHP, HP);
   }
 
   attachEnergy(energy: Energy[]) {
@@ -158,6 +166,27 @@ export class InPlayPokemonCard {
   }
   isBurned() {
     return this.SecondaryConditions.has("Burned");
+  }
+  hasSpecialCondition() {
+    return this.CurrentConditions.length > 0;
+  }
+
+  /**
+   * Recovers this Pokemon from a random Special Condition.
+   */
+  removeRandomSpecialCondition() {
+    const conditions = this.CurrentConditions;
+    if (conditions.length == 0) return;
+
+    const condition = randomElement(conditions);
+
+    if (condition === "Asleep" || condition === "Confused" || condition === "Paralyzed") {
+      this.PrimaryCondition = undefined;
+    } else {
+      this.SecondaryConditions.delete(condition);
+    }
+
+    this.logger.specialConditionEnded(this, [condition]);
   }
 
   /**

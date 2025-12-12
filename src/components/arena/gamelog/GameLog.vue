@@ -251,9 +251,6 @@
           <p v-for="(condition, i) in entry.specialConditions" :key="i">
             <CardName :card-id="entry.targetPokemon.cardId" /> is now {{ condition }}!
           </p>
-          <p v-if="entry.currentConditionList.length > entry.specialConditions.length">
-            Current Special Conditions: {{ entry.currentConditionList.join(", ") }}.
-          </p>
         </div>
 
         <div v-else-if="entry.type == 'specialConditionDamage'" class="sub-entry">
@@ -271,9 +268,6 @@
         <div v-else-if="entry.type == 'specialConditionEnded'" class="sub-entry">
           <p v-for="(condition, i) in entry.specialConditions" :key="i">
             <CardName :card-id="entry.targetPokemon.cardId" /> recovered from being {{ condition }}!
-          </p>
-          <p v-if="entry.currentConditionList.length > 0">
-            Remaining Special Conditions: {{ entry.currentConditionList.join(", ") }}.
           </p>
         </div>
 

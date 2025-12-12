@@ -83,7 +83,7 @@ export const parsePokemonToolEffect = (cardText: string): ParsedResult<PokemonTo
       pattern:
         /^if the Pokémon this card is attached to is affected by any Special Conditions, it recovers from all of them, and discard this card\./i,
       transform: () => {
-        effect.conditions.push((pokemon) => pokemon.CurrentConditions.length > 0);
+        effect.conditions.push((pokemon) => pokemon.hasSpecialCondition());
         effect.effect = async (game, pokemon) => {
           pokemon.removeAllSpecialConditions();
 

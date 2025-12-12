@@ -926,16 +926,6 @@ export class Game {
   }
 
   /**
-   * Heals a set amount of damage from a Pokémon.
-   */
-  healPokemon(target: InPlayPokemonCard, HP: number): void {
-    const initialHP = target.CurrentHP;
-
-    target.healDamage(HP);
-    this.GameLog.pokemonHealed(target.player, target, initialHP, HP);
-  }
-
-  /**
    * Discards (up to) a given amount of a given type of Energy from a Pokémon.
    */
   async discardEnergy(pokemon: InPlayPokemonCard, type: Energy, count: number): Promise<void> {
