@@ -334,4 +334,20 @@ export class InPlayPokemonCard {
         await this.triggerPokemonTool(tool);
     }
   }
+
+  async afterKnockedOutByAttack() {
+    if (
+      this.Ability?.type === "Standard" &&
+      this.Ability.trigger.type === "AfterKnockedOutByAttack"
+    ) {
+      if (this.game.DefendingPlayer.InPlayPokemon.includes(this)) await this.triggerAbility();
+    }
+    for (const tool of this.AttachedToolCards) {
+      if (
+        tool.Effect.trigger === "OnKnockOut" &&
+        tool.Effect.conditions.every((cond) => cond(this))
+      )
+        await this.triggerPokemonTool(tool);
+    }
+  }
 }

@@ -542,6 +542,8 @@ export class Player {
   async handleKnockOut(pokemon: InPlayPokemonCard, fromAttack: boolean) {
     this.logger.pokemonKnockedOut(this, pokemon, fromAttack);
 
+    if (fromAttack) await pokemon.afterKnockedOutByAttack();
+
     for (const card of pokemon.InPlayCards) {
       if (!this.InPlay.includes(card)) throw new Error("Card not in play");
       removeElement(this.InPlay, card);

@@ -8,10 +8,11 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 122/157 (77.7%)
+  - [ ] A3: 124/157 (79.0%)
     - [ ] Abilities
       - [ ] New triggers
-        - [ ] On Knocked Out
+        - [ ] Before Knocked Out
+        - [x] After Knocked Out
       - [ ] New conditionals
         - [ ] During your first turn
       - [ ] New effects
@@ -20,7 +21,7 @@ Backend todo:
         - [ ] Apply HealSpecialConditions status to player (mon with Energy of type attached)
         - [x] Move all Energy of type from Benched mon to Active mon
         - [ ] Flip coin to set self HP to 10 (need to investigate OOO in-game)
-        - [ ] Move all Energy of type from self to Benched mon
+        - [x] Move all Energy of type from self to Benched mon
         - [x] Switch with Active mon
         - [ ] Put self to sleep
     - [ ] Attacks
@@ -102,6 +103,8 @@ Frontend todo:
   - [ ] Auto mode toggle? (Will need to adjust BetterRandomAgent to be able to stop and start in the middle of a turn)
 - [x] Allow user to select decks for arena
 - [x] Allow user control of one or both players in arena
+  - [ ] Control selectNPokemon()
+  - [ ] Control distributeEnergy()
 - [ ] Allow user to select set of decks to run in mass simulator
 - [x] Deck list UI
   - [x] Custom and built-in decks

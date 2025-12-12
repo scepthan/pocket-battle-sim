@@ -83,6 +83,15 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       },
     },
     {
+      pattern:
+        /^If this Pokémon is in the Active Spot and is Knocked Out by damage from an attack from your opponent’s Pokémon, /i,
+      transform: () => {
+        if (ability.type === "Status") throw new Error("Cannot set trigger on Status Ability");
+        ability.trigger = { type: "AfterKnockedOutByAttack" };
+        ability.conditions.push(selfActive);
+      },
+    },
+    {
       pattern: /^Whenever you attach a \{(\w)\} Energy from your Energy Zone to this Pokémon, /i,
       transform: (_, energyType) => {
         if (ability.type === "Status") throw new Error("Cannot set trigger on Status Ability");
@@ -194,6 +203,25 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
             const energyToMove =
               amount === "all" ? target.AttachedEnergy.filter((e) => e === fullType) : [fullType];
             await self.player.transferEnergy(target, active, energyToMove);
+          },
+        };
+      },
+    },
+    {
+      pattern: /move all {(\w)} Energy from this Pokémon to 1 of your Benched (.+?)\./i,
+      transform: (_, energyType, benchedSpecifier) => {
+        const fullType = parseEnergy(energyType);
+        const benchPredicate = parsePokemonPredicate(benchedSpecifier);
+        ability.conditions.push((self) => self.AttachedEnergy.includes(fullType));
+
+        ability.effect = {
+          type: "Targeted",
+          findValidTargets: (game, self) => self.player.BenchedPokemon.filter(benchPredicate),
+          effect: async (game, self, target) => {
+            if (!target.isPokemon) throw new Error("Not a valid target");
+
+            const energyToMove = self.AttachedEnergy.filter((e) => e === fullType);
+            await self.player.transferEnergy(self, target, energyToMove);
           },
         };
       },
