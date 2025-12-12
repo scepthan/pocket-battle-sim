@@ -406,6 +406,17 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         };
       },
     },
+    {
+      pattern: /^switch it with your Active Pokémon\.$/i,
+      transform: () => {
+        ability.effect = {
+          type: "Standard",
+          effect: async (game, self) => {
+            await self.player.swapActivePokemon(self, "selfEffect");
+          },
+        };
+      },
+    },
 
     // Pokemon statuses
     {
