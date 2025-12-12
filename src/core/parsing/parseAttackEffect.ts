@@ -174,6 +174,13 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       },
     },
     {
+      pattern: /^If your opponent’s Active Pokémon is affected by a Special Condition,/i,
+      transform: () => {
+        conditionalForNextEffect = (game) =>
+          game.DefendingPlayer.activeOrThrow().CurrentConditions.length > 0;
+      },
+    },
+    {
       pattern: /^If your opponent’s Active Pokémon is a ([^,]+?),/i,
       transform: (_, specifier) => {
         const predicate = parsePokemonPredicate(specifier);
