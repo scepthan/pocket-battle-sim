@@ -92,10 +92,11 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       },
     },
     {
-      pattern: /^Whenever you attach a \{(\w)\} Energy from your Energy Zone to this Pokémon, /i,
+      pattern:
+        /^Whenever you attach (?:a {(\w)}|an) Energy from your Energy Zone to (?:this Pokémon|it), /i,
       transform: (_, energyType) => {
         if (ability.type === "Status") throw new Error("Cannot set trigger on Status Ability");
-        const fullType = parseEnergy(energyType);
+        const fullType = energyType ? parseEnergy(energyType) : undefined;
         ability.trigger = { type: "OnEnergyZoneAttach", energy: fullType };
       },
     },
@@ -358,6 +359,15 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           effect: async (game, self) => {
             await game.chooseNewActivePokemon(self.player.opponent);
           },
+        };
+      },
+    },
+    {
+      pattern: /^it is now Asleep\./i,
+      transform: () => {
+        ability.effect = {
+          type: "Standard",
+          effect: async (game, self) => self.player.sleepActivePokemon(),
         };
       },
     },

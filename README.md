@@ -8,7 +8,7 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 131/157 (83.4%)
+  - [ ] A3: 132/157 (84.1%)
     - [ ] Abilities
       - [ ] New triggers
         - [ ] Before Knocked Out
@@ -23,7 +23,7 @@ Backend todo:
         - [ ] Flip coin to set self HP to 10 (need to investigate OOO in-game)
         - [x] Move all Energy of type from self to Benched mon
         - [x] Switch with Active mon
-        - [ ] Put self to sleep
+        - [x] Put self to sleep
     - [ ] Attacks
       - [ ] New conditionals
         - [ ] Moved to the Active Spot on this turn
