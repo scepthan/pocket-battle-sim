@@ -8,7 +8,7 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 130/157 (82.8%)
+  - [ ] A3: 131/157 (83.4%)
     - [ ] Abilities
       - [ ] New triggers
         - [ ] Before Knocked Out
@@ -34,7 +34,7 @@ Backend todo:
         - [ ] Any of own Benched mon have damage
       - [ ] New effects
         - [x] Discard random Energy from both Active mon
-        - [ ] Poison and Burn
+        - [x] Poison and Burn
         - [ ] Apply Counterattack status to self
         - [ ] Apply CannotUseItem status to opponent
         - [x] Switch with Benched mon of type

@@ -703,6 +703,15 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       },
     },
     {
+      pattern: /^Your opponent’s Active Pokémon is now Poisoned and Burned\./i,
+      transform: () => {
+        addSideEffect(async (game) => {
+          game.poisonDefendingPokemon(false);
+          game.burnDefendingPokemon();
+        });
+      },
+    },
+    {
       pattern: /^Your opponent’s Active Pokémon is now Asleep\./i,
       transform: () => {
         addSideEffect(async (game) => game.sleepDefendingPokemon());
