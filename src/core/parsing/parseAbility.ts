@@ -458,6 +458,24 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       },
     },
     {
+      pattern: /^Prevent all damage done to this Pokémon by attacks from your opponent’s (.+?)\.$/i,
+      transform: (_, specifier) => {
+        const predicate = parsePokemonPredicate(specifier);
+
+        convertToStatusAbility({
+          type: "PokemonStatus",
+          status: {
+            type: "PreventAttackDamage",
+            source: "Ability",
+            attackerCondition: {
+              test: predicate,
+              descriptor: specifier,
+            },
+          },
+        });
+      },
+    },
+    {
       pattern:
         /^Prevent all effects of attacks used by your opponent’s Pokémon done to this Pokémon\.$/i,
       transform: () => {

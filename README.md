@@ -8,7 +8,7 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 121/157 (77.1%)
+  - [ ] A3: 122/157 (77.7%)
     - [ ] Abilities
       - [ ] New triggers
         - [ ] On Knocked Out
@@ -16,7 +16,7 @@ Backend todo:
         - [ ] During your first turn
       - [ ] New effects
         - [x] Heal all mon of type
-        - [ ] Prevent damage from ex mon
+        - [x] Prevent damage from ex mon
         - [ ] Apply HealSpecialConditions status to player (mon with Energy of type attached)
         - [x] Move all Energy of type from Benched mon to Active mon
         - [ ] Flip coin to set self HP to 10 (need to investigate OOO in-game)
