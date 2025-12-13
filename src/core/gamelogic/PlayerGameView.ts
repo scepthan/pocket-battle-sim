@@ -390,6 +390,7 @@ export class PlayerGameView {
         this.player,
         this.selfActive.AttachedEnergy,
         this.player.effectiveRetreatCost,
+        "Choose Energy to discard.",
         canSelectFewer
       );
     }

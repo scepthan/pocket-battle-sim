@@ -95,7 +95,6 @@ import {
   PlayerPokemonView,
   removeElement,
   type CardSlotView,
-  type GameInitState,
   type PlayingCard,
   type PokemonCard,
 } from "@/core";
@@ -145,7 +144,7 @@ const setupAgent = () => {
   if (!agent.value) return;
   game.value = undefined;
 
-  agent.value.setupPokemon = async (gameView: GameInitState) => {
+  agent.value.setupPokemon = async (gameView) => {
     while (true) {
       stage.value = "selectCard";
       cardSelector.text.value = "Select your Active Pokémon:";
@@ -191,7 +190,7 @@ const setupAgent = () => {
     }
   };
 
-  agent.value.doTurn = async (gameView: PlayerGameView) => {
+  agent.value.doTurn = async (gameView) => {
     game.value = gameView;
     while (true) {
       if (!gameView.canPlay) {
@@ -397,7 +396,7 @@ const setupAgent = () => {
     }
   };
 
-  agent.value.chooseNewActivePokemon = async (gameView: PlayerGameView) => {
+  agent.value.chooseNewActivePokemon = async (gameView) => {
     stage.value = "selectPokemon";
     pokemonSelector.text.value = "Select a Pokémon to swap in:";
     pokemonSelector.options.value = gameView.selfBenched;
@@ -415,14 +414,16 @@ const setupAgent = () => {
     return selectedPokemon;
   };
 
-  agent.value.choosePokemon = async (pokemon: PlayerPokemonView[]) => {
+  agent.value.choosePokemon = async (pokemon, prompt) => {
     stage.value = "selectPokemon";
     pokemonSelector.options.value = pokemon;
+    pokemonSelector.text.value = prompt;
 
     const selectedPokemon = await pokemonSelector.selectionPromise();
 
     stage.value = "idle";
     pokemonSelector.options.value = [];
+    pokemonSelector.text.value = undefined;
 
     if (selectedPokemon === "cancel" || !selectedPokemon?.isPokemon) {
       throw new Error("No Pokémon selected.");
@@ -431,9 +432,9 @@ const setupAgent = () => {
     return selectedPokemon;
   };
 
-  agent.value.chooseNPokemon = async (pokemon: PlayerPokemonView[], n: number) => {
+  agent.value.chooseNPokemon = async (pokemon, n, prompt) => {
     stage.value = "selectPokemon";
-    pokemonSelector.text.value = `Select ${n} Pokémon:`;
+    pokemonSelector.text.value = prompt;
     pokemonSelector.options.value = pokemon.slice();
     pokemonSelector.addReadyButton.value = true;
     pokemonSelector.addCancelButton.value = true;
@@ -461,14 +462,16 @@ const setupAgent = () => {
     return selectedPokemon;
   };
 
-  agent.value.chooseCard = async (cards: PlayingCard[]) => {
+  agent.value.chooseCard = async (cards, prompt) => {
     stage.value = "selectCard";
     cardSelector.options.value = cards;
+    cardSelector.text.value = prompt;
 
     const selectedCard = await cardSelector.selectionPromise();
 
     stage.value = "idle";
     cardSelector.options.value = [];
+    cardSelector.text.value = undefined;
 
     if (selectedCard === "cancel" || !selectedCard) {
       throw new Error("No card selected.");
@@ -477,9 +480,9 @@ const setupAgent = () => {
     return selectedCard;
   };
 
-  agent.value.chooseNCards = async (cards: PlayingCard[], n: number) => {
+  agent.value.chooseNCards = async (cards, n, prompt) => {
     stage.value = "selectCard";
-    cardSelector.text.value = `Select ${n} cards:`;
+    cardSelector.text.value = prompt;
     cardSelector.options.value = cards.slice();
     cardSelector.addReadyButton.value = true;
     cardSelector.addCancelButton.value = true;
@@ -507,14 +510,16 @@ const setupAgent = () => {
     return selectedCards;
   };
 
-  agent.value.choose = async (options: string[]) => {
+  agent.value.choose = async (options, prompt) => {
     stage.value = "selectAny";
     baseSelector.options.value = options;
+    baseSelector.text.value = prompt;
 
     const selectedOption = await baseSelector.selectionPromise();
 
     stage.value = "idle";
     baseSelector.options.value = [];
+    baseSelector.text.value = undefined;
 
     if (selectedOption === "cancel" || !selectedOption) {
       throw new Error("No option selected.");

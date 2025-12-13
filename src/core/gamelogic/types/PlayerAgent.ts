@@ -48,7 +48,7 @@ export abstract class PlayerAgent {
     game: PlayerGameView,
     reason: "opponentEffect" | "activeKnockedOut"
   ): Promise<PlayerPokemonView> {
-    return this.choosePokemon(game.selfBenched);
+    return this.choosePokemon(game.selfBenched, "Choose a new Active Pokémon.");
   }
 
   /**
@@ -57,7 +57,7 @@ export abstract class PlayerAgent {
    *
    * By default, returns a random element.
    */
-  async choose(options: string[]): Promise<string> {
+  async choose(options: string[], prompt: string): Promise<string> {
     return randomElement(options);
   }
   /**
@@ -66,8 +66,8 @@ export abstract class PlayerAgent {
    *
    * By default, calls `this.chooseNPokemon()` (random unless this function is user-defined).
    */
-  async choosePokemon(pokemon: PlayerPokemonView[]): Promise<PlayerPokemonView> {
-    const output = await this.chooseNPokemon(pokemon, 1);
+  async choosePokemon(pokemon: PlayerPokemonView[], prompt: string): Promise<PlayerPokemonView> {
+    const output = await this.chooseNPokemon(pokemon, 1, prompt);
     if (output.length !== 1)
       throw new Error("chooseNPokemon(1) did not return exactly one Pokémon");
     return output[0]!;
@@ -78,7 +78,11 @@ export abstract class PlayerAgent {
    *
    * By default, returns n random Pokémon.
    */
-  async chooseNPokemon(pokemon: PlayerPokemonView[], n: number): Promise<PlayerPokemonView[]> {
+  async chooseNPokemon(
+    pokemon: PlayerPokemonView[],
+    n: number,
+    prompt: string
+  ): Promise<PlayerPokemonView[]> {
     return randomElements(pokemon, n);
   }
   /**
@@ -86,8 +90,8 @@ export abstract class PlayerAgent {
    *
    * By default, calls `this.chooseNCards()` (random unless this function is user-defined).
    */
-  async chooseCard(cards: PlayingCard[]): Promise<PlayingCard> {
-    const output = await this.chooseNCards(cards, 1);
+  async chooseCard(cards: PlayingCard[], prompt: string): Promise<PlayingCard> {
+    const output = await this.chooseNCards(cards, 1, prompt);
     if (output.length !== 1) throw new Error("chooseNCards(1) did not return exactly one card");
     return output[0]!;
   }
@@ -96,7 +100,7 @@ export abstract class PlayerAgent {
    *
    * By default, returns n random cards.
    */
-  async chooseNCards(cards: PlayingCard[], n: number): Promise<PlayingCard[]> {
+  async chooseNCards(cards: PlayingCard[], n: number, prompt: string): Promise<PlayingCard[]> {
     return randomElements(cards, n);
   }
   /**
@@ -109,7 +113,7 @@ export abstract class PlayerAgent {
    *
    * By default, returns n random Energy.
    */
-  async chooseNEnergy(energy: Energy[], n: number): Promise<Energy[]> {
+  async chooseNEnergy(energy: Energy[], n: number, prompt: string): Promise<Energy[]> {
     return randomElements(energy, n);
   }
 

@@ -1047,6 +1047,46 @@ export class Game {
   }
 
   /**
+   * Asks a player to choose from a selection of any type of object. For Pokémon specifically,
+   * use `.choosePokemon()`.
+   */
+  async choose(player: Player, options: string[], prompt: string): Promise<string | undefined>;
+  async choose<T>(
+    player: Player,
+    options: Record<string, T>,
+    prompt: string
+  ): Promise<T | undefined>;
+  async choose<T>(player: Player, options: string[] | Record<string, T>, prompt: string) {
+    const inputs = Array.isArray(options) ? options : Object.keys(options);
+
+    if (inputs.length == 0) {
+      this.GameLog.noValidTargets(player);
+      return;
+    }
+    let selected = inputs[0];
+    if (inputs.length > 1) {
+      const agent = this.findAgent(player);
+      selected = await agent.choose(inputs, prompt);
+      if (!inputs.includes(selected)) {
+        throw new Error("Invalid option selected");
+      }
+    }
+    if (selected && !Array.isArray(options)) {
+      return options[selected];
+    }
+    return selected;
+  }
+
+  /**
+   * Asks a player to choose between "Yes" or "No" for a given question.
+   *
+   * @returns true if the player chooses "Yes", false if they choose "No".
+   */
+  async chooseYesNo(player: Player, question: string): Promise<boolean> {
+    return (await this.choose(player, { Yes: true, No: false }, question)) ?? false;
+  }
+
+  /**
    * Asks a player to choose a new Active Pokémon from among their Benched Pokémon.
    * If they have no Benched Pokémon, this does nothing.
    */
@@ -1077,7 +1117,8 @@ export class Game {
    */
   async choosePokemon(
     player: Player,
-    validPokemon: InPlayPokemon[]
+    validPokemon: InPlayPokemon[],
+    prompt: string = "Choose a Pokémon."
   ): Promise<InPlayPokemon | undefined> {
     if (validPokemon.length == 0) {
       this.GameLog.noValidTargets(player);
@@ -1086,37 +1127,9 @@ export class Game {
     if (validPokemon.length == 1) return validPokemon[0];
 
     const agent = this.findAgent(player);
-    const selectedView = await agent.choosePokemon(
-      validPokemon.map((p) => new PlayerPokemonView(p))
-    );
+    const pokemonViews = validPokemon.map((p) => new PlayerPokemonView(p));
+    const selectedView = await agent.choosePokemon(pokemonViews, prompt);
     const selected = this.viewToPokemon(selectedView, validPokemon);
-    return selected;
-  }
-
-  /**
-   * Asks a player to choose from a selection of any type of object. For Pokémon specifically,
-   * use `.choosePokemon()`.
-   */
-  async choose(player: Player, options: string[]): Promise<string | undefined>;
-  async choose<T>(player: Player, options: Record<string, T>): Promise<T | undefined>;
-  async choose<T>(player: Player, options: string[] | Record<string, T>) {
-    const inputs = Array.isArray(options) ? options : Object.keys(options);
-
-    if (inputs.length == 0) {
-      this.GameLog.noValidTargets(player);
-      return;
-    }
-    let selected = inputs[0];
-    if (inputs.length > 1) {
-      const agent = this.findAgent(player);
-      selected = await agent.choose(inputs);
-      if (!inputs.includes(selected)) {
-        throw new Error("Invalid option selected");
-      }
-    }
-    if (selected && !Array.isArray(options)) {
-      return options[selected];
-    }
     return selected;
   }
 
@@ -1126,7 +1139,8 @@ export class Game {
   async chooseNPokemon(
     player: Player,
     options: InPlayPokemon[],
-    n: number
+    n: number,
+    prompt: string = `Choose ${n} Pokémon`
   ): Promise<InPlayPokemon[]> {
     if (options.length == 0) {
       this.GameLog.noValidTargets(player);
@@ -1135,12 +1149,10 @@ export class Game {
     if (options.length <= n) return options.slice();
 
     const agent = this.findAgent(player);
-    const selected = (
-      await agent.chooseNPokemon(
-        options.map((p) => new PlayerPokemonView(p)),
-        n
-      )
-    ).map((v) => this.viewToPokemon(v, options));
+    const pokemonViews = options.map((p) => new PlayerPokemonView(p));
+    const selected = (await agent.chooseNPokemon(pokemonViews, n, prompt)).map((v) =>
+      this.viewToPokemon(v, options)
+    );
     if (!isSubset(options, selected)) {
       throw new Error("Invalid Pokémon selected");
     }
@@ -1150,7 +1162,11 @@ export class Game {
   /**
    * Asks a player to choose from a selection of cards.
    */
-  async chooseCard(player: Player, options: PlayingCard[]): Promise<PlayingCard | undefined> {
+  async chooseCard(
+    player: Player,
+    options: PlayingCard[],
+    prompt: string = "Choose a card."
+  ): Promise<PlayingCard | undefined> {
     if (options.length == 0) {
       this.GameLog.noValidTargets(player);
       return;
@@ -1158,7 +1174,7 @@ export class Game {
     if (options.length == 1) return options[0];
 
     const agent = this.findAgent(player);
-    const selected = await agent.chooseCard(options);
+    const selected = await agent.chooseCard(options, prompt);
     if (!options.includes(selected)) {
       throw new Error("Invalid card selected");
     }
@@ -1168,7 +1184,12 @@ export class Game {
   /**
    * Asks a player to choose N options from a selection of cards.
    */
-  async chooseNCards(player: Player, options: PlayingCard[], n: number): Promise<PlayingCard[]> {
+  async chooseNCards(
+    player: Player,
+    options: PlayingCard[],
+    n: number,
+    prompt: string = `Choose ${n} cards`
+  ): Promise<PlayingCard[]> {
     if (options.length == 0) {
       this.GameLog.noValidTargets(player);
       return [];
@@ -1176,7 +1197,7 @@ export class Game {
     if (options.length <= n) return options.slice();
 
     const agent = this.findAgent(player);
-    const selected = await agent.chooseNCards(options, n);
+    const selected = await agent.chooseNCards(options, n, prompt);
     if (!isSubset(options, selected)) {
       throw new Error("Invalid option selected");
     }
@@ -1200,6 +1221,7 @@ export class Game {
     player: Player,
     options: Energy[],
     n: number,
+    prompt: string,
     canSelectFewer?: boolean
   ): Promise<Energy[]> {
     if (n === 0) return [];
@@ -1214,7 +1236,7 @@ export class Game {
       return options.slice(0, n);
 
     const agent = this.findAgent(player);
-    const selected = await agent.chooseNEnergy(options, n);
+    const selected = await agent.chooseNEnergy(options, n, prompt);
     if (!isSubset(options, selected)) {
       throw new Error("Invalid option selected");
     }

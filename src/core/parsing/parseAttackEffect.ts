@@ -999,7 +999,8 @@ export const parseAttackEffect = (attack: Attack): boolean => {
             return;
           }
           const attacks = Object.fromEntries(chosenPokemon.Attacks.map((a) => [a.name, a]));
-          const chosenAttack = await game.choose(game.AttackingPlayer, attacks);
+          const prompt = `Choose an attack to copy from ${chosenPokemon.Name}.`;
+          const chosenAttack = await game.choose(game.AttackingPlayer, attacks, prompt);
           if (!chosenAttack) {
             game.GameLog.attackFailed(game.AttackingPlayer);
             return;

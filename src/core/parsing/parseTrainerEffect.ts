@@ -187,6 +187,18 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         },
       }),
     },
+    {
+      pattern: /^Look at the top card of your deck\. Then, you may shuffle your deck\.$/,
+      transform: () => ({
+        type: "Conditional",
+        condition: (game) => game.AttackingPlayer.Deck.length > 0,
+        effect: async (game) => {
+          await game.showCards(game.AttackingPlayer, game.AttackingPlayer.Deck.slice(0, 1));
+          const choice = await game.chooseYesNo(game.AttackingPlayer, "Shuffle deck?");
+          if (choice) game.AttackingPlayer.shuffleDeck();
+        },
+      }),
+    },
 
     // Status effects
     {
@@ -481,7 +493,8 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         effect: async (game, target) => {
           const player = game.AttackingPlayer;
           if (!target.isPokemon) return;
-          const energy = await game.chooseNEnergy(player, target.AttachedEnergy, 1);
+          const prompt = "Choose an Energy to move.";
+          const energy = await game.chooseNEnergy(player, target.AttachedEnergy, 1, prompt);
           await player.transferEnergy(target, player.activeOrThrow(), energy);
         },
       }),

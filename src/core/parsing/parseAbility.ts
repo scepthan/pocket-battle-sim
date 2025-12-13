@@ -394,10 +394,11 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         ability.effect = {
           type: "Standard",
           effect: async (game, self) => {
-            const chosenPlayer = await game.choose(self.player, {
-              Self: self.player,
-              Opponent: self.player.opponent,
-            });
+            const chosenPlayer = await game.choose(
+              self.player,
+              { Self: self.player, Opponent: self.player.opponent },
+              "Choose a player."
+            );
             if (!chosenPlayer) throw new Error("No player chosen");
 
             if (chosenPlayer.Deck.length > 0) {
