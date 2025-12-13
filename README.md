@@ -8,7 +8,7 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 139/157 (88.5%)
+  - [ ] A3: 140/157 (89.2%)
     - [ ] Abilities
       - [ ] New triggers
         - [ ] Before Knocked Out
@@ -39,7 +39,7 @@ Backend todo:
         - [x] Apply CannotUseItem status to opponent
         - [x] Switch with Benched mon of type
         - [x] Apply CannotAttachEnergy status to opponent (active)
-        - [ ] Also do damage to any of own mon
+        - [x] Also do damage to any of own mon
         - [x] Do damage to any opposing mon for each Energy attached to it
         - [ ] Discard random filtered card from opponent's hand
         - [x] Apply random Special Condition to opposing mon

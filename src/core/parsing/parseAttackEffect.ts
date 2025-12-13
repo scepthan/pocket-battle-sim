@@ -400,9 +400,11 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       },
     },
     {
-      pattern: /^This attack also does (\d+) damage to 1 of your Benched Pokémon\./i,
-      transform: (_, damage) => {
-        attack.choosePokemonToAttack = (game) => game.AttackingPlayer.BenchedPokemon;
+      pattern: /^This attack also does (\d+) damage to 1 of your (.+?)\./i,
+      transform: (_, damage, specifier) => {
+        const predicate = parsePokemonPredicate(specifier);
+        attack.choosePokemonToAttack = (game) =>
+          game.AttackingPlayer.InPlayPokemon.filter(predicate);
         attack.attackingEffects.push(attackTargetIfExists(Number(damage)));
       },
     },
