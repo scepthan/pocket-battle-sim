@@ -49,11 +49,6 @@ const opponent = ref<PlayerAgent>();
 const game = ref<Game>();
 const gameView = ref<PlayerGameView>();
 
-const playerDeckName = ref<string>();
-const opponentDeckName = ref<string>();
-const playerDeck = ref<DeckInfo>();
-const opponentDeck = ref<DeckInfo>();
-
 const findDeck = (deckName: string) => {
   let deck = deckStore.BuiltinDecks[deckName];
   if (deckName.startsWith("Custom - ")) {
@@ -63,6 +58,24 @@ const findDeck = (deckName: string) => {
   if (!deck) throw new Error("Could not find deck: " + deckName);
   return deck;
 };
+
+const playerDeckName = ref<string>();
+const opponentDeckName = ref<string>();
+const playerDeck = ref<DeckInfo>();
+const opponentDeck = ref<DeckInfo>();
+
+playerDeckName.value = localStorage.getItem("arenaPlayerDeck") ?? undefined;
+if (playerDeckName.value) playerDeck.value = findDeck(playerDeckName.value);
+
+opponentDeckName.value = localStorage.getItem("arenaOpponentDeck") ?? undefined;
+if (opponentDeckName.value) opponentDeck.value = findDeck(opponentDeckName.value);
+
+watch(playerDeckName, (name) => {
+  if (name) localStorage.setItem("arenaPlayerDeck", name);
+});
+watch(opponentDeckName, (name) => {
+  if (name) localStorage.setItem("arenaOpponentDeck", name);
+});
 
 const startGame = () => {
   const allDecks = deckStore.BuiltinDecks;
