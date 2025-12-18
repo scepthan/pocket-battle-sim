@@ -399,6 +399,23 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         };
       },
     },
+    {
+      pattern:
+        /^Choose 1 of your (.+?) that has damage on it, and move (\d+) of its damage to your opponent’s Active Pokémon\.$/,
+      transform: (_, descriptor, amount) => {
+        const predicate = parsePokemonPredicate(descriptor, (p) => p.isDamaged());
+
+        return {
+          type: "Targeted",
+          validTargets: (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
+          effect: async (game, target) => {
+            if (!target.isPokemon) return;
+            target.healDamage(Number(amount));
+            game.applyDamage(game.DefendingPlayer.activeOrThrow(), Number(amount), false);
+          },
+        };
+      },
+    },
 
     // Energy effects
     {
