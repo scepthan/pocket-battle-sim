@@ -925,7 +925,6 @@ export const parseAttackEffect = (attack: Attack): boolean => {
           game.DefendingPlayer.applyPlayerStatus({
             type: "CannotUseSupporter",
             source: "Effect",
-            category: "GameRule",
             keepNextTurn: true,
           });
         });
@@ -939,7 +938,6 @@ export const parseAttackEffect = (attack: Attack): boolean => {
           game.DefendingPlayer.applyPlayerStatus({
             type: "CannotUseItem",
             source: "Effect",
-            category: "GameRule",
             keepNextTurn: true,
           });
         });
@@ -951,12 +949,15 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       transform: () => {
         addSideEffect(async (game) => {
           game.DefendingPlayer.applyPlayerStatus({
-            type: "CannotAttachFromEnergyZone",
+            type: "PokemonStatus",
             source: "Effect",
-            category: "Pokemon",
             keepNextTurn: true,
             appliesToPokemon: (pokemon) => pokemon === pokemon.player.ActivePokemon,
             descriptor: "Active Pokémon",
+            pokemonStatus: {
+              type: "CannotAttachFromEnergyZone",
+              source: "Effect",
+            },
           });
         });
       },

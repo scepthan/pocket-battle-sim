@@ -15,6 +15,7 @@ import {
   type PrimaryCondition,
   type SecondaryCondition,
 } from "./types";
+import type { PokemonPlayerStatus } from "./types/playerstatus/PokemonPlayerStatus";
 
 export class InPlayPokemon {
   BaseCard: PokemonCard;
@@ -41,7 +42,16 @@ export class InPlayPokemon {
 
   PrimaryCondition?: PrimaryCondition;
   SecondaryConditions: Set<SecondaryCondition> = new Set();
-  PokemonStatuses: PokemonStatus[] = [];
+  private _PokemonStatuses: PokemonStatus[] = [];
+  get PokemonStatuses() {
+    const filteredPlayerStatuses = this.player.PlayerStatuses.filter(
+      (status) => status.type === "PokemonStatus" && status.appliesToPokemon(this, this.player.game)
+    ) as PokemonPlayerStatus[];
+
+    return this._PokemonStatuses.concat(
+      filteredPlayerStatuses.map((status) => status.pokemonStatus)
+    );
+  }
   ActivePlayerStatuses: PlayerStatus[] = []; // PlayerStatuses currently in play from this Pokemon's Ability
 
   InPlayCards: PlayingCard[] = [];
@@ -61,8 +71,8 @@ export class InPlayPokemon {
 
   calculateEffectiveEnergy(energies: Energy[]) {
     const energiesToDouble = new Set<Energy>();
-    for (const status of this.player.PlayerStatuses) {
-      if (status.type === "DoubleEnergy" && status.appliesToPokemon(this, this.player.game)) {
+    for (const status of this.PokemonStatuses) {
+      if (status.type === "DoubleEnergy") {
         energiesToDouble.add(status.energyType);
       }
     }
@@ -208,7 +218,7 @@ export class InPlayPokemon {
   removeAllSpecialConditionsAndStatuses() {
     this.removeAllSpecialConditions();
 
-    this.PokemonStatuses = this.PokemonStatuses.filter((status) => status.source != "Effect");
+    this._PokemonStatuses = this._PokemonStatuses.filter((status) => status.source != "Effect");
   }
 
   /**
@@ -217,7 +227,7 @@ export class InPlayPokemon {
    * Applies unconditionally; to check for effect prevention, use Game.applyPokemonStatus().
    */
   applyPokemonStatus(status: PokemonStatus) {
-    this.PokemonStatuses.push(status);
+    this._PokemonStatuses.push(status);
     this.logger.applyPokemonStatus(this.player, this, status);
 
     if (status.type === "IncreaseMaxHP") {
@@ -231,13 +241,31 @@ export class InPlayPokemon {
    * Removes a PokemonStatus from this Pokemon and deals with any side effects.
    */
   removePokemonStatus(status: PokemonStatus) {
-    removeElement(this.PokemonStatuses, status);
+    removeElement(this._PokemonStatuses, status);
 
     if (status.type === "IncreaseMaxHP") {
       const hpIncrease = status.amount;
       this.MaxHP -= hpIncrease;
       this.CurrentHP -= hpIncrease;
     }
+  }
+
+  /**
+   * Updates PokemonStatuses at the end of the turn, removing those that should expire.
+   */
+  updatePokemonStatusesAtTurnEnd() {
+    const newStatuses: PokemonStatus[] = [];
+    for (const status of this._PokemonStatuses) {
+      if (status.source == "Effect") {
+        if (status.turnsToKeep) {
+          status.turnsToKeep -= 1;
+          newStatuses.push(status);
+        }
+      } else {
+        newStatuses.push(status);
+      }
+    }
+    this._PokemonStatuses = newStatuses;
   }
 
   /**

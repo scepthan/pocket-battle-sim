@@ -1,18 +1,14 @@
 import type { BasePlayerStatus } from "./PlayerStatus";
 
-interface BaseGameRulePlayerStatus extends BasePlayerStatus {
-  category: "GameRule";
-}
-
-interface CannotUseSupporterPlayerStatus extends BaseGameRulePlayerStatus {
+interface CannotUseSupporterPlayerStatus extends BasePlayerStatus {
   type: "CannotUseSupporter";
 }
-interface CannotUseItemPlayerStatus extends BaseGameRulePlayerStatus {
+interface CannotUseItemPlayerStatus extends BasePlayerStatus {
   type: "CannotUseItem";
 }
 
 // A dummy status so the v-else in the game log works correctly
-interface DummyPlayerStatus extends BaseGameRulePlayerStatus {
+interface DummyPlayerStatus extends BasePlayerStatus {
   type: "Dummy";
 }
 

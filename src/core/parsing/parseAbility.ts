@@ -576,7 +576,6 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           type: "PlayerStatus",
           opponent: true,
           status: {
-            category: "GameRule",
             type: "CannotUseSupporter",
             source: "Ability",
           },
@@ -591,11 +590,11 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           type: "PlayerStatus",
           opponent: true,
           status: {
-            category: "Pokemon",
-            type: "CannotEvolve",
+            type: "PokemonStatus",
             source: "Ability",
             appliesToPokemon: (p) => p === p.player.ActivePokemon,
             descriptor: "Active Pokémon",
+            pokemonStatus: { type: "CannotEvolve", source: "Ability" },
           },
         });
       },
@@ -612,12 +611,15 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           type: "PlayerStatus",
           opponent: false,
           status: {
-            category: "Pokemon",
-            type: "IncreaseAttack",
-            amount: Number(amount),
+            type: "PokemonStatus",
             source: "Ability",
             appliesToPokemon: predicate,
             descriptor: specifier,
+            pokemonStatus: {
+              type: "IncreaseAttack",
+              amount: Number(amount),
+              source: "Ability",
+            },
           },
         });
       },
@@ -645,12 +647,15 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           type: "PlayerStatus",
           opponent: false,
           status: {
-            category: "Pokemon",
-            type: "DecreaseRetreatCost",
-            amount: Number(amount),
+            type: "PokemonStatus",
+            source: "Ability",
             appliesToPokemon,
             descriptor: specifier,
-            source: "Ability",
+            pokemonStatus: {
+              type: "ReduceRetreatCost",
+              amount: Number(amount),
+              source: "Ability",
+            },
           },
         });
       },
@@ -664,11 +669,11 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           type: "PlayerStatus",
           opponent: false,
           status: {
-            category: "Pokemon",
-            type: "NoRetreatCost",
+            type: "PokemonStatus",
+            source: "Ability",
             appliesToPokemon,
             descriptor: specifier,
-            source: "Ability",
+            pokemonStatus: { type: "NoRetreatCost", source: "Ability" },
           },
         });
       },
@@ -683,13 +688,16 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           type: "PlayerStatus",
           opponent: false,
           status: {
-            category: "Pokemon",
-            type: "DoubleEnergy",
-            energyType: fullType,
+            type: "PokemonStatus",
             source: "Ability",
             appliesToPokemon: (p) => p.Type === fullType,
             doesNotStack: true,
             descriptor: fullType + "-type Pokémon",
+            pokemonStatus: {
+              type: "DoubleEnergy",
+              energyType: fullType,
+              source: "Ability",
+            },
           },
         });
       },

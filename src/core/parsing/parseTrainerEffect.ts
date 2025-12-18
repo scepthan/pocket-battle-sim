@@ -208,11 +208,14 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         condition: () => true,
         effect: async (game) => {
           game.AttackingPlayer.applyPlayerStatus({
-            type: "DecreaseRetreatCost",
-            category: "Pokemon",
+            type: "PokemonStatus",
             appliesToPokemon: (pokemon, game) => game.AttackingPlayer.ActivePokemon === pokemon,
             source: "Effect",
-            amount: Number(modifier),
+            pokemonStatus: {
+              type: "ReduceRetreatCost",
+              amount: Number(modifier),
+              source: "Effect",
+            },
           });
         },
       }),
@@ -229,13 +232,19 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
           condition: () => true,
           effect: async (game) => {
             game.AttackingPlayer.applyPlayerStatus({
-              type: "IncreaseAttack",
-              category: "Pokemon",
+              type: "PokemonStatus",
               appliesToPokemon,
-              appliesToDefender,
               descriptor: selfSpecifier,
               source: "Effect",
-              amount: Number(modifier),
+              pokemonStatus: {
+                type: "IncreaseAttack",
+                amount: Number(modifier),
+                defenderCondition: {
+                  test: appliesToDefender,
+                  descriptor: opponentSpecifier,
+                },
+                source: "Effect",
+              },
             });
           },
         };
@@ -252,13 +261,16 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
           condition: () => true,
           effect: async (game) => {
             game.AttackingPlayer.applyPlayerStatus({
-              type: "ReduceAttackCost",
-              category: "Pokemon",
+              type: "PokemonStatus",
               appliesToPokemon,
               descriptor: specifier,
               source: "Effect",
-              energyType: fullType,
-              amount: Number(count),
+              pokemonStatus: {
+                type: "ReduceAttackCost",
+                energyType: fullType,
+                amount: Number(count),
+                source: "Effect",
+              },
             });
           },
         };
@@ -275,13 +287,16 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
           condition: () => true,
           effect: async (game) => {
             game.AttackingPlayer.applyPlayerStatus({
-              type: "IncreaseDefense",
-              category: "Pokemon",
+              type: "PokemonStatus",
               appliesToPokemon,
               descriptor: specifier,
               source: "Effect",
-              amount: Number(modifier),
               keepNextTurn: true,
+              pokemonStatus: {
+                type: "ReduceAttackDamage",
+                amount: Number(modifier),
+                source: "Effect",
+              },
             });
           },
         };

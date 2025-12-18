@@ -313,11 +313,7 @@ export class Player {
     if (!pokemon.ReadyToEvolve) {
       throw new Error("Pokemon is not ready to evolve");
     }
-    if (
-      this.PlayerStatuses.some(
-        (status) => status.type == "CannotEvolve" && status.appliesToPokemon(pokemon, this.game)
-      )
-    ) {
+    if (pokemon.PokemonStatuses.some((status) => status.type == "CannotEvolve")) {
       throw new Error("Cannot evolve this Pokemon due to status effect");
     }
 
@@ -333,13 +329,7 @@ export class Player {
   }
 
   canAttachFromEnergyZone(pokemon: InPlayPokemon) {
-    if (
-      this.PlayerStatuses.some(
-        (status) =>
-          status.type === "CannotAttachFromEnergyZone" &&
-          status.appliesToPokemon(pokemon, this.game)
-      )
-    )
+    if (pokemon.PokemonStatuses.some((status) => status.type === "CannotAttachFromEnergyZone"))
       return false;
 
     return true;
@@ -430,11 +420,11 @@ export class Player {
     const active = this.activeOrThrow();
     let retreatCost = active.RetreatCost;
 
-    for (const status of this.PlayerStatuses) {
-      if (status.type === "NoRetreatCost" && status.appliesToPokemon(active, this.game)) {
+    for (const status of this.activeOrThrow().PokemonStatuses) {
+      if (status.type === "NoRetreatCost") {
         return 0;
       }
-      if (status.type === "DecreaseRetreatCost" && status.appliesToPokemon(active, this.game)) {
+      if (status.type === "ReduceRetreatCost") {
         retreatCost -= status.amount;
       }
     }

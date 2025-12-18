@@ -320,18 +320,7 @@ export class Game {
       player.PlayerStatuses = newStatuses;
 
       for (const pokemon of player.InPlayPokemon) {
-        const newStatuses: PokemonStatus[] = [];
-        for (const status of pokemon.PokemonStatuses) {
-          if (status.source == "Effect") {
-            if (status.turnsToKeep) {
-              status.turnsToKeep -= 1;
-              newStatuses.push(status);
-            }
-          } else {
-            newStatuses.push(status);
-          }
-        }
-        pokemon.PokemonStatuses = newStatuses;
+        pokemon.updatePokemonStatusesAtTurnEnd();
       }
     }
 
@@ -660,16 +649,12 @@ export class Game {
 
     const attacker = this.AttackingPlayer.activeOrThrow();
     const defender = this.DefendingPlayer.activeOrThrow();
-    for (const status of this.AttackingPlayer.PlayerStatuses) {
-      if (status.type === "IncreaseAttack" && status.appliesToPokemon(attacker, this))
-        if (!status.appliesToDefender || status.appliesToDefender(defender, this))
-          totalDamage += status.amount;
-    }
     for (const status of attacker.PokemonStatuses) {
       if (status.type == "ReduceOwnAttackDamage") {
         totalDamage -= status.amount;
       } else if (status.type == "IncreaseAttack") {
-        totalDamage += status.amount;
+        if (!status.defenderCondition || status.defenderCondition.test(defender))
+          totalDamage += status.amount;
       } else if (status.type == "IncreaseDamageOfAttack") {
         if (status.attackName == this.CurrentAttack?.name) totalDamage += status.amount;
       }
@@ -870,12 +855,6 @@ export class Game {
 
     // After that, apply any damage modification statuses on the defender
     if (totalDamage > 0) {
-      if (owner === this.DefendingPlayer) {
-        for (const status of this.DefendingPlayer.PlayerStatuses) {
-          if (status.type === "IncreaseDefense" && status.appliesToPokemon(defender, this))
-            totalDamage -= status.amount;
-        }
-      }
       for (const status of defender.PokemonStatuses) {
         if (status.type === "ReduceAttackDamage") {
           if (status.attackerCondition && !status.attackerCondition.test(attacker)) continue;

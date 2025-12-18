@@ -154,8 +154,12 @@ export class PlayerGameView {
     const active = this.player.activeOrThrow();
 
     for (const status of this.player.PlayerStatuses) {
-      if (status.type === "DecreaseRetreatCost" && status.appliesToPokemon(active, this.game)) {
-        modifier -= status.amount;
+      if (
+        status.type === "PokemonStatus" &&
+        status.pokemonStatus.type === "ReduceRetreatCost" &&
+        status.appliesToPokemon(active, this.game)
+      ) {
+        modifier -= status.pokemonStatus.amount;
       }
     }
 
@@ -222,10 +226,8 @@ export class PlayerGameView {
     if (attack.extraConditions.some((condition) => !condition(this.game, realActive))) return false;
 
     const requiredEnergy = [...attack.requiredEnergy];
-    for (const status of [...this.selfActive.PokemonStatuses, ...this.player.PlayerStatuses]) {
+    for (const status of this.selfActive.PokemonStatuses) {
       if (status.type == "ReduceAttackCost") {
-        if ("appliesToPokemon" in status && !status.appliesToPokemon(realActive, this.game))
-          continue;
         for (let i = 0; i < status.amount; i++) {
           if (requiredEnergy.includes(status.energyType))
             removeElement(requiredEnergy, status.energyType);
@@ -273,12 +275,7 @@ export class PlayerGameView {
 
     if (!pokemon.ReadyToEvolve) return false;
     const realPokemon = this.pokemonFromView(pokemon);
-    if (
-      this.player.PlayerStatuses.some(
-        (status) => status.type == "CannotEvolve" && status.appliesToPokemon(realPokemon, this.game)
-      )
-    )
-      return false;
+    if (realPokemon.PokemonStatuses.some((status) => status.type == "CannotEvolve")) return false;
     return true;
   }
   canAttachFromEnergyZone(pokemon: PlayerPokemonView, ignoreCanPlay: boolean = false) {
@@ -380,10 +377,8 @@ export class PlayerGameView {
     if (!this.canRetreat()) return false;
 
     if (!energy) {
-      const canSelectFewer = this.player.PlayerStatuses.some(
-        (status) =>
-          status.type == "DoubleEnergy" &&
-          status.appliesToPokemon(this.pokemonFromView(this.selfActive), this.game)
+      const canSelectFewer = this.selfActive.PokemonStatuses.some(
+        (status) => status.type == "DoubleEnergy"
       );
 
       energy = await this.game.chooseNEnergy(
