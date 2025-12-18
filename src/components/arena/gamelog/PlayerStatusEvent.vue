@@ -2,14 +2,12 @@
   <div v-if="entry.status.type == 'PokemonStatus'">
     <div v-if="pokemonStatus">
       <p v-if="pokemonStatus.type == 'ReduceRetreatCost'">
-        Retreat cost is {{ pokemonStatus.amount }} less<span v-if="entry.status.descriptor">
-          for <b>{{ entry.player }}'s</b>
-          <PokemonDescriptor :text="entry.status.descriptor" /></span
+        Retreat cost is {{ pokemonStatus.amount }} less<span v-if="descriptor">
+          for <b>{{ entry.player }}'s</b> <PokemonDescriptor :text="descriptor" /></span
         ><span v-if="entry.status.source == 'Effect'"> for this turn</span>!
       </p>
       <p v-else-if="pokemonStatus.type == 'IncreaseAttack'">
-        Attacks used<span v-if="entry.status.descriptor">
-          by your <PokemonDescriptor :text="entry.status.descriptor" /></span
+        Attacks used<span v-if="descriptor"> by your <PokemonDescriptor :text="descriptor" /></span
         ><span v-if="entry.status.source == 'Effect'"> this turn</span> do +{{
           pokemonStatus.amount
         }}
@@ -20,11 +18,10 @@
           pokemonStatus.amount
         }}
         damage to <b>{{ entry.player }}</b
-        >'s <PokemonDescriptor :text="entry.status.descriptor" />!
+        >'s <PokemonDescriptor :text="descriptor" />!
       </p>
       <p v-else-if="pokemonStatus.type == 'CannotEvolve'">
-        <b>{{ entry.player }}</b> cannot evolve their
-        <PokemonDescriptor :text="entry.status.descriptor" /><span
+        <b>{{ entry.player }}</b> cannot evolve their <PokemonDescriptor :text="descriptor" /><span
           v-if="entry.status.source == 'Effect'"
         >
           next turn</span
@@ -32,20 +29,18 @@
       </p>
       <p v-else-if="pokemonStatus.type == 'CannotAttachFromEnergyZone'">
         <b>{{ entry.player }}</b> cannot attach Energy from their Energy Zone to their
-        <PokemonDescriptor :text="entry.status.descriptor" /><span
-          v-if="entry.status.source == 'Effect'"
-        >
+        <PokemonDescriptor :text="descriptor" /><span v-if="entry.status.source == 'Effect'">
           next turn</span
         >!
       </p>
       <p v-else-if="pokemonStatus.type == 'DoubleEnergy'">
         All of <b>{{ entry.player }}</b
-        >'s <PokemonDescriptor :text="entry.status.descriptor" /> now have their
+        >'s <PokemonDescriptor :text="descriptor" /> now have their
         <EnergyIcon inline :energy="pokemonStatus.energyType" /> count as double!
       </p>
       <p v-else-if="pokemonStatus.type == 'ReduceAttackCost'">
         All of <b>{{ entry.player }}</b
-        >'s <PokemonDescriptor :text="entry.status.descriptor" /> have their attack cost reduced by
+        >'s <PokemonDescriptor :text="descriptor" /> have their attack cost reduced by
         {{ pokemonStatus.amount }} <EnergyIcon inline :energy="pokemonStatus.energyType" /><span
           v-if="entry.status.source == 'Effect'"
         >
@@ -54,7 +49,7 @@
       </p>
       <p v-else-if="pokemonStatus.type == 'NoRetreatCost'">
         All of <b>{{ entry.player }}</b
-        >'s <PokemonDescriptor :text="entry.status.descriptor" /> have no Retreat Cost<span
+        >'s <PokemonDescriptor :text="descriptor" /> have no Retreat Cost<span
           v-if="entry.status.source == 'Effect'"
         >
           this turn</span
@@ -62,7 +57,7 @@
       </p>
       <p v-else>
         Unknown Pokemon status applied to <b>{{ entry.player }}</b
-        >'s <PokemonDescriptor :text="entry.status.descriptor" />: {{ pokemonStatus.type }}
+        >'s <PokemonDescriptor :text="descriptor" />: {{ pokemonStatus.type }}
       </p>
     </div>
   </div>
@@ -96,5 +91,8 @@ const props = defineProps<Props>();
 
 const pokemonStatus = computed(() =>
   props.entry.status.type === "PokemonStatus" ? props.entry.status.pokemonStatus : null
+);
+const descriptor = computed(() =>
+  props.entry.status.type === "PokemonStatus" ? props.entry.status.pokemonCondition.descriptor : ""
 );
 </script>

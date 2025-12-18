@@ -9,3 +9,7 @@ export type TargetedPokemonEffect = (
 ) => Promise<void>;
 
 export type PokemonConditional = (pokemon: InPlayPokemon) => boolean;
+export interface PokemonDescriptor {
+  test: PokemonConditional;
+  descriptor: string;
+}

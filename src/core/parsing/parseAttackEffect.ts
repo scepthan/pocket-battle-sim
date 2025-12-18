@@ -57,13 +57,13 @@ export const parseAttackEffect = (attack: Attack): boolean => {
     attack.sideEffects.push(applyConditionalIfAvailable(effect));
   };
 
-  const parsePokemonPredicate = (specifier: string) => {
-    const { parseSuccessful: success, value } = _pokemonParse(specifier);
+  const parsePokemonPredicate = (descriptor: string) => {
+    const { parseSuccessful: success, value } = _pokemonParse(descriptor);
     if (!success) parseSuccessful = false;
     return value;
   };
-  const parsePlayingCardPredicate = (specifier: string) => {
-    const { parseSuccessful: success, value } = _cardParse(specifier);
+  const parsePlayingCardPredicate = (descriptor: string) => {
+    const { parseSuccessful: success, value } = _cardParse(descriptor);
     if (!success) parseSuccessful = false;
     return value;
   };
@@ -182,8 +182,8 @@ export const parseAttackEffect = (attack: Attack): boolean => {
     },
     {
       pattern: /^If your opponent’s Active Pokémon is a ([^,]+?),/i,
-      transform: (_, specifier) => {
-        const predicate = parsePokemonPredicate(specifier);
+      transform: (_, descriptor) => {
+        const predicate = parsePokemonPredicate(descriptor);
         conditionalForNextEffect = (game) => predicate(game.DefendingPlayer.activeOrThrow());
       },
     },
@@ -282,8 +282,8 @@ export const parseAttackEffect = (attack: Attack): boolean => {
     },
     {
       pattern: /^This attack does (\d+)( more)? damage for each of your ([^.]+)\./i,
-      transform: (_, damageEach, more, specifier) => {
-        const predicate = parsePokemonPredicate(specifier);
+      transform: (_, damageEach, more, descriptor) => {
+        const predicate = parsePokemonPredicate(descriptor);
 
         attack.calculateDamage = (game) => {
           const pokemonCount = game.AttackingPlayer.InPlayPokemon.filter(predicate).length;
@@ -340,9 +340,9 @@ export const parseAttackEffect = (attack: Attack): boolean => {
     // Damage to opponent’s bench
     {
       pattern: /^This attack also does (\d+) damage to each of your opponent’s (Benched [^.]+?)\./i,
-      transform: (_, benchDamage, specifier) => {
+      transform: (_, benchDamage, descriptor) => {
         const dmg = Number(benchDamage);
-        const predicate = parsePokemonPredicate(specifier);
+        const predicate = parsePokemonPredicate(descriptor);
         const benchDamageEffect = applyConditionalIfAvailable(async (game) => {
           for (const p of game.DefendingPlayer.BenchedPokemon) {
             if (predicate(p)) game.attackPokemon(p, dmg);
@@ -354,8 +354,8 @@ export const parseAttackEffect = (attack: Attack): boolean => {
     {
       pattern:
         /^This attack does (\d+) damage to 1 of your opponent’s (.+?) for each Energy attached to that Pokémon\./i,
-      transform: (_, damagePerEnergy, specifier) => {
-        const predicate = parsePokemonPredicate(specifier);
+      transform: (_, damagePerEnergy, descriptor) => {
+        const predicate = parsePokemonPredicate(descriptor);
 
         attack.choosePokemonToAttack = (game) =>
           game.DefendingPlayer.InPlayPokemon.filter(predicate);
@@ -368,8 +368,8 @@ export const parseAttackEffect = (attack: Attack): boolean => {
     },
     {
       pattern: /^This attack(?: also)? does (\d+) damage to 1 of your opponent’s (.+?)\./i,
-      transform: (_, damage, specifier) => {
-        const predicate = parsePokemonPredicate(specifier);
+      transform: (_, damage, descriptor) => {
+        const predicate = parsePokemonPredicate(descriptor);
         attack.choosePokemonToAttack = (game) =>
           game.DefendingPlayer.InPlayPokemon.filter(predicate);
         attack.attackingEffects.push(attackTargetIfExists(Number(damage)));
@@ -401,8 +401,8 @@ export const parseAttackEffect = (attack: Attack): boolean => {
     },
     {
       pattern: /^This attack also does (\d+) damage to 1 of your (.+?)\./i,
-      transform: (_, damage, specifier) => {
-        const predicate = parsePokemonPredicate(specifier);
+      transform: (_, damage, descriptor) => {
+        const predicate = parsePokemonPredicate(descriptor);
         attack.choosePokemonToAttack = (game) =>
           game.AttackingPlayer.InPlayPokemon.filter(predicate);
         attack.attackingEffects.push(attackTargetIfExists(Number(damage)));
@@ -466,8 +466,8 @@ export const parseAttackEffect = (attack: Attack): boolean => {
     },
     {
       pattern: /^Put 1 random (.+?) from your deck into your hand\./i,
-      transform: (_, specifier) => {
-        const predicate = parsePlayingCardPredicate(specifier);
+      transform: (_, descriptor) => {
+        const predicate = parsePlayingCardPredicate(descriptor);
         addSideEffect(async (game) => {
           game.AttackingPlayer.drawRandomFilteredToHand(predicate);
         });
@@ -475,8 +475,8 @@ export const parseAttackEffect = (attack: Attack): boolean => {
     },
     {
       pattern: /^Put 1 random (.+?) from your deck onto your bench\./i,
-      transform: (_, specifier) => {
-        const predicate = parsePlayingCardPredicate(specifier);
+      transform: (_, descriptor) => {
+        const predicate = parsePlayingCardPredicate(descriptor);
         addSideEffect(async (game) => {
           await game.AttackingPlayer.playRandomFilteredToBench(predicate);
         });
@@ -661,8 +661,8 @@ export const parseAttackEffect = (attack: Attack): boolean => {
     // Switching effects
     {
       pattern: /^Switch this Pokémon with 1 of your Benched (.+?)\./i,
-      transform: (_, specifier) => {
-        const predicate = parsePokemonPredicate(specifier);
+      transform: (_, descriptor) => {
+        const predicate = parsePokemonPredicate(descriptor);
         addSideEffect(async (game) => {
           const pokemon = await game.choosePokemon(
             game.AttackingPlayer,
@@ -952,8 +952,10 @@ export const parseAttackEffect = (attack: Attack): boolean => {
             type: "PokemonStatus",
             source: "Effect",
             keepNextTurn: true,
-            appliesToPokemon: (pokemon) => pokemon === pokemon.player.ActivePokemon,
-            descriptor: "Active Pokémon",
+            pokemonCondition: {
+              test: (pokemon) => pokemon === pokemon.player.ActivePokemon,
+              descriptor: "Active Pokémon",
+            },
             pokemonStatus: {
               type: "CannotAttachFromEnergyZone",
               source: "Effect",

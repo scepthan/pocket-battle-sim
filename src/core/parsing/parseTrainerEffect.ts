@@ -24,13 +24,13 @@ interface EffectTransformer {
 export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect> => {
   let parseSuccessful = true;
 
-  const parsePokemonPredicate = (specifier: string, initial?: InPlayPokemonPredicate) => {
-    const { parseSuccessful: success, value } = _pokemonParse(specifier, initial);
+  const parsePokemonPredicate = (descriptor: string, initial?: InPlayPokemonPredicate) => {
+    const { parseSuccessful: success, value } = _pokemonParse(descriptor, initial);
     if (!success) parseSuccessful = false;
     return value;
   };
-  const parsePlayingCardPredicate = (specifier: string) => {
-    const { parseSuccessful: success, value } = _cardParse(specifier);
+  const parsePlayingCardPredicate = (descriptor: string) => {
+    const { parseSuccessful: success, value } = _cardParse(descriptor);
     if (!success) parseSuccessful = false;
     return value;
   };
@@ -47,8 +47,8 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     },
     {
       pattern: /^Put (?:a|1) random (.+?) from your deck into your hand\.$/,
-      transform: (_, specifier) => {
-        const predicate = parsePlayingCardPredicate(specifier);
+      transform: (_, descriptor) => {
+        const predicate = parsePlayingCardPredicate(descriptor);
         return {
           type: "Conditional",
           condition: (game) => game.AttackingPlayer.canDraw(true),
@@ -113,8 +113,8 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     },
     {
       pattern: /^Put (?:a|1) random (.+?) from your discard pile into your hand\.$/,
-      transform: (_, specifier) => {
-        const predicate = parsePlayingCardPredicate(specifier);
+      transform: (_, descriptor) => {
+        const predicate = parsePlayingCardPredicate(descriptor);
         return {
           type: "Conditional",
           condition: (game, self) => self.Discard.some(predicate),
@@ -209,7 +209,10 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         effect: async (game) => {
           game.AttackingPlayer.applyPlayerStatus({
             type: "PokemonStatus",
-            appliesToPokemon: (pokemon, game) => game.AttackingPlayer.ActivePokemon === pokemon,
+            pokemonCondition: {
+              test: (pokemon) => pokemon.player.ActivePokemon === pokemon,
+              descriptor: "Active Pokémon",
+            },
             source: "Effect",
             pokemonStatus: {
               type: "ReduceRetreatCost",
@@ -233,8 +236,10 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
           effect: async (game) => {
             game.AttackingPlayer.applyPlayerStatus({
               type: "PokemonStatus",
-              appliesToPokemon,
-              descriptor: selfSpecifier,
+              pokemonCondition: {
+                test: appliesToPokemon,
+                descriptor: selfSpecifier,
+              },
               source: "Effect",
               pokemonStatus: {
                 type: "IncreaseAttack",
@@ -252,8 +257,8 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     },
     {
       pattern: /^During this turn, attacks used by your (.+?) cost (\d+) less {(\w)} Energy\.$/,
-      transform: (_, specifier, count, energy) => {
-        const appliesToPokemon = parsePokemonPredicate(specifier);
+      transform: (_, descriptor, count, energy) => {
+        const predicate = parsePokemonPredicate(descriptor);
         const fullType = parseEnergy(energy);
 
         return {
@@ -262,8 +267,10 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
           effect: async (game) => {
             game.AttackingPlayer.applyPlayerStatus({
               type: "PokemonStatus",
-              appliesToPokemon,
-              descriptor: specifier,
+              pokemonCondition: {
+                test: predicate,
+                descriptor,
+              },
               source: "Effect",
               pokemonStatus: {
                 type: "ReduceAttackCost",
@@ -279,8 +286,8 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     {
       pattern:
         /^During your opponent’s next turn, all of your (.+?) take −(\d+) damage from attacks from your opponent’s Pokémon\.$/,
-      transform: (_, specifier, modifier) => {
-        const appliesToPokemon = parsePokemonPredicate(specifier);
+      transform: (_, descriptor, modifier) => {
+        const predicate = parsePokemonPredicate(descriptor);
 
         return {
           type: "Conditional",
@@ -288,8 +295,10 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
           effect: async (game) => {
             game.AttackingPlayer.applyPlayerStatus({
               type: "PokemonStatus",
-              appliesToPokemon,
-              descriptor: specifier,
+              pokemonCondition: {
+                test: predicate,
+                descriptor,
+              },
               source: "Effect",
               keepNextTurn: true,
               pokemonStatus: {
@@ -307,9 +316,9 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     {
       pattern:
         /^Heal (\d+) damage from 1 of your ([^.]+?), and it recovers from all Special Conditions\.$/,
-      transform: (_, modifier, specifier) => {
+      transform: (_, modifier, descriptor) => {
         const predicate = parsePokemonPredicate(
-          specifier,
+          descriptor,
           (p) => p.isDamaged() || p.hasSpecialCondition()
         );
         return {
@@ -325,8 +334,8 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     },
     {
       pattern: /^Heal (\d+) damage from 1 of your ([^.]+?)\.$/,
-      transform: (_, modifier, specifier) => {
-        const predicate = parsePokemonPredicate(specifier, (p) => p.isDamaged());
+      transform: (_, modifier, descriptor) => {
+        const predicate = parsePokemonPredicate(descriptor, (p) => p.isDamaged());
         return {
           type: "Targeted",
           validTargets: (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
@@ -339,8 +348,8 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     {
       pattern:
         /^Heal all damage from 1 of your ([^.]+?)\. If you do, discard all Energy from that Pokémon\.$/,
-      transform: (_, specifier) => {
-        const predicate = parsePokemonPredicate(specifier, (p) => p.isDamaged());
+      transform: (_, descriptor) => {
+        const predicate = parsePokemonPredicate(descriptor, (p) => p.isDamaged());
         return {
           type: "Targeted",
           validTargets: (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
@@ -372,10 +381,10 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     },
     {
       pattern: /^Heal (\d+) damage from each of your (.+?) that has any {(\w)} Energy attached\.$/,
-      transform: (_, modifier, specifier, energyType) => {
+      transform: (_, modifier, descriptor, energyType) => {
         const fullType = parseEnergy(energyType);
         const predicate = parsePokemonPredicate(
-          specifier,
+          descriptor,
           (p) => p.isDamaged() && p.AttachedEnergy.includes(fullType)
         );
 
@@ -416,9 +425,9 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     },
     {
       pattern: /^Take a {(\w)} Energy from your Energy Zone and attach it to (.+?)\.$/,
-      transform: (_, energyType, specifier) => {
+      transform: (_, energyType, descriptor) => {
         const fullType = parseEnergy(energyType);
-        const predicate = parsePokemonPredicate(specifier);
+        const predicate = parsePokemonPredicate(descriptor);
 
         return {
           type: "Targeted",
@@ -433,8 +442,8 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     {
       pattern:
         /^Choose 1 of your (.+?)\. Take (\d+) \{(\w)\} Energy from your Energy Zone and attach it to that Pokémon\.( Your turn ends\.)$/,
-      transform: (_, specifier, count, energyType, endTurn) => {
-        const predicate = parsePokemonPredicate(specifier);
+      transform: (_, descriptor, count, energyType, endTurn) => {
+        const predicate = parsePokemonPredicate(descriptor);
         const fullType = parseEnergy(energyType);
         const energyToAttach = new Array(Number(count)).fill(fullType);
 
@@ -453,8 +462,8 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     {
       pattern:
         /^Choose 1 of your (.+?)\. Attach (\d+) \{(\w)\} Energy from your discard pile to that Pokémon\.$/,
-      transform: (_, specifier, count, energyType) => {
-        const predicate = parsePokemonPredicate(specifier);
+      transform: (_, descriptor, count, energyType) => {
+        const predicate = parsePokemonPredicate(descriptor);
         const fullType = parseEnergy(energyType);
 
         return {
@@ -477,9 +486,9 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     {
       pattern:
         /^Move all {(\w)} Energy from your Benched Pokémon to your (.+?) in the Active Spot\.$/,
-      transform: (_, energyType, specifier) => {
+      transform: (_, energyType, descriptor) => {
         const fullType = parseEnergy(energyType);
-        const predicate = parsePokemonPredicate(specifier);
+        const predicate = parsePokemonPredicate(descriptor);
 
         return {
           type: "Conditional",
@@ -558,8 +567,8 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     {
       pattern:
         /^You can use this card only if you have (.+?) in play\. Switch in 1 of your opponent’s Benched Pokémon to the Active Spot\.$/i,
-      transform: (_, specifier) => {
-        const predicate = parsePokemonPredicate(specifier);
+      transform: (_, descriptor) => {
+        const predicate = parsePokemonPredicate(descriptor);
 
         return {
           type: "Targeted",
@@ -578,8 +587,8 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     },
     {
       pattern: /^Put your (.+?) in the Active Spot into your hand\.$/,
-      transform: (_, specifier) => {
-        const predicate = parsePokemonPredicate(specifier);
+      transform: (_, descriptor) => {
+        const predicate = parsePokemonPredicate(descriptor);
 
         return {
           type: "Conditional",

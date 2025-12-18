@@ -157,7 +157,7 @@ export class PlayerGameView {
       if (
         status.type === "PokemonStatus" &&
         status.pokemonStatus.type === "ReduceRetreatCost" &&
-        status.appliesToPokemon(active, this.game)
+        status.pokemonCondition.test(active)
       ) {
         modifier -= status.pokemonStatus.amount;
       }

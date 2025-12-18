@@ -45,7 +45,7 @@ export class InPlayPokemon {
   private _PokemonStatuses: PokemonStatus[] = [];
   get PokemonStatuses() {
     const filteredPlayerStatuses = this.player.PlayerStatuses.filter(
-      (status) => status.type === "PokemonStatus" && status.appliesToPokemon(this, this.player.game)
+      (status) => status.type === "PokemonStatus" && status.pokemonCondition.test(this)
     ) as PokemonPlayerStatus[];
 
     return this._PokemonStatuses.concat(

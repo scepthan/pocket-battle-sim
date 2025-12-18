@@ -51,8 +51,8 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
   let abilityText = inputAbility.text;
   let parseSuccessful = true;
 
-  const parsePokemonPredicate = (specifier: string, initial?: InPlayPokemonPredicate) => {
-    const { parseSuccessful: success, value } = _pokemonParse(specifier, initial);
+  const parsePokemonPredicate = (descriptor: string, initial?: InPlayPokemonPredicate) => {
+    const { parseSuccessful: success, value } = _pokemonParse(descriptor, initial);
     if (!success) parseSuccessful = false;
     return value;
   };
@@ -129,8 +129,8 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     },
     {
       pattern: /If you have (.+?) in play, /i,
-      transform: (_, specifier) => {
-        const predicate = parsePokemonPredicate(specifier);
+      transform: (_, descriptor) => {
+        const predicate = parsePokemonPredicate(descriptor);
         ability.conditions.push((self) => self.player.InPlayPokemon.some(predicate));
       },
     },
@@ -169,9 +169,9 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     },
     {
       pattern: /take a {(\w)} Energy from your Energy Zone and attach it to 1 of your ([^.]+?)\./i,
-      transform: (_, energyType, specifier) => {
+      transform: (_, energyType, descriptor) => {
         const fullType = parseEnergy(energyType);
-        const predicate = parsePokemonPredicate(specifier);
+        const predicate = parsePokemonPredicate(descriptor);
 
         ability.effect = {
           type: "Targeted",
@@ -231,8 +231,8 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     // Healing effects
     {
       pattern: /heal (\d+) damage from each of your (.+?)\.$/i,
-      transform: (_, healing, specifier) => {
-        const predicate = parsePokemonPredicate(specifier, (p) => p.isDamaged());
+      transform: (_, healing, descriptor) => {
+        const predicate = parsePokemonPredicate(descriptor, (p) => p.isDamaged());
 
         ability.conditions.push((self) => self.player.InPlayPokemon.some(predicate));
         ability.effect = {
@@ -462,12 +462,12 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     // Pokemon statuses
     {
       pattern: /^This Pokémon takes −(\d+) damage from attacks(?: from ([^.]+?))?\.$/i,
-      transform: (_, amount, specifier) => {
+      transform: (_, amount, descriptor) => {
         const reduceAmount = Number(amount);
-        const attackerCondition = specifier
+        const attackerCondition = descriptor
           ? {
-              test: parsePokemonPredicate(specifier),
-              descriptor: specifier,
+              test: parsePokemonPredicate(descriptor),
+              descriptor,
             }
           : undefined;
 
@@ -498,8 +498,8 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     },
     {
       pattern: /^Prevent all damage done to this Pokémon by attacks from your opponent’s (.+?)\.$/i,
-      transform: (_, specifier) => {
-        const predicate = parsePokemonPredicate(specifier);
+      transform: (_, descriptor) => {
+        const predicate = parsePokemonPredicate(descriptor);
 
         convertToStatusAbility({
           type: "PokemonStatus",
@@ -508,7 +508,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
             source: "Ability",
             attackerCondition: {
               test: predicate,
-              descriptor: specifier,
+              descriptor,
             },
           },
         });
@@ -592,8 +592,10 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           status: {
             type: "PokemonStatus",
             source: "Ability",
-            appliesToPokemon: (p) => p === p.player.ActivePokemon,
-            descriptor: "Active Pokémon",
+            pokemonCondition: {
+              test: (p) => p === p.player.ActivePokemon,
+              descriptor: "Active Pokémon",
+            },
             pokemonStatus: { type: "CannotEvolve", source: "Ability" },
           },
         });
@@ -604,8 +606,8 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     {
       pattern:
         /^Attacks used by your (.+?) do \+(\d+) damage to your opponent’s Active Pokémon\.$/i,
-      transform: (_, specifier, amount) => {
-        const predicate = parsePokemonPredicate(specifier);
+      transform: (_, descriptor, amount) => {
+        const predicate = parsePokemonPredicate(descriptor);
 
         convertToStatusAbility({
           type: "PlayerStatus",
@@ -613,8 +615,10 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           status: {
             type: "PokemonStatus",
             source: "Ability",
-            appliesToPokemon: predicate,
-            descriptor: specifier,
+            pokemonCondition: {
+              test: predicate,
+              descriptor,
+            },
             pokemonStatus: {
               type: "IncreaseAttack",
               amount: Number(amount),
@@ -640,8 +644,8 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     },
     {
       pattern: /^your (Active .+?)’s Retreat Cost is (\d+) less\./i,
-      transform: (_, specifier, amount) => {
-        const appliesToPokemon = parsePokemonPredicate(specifier);
+      transform: (_, descriptor, amount) => {
+        const predicate = parsePokemonPredicate(descriptor);
 
         convertToStatusAbility({
           type: "PlayerStatus",
@@ -649,8 +653,10 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           status: {
             type: "PokemonStatus",
             source: "Ability",
-            appliesToPokemon,
-            descriptor: specifier,
+            pokemonCondition: {
+              test: predicate,
+              descriptor,
+            },
             pokemonStatus: {
               type: "ReduceRetreatCost",
               amount: Number(amount),
@@ -662,8 +668,8 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     },
     {
       pattern: /^your (Active .+?) has no Retreat Cost\./i,
-      transform: (_, specifier) => {
-        const appliesToPokemon = parsePokemonPredicate(specifier);
+      transform: (_, descriptor) => {
+        const predicate = parsePokemonPredicate(descriptor);
 
         convertToStatusAbility({
           type: "PlayerStatus",
@@ -671,8 +677,10 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           status: {
             type: "PokemonStatus",
             source: "Ability",
-            appliesToPokemon,
-            descriptor: specifier,
+            pokemonCondition: {
+              test: predicate,
+              descriptor,
+            },
             pokemonStatus: { type: "NoRetreatCost", source: "Ability" },
           },
         });
@@ -680,9 +688,10 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
     },
     {
       pattern:
-        /^Each {(\w)} Energy attached to your {\1} Pokémon provides 2 {\1} Energy. This effect doesn’t stack.$/i,
-      transform: (_, energyType) => {
+        /^Each {(\w)} Energy attached to your (.+?) provides 2 {\1} Energy. This effect doesn’t stack.$/i,
+      transform: (_, energyType, descriptor) => {
         const fullType = parseEnergy(energyType);
+        const predicate = parsePokemonPredicate(descriptor);
 
         convertToStatusAbility({
           type: "PlayerStatus",
@@ -690,9 +699,11 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           status: {
             type: "PokemonStatus",
             source: "Ability",
-            appliesToPokemon: (p) => p.Type === fullType,
+            pokemonCondition: {
+              test: predicate,
+              descriptor,
+            },
             doesNotStack: true,
-            descriptor: fullType + "-type Pokémon",
             pokemonStatus: {
               type: "DoubleEnergy",
               energyType: fullType,

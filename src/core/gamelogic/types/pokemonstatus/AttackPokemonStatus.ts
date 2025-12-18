@@ -1,11 +1,8 @@
-import type { PokemonConditional } from "../Effects";
+import type { PokemonDescriptor } from "../Effects";
 import type { BasePokemonStatus } from "./PokemonStatus";
 
 interface BaseAttackPokemonStatus extends BasePokemonStatus {
-  defenderCondition?: {
-    test: PokemonConditional;
-    descriptor: string;
-  };
+  defenderCondition?: PokemonDescriptor;
 }
 
 // Statuses that affect outgoing attacks
