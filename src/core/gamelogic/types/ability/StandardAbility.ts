@@ -12,6 +12,7 @@ export type AbilityTrigger =
   | { type: "Manual"; multiUse: boolean }
   | { type: "OnEnterPlay"; excludeSetup?: boolean }
   | { type: "AfterDamagedByAttack" }
+  | { type: "BeforeKnockedOutByAttack" }
   | { type: "AfterKnockedOutByAttack" }
   | { type: "OnEnergyZoneAttach"; energy?: Energy }
   | { type: "OnEndOwnTurn"; firstOnly?: boolean }

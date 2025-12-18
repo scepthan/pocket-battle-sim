@@ -92,6 +92,13 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       },
     },
     {
+      pattern: /^If this Pokémon would be Knocked Out by damage from an attack, /i,
+      transform: () => {
+        if (ability.type === "Status") throw new Error("Cannot set trigger on Status Ability");
+        ability.trigger = { type: "BeforeKnockedOutByAttack" };
+      },
+    },
+    {
       pattern:
         /^Whenever you attach (?:a {(\w)}|an) Energy from your Energy Zone to (?:this Pokémon|it), /i,
       transform: (_, energyType) => {
@@ -284,6 +291,20 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
             const damage = target.currentDamage();
             game.applyDamage(self, damage, false);
             target.healDamage(damage);
+          },
+        };
+      },
+    },
+    {
+      pattern:
+        /flip a coin. If heads, this Pokémon is not Knocked Out, and its remaining HP becomes (\d+)\./i,
+      transform: (_, hp) => {
+        ability.effect = {
+          type: "Standard",
+          effect: async (game, self) => {
+            if (self.player.flipCoin()) {
+              self.healDamage(Number(hp));
+            }
           },
         };
       },

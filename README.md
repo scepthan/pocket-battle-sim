@@ -8,10 +8,10 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 143/157 (91.1%)
+  - [ ] A3: 144/157 (91.7%)
     - [ ] Abilities
       - [ ] New triggers
-        - [ ] Before Knocked Out
+        - [x] Before Knocked Out
         - [x] After Knocked Out
       - [ ] New conditionals
         - [ ] During your first turn
@@ -20,7 +20,7 @@ Backend todo:
         - [x] Prevent damage from ex mon
         - [ ] Apply HealSpecialConditions status to player (mon with Energy of type attached)
         - [x] Move all Energy of type from Benched mon to Active mon
-        - [ ] Flip coin to set self HP to 10 (need to investigate OOO in-game)
+        - [x] Flip coin to set self HP to 10 (need to investigate OOO in-game)
         - [x] Move all Energy of type from self to Benched mon
         - [x] Switch with Active mon
         - [x] Put self to sleep

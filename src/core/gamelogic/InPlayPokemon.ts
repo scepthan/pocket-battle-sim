@@ -392,6 +392,15 @@ export class InPlayPokemon {
     }
   }
 
+  async beforeKnockedOutByAttack() {
+    if (
+      this.Ability?.type === "Standard" &&
+      this.Ability.trigger.type === "BeforeKnockedOutByAttack"
+    ) {
+      if (this.game.DefendingPlayer.InPlayPokemon.includes(this)) await this.triggerAbility();
+    }
+  }
+
   async afterKnockedOutByAttack() {
     if (
       this.Ability?.type === "Standard" &&

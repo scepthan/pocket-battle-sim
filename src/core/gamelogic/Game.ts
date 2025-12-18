@@ -366,7 +366,10 @@ export class Game {
       for (const pokemon of player.InPlayPokemon) {
         if (pokemon.CurrentHP <= 0) {
           const fromAttack = this.AttackKnockedOutPokemon.has(pokemon);
-          await this.handleKnockOut(pokemon, fromAttack);
+          if (fromAttack) await pokemon.beforeKnockedOutByAttack();
+          if (pokemon.CurrentHP <= 0) {
+            await this.handleKnockOut(pokemon, fromAttack);
+          }
         }
       }
     }
