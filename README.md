@@ -8,7 +8,7 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 142/157 (90.4%)
+  - [ ] A3: 143/157 (91.1%)
     - [ ] Abilities
       - [ ] New triggers
         - [ ] Before Knocked Out
@@ -41,6 +41,7 @@ Backend todo:
         - [x] Apply CannotAttachEnergy status to opponent (active)
         - [x] Also do damage to any of own mon
         - [x] Do damage to any opposing mon for each Energy attached to it
+        - [x] Draw random card that evolves from mon
         - [ ] Discard random filtered card from opponent's hand
         - [x] Apply random Special Condition to opposing mon
         - [ ] Apply IncreaseAttackDamage status to self
