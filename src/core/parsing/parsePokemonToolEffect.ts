@@ -121,5 +121,6 @@ const removePokemonStatus = (pokemon: InPlayPokemon, status: PokemonStatus) => {
     (s) => s.type === status.type && s.source === status.source
   );
   if (!foundStatus) throw new Error("Could not find status to remove");
+  pokemon.logger.removePokemonStatus(pokemon, status);
   pokemon.removePokemonStatus(foundStatus);
 };

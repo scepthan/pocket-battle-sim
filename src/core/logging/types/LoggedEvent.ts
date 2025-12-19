@@ -286,6 +286,12 @@ interface PokemonStatusAppliedEvent {
   targetPokemon: InPlayPokemonDescriptor;
   status: PokemonStatus;
 }
+interface PokemonStatusRemovedEvent {
+  type: "removePokemonStatus";
+  player: string;
+  targetPokemon: InPlayPokemonDescriptor;
+  status: PokemonStatus;
+}
 interface PlayerStatusAppliedEvent {
   type: "applyPlayerStatus";
   player: string;
@@ -365,6 +371,7 @@ export type LoggedEvent =
   | SpecialConditionDamageEvent
   | SpecialConditionEffectiveEvent
   | PokemonStatusAppliedEvent
+  | PokemonStatusRemovedEvent
   | PlayerStatusAppliedEvent
   | PlayerStatusRemovedEvent
   | AttackFailedEvent

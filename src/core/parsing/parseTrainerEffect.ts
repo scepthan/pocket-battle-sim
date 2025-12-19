@@ -689,6 +689,21 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         };
       },
     },
+
+    // Other effects
+    {
+      pattern: /Discard all Pokémon Tool cards attached to each of your opponent’s Pokémon\./i,
+      transform: () => ({
+        type: "Conditional",
+        condition: (game) =>
+          game.DefendingPlayer.InPlayPokemon.some((p) => p.AttachedToolCards.length > 0),
+        effect: async (game) => {
+          for (const pokemon of game.DefendingPlayer.InPlayPokemon) {
+            await game.discardPokemonTools(pokemon);
+          }
+        },
+      }),
+    },
   ];
 
   for (const { pattern, transform } of dictionary) {

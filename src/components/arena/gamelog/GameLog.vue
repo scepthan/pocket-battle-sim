@@ -118,12 +118,23 @@
           </p>
         </div>
 
+        <div v-else-if="entry.type == 'applyPokemonStatus'" class="sub-entry">
+          <PokemonStatusEvent :entry="entry" />
+        </div>
+
+        <div v-else-if="entry.type == 'removePokemonStatus'" class="sub-entry">
+          <p>
+            Status removed from <CardName :card-id="entry.targetPokemon.cardId" />:
+            {{ entry.status.type }}
+          </p>
+        </div>
+
         <div v-else-if="entry.type == 'applyPlayerStatus'" class="sub-entry">
           <PlayerStatusEvent :entry="entry" />
         </div>
 
         <div v-else-if="entry.type == 'removePlayerStatus'" class="sub-entry">
-          <p>Player status removed from {{ entry.player }}: {{ entry.status.type }}</p>
+          <p>Status removed from {{ entry.player }}: {{ entry.status.type }}</p>
         </div>
 
         <div
@@ -269,10 +280,6 @@
           <p v-for="(condition, i) in entry.specialConditions" :key="i">
             <CardName :card-id="entry.targetPokemon.cardId" /> recovered from being {{ condition }}!
           </p>
-        </div>
-
-        <div v-else-if="entry.type == 'applyPokemonStatus'" class="sub-entry">
-          <PokemonStatusEvent :entry="entry" />
         </div>
 
         <div v-else-if="entry.type == 'pokemonKnockedOut'" class="sub-entry">

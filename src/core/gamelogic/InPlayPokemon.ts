@@ -279,7 +279,8 @@ export class InPlayPokemon {
     this.InPlayCards.push(card);
     this.player.InPlay.push(card);
 
-    if (card.Effect.trigger === "OnAttach") await this.triggerPokemonTool(card);
+    if (card.Effect.trigger === "OnAttach" && card.Effect.conditions.every((cond) => cond(this)))
+      await this.triggerPokemonTool(card);
   }
 
   /**
@@ -293,7 +294,11 @@ export class InPlayPokemon {
     removeElement(this.InPlayCards, card);
     removeElement(this.player.InPlay, card);
 
-    if (card.Effect.trigger === "OnAttach" && card.Effect.undo)
+    if (
+      card.Effect.trigger === "OnAttach" &&
+      card.Effect.undo &&
+      card.Effect.conditions.every((cond) => cond(this))
+    )
       await card.Effect.undo(this.game, this);
   }
 

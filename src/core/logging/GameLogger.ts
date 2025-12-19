@@ -470,6 +470,15 @@ export class GameLogger {
     });
   }
 
+  removePokemonStatus(pokemon: InPlayPokemon, status: PokemonStatus) {
+    this.addEntry({
+      type: "removePokemonStatus",
+      player: pokemon.player.Name,
+      targetPokemon: pokemon.player.pokemonToDescriptor(pokemon),
+      status,
+    });
+  }
+
   applyPlayerStatus(player: Player, status: PlayerStatus) {
     this.addEntry({
       type: "applyPlayerStatus",
