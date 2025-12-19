@@ -168,6 +168,13 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       },
     },
     {
+      pattern: /^If your opponent’s Active Pokémon has more remaining HP than this Pokémon,/i,
+      transform: () => {
+        conditionalForNextEffect = (game, self) =>
+          game.DefendingPlayer.activeOrThrow().CurrentHP > self.CurrentHP;
+      },
+    },
+    {
       pattern: /^If your opponent’s Active Pokémon is Poisoned,/i,
       transform: () => {
         conditionalForNextEffect = (game) => game.DefendingPlayer.activeOrThrow().isPoisoned();

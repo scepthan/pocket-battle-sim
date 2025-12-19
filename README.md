@@ -8,7 +8,7 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 144/157 (91.7%)
+  - [ ] A3: 145/157 (92.4%)
     - [ ] Abilities
       - [ ] New triggers
         - [x] Before Knocked Out
@@ -28,7 +28,7 @@ Backend todo:
       - [ ] New conditionals
         - [ ] Moved to the Active Spot on this turn
         - [x] At least 1 heads
-        - [ ] Opposing mon has more HP than self
+        - [x] Opposing mon has more HP than self
         - [x] Opposing mon has Special Condition
         - [ ] Opposing mon has Ability
         - [ ] Any of own Benched mon have damage
