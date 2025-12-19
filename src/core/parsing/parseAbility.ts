@@ -141,6 +141,16 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         ability.conditions.push((self) => self.player.InPlayPokemon.some(predicate));
       },
     },
+    {
+      pattern: /^During your first turn, /i,
+      transform: () => {
+        ability.conditions.push((self) => {
+          const game = self.player.game;
+          const turnNumber = game.TurnNumber;
+          return self.player === game.AttackingPlayer && 1 <= turnNumber && turnNumber <= 2;
+        });
+      },
+    },
 
     // Energy effects
     {

@@ -189,6 +189,9 @@ export class Game {
     this.GameLog.nextTurn(this.TurnNumber, this.AttackingPlayer, this.DefendingPlayer);
     this.TurnOver = false;
 
+    // Check statuses that happen on turn change
+    await this.afterAction();
+
     // Generate next energy for the attacking player
     if (this.TurnNumber > 1) {
       this.AttackingPlayer.AvailableEnergy = this.AttackingPlayer.NextEnergy;
@@ -337,37 +340,45 @@ export class Game {
 
   /**
    * This method is called at the end of every chain-of-events that the player can kick off by
-   * performing any action (attacking, retreating, evolving, attaching Energy, etc.).
+   * performing any action (attacking, retreating, evolving, attaching Energy, etc.). It handles
+   * checking for knockouts and game over, adding or removing statuses, and asking the players to
+   * set new Active mon if necessary.
    */
   private async afterAction(): Promise<void> {
     await this.checkForKnockOuts();
 
-    this.removeOutdatedStatuses();
+    // Remove statuses and check for game over; repeat if more Pokémon are knocked out
+    do {
+      this.removeOutdatedStatuses();
 
-    this.checkStatusAbilityConditions();
+      this.checkStatusAbilityConditions();
 
-    this.checkForGameOver();
-    if (this.GameOver) return;
+      this.checkForGameOver();
+      if (this.GameOver) return;
+    } while (await this.checkForKnockOuts());
 
     await this.ensureActivePokemon();
   }
 
   /**
-   * Checks the game for any Pokémon that should be knocked out, then handles checking for game
-   * over and choosing new Active Pokémon if necessary.
-   *
+   * Checks the game for any Pokémon that should be knocked out, and adds Prize Points accordingly.
+   * Returns true if any Pokémon were knocked out.
    */
-  private async checkForKnockOuts(): Promise<void> {
+  private async checkForKnockOuts(): Promise<boolean> {
     const attackerPrizePoints = this.AttackingPlayer.GamePoints;
     const defenderPrizePoints = this.DefendingPlayer.GamePoints;
+
+    let anyKnockedOut = false;
 
     // Check for any pokemon that are knocked out
     for (const player of [this.DefendingPlayer, this.AttackingPlayer]) {
       for (const pokemon of player.InPlayPokemon) {
         if (pokemon.CurrentHP <= 0) {
           const fromAttack = this.AttackKnockedOutPokemon.has(pokemon);
+          // Give mon such as Conkeldurr a chance to avoid being knocked out
           if (fromAttack) await pokemon.beforeKnockedOutByAttack();
           if (pokemon.CurrentHP <= 0) {
+            anyKnockedOut = true;
             await this.handleKnockOut(pokemon, fromAttack);
           }
         }
@@ -376,13 +387,15 @@ export class Game {
 
     this.AttackingPlayer.checkPrizePointsChange(attackerPrizePoints);
     this.DefendingPlayer.checkPrizePointsChange(defenderPrizePoints);
+
+    return anyKnockedOut;
   }
 
   /**
    * Checks all player statuses applied by abilities and removes those whose inflictors are no
    * longer in play.
    */
-  private removeOutdatedStatuses() {
+  private removeOutdatedStatuses(): void {
     for (const pokemon of this.InPlayPokemon) {
       for (const status of pokemon.PokemonStatuses) {
         if (status.source === "Ability") {
@@ -420,9 +433,9 @@ export class Game {
   }
 
   /**
-   * Checks all Pokémon abilities that apply statuses and applies or removes them as necessary.
+   * Checks all Pokémon abilities that apply statuses and adds or removes the status as necessary.
    */
-  private checkStatusAbilityConditions() {
+  private checkStatusAbilityConditions(): void {
     for (const player of [this.AttackingPlayer, this.DefendingPlayer]) {
       for (const pokemon of player.InPlayPokemon) {
         const ability = pokemon.Ability;

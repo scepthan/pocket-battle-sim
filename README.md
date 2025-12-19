@@ -8,13 +8,13 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 147/157 (93.6%)
+  - [ ] A3: 148/157 (94.3%)
     - [ ] Abilities
       - [x] New triggers
         - [x] Before Knocked Out
         - [x] After Knocked Out
-      - [ ] New conditionals
-        - [ ] During your first turn
+      - [x] New conditionals
+        - [x] During your first turn
       - [ ] New effects
         - [x] Heal all mon of type
         - [x] Prevent damage from ex mon
@@ -88,6 +88,7 @@ Backend todo:
   - [ ] Add increase/decrease max HP log events (probably does not need to be separate)
   - [ ] Possibly rework how Tools that apply statuses work?
     - [ ] Current bug: Eevee with Leaf Cape evolving into Leafeon will not gain HP
+  - [ ] Parsing logic is duplicated across different parsing files; there's probably a way to combine all the natural language parsing into one method
 - [x] Single battle simulation
 - [ ] Basic logic-based AI opponent (at least as competitive as Auto Mode)
   - [ ] Evolve multiple mon per turn
