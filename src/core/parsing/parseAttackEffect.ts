@@ -472,17 +472,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       },
     },
     {
-      pattern: /^Put a random card that evolves from (.+?) from your deck into your hand\./i,
-      transform: (_, name) => {
-        addSideEffect(async (game) => {
-          game.AttackingPlayer.drawRandomFilteredToHand(
-            (card) => card.CardType === "Pokemon" && card.EvolvesFrom === name
-          );
-        });
-      },
-    },
-    {
-      pattern: /^Put 1 random (.+?) from your deck into your hand\./i,
+      pattern: /^Put (?:a|1) random (.+?) from your deck into your hand\./i,
       transform: (_, descriptor) => {
         const predicate = parsePlayingCardPredicate(descriptor);
         addSideEffect(async (game) => {
@@ -500,10 +490,11 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       },
     },
     {
-      pattern: /^discard a random card from your opponent’s hand\./i,
-      transform: () => {
+      pattern: /^discard a random (.+?) from your opponent’s hand\./i,
+      transform: (_, descriptor) => {
+        const predicate = parsePlayingCardPredicate(descriptor);
         addSideEffect(async (game) => {
-          game.DefendingPlayer.discardRandomFiltered();
+          game.DefendingPlayer.discardRandomFiltered(predicate);
         });
       },
     },

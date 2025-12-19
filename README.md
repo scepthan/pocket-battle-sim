@@ -8,9 +8,9 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 145/157 (92.4%)
+  - [ ] A3: 146/157 (93.0%)
     - [ ] Abilities
-      - [ ] New triggers
+      - [x] New triggers
         - [x] Before Knocked Out
         - [x] After Knocked Out
       - [ ] New conditionals
@@ -41,8 +41,7 @@ Backend todo:
         - [x] Apply CannotAttachEnergy status to opponent (active)
         - [x] Also do damage to any of own mon
         - [x] Do damage to any opposing mon for each Energy attached to it
-        - [x] Draw random card that evolves from mon
-        - [ ] Discard random filtered card from opponent's hand
+        - [x] Discard random filtered card from opponent's hand
         - [x] Apply random Special Condition to opposing mon
         - [ ] Apply IncreaseAttackDamage status to self
         - [ ] Apply IncreaseAttackCost and IncreaseRetreatCost statuses to opposing mon
@@ -57,7 +56,7 @@ Backend todo:
       - [ ] Discard all of opponent's Pokemon Tools
       - [x] If mon in play, switch in opponent's Benched mon of choice
       - [x] Heal all damage and discard all Energy from mon
-    - [ ] Pokemon Tools
+    - [x] Pokemon Tools
       - [x] Poison attacker when damaged
     - [ ] New Player Statuses
       - [x] CannotAttachEnergy (PokemonPlayerStatus)
@@ -69,9 +68,9 @@ Backend todo:
     - [x] New Pokemon predicates
       - [x] Stage 2
       - [x] Has damage on it
-    - [ ] New card predicates
-      - [ ] Card that evolves from mon
-      - [ ] Item card (need to investigate if Fossils count)
+    - [x] New card predicates
+      - [x] Card that evolves from mon
+      - [x] Item card (Fossils count)
     - [x] Unique promo cards
       - [x] Rayquaza
       - [x] Rayquaza ex
