@@ -80,7 +80,14 @@ Backend todo:
   - [ ] A4
     - [ ] Baby Pokémon (0-cost attacks)
   - [ ] A4a
-- [x] Bring in newer sets
+- [ ] Bring in newer sets
+  - [x] A2-A4a
+  - [ ] A4b-B1a
+- [ ] Game logic improvements
+  - [ ] Combine statuses that increase and decrease the same stat
+  - [ ] Add increase/decrease max HP log events (probably does not need to be separate)
+  - [ ] Possibly rework how Tools that apply statuses work?
+    - [ ] Current bug: Eevee with Leaf Cape evolving into Leafeon will not gain HP
 - [x] Single battle simulation
 - [ ] Basic logic-based AI opponent (at least as competitive as Auto Mode)
   - [ ] Evolve multiple mon per turn

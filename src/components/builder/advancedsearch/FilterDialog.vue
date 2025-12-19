@@ -25,7 +25,7 @@
         <FilterDialogRow label="Is Pokémon ex?">
           <Toggle3Way v-model="filters.isEx" :disabled="filters.isPokemon === false" />
         </FilterDialogRow>
-        <!-- <FilterDialogRow label="Is Mega Pokémon?">
+        <!-- <FilterDialogRow label="Is Mega Evolution?">
           <Toggle3Way v-model="filters.isMega" :disabled="filters.isPokemon === false" />
         </FilterDialogRow> -->
         <!-- <FilterDialogRow label="Is Ultra Beast?">
