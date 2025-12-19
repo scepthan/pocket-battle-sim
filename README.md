@@ -8,7 +8,7 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 148/157 (94.3%)
+  - [ ] A3: 149/157 (94.9%)
     - [ ] Abilities
       - [x] New triggers
         - [x] Before Knocked Out
@@ -26,7 +26,7 @@ Backend todo:
         - [x] Put self to sleep
     - [ ] Attacks
       - [ ] New conditionals
-        - [ ] Moved to the Active Spot on this turn
+        - [x] Moved to the Active Spot on this turn
         - [x] At least 1 heads
         - [x] Opposing mon has more HP than self
         - [x] Opposing mon has Special Condition

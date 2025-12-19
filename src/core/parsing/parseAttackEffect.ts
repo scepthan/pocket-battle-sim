@@ -235,6 +235,17 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       },
     },
     {
+      pattern: /^If this Pokémon moved from your Bench to the Active Spot this turn,/i,
+      transform: () => {
+        conditionalForNextEffect = (game) => {
+          const damageEvents = game.GameLog.currentTurn.filter(
+            (event) => event.type === "selectActivePokemon" || event.type === "swapActivePokemon"
+          );
+          return damageEvents.some((event) => event.player === game.AttackingPlayer.Name);
+        };
+      },
+    },
+    {
       pattern: /^If heads,/i,
       transform: () => {
         conditionalForNextEffect = (game, self, heads) => heads > 0;
