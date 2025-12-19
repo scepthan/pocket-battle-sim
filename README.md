@@ -8,17 +8,17 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 149/157 (94.9%)
-    - [ ] Abilities
+  - [ ] A3: 150/157 (95.5%)
+    - [x] Abilities
       - [x] New triggers
         - [x] Before Knocked Out
         - [x] After Knocked Out
       - [x] New conditionals
         - [x] During your first turn
-      - [ ] New effects
+      - [x] New effects
         - [x] Heal all mon of type
         - [x] Prevent damage from ex mon
-        - [ ] Apply HealSpecialConditions status to player (mon with Energy of type attached)
+        - [x] Apply PreventSpecialConditions status to player (mon with Energy of type attached)
         - [x] Move all Energy of type from Benched mon to Active mon
         - [x] Flip coin to set self HP to 10 (need to investigate OOO in-game)
         - [x] Move all Energy of type from self to Benched mon
@@ -58,10 +58,8 @@ Backend todo:
       - [x] Heal all damage and discard all Energy from mon
     - [x] Pokemon Tools
       - [x] Poison attacker when damaged
-    - [ ] New Player Statuses
+    - [x] New Pokemon Statuses
       - [x] CannotAttachEnergy (PokemonPlayerStatus)
-      - [ ] HealSpecialConditions (PokemonPlayerStatus)
-    - [ ] New Pokemon Statuses
       - [ ] IncreaseAttackDamage (DefensePokemonStatus)
       - [ ] IncreaseAttackCost (BasePokemonStatus)
       - [ ] IncreaseRetreatCost (BasePokemonStatus)
@@ -85,10 +83,13 @@ Backend todo:
   - [ ] A4b-B1a
 - [ ] Game logic improvements
   - [ ] Combine statuses that increase and decrease the same stat
-  - [ ] Add increase/decrease max HP log events (probably does not need to be separate)
   - [ ] Possibly rework how Tools that apply statuses work?
     - [ ] Current bug: Eevee with Leaf Cape evolving into Leafeon will not gain HP
   - [ ] Parsing logic is duplicated across different parsing files; there's probably a way to combine all the natural language parsing into one method
+- [ ] Logging improvements
+  - [ ] Add increase/decrease max HP log events (probably does not need to be separate)
+  - [ ] If damage prevention came from somewhere other than the afflicted mon, log it (e.g. Comfey)
+  - [ ] Log the specific Special Condition prevented instead of just "a Special Condition"
 - [x] Single battle simulation
 - [ ] Basic logic-based AI opponent (at least as competitive as Auto Mode)
   - [ ] Evolve multiple mon per turn

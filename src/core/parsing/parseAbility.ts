@@ -627,7 +627,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
               test: (p) => p === p.player.ActivePokemon,
               descriptor: "Active Pokémon",
             },
-            pokemonStatus: { type: "CannotEvolve", source: "Ability" },
+            pokemonStatus: { type: "CannotEvolve", source: "PlayerStatus" },
           },
         });
       },
@@ -653,7 +653,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
             pokemonStatus: {
               type: "IncreaseAttack",
               amount: Number(amount),
-              source: "Ability",
+              source: "PlayerStatus",
             },
           },
         });
@@ -668,7 +668,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           status: {
             type: "IncreaseAttack",
             amount: Number(amount),
-            source: "Ability",
+            source: "PlayerStatus",
           },
         });
       },
@@ -691,7 +691,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
             pokemonStatus: {
               type: "ReduceRetreatCost",
               amount: Number(amount),
-              source: "Ability",
+              source: "PlayerStatus",
             },
           },
         });
@@ -712,7 +712,27 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
               test: predicate,
               descriptor,
             },
-            pokemonStatus: { type: "NoRetreatCost", source: "Ability" },
+            pokemonStatus: { type: "NoRetreatCost", source: "PlayerStatus" },
+          },
+        });
+      },
+    },
+    {
+      pattern:
+        /^Each of your (.+?) recovers from all Special Conditions and can’t be affected by any Special Conditions\.$/i,
+      transform: (_, descriptor) => {
+        const predicate = parsePokemonPredicate(descriptor);
+        convertToStatusAbility({
+          type: "PlayerStatus",
+          opponent: false,
+          status: {
+            type: "PokemonStatus",
+            source: "Ability",
+            pokemonCondition: {
+              test: predicate,
+              descriptor,
+            },
+            pokemonStatus: { type: "PreventSpecialConditions", source: "PlayerStatus" },
           },
         });
       },
@@ -738,7 +758,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
             pokemonStatus: {
               type: "DoubleEnergy",
               energyType: fullType,
-              source: "Ability",
+              source: "PlayerStatus",
             },
           },
         });

@@ -466,6 +466,18 @@ export class Game {
         }
       }
     }
+
+    this.checkSpecialConditionImmunity();
+  }
+
+  private checkSpecialConditionImmunity(): void {
+    for (const pokemon of this.InPlayPokemon) {
+      if (
+        pokemon.PokemonStatuses.some((status) => status.type === "PreventSpecialConditions") &&
+        pokemon.hasSpecialCondition()
+      )
+        pokemon.removeAllSpecialConditions();
+    }
   }
 
   /**

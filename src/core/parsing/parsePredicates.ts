@@ -61,10 +61,17 @@ export const parsePokemonPredicate = (
     predicate = (pokemon) => energyTypes.includes(pokemon.Type) && prevPredicate(pokemon);
   }
 
-  if (text.endsWith(" that has any Energy attached")) {
+  const match = text.match(/ that has any(?: {(\w)})? Energy attached$/);
+  if (match) {
     const prevPredicate = predicate;
-    predicate = (pokemon) => pokemon.AttachedEnergy.length > 0 && prevPredicate(pokemon);
-    text = text.slice(0, -29);
+    if (match[1]) {
+      const energy = parseEnergy(match[1]);
+      predicate = (pokemon) =>
+        pokemon.AttachedEnergy.some((e) => e === energy) && prevPredicate(pokemon);
+    } else {
+      predicate = (pokemon) => pokemon.AttachedEnergy.length > 0 && prevPredicate(pokemon);
+    }
+    text = text.replace(match[0], "");
   }
 
   if (text.endsWith(" that have damage on them")) {

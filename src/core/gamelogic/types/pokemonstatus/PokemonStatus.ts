@@ -4,7 +4,7 @@ import type { OtherPokemonStatus } from "./OtherPokemonStatus";
 
 export interface BasePokemonStatus {
   id?: string;
-  source: "Effect" | "Ability" | "PokemonTool";
+  source: "Effect" | "Ability" | "PokemonTool" | "PlayerStatus";
   turnsToKeep?: number;
 }
 
