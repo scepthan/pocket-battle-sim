@@ -804,12 +804,12 @@ export const parseAttackEffect = (attack: Attack): boolean => {
     // Other status effects
     {
       pattern:
-        /^During your opponent’s next turn, this Pokémon takes −(\d+) damage from attacks\./i,
-      transform: (_, damageReduction) => {
+        /^During your opponent’s next turn, this Pokémon takes (−|\+)(\d+) damage from attacks\./i,
+      transform: (_, sign, amount) => {
         addSideEffect(async (game) =>
           game.AttackingPlayer.applyActivePokemonStatus({
-            type: "ReduceAttackDamage",
-            amount: Number(damageReduction),
+            type: "ModifyIncomingAttackDamage",
+            amount: Number(amount) * (sign === "+" ? 1 : -1),
             source: "Effect",
             turnsToKeep: 1,
           })

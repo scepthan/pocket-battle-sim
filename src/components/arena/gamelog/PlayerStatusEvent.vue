@@ -13,11 +13,9 @@
         }}
         damage to the opponent's Active Pokemon!
       </p>
-      <p v-else-if="pokemonStatus.type == 'ReduceAttackDamage'">
-        Attacks used<span v-if="entry.status.source == 'Effect'"> next turn</span> do -{{
-          pokemonStatus.amount
-        }}
-        damage to <b>{{ entry.player }}</b
+      <p v-else-if="pokemonStatus.type == 'ModifyIncomingAttackDamage'">
+        Attacks used<span v-if="entry.status.source == 'Effect'"> next turn</span> do
+        <SignedNumber :number="pokemonStatus.amount" /> damage to <b>{{ entry.player }}</b
         >'s <PokemonDescriptor :text="descriptor" />!
       </p>
       <p v-else-if="pokemonStatus.type == 'CannotEvolve'">

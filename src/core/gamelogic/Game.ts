@@ -884,13 +884,13 @@ export class Game {
     // After that, apply any damage modification statuses on the defender
     if (totalDamage > 0) {
       for (const status of defender.PokemonStatuses) {
-        if (status.type === "ReduceAttackDamage") {
+        if (status.type === "ModifyIncomingAttackDamage") {
           if (status.attackerCondition && !status.attackerCondition.test(attacker)) continue;
-          totalDamage -= status.amount;
-        } else if (status.type === "ReduceAttackDamageOnCoinFlip") {
+          totalDamage += status.amount;
+        } else if (status.type === "ModifyIncomingAttackDamageOnCoinFlip") {
           if (status.attackerCondition && !status.attackerCondition.test(attacker)) continue;
           const flipResult = this.AttackingPlayer.flipCoin();
-          if (flipResult) totalDamage -= status.amount;
+          if (flipResult) totalDamage += status.amount;
         }
       }
     }

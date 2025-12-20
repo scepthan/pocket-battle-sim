@@ -505,8 +505,8 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         convertToStatusAbility({
           type: "PokemonStatus",
           status: {
-            type: "ReduceAttackDamage",
-            amount: reduceAmount,
+            type: "ModifyIncomingAttackDamage",
+            amount: -reduceAmount,
             source: "Ability",
             attackerCondition,
           },
@@ -520,8 +520,8 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         convertToStatusAbility({
           type: "PokemonStatus",
           status: {
-            type: "ReduceAttackDamageOnCoinFlip",
-            amount: Number(amount),
+            type: "ModifyIncomingAttackDamageOnCoinFlip",
+            amount: -Number(amount),
             source: "Ability",
           },
         });

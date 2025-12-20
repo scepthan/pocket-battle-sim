@@ -6,16 +6,16 @@ interface BaseDefensePokemonStatus extends BasePokemonStatus {
   attackerCondition?: PokemonDescriptor;
 }
 
-interface ReduceAttackDamagePokemonStatus extends BaseDefensePokemonStatus {
-  type: "ReduceAttackDamage";
+interface ModifyIncomingAttackDamagePokemonStatus extends BaseDefensePokemonStatus {
+  type: "ModifyIncomingAttackDamage";
+  amount: number;
+}
+interface ModifyIncomingAttackDamageOnCoinFlipPokemonStatus extends BaseDefensePokemonStatus {
+  type: "ModifyIncomingAttackDamageOnCoinFlip";
   amount: number;
 }
 interface PreventAttackDamagePokemonStatus extends BaseDefensePokemonStatus {
   type: "PreventAttackDamage";
-}
-interface ReduceAttackDamageOnCoinFlipPokemonStatus extends BaseDefensePokemonStatus {
-  type: "ReduceAttackDamageOnCoinFlip";
-  amount: number;
 }
 interface PreventAttackEffectsPokemonStatus extends BaseDefensePokemonStatus {
   type: "PreventAttackEffects";
@@ -29,9 +29,9 @@ interface CounterAttackPokemonStatus extends BaseDefensePokemonStatus {
 }
 
 export type DefensePokemonStatus =
-  | ReduceAttackDamagePokemonStatus
+  | ModifyIncomingAttackDamagePokemonStatus
+  | ModifyIncomingAttackDamageOnCoinFlipPokemonStatus
   | PreventAttackDamagePokemonStatus
-  | ReduceAttackDamageOnCoinFlipPokemonStatus
   | PreventAttackEffectsPokemonStatus
   | PreventAttackDamageAndEffectsPokemonStatus
   | CounterAttackPokemonStatus;

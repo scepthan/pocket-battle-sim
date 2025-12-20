@@ -62,6 +62,7 @@ declare module 'vue' {
     SearchSort: typeof import('./src/components/builder/SearchSort.vue')['default']
     SelectableCard: typeof import('./src/components/builder/SelectableCard.vue')['default']
     SelectionMenu: typeof import('./src/components/arena/control/SelectionMenu.vue')['default']
+    SignedNumber: typeof import('./src/components/arena/gamelog/SignedNumber.vue')['default']
     Toggle3Way: typeof import('./src/components/builder/advancedsearch/Toggle3Way.vue')['default']
     TooltipButton: typeof import('./src/components/common/TooltipButton.vue')['default']
   }

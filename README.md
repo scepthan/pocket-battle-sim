@@ -8,7 +8,7 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 150/157 (95.5%)
+  - [ ] A3: 151/157 (96.2%)
     - [x] Abilities
       - [x] New triggers
         - [x] Before Knocked Out
@@ -43,7 +43,7 @@ Backend todo:
         - [x] Do damage to any opposing mon for each Energy attached to it
         - [x] Discard random filtered card from opponent's hand
         - [x] Apply random Special Condition to opposing mon
-        - [ ] Apply IncreaseAttackDamage status to self
+        - [x] Take increased damage from attacks next turn
         - [ ] Apply IncreaseAttackCost and IncreaseRetreatCost statuses to opposing mon
         - [ ] Confuse self
     - [ ] Items/Supporters
@@ -60,7 +60,7 @@ Backend todo:
       - [x] Poison attacker when damaged
     - [x] New Pokemon Statuses
       - [x] CannotAttachEnergy (PokemonPlayerStatus)
-      - [ ] IncreaseAttackDamage (DefensePokemonStatus)
+      - [x] ModifyIncomingAttackDamage (DefensePokemonStatus)
       - [ ] IncreaseAttackCost (BasePokemonStatus)
       - [ ] IncreaseRetreatCost (BasePokemonStatus)
     - [x] New Pokemon predicates

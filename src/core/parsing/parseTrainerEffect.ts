@@ -302,8 +302,8 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
               source: "Effect",
               keepNextTurn: true,
               pokemonStatus: {
-                type: "ReduceAttackDamage",
-                amount: Number(modifier),
+                type: "ModifyIncomingAttackDamage",
+                amount: -Number(modifier),
                 source: "Effect",
               },
             });

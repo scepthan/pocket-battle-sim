@@ -1,10 +1,11 @@
 <template>
   <CardName :card-id="entry.targetPokemon.cardId" />
-  <span v-if="entry.status.type == 'ReduceAttackDamage'">
-    will take &minus;{{ entry.status.amount }} damage from attacks</span
+  <span v-if="entry.status.type == 'ModifyIncomingAttackDamage'">
+    will take <SignedNumber :number="entry.status.amount" /> damage from attacks</span
   >
-  <span v-else-if="entry.status.type == 'ReduceAttackDamageOnCoinFlip'">
-    will flip a coin to take &minus;{{ entry.status.amount }} damage from attacks</span
+  <span v-else-if="entry.status.type == 'ModifyIncomingAttackDamageOnCoinFlip'">
+    will flip a coin to take <SignedNumber :number="entry.status.amount" /> damage from
+    attacks</span
   >
   <span v-else-if="entry.status.type == 'PreventAttackDamageAndEffects'">
     cannot be affected by attacks</span
