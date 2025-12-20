@@ -196,6 +196,13 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       },
     },
     {
+      pattern: /^If your opponent’s Active Pokémon has an Ability,/i,
+      transform: () => {
+        conditionalForNextEffect = (game) =>
+          game.DefendingPlayer.activeOrThrow().Ability !== undefined;
+      },
+    },
+    {
       pattern:
         /^If any of your Pokémon were knocked out by damage from an attack during your opponent’s last turn,/i,
       transform: () => {

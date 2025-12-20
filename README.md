@@ -8,7 +8,7 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 154/157 (98.1%)
+  - [ ] A3: 155/157 (98.7%)
     - [x] Abilities
       - [x] New triggers
         - [x] Before Knocked Out
@@ -25,12 +25,12 @@ Backend todo:
         - [x] Switch with Active mon
         - [x] Put self to sleep
     - [ ] Attacks
-      - [ ] New conditionals
+      - [x] New conditionals
         - [x] Moved to the Active Spot on this turn
         - [x] At least 1 heads
         - [x] Opposing mon has more HP than self
         - [x] Opposing mon has Special Condition
-        - [ ] Opposing mon has Ability
+        - [x] Opposing mon has Ability
         - [x] Any of own Benched mon have damage
       - [ ] New effects
         - [x] Discard random Energy from both Active mon
@@ -90,6 +90,7 @@ Backend todo:
   - [ ] Add increase/decrease max HP log events (probably does not need to be separate)
   - [ ] If damage prevention came from somewhere other than the afflicted mon, log it (e.g. Comfey)
   - [ ] Log the specific Special Condition prevented instead of just "a Special Condition"
+  - [ ] Prevent "played to bench" event from appearing as a player action when it was a side effect
 - [x] Single battle simulation
 - [ ] Basic logic-based AI opponent (at least as competitive as Auto Mode)
   - [ ] Evolve multiple mon per turn
