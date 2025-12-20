@@ -10,6 +10,7 @@ import { randomElement } from "../util";
 import {
   parsePlayingCardPredicate as _cardParse,
   parsePokemonPredicate as _pokemonParse,
+  type InPlayPokemonPredicate,
 } from "./parsePredicates";
 
 interface EffectTransformer {
@@ -57,8 +58,8 @@ export const parseAttackEffect = (attack: Attack): boolean => {
     attack.sideEffects.push(applyConditionalIfAvailable(effect));
   };
 
-  const parsePokemonPredicate = (descriptor: string) => {
-    const { parseSuccessful: success, value } = _pokemonParse(descriptor);
+  const parsePokemonPredicate = (descriptor: string, predicate?: InPlayPokemonPredicate) => {
+    const { parseSuccessful: success, value } = _pokemonParse(descriptor, predicate);
     if (!success) parseSuccessful = false;
     return value;
   };
@@ -199,8 +200,15 @@ export const parseAttackEffect = (attack: Attack): boolean => {
         /^If any of your Pokémon were knocked out by damage from an attack during your opponent’s last turn,/i,
       transform: () => {
         conditionalForNextEffect = (game) =>
-          game.GameLog.turns[1]?.some((e) => e.type == "pokemonKnockedOut" && e.fromAttack) ??
+          game.GameLog.previousTurn?.some((e) => e.type == "pokemonKnockedOut" && e.fromAttack) ??
           false;
+      },
+    },
+    {
+      pattern: /^If any of your (.+?) have damage on them,/i,
+      transform: (_, descriptor) => {
+        const predicate = parsePokemonPredicate(descriptor, (p) => p.isDamaged());
+        conditionalForNextEffect = (game) => game.AttackingPlayer.InPlayPokemon.some(predicate);
       },
     },
     {

@@ -31,23 +31,23 @@ export const parsePokemonPredicate = (
 ): ParsedResult<InPlayPokemonPredicate> => {
   let predicate: InPlayPokemonPredicate = basePredicate;
 
-  if (text.startsWith("Benched ")) {
-    predicate = (pokemon) => pokemon.player.BenchedPokemon.includes(pokemon);
-    text = text.slice(8);
-  } else if (text.startsWith("Active ")) {
-    predicate = (pokemon) => pokemon.player.ActivePokemon === pokemon;
-    text = text.slice(7);
-  }
+  const parsePart = (
+    regex: RegExp,
+    transform: (match: RegExpMatchArray) => InPlayPokemonPredicate
+  ) => {
+    const match = text.match(regex);
+    if (match) {
+      const prevPredicate = predicate;
+      const newPredicate = transform(match);
+      predicate = (pokemon) => newPredicate(pokemon) && prevPredicate(pokemon);
+      text = text.replace(regex, "");
+    }
+  };
 
-  if (text.startsWith("Basic ")) {
-    const prevPredicate = predicate;
-    predicate = (pokemon) => pokemon.Stage === 0 && prevPredicate(pokemon);
-    text = text.slice(6);
-  } else if (text.startsWith("Stage 2 ")) {
-    const prevPredicate = predicate;
-    predicate = (pokemon) => pokemon.Stage === 2 && prevPredicate(pokemon);
-    text = text.slice(8);
-  }
+  parsePart(/^Benched /, () => (pokemon) => pokemon.player.BenchedPokemon.includes(pokemon));
+  parsePart(/^Active /, () => (pokemon) => pokemon.player.ActivePokemon === pokemon);
+  parsePart(/^Basic /, () => (pokemon) => pokemon.Stage === 0);
+  parsePart(/^Stage 2 /, () => (pokemon) => pokemon.Stage === 2);
 
   const energyTypes: Energy[] = [];
   let energyMatch;
@@ -61,33 +61,22 @@ export const parsePokemonPredicate = (
     predicate = (pokemon) => energyTypes.includes(pokemon.Type) && prevPredicate(pokemon);
   }
 
-  const match = text.match(/ that has any(?: {(\w)})? Energy attached$/);
-  if (match) {
-    const prevPredicate = predicate;
-    if (match[1]) {
-      const energy = parseEnergy(match[1]);
-      predicate = (pokemon) =>
-        pokemon.AttachedEnergy.some((e) => e === energy) && prevPredicate(pokemon);
+  parsePart(/ that has any(?: {(\w)})? Energy attached$/, ([, energy]) => {
+    if (energy) {
+      const fullEnergy = parseEnergy(energy);
+      return (pokemon) => pokemon.AttachedEnergy.some((e) => e === fullEnergy);
     } else {
-      predicate = (pokemon) => pokemon.AttachedEnergy.length > 0 && prevPredicate(pokemon);
+      return (pokemon) => pokemon.AttachedEnergy.length > 0;
     }
-    text = text.replace(match[0], "");
-  }
+  });
+  parsePart(/ that have damage on them$/, () => (pokemon) => pokemon.isDamaged());
 
-  if (text.endsWith(" that have damage on them")) {
-    const prevPredicate = predicate;
-    predicate = (pokemon) => pokemon.isDamaged() && prevPredicate(pokemon);
-    text = text.slice(0, -25);
-  }
-
-  if (text === "Pokémon ex") {
+  parsePart(/^Pokémon ex$/, () => (pokemon) => pokemon.Name.endsWith(" ex"));
+  if (text === "" || text === "Pokémon") {
     return {
       parseSuccessful: true,
-      value: (pokemon) => pokemon.Name.endsWith(" ex") && predicate(pokemon),
+      value: predicate,
     };
-  }
-  if (text === "Pokémon") {
-    return { parseSuccessful: true, value: predicate };
   }
 
   const { parseSuccessful, value: names } = parsePokemonNames(text);

@@ -8,7 +8,7 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 151/157 (96.2%)
+  - [ ] A3: 152/157 (96.8%)
     - [x] Abilities
       - [x] New triggers
         - [x] Before Knocked Out
@@ -31,7 +31,7 @@ Backend todo:
         - [x] Opposing mon has more HP than self
         - [x] Opposing mon has Special Condition
         - [ ] Opposing mon has Ability
-        - [ ] Any of own Benched mon have damage
+        - [x] Any of own Benched mon have damage
       - [ ] New effects
         - [x] Discard random Energy from both Active mon
         - [x] Poison and Burn

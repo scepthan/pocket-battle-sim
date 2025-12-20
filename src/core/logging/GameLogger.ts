@@ -24,6 +24,9 @@ export class GameLogger {
   get currentTurn() {
     return this.turns[0]!;
   }
+  get previousTurn() {
+    return this.turns[1];
+  }
   get entries() {
     return this.turns.slice().reverse().flat();
   }
