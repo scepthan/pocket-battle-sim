@@ -774,6 +774,12 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       },
     },
     {
+      pattern: /^This Pokémon is now Confused\./i,
+      transform: () => {
+        addSideEffect(async (game, self) => self.player.confuseActivePokemon());
+      },
+    },
+    {
       pattern:
         /^1 Special Condition from among Asleep, Burned, Confused, Paralyzed, and Poisoned is chosen at random, and your opponent’s Active Pokémon is now affected by that Special Condition\. Any Special Conditions already affecting that Pokémon will not be chosen\.$/i,
       transform: () => {

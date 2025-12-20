@@ -8,7 +8,7 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 153/157 (97.5%)
+  - [ ] A3: 154/157 (98.1%)
     - [x] Abilities
       - [x] New triggers
         - [x] Before Knocked Out
@@ -45,7 +45,7 @@ Backend todo:
         - [x] Apply random Special Condition to opposing mon
         - [x] Take increased damage from attacks next turn
         - [ ] Apply IncreaseAttackCost and IncreaseRetreatCost statuses to opposing mon
-        - [ ] Confuse self
+        - [x] Confuse self
     - [x] Items/Supporters
       - [x] Heal damage and remove random Special Condition
       - [x] Evolve Basic mon to Stage 2
