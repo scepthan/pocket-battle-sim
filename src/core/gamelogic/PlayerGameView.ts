@@ -156,10 +156,10 @@ export class PlayerGameView {
     for (const status of this.player.PlayerStatuses) {
       if (
         status.type === "PokemonStatus" &&
-        status.pokemonStatus.type === "ReduceRetreatCost" &&
+        status.pokemonStatus.type === "ModifyRetreatCost" &&
         status.pokemonCondition.test(active)
       ) {
-        modifier -= status.pokemonStatus.amount;
+        modifier += status.pokemonStatus.amount;
       }
     }
 
@@ -227,10 +227,14 @@ export class PlayerGameView {
 
     const requiredEnergy = [...attack.requiredEnergy];
     for (const status of this.selfActive.PokemonStatuses) {
-      if (status.type == "ReduceAttackCost") {
-        for (let i = 0; i < status.amount; i++) {
-          if (requiredEnergy.includes(status.energyType))
-            removeElement(requiredEnergy, status.energyType);
+      if (status.type == "ModifyAttackCost") {
+        if (status.amount < 0) {
+          for (let i = 0; i < -status.amount; i++) {
+            if (requiredEnergy.includes(status.energyType))
+              removeElement(requiredEnergy, status.energyType);
+          }
+        } else {
+          requiredEnergy.push(...Array(status.amount).fill(status.energyType));
         }
       }
     }

@@ -8,7 +8,7 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 155/157 (98.7%)
+  - [ ] A3: 156/157 (99.4%)
     - [x] Abilities
       - [x] New triggers
         - [x] Before Knocked Out
@@ -44,7 +44,7 @@ Backend todo:
         - [x] Discard random filtered card from opponent's hand
         - [x] Apply random Special Condition to opposing mon
         - [x] Take increased damage from attacks next turn
-        - [ ] Apply IncreaseAttackCost and IncreaseRetreatCost statuses to opposing mon
+        - [x] Apply IncreaseAttackCost and IncreaseRetreatCost statuses to opposing mon
         - [x] Confuse self
     - [x] Items/Supporters
       - [x] Heal damage and remove random Special Condition
@@ -61,8 +61,8 @@ Backend todo:
     - [x] New Pokemon Statuses
       - [x] CannotAttachEnergy (PokemonPlayerStatus)
       - [x] ModifyIncomingAttackDamage (DefensePokemonStatus)
-      - [ ] IncreaseAttackCost (BasePokemonStatus)
-      - [ ] IncreaseRetreatCost (BasePokemonStatus)
+      - [x] ModifyAttackCost (BasePokemonStatus)
+      - [x] ModifyRetreatCost (BasePokemonStatus)
     - [x] New Pokemon predicates
       - [x] Stage 2
       - [x] Has damage on it
@@ -82,7 +82,7 @@ Backend todo:
   - [x] A2-A4a
   - [ ] A4b-B1a
 - [ ] Game logic improvements
-  - [ ] Combine statuses that increase and decrease the same stat
+  - [x] Combine statuses that increase and decrease the same stat
   - [ ] Possibly rework how Tools that apply statuses work?
     - [ ] Current bug: Eevee with Leaf Cape evolving into Leafeon will not gain HP
   - [ ] Parsing logic is duplicated across different parsing files; there's probably a way to combine all the natural language parsing into one method

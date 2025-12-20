@@ -108,6 +108,10 @@
       "Cards": ["A2-150", "A3-066", "A3-090", "A3-090", "A3-091", "A3-091", "A3-092", "A3-124", "A3-125", "A3-125", "A3-126", "A3-127", "A3-127", "A3-144", "A3-144", "A3-155", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
       "EnergyTypes": ["Lightning", "Fighting"]
     },
+    "Alolan Sandslash & Escavalier": {
+      "Cards": ["A3-006", "A3-006", "A3-038", "A3-038", "A3-039", "A3-055", "A3-120", "A3-133", "A3-133", "A3-134", "A3-140", "A3-144", "A3-144", "PROMO-A-002", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007", "PROMO-A-073", "PROMO-A-073"],
+      "EnergyTypes": ["Water", "Metal"]
+    },
     "Ilima": {
       "Cards": ["A2-147", "A3-129", "A3-129", "A3-130", "A3-130", "A3-136", "A3-136", "A3-137", "A3-137", "A3-138", "A3-138", "A3-139", "A3-139", "A3-141", "A3-141", "A3-149", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
       "EnergyTypes": ["Darkness"]

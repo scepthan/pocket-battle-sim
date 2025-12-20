@@ -6,7 +6,7 @@ interface CoinFlipToAttackPokemonStatus extends BasePokemonStatus {
   type: "CoinFlipToAttack";
 }
 interface ModifyAttackCostPokemonStatus extends BasePokemonStatus {
-  type: "ReduceAttackCost";
+  type: "ModifyAttackCost";
   energyType: Energy;
   amount: number;
 }
@@ -25,7 +25,7 @@ interface NoRetreatCostPokemonStatus extends BasePokemonStatus {
   type: "NoRetreatCost";
 }
 interface ModifyRetreatCostPokemonStatus extends BasePokemonStatus {
-  type: "ReduceRetreatCost";
+  type: "ModifyRetreatCost";
   amount: number;
 }
 

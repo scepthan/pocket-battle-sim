@@ -424,8 +424,8 @@ export class Player {
       if (status.type === "NoRetreatCost") {
         return 0;
       }
-      if (status.type === "ReduceRetreatCost") {
-        retreatCost -= status.amount;
+      if (status.type === "ModifyRetreatCost") {
+        retreatCost += status.amount;
       }
     }
 

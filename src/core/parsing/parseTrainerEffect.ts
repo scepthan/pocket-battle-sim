@@ -215,8 +215,8 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
             },
             source: "Effect",
             pokemonStatus: {
-              type: "ReduceRetreatCost",
-              amount: Number(modifier),
+              type: "ModifyRetreatCost",
+              amount: -Number(modifier),
               source: "Effect",
             },
           });
@@ -273,9 +273,9 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
               },
               source: "Effect",
               pokemonStatus: {
-                type: "ReduceAttackCost",
+                type: "ModifyAttackCost",
                 energyType: fullType,
-                amount: Number(count),
+                amount: -Number(count),
                 source: "Effect",
               },
             });

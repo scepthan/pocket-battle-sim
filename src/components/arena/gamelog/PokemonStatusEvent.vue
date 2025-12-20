@@ -36,9 +36,13 @@
   <span v-else-if="entry.status.type == 'PreventSpecialConditions'">
     cannot be affected by Special Conditions</span
   >
-  <span v-else-if="entry.status.type == 'ReduceAttackCost'">
-    has its attack cost reduced by {{ entry.status.amount }}
-    <EnergyIcon :energy="entry.status.energyType" inline
+  <span v-else-if="entry.status.type == 'ModifyAttackCost'">
+    has its attack cost {{ entry.status.amount < 0 ? "reduced" : "increased" }} by
+    {{ Math.abs(entry.status.amount) }} <EnergyIcon :energy="entry.status.energyType" inline
+  /></span>
+  <span v-else-if="entry.status.type == 'ModifyRetreatCost'">
+    has its retreat cost {{ entry.status.amount < 0 ? "reduced" : "increased" }} by
+    {{ Math.abs(entry.status.amount) }} <EnergyIcon energy="Colorless" inline
   /></span>
   <span v-else> has unknown status "{{ entry.status.type }}" applied to it</span
   ><span v-if="'attackerCondition' in entry.status && entry.status.attackerCondition?.descriptor">

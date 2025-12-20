@@ -1,8 +1,10 @@
 <template>
   <div v-if="entry.status.type == 'PokemonStatus'">
     <div v-if="pokemonStatus">
-      <p v-if="pokemonStatus.type == 'ReduceRetreatCost'">
-        Retreat cost is {{ pokemonStatus.amount }} less<span v-if="descriptor">
+      <p v-if="pokemonStatus.type == 'ModifyRetreatCost'">
+        Retreat cost is {{ Math.abs(pokemonStatus.amount) }}
+        {{ pokemonStatus.amount < 0 ? "less" : "more"
+        }}<span v-if="descriptor">
           for <b>{{ entry.player }}'s</b> <PokemonDescriptor :text="descriptor" /></span
         ><span v-if="entry.status.source == 'Effect'"> for this turn</span>!
       </p>
@@ -36,10 +38,12 @@
         >'s <PokemonDescriptor :text="descriptor" /> now have their
         <EnergyIcon inline :energy="pokemonStatus.energyType" /> count as double!
       </p>
-      <p v-else-if="pokemonStatus.type == 'ReduceAttackCost'">
+      <p v-else-if="pokemonStatus.type == 'ModifyAttackCost'">
         All of <b>{{ entry.player }}</b
-        >'s <PokemonDescriptor :text="descriptor" /> have their attack cost reduced by
-        {{ pokemonStatus.amount }} <EnergyIcon inline :energy="pokemonStatus.energyType" /><span
+        >'s <PokemonDescriptor :text="descriptor" /> have their attack cost
+        {{ pokemonStatus.amount < 0 ? "reduced" : "increased" }} by
+        {{ Math.abs(pokemonStatus.amount) }}
+        <EnergyIcon inline :energy="pokemonStatus.energyType" /><span
           v-if="entry.status.source == 'Effect'"
         >
           this turn</span

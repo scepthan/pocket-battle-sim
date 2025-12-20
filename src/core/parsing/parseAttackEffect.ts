@@ -917,6 +917,27 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       },
     },
     {
+      pattern:
+        /^During your opponent’s next turn, attacks used by the Defending Pokémon cost (\d+) {(\w)} more, and its Retreat Cost is (\d+) {C} more./i,
+      transform: (_, attackCostModifier, type, retreatCostModifier) => {
+        addSideEffect(async (game) => {
+          game.DefendingPlayer.applyActivePokemonStatus({
+            type: "ModifyAttackCost",
+            amount: Number(attackCostModifier),
+            energyType: parseEnergy(type),
+            source: "Effect",
+            turnsToKeep: 1,
+          });
+          game.DefendingPlayer.applyActivePokemonStatus({
+            type: "ModifyRetreatCost",
+            amount: Number(retreatCostModifier),
+            source: "Effect",
+            turnsToKeep: 1,
+          });
+        });
+      },
+    },
+    {
       pattern: /^During your next turn, this Pokémon can’t attack\./i,
       transform: () => {
         addSideEffect(async (game) =>

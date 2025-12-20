@@ -590,9 +590,9 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
         convertToStatusAbility({
           type: "PokemonStatus",
           status: {
-            type: "ReduceAttackCost",
+            type: "ModifyAttackCost",
             energyType: fullType,
-            amount: Number(amount),
+            amount: -Number(amount),
             source: "Ability",
           },
         });
@@ -689,8 +689,8 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
               descriptor,
             },
             pokemonStatus: {
-              type: "ReduceRetreatCost",
-              amount: Number(amount),
+              type: "ModifyRetreatCost",
+              amount: -Number(amount),
               source: "PlayerStatus",
             },
           },
