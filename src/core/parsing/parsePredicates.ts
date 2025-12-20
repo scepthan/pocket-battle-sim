@@ -46,6 +46,7 @@ export const parsePokemonPredicate = (
 
   parsePart(/^Benched /, () => (pokemon) => pokemon.player.BenchedPokemon.includes(pokemon));
   parsePart(/^Active /, () => (pokemon) => pokemon.player.ActivePokemon === pokemon);
+
   parsePart(/^Basic /, () => (pokemon) => pokemon.Stage === 0);
   parsePart(/^Stage 2 /, () => (pokemon) => pokemon.Stage === 2);
 
@@ -69,7 +70,7 @@ export const parsePokemonPredicate = (
       return (pokemon) => pokemon.AttachedEnergy.length > 0;
     }
   });
-  parsePart(/ that have damage on them$/, () => (pokemon) => pokemon.isDamaged());
+  parsePart(/ that ha(?:s|ve) damage on (?:it|them)$/, () => (pokemon) => pokemon.isDamaged());
 
   parsePart(/^Pokémon ex$/, () => (pokemon) => pokemon.Name.endsWith(" ex"));
   if (text === "" || text === "Pokémon") {

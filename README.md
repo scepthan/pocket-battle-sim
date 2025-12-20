@@ -8,7 +8,7 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 152/157 (96.8%)
+  - [ ] A3: 153/157 (97.5%)
     - [x] Abilities
       - [x] New triggers
         - [x] Before Knocked Out
@@ -46,12 +46,12 @@ Backend todo:
         - [x] Take increased damage from attacks next turn
         - [ ] Apply IncreaseAttackCost and IncreaseRetreatCost statuses to opposing mon
         - [ ] Confuse self
-    - [ ] Items/Supporters
+    - [x] Items/Supporters
       - [x] Heal damage and remove random Special Condition
       - [x] Evolve Basic mon to Stage 2
       - [x] Look at top card and choose to shuffle
       - [x] Move damage from own mon to opposing mon
-      - [ ] Put damaged mon into hand
+      - [x] Put mon into hand
       - [x] Attach Energy to mon and end turn
       - [x] Discard all of opponent's Pokemon Tools
       - [x] If mon in play, switch in opponent's Benched mon of choice

@@ -616,6 +616,21 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         };
       },
     },
+    {
+      pattern: /^Put 1 of your (.+?) into your hand\.$/,
+      transform: (_, descriptor) => {
+        const predicate = parsePokemonPredicate(descriptor);
+
+        return {
+          type: "Targeted",
+          validTargets: (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
+          effect: async (game, target) => {
+            if (!target.isPokemon) return;
+            await game.AttackingPlayer.returnPokemonToHand(target);
+          },
+        };
+      },
+    },
 
     // Pokemon-playing effects
     {
