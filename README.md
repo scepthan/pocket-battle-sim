@@ -8,7 +8,7 @@ Backend todo:
   - [x] A2: 157/157 (100%)
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
-  - [ ] A3: 156/157 (99.4%)
+  - [x] A3: 157/157 (100%)
     - [x] Abilities
       - [x] New triggers
         - [x] Before Knocked Out
@@ -24,7 +24,7 @@ Backend todo:
         - [x] Move all Energy of type from self to Benched mon
         - [x] Switch with Active mon
         - [x] Put self to sleep
-    - [ ] Attacks
+    - [x] Attacks
       - [x] New conditionals
         - [x] Moved to the Active Spot on this turn
         - [x] At least 1 heads
@@ -32,10 +32,10 @@ Backend todo:
         - [x] Opposing mon has Special Condition
         - [x] Opposing mon has Ability
         - [x] Any of own Benched mon have damage
-      - [ ] New effects
+      - [x] New effects
         - [x] Discard random Energy from both Active mon
         - [x] Poison and Burn
-        - [ ] Apply Counterattack status to self
+        - [x] Apply Counterattack status to self
         - [x] Apply CannotUseItem status to opponent
         - [x] Switch with Benched mon of type
         - [x] Apply CannotAttachEnergy status to opponent (active)

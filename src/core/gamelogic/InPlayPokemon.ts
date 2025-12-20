@@ -256,7 +256,7 @@ export class InPlayPokemon {
   updatePokemonStatusesAtTurnEnd() {
     const newStatuses: PokemonStatus[] = [];
     for (const status of this._PokemonStatuses) {
-      if (status.source == "Effect") {
+      if (status.source == "Effect" || status.turnsToKeep !== undefined) {
         if (status.turnsToKeep) {
           status.turnsToKeep -= 1;
           newStatuses.push(status);
@@ -394,6 +394,10 @@ export class InPlayPokemon {
         tool.Effect.conditions.every((cond) => cond(this))
       )
         await this.triggerPokemonTool(tool);
+    }
+    for (const status of this.PokemonStatuses) {
+      if (status.type === "CounterAttack")
+        this.game.applyDamage(this.game.AttackingPokemon!, status.amount, false);
     }
   }
 

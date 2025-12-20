@@ -14,6 +14,9 @@
   <span v-else-if="entry.status.type == 'PreventAttackEffects'">
     cannot be harmed by effects of attacks</span
   >
+  <span v-else-if="entry.status.type == 'CounterAttack'">
+    will do {{ entry.status.amount }} damage if attacked</span
+  >
   <span v-else-if="entry.status.type == 'ReduceOwnAttackDamage'">
     will attack for &minus;{{ entry.status.amount }} damage</span
   >

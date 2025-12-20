@@ -878,6 +878,20 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       },
     },
     {
+      pattern:
+        /^During your opponent’s next turn, if this Pokémon is damaged by an attack, do (\d+) damage to the Attacking Pokémon\./i,
+      transform: (_, damage) => {
+        addSideEffect(async (game) =>
+          game.AttackingPlayer.applyActivePokemonStatus({
+            type: "CounterAttack",
+            amount: Number(damage),
+            source: "Effect",
+            turnsToKeep: 1,
+          })
+        );
+      },
+    },
+    {
       // Vulpix and Omastar have the same phrase in opposite order, so we account for both arrangements
       pattern:
         /^(?:the Defending Pokémon can’t attack ?|during your opponent’s next turn(?:, )?){2}\./i,
