@@ -83,14 +83,23 @@ Backend todo:
   - [ ] A4b-B1a
 - [ ] Game logic improvements
   - [x] Combine statuses that increase and decrease the same stat
+  - [ ] Implement max Energy and HP/damage limits
   - [ ] Possibly rework how Tools that apply statuses work?
     - [ ] Current bug: Eevee with Leaf Cape evolving into Leafeon will not gain HP
+  - [ ] Some properties on `PlayerPokemonView` can be maliciously modified by agents—use `.slice()` and make deep copies
   - [ ] Parsing logic is duplicated across different parsing files; there's probably a way to combine all the natural language parsing into one method
+  - [ ] A lot of the reactive logic that I'm currently hard-coding could possibly be simplified by switching everything to Vue's `ref`/`computed`/`watch`
+    - Biggest downside I see with this approach is maintaining order-of-operations (OOO) becomes much trickier to keep track of (for example, every action *must* be logged before the relevant property is modified)
+    - Callbacks still feel like a better approach for things like knockouts which happen out of sequence with the property they're related to (can't just do `watch(hp, (val) => { if (val == 0) ... })`)
+    - I also don't know if this will be faster or slower than the callback approach, but I would guess slower at first glance
 - [ ] Logging improvements
   - [ ] Add increase/decrease max HP log events (probably does not need to be separate)
   - [ ] If damage prevention came from somewhere other than the afflicted mon, log it (e.g. Comfey)
   - [ ] Log the specific Special Condition prevented instead of just "a Special Condition"
   - [ ] Prevent "played to bench" event from appearing as a player action when it was a side effect
+- [ ] Interactions to test in-app
+  - [ ] Heavy Helmet vs CounterAttack status effect (does it reduce damage? Reddit claims it will)
+  - [ ] Heavy Helmet vs max HP damage (990 or 970?)
 - [x] Single battle simulation
 - [ ] Basic logic-based AI opponent (at least as competitive as Auto Mode)
   - [ ] Evolve multiple mon per turn
