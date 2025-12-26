@@ -1,0 +1,50 @@
+{
+  "A3a Solo Battles": {
+    "Buzzwole ex": {
+      "Cards": ["A2-150", "A2-150", "A2b-071", "A3-147", "A3a-006", "A3a-006", "A3a-007", "A3a-007", "A3a-008", "A3a-008", "A3a-062", "A3a-062", "A3a-066", "A3a-066", "A3a-069", "A3a-069", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Grass"]
+    },
+    "Tapu Koko ex & Pikachu ex": {
+      "Cards": ["A2-150", "A2-150", "A2-154", "A2b-022", "A3-066", "A3-066", "A3a-019", "A3a-019", "A3a-021", "A3a-021", "A3a-064", "A3a-064", "A3a-065", "A3a-065", "PROMO-A-002", "PROMO-A-002", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Lightning"]
+    },
+    "Lycanroc ex & Passimian ex": {
+      "Cards": ["A2-092", "A2-092", "A2-146", "A2-147", "A2-150", "A2b-042", "A2b-042", "A2b-071", "A3-098", "A3-098", "A3-104", "A3-104", "A3a-033", "A3a-033", "PROMO-A-002", "PROMO-A-002", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Fighting"]
+    },
+    "Guzzlord ex & Naganadel": {
+      "Cards": ["A2-150", "A2b-069", "A3-146", "A3-146", "A3a-042", "A3a-042", "A3a-043", "A3a-043", "A3a-044", "A3a-044", "A3a-045", "A3a-045", "A3a-062", "A3a-062", "A3a-069", "A3a-069", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Darkness"]
+    },
+    "Alolan Dugtrio ex & Skarmory": {
+      "Cards": ["A2-111", "A2-111", "A2-147", "A2-147", "A2-148", "A2-148", "A2a-075", "A2a-075", "A3-093", "A3-093", "A3-117", "A3-117", "A3-119", "A3-119", "A3a-047", "A3a-047", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Metal"]
+    },
+    "Ultra Beast Drop Event": {
+      "Cards": ["A2-147", "A2-148", "A2-150", "A3-151", "A3a-053", "A3a-053", "A3a-062", "A3a-062", "A3a-063", "A3a-066", "A3a-069", "A3a-069", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007", "PROMO-A-078", "PROMO-A-079", "PROMO-A-081", "PROMO-A-081"],
+      "EnergyTypes": ["Psychic", "Metal"]
+    }
+  },
+  "A3a Rentals": {
+    "Buzzwole ex": {
+      "Cards": ["A3a-001", "A3a-001", "A3a-002", "A3a-002", "A3a-006", "A3a-007", "A3a-007", "A3a-008", "A3a-008", "A3a-057", "A3a-057", "A3a-058", "A3a-062", "A3a-063", "A3a-066", "A3a-069", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Grass"]
+    },
+    "Tapu Koko ex": {
+      "Cards": ["A3a-013", "A3a-013", "A3a-014", "A3a-014", "A3a-015", "A3a-016", "A3a-016", "A3a-017", "A3a-018", "A3a-019", "A3a-021", "A3a-057", "A3a-057", "A3a-058", "A3a-064", "A3a-065", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Lightning"]
+    },
+    "Lycanroc ex": {
+      "Cards": ["A3a-028", "A3a-028", "A3a-029", "A3a-030", "A3a-030", "A3a-031", "A3a-032", "A3a-032", "A3a-033", "A3a-034", "A3a-034", "A3a-035", "A3a-035", "A3a-036", "A3a-064", "PROMO-A-002", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Fighting"]
+    },
+    "Guzzlord ex": {
+      "Cards": ["A3a-037", "A3a-037", "A3a-038", "A3a-039", "A3a-039", "A3a-040", "A3a-040", "A3a-041", "A3a-042", "A3a-043", "A3a-044", "A3a-044", "A3a-045", "A3a-062", "A3a-066", "A3a-069", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Darkness"]
+    },
+    "Alolan Dugtrio ex": {
+      "Cards": ["A3a-046", "A3a-046", "A3a-047", "A3a-048", "A3a-048", "A3a-049", "A3a-049", "A3a-050", "A3a-051", "A3a-051", "A3a-052", "A3a-060", "A3a-060", "A3a-061", "A3a-067", "A3a-068", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Metal"]
+    }
+  }
+}

@@ -9,71 +9,47 @@ Backend todo:
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
   - [x] A3: 157/157 (100%)
-    - [x] Abilities
-      - [x] New triggers
-        - [x] Before Knocked Out
-        - [x] After Knocked Out
-      - [x] New conditionals
-        - [x] During your first turn
-      - [x] New effects
-        - [x] Heal all mon of type
-        - [x] Prevent damage from ex mon
-        - [x] Apply PreventSpecialConditions status to player (mon with Energy of type attached)
-        - [x] Move all Energy of type from Benched mon to Active mon
-        - [x] Flip coin to set self HP to 10 (need to investigate OOO in-game)
-        - [x] Move all Energy of type from self to Benched mon
-        - [x] Switch with Active mon
-        - [x] Put self to sleep
-    - [x] Attacks
-      - [x] New conditionals
-        - [x] Moved to the Active Spot on this turn
-        - [x] At least 1 heads
-        - [x] Opposing mon has more HP than self
-        - [x] Opposing mon has Special Condition
-        - [x] Opposing mon has Ability
-        - [x] Any of own Benched mon have damage
-      - [x] New effects
-        - [x] Discard random Energy from both Active mon
-        - [x] Poison and Burn
-        - [x] Apply Counterattack status to self
-        - [x] Apply CannotUseItem status to opponent
-        - [x] Switch with Benched mon of type
-        - [x] Apply CannotAttachEnergy status to opponent (active)
-        - [x] Also do damage to any of own mon
-        - [x] Do damage to any opposing mon for each Energy attached to it
-        - [x] Discard random filtered card from opponent's hand
-        - [x] Apply random Special Condition to opposing mon
-        - [x] Take increased damage from attacks next turn
-        - [x] Apply IncreaseAttackCost and IncreaseRetreatCost statuses to opposing mon
-        - [x] Confuse self
-    - [x] Items/Supporters
-      - [x] Heal damage and remove random Special Condition
-      - [x] Evolve Basic mon to Stage 2
-      - [x] Look at top card and choose to shuffle
-      - [x] Move damage from own mon to opposing mon
-      - [x] Put mon into hand
-      - [x] Attach Energy to mon and end turn
-      - [x] Discard all of opponent's Pokemon Tools
-      - [x] If mon in play, switch in opponent's Benched mon of choice
-      - [x] Heal all damage and discard all Energy from mon
-    - [x] Pokemon Tools
-      - [x] Poison attacker when damaged
-    - [x] New Pokemon Statuses
-      - [x] CannotAttachEnergy (PokemonPlayerStatus)
-      - [x] ModifyIncomingAttackDamage (DefensePokemonStatus)
-      - [x] ModifyAttackCost (BasePokemonStatus)
-      - [x] ModifyRetreatCost (BasePokemonStatus)
-    - [x] New Pokemon predicates
-      - [x] Stage 2
-      - [x] Has damage on it
-    - [x] New card predicates
-      - [x] Card that evolves from mon
-      - [x] Item card (Fossils count)
-    - [x] Unique promo cards
-      - [x] Rayquaza
-      - [x] Rayquaza ex
-  - [ ] A3a
+  - [ ] A3a: 53/72 (73.6%)
     - [ ] Ultra Beasts
+    - [ ] Abilities
+      - [ ] New triggers
+        - [ ] End of your first turn
+      - [ ] New conditionals
+      - [ ] New effects
+        - [ ] Apply ReduceOwnAttackDamage to opponent
+        - [ ] Draw random card from deck
+        - [ ] Apply PreventHealing to both players
+        - [ ] Apply ExtraPoisonDamage to opponent's Active
+        - [ ] Apply ModifyAttackCost(Colorless, +1) to opponent's Active
+        - [ ] Swap (predicate) Active mon with (predicate) Benched mon
+    - [ ] Attacks
+      - [ ] New conditionals
+        - [ ] Specific mon is on Bench
+        - [ ] Supporter has been used this turn
+      - [ ] New effects
+        - [ ] Flip coins to shuffle cards from opponent's hand into deck
+        - [ ] Knock out defending mon
+        - [ ] Discard cards from both player's decks
+    - [ ] Items/Supporters
+      - [ ] If opponent has no points, apply ModifyIncomingAttackDamage
+      - [ ] Switch opponent's (predicate) Active to the Bench
+      - [ ] View all (predicate) cards in opponent's deck
+      - [ ] If opponent has any points, attach energy from discard to mon
+    - [ ] Pokemon Tools
+      - [ ] New triggers
+        - [ ] On Knocked Out
+      - [ ] New effects
+        - [ ] Move energy from this mon to Benched mon
+        - [ ] Do extra damage per point scored
+    - [ ] New Pokemon Statuses
+      - [ ] PreventHealing
+    - [ ] New Pokemon predicates
+      - [ ] Ultra Beast
+    - [ ] New card predicates
+    - [ ] Unique promo cards
+      - [x] Dawn Wings Necrozma
+      - [x] Dusk Mane Necrozma
+      - [ ] Ultra Necrozma ex
   - [ ] A3b
   - [ ] A4
     - [ ] Baby Pokémon (0-cost attacks)
@@ -83,13 +59,14 @@ Backend todo:
   - [ ] A4b-B1a
 - [ ] Game logic improvements
   - [x] Combine statuses that increase and decrease the same stat
+    - [ ] ReduceOwnAttackDamage/IncreaseAttack
   - [ ] Implement max Energy and HP/damage limits
   - [ ] Possibly rework how Tools that apply statuses work?
     - [ ] Current bug: Eevee with Leaf Cape evolving into Leafeon will not gain HP
   - [ ] Some properties on `PlayerPokemonView` can be maliciously modified by agents—use `.slice()` and make deep copies
   - [ ] Parsing logic is duplicated across different parsing files; there's probably a way to combine all the natural language parsing into one method
   - [ ] A lot of the reactive logic that I'm currently hard-coding could possibly be simplified by switching everything to Vue's `ref`/`computed`/`watch`
-    - Biggest downside I see with this approach is maintaining order-of-operations (OOO) becomes much trickier to keep track of (for example, every action *must* be logged before the relevant property is modified)
+    - Biggest downside I see with this approach is maintaining order-of-operations (OOO) becomes much trickier to keep track of (for example, every action _must_ be logged before the relevant property is modified)
     - Callbacks still feel like a better approach for things like knockouts which happen out of sequence with the property they're related to (can't just do `watch(hp, (val) => { if (val == 0) ... })`)
     - I also don't know if this will be faster or slower than the callback approach, but I would guess slower at first glance
 - [ ] Logging improvements

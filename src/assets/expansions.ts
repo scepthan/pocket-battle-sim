@@ -11,4 +11,5 @@ export const allExpansions = {
   A4a: "Secluded Springs",
   A4b: "Deluxe Pack: ex",
   B1: "Mega Rising",
+  B1a: "Crimson Blaze",
 };

@@ -1,7 +1,7 @@
 <template>
   <v-select
     v-model="selectedExpansions"
-    :items="Object.entries(allExpansions)"
+    :items="Object.entries(allExpansions).reverse()"
     :item-title="([set, name]) => `${set} - ${name}`"
     item-value="0"
     multiple
