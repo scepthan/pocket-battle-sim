@@ -1,5 +1,13 @@
 import { allCards } from "@/assets";
-import type { Energy, FossilCard, PokemonCard, TrainerEffect } from "../gamelogic";
+import type {
+  CardSlot,
+  Energy,
+  FossilCard,
+  Game,
+  PokemonCard,
+  TargetedEffect,
+  TrainerEffect,
+} from "../gamelogic";
 import { parseEnergy } from "../gamelogic";
 import { randomElement, removeElement } from "../util";
 import {
@@ -19,7 +27,7 @@ const findBasicForStage2 = (stage2: PokemonCard) => {
 
 interface EffectTransformer {
   pattern: RegExp;
-  transform: (...args: string[]) => TrainerEffect;
+  transform: (...args: string[]) => void;
 }
 export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect> => {
   let parseSuccessful = true;
@@ -35,69 +43,82 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     return value;
   };
 
+  let effect: TrainerEffect = {
+    type: "Conditional",
+    condition: () => true,
+    effect: async (game) => {
+      game.GameLog.notImplemented(game.AttackingPlayer);
+    },
+  };
+  const convertToTargetedEffect = (
+    validTargets: (game: Game) => CardSlot[],
+    newEffect: TargetedEffect<CardSlot>
+  ) => {
+    effect = {
+      type: "Targeted",
+      condition: effect.condition,
+      validTargets,
+      effect: newEffect,
+    };
+  };
+
   const dictionary: EffectTransformer[] = [
     // Draw effects
     {
       pattern: /^Draw (a|\d+) cards?\.$/,
-      transform: (_, count) => ({
-        type: "Conditional",
-        condition: (game) => game.AttackingPlayer.canDraw(true),
-        effect: async (game) => game.AttackingPlayer.drawCards(count == "a" ? 1 : Number(count)),
-      }),
+      transform: (_, count) => {
+        effect.condition = (game) => game.AttackingPlayer.canDraw(true);
+        effect.effect = async (game: Game) =>
+          game.AttackingPlayer.drawCards(count == "a" ? 1 : Number(count));
+      },
     },
     {
       pattern: /^Put (?:a|1) random (.+?) from your deck into your hand\.$/,
       transform: (_, descriptor) => {
         const predicate = parsePlayingCardPredicate(descriptor);
-        return {
-          type: "Conditional",
-          condition: (game) => game.AttackingPlayer.canDraw(true),
-          effect: async (game) => {
-            game.AttackingPlayer.drawRandomFilteredToHand(predicate);
-          },
+        effect.condition = (game) => game.AttackingPlayer.canDraw(true);
+        effect.effect = async (game: Game) => {
+          game.AttackingPlayer.drawRandomFilteredToHand(predicate);
         };
       },
     },
     {
       pattern:
-        /^Look at the top card of your deck. If that card is a {(\w)} Pokémon, put it into your hand. If it is not a {\1} Pokémon, put it on the bottom of your deck.$/i,
-      transform: (_, type) => {
-        const fullType = parseEnergy(type);
+        /^Look at the top card of your deck. If that card is a (.+?), put it into your hand. If it is not a \1, put it on the bottom of your deck.$/i,
+      transform: (_, descriptor) => {
+        const predicate = parsePlayingCardPredicate(descriptor);
 
-        return {
-          type: "Conditional",
-          condition: (game) => game.AttackingPlayer.Deck.length > 0,
-          effect: async (game) => {
-            const topCard = game.AttackingPlayer.Deck.shift()!;
-            await game.showCards(game.AttackingPlayer, [topCard]);
+        effect.condition = (game) => game.AttackingPlayer.Deck.length > 0;
+        effect.effect = async (game: Game) => {
+          const topCard = game.AttackingPlayer.Deck.shift()!;
+          await game.showCards(game.AttackingPlayer, [topCard]);
 
-            if (topCard.CardType == "Pokemon" && topCard.Type == fullType) {
-              game.AttackingPlayer.Hand.push(topCard);
-              game.GameLog.putIntoHand(game.AttackingPlayer, [topCard]);
-            } else {
-              game.AttackingPlayer.Deck.push(topCard);
-              game.GameLog.returnToBottomOfDeck(game.AttackingPlayer, [topCard]);
-            }
-          },
+          if (predicate(topCard)) {
+            game.AttackingPlayer.Hand.push(topCard);
+            game.GameLog.putIntoHand(game.AttackingPlayer, [topCard]);
+          } else {
+            game.AttackingPlayer.Deck.push(topCard);
+            game.GameLog.returnToBottomOfDeck(game.AttackingPlayer, [topCard]);
+          }
         };
       },
     },
     {
-      pattern: /^Choose a Pokémon in your hand and switch it with a random Pokémon in your deck.$/i,
-      transform: () => ({
-        type: "Conditional",
-        condition: (game) => game.AttackingPlayer.Hand.some((c) => c.CardType == "Pokemon"),
-        effect: async (game) => {
-          const handPokemon = game.AttackingPlayer.Hand.filter((c) => c.CardType == "Pokemon");
-          const chosen = await game.chooseCard(game.AttackingPlayer, handPokemon);
+      pattern: /^Choose a (.+?) in your hand and switch it with a random \1 in your deck.$/i,
+      transform: (_, descriptor) => {
+        const predicate = parsePlayingCardPredicate(descriptor);
+        effect.condition = (game) => game.AttackingPlayer.Hand.some(predicate);
+        effect.effect = async (game: Game) => {
+          const validHandCards = game.AttackingPlayer.Hand.filter(predicate);
+          const chosen = await game.chooseCard(game.AttackingPlayer, validHandCards);
           if (!chosen) return;
 
-          const deckPokemon = game.AttackingPlayer.Deck.filter((c) => c.CardType == "Pokemon");
-          if (deckPokemon.length == 0) {
+          const validDeckCards = game.AttackingPlayer.Deck.filter(predicate);
+          if (validDeckCards.length == 0) {
             game.GameLog.noValidCards(game.AttackingPlayer);
             return;
           }
-          const pokemonFromDeck = randomElement(deckPokemon);
+          const pokemonFromDeck = randomElement(validDeckCards);
 
           removeElement(game.AttackingPlayer.Hand, chosen);
           game.AttackingPlayer.Deck.push(chosen);
@@ -108,105 +129,91 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
           game.GameLog.putIntoHand(game.AttackingPlayer, [pokemonFromDeck]);
 
           game.AttackingPlayer.shuffleDeck();
-        },
-      }),
+        };
+      },
     },
     {
       pattern: /^Put (?:a|1) random (.+?) from your discard pile into your hand\.$/,
       transform: (_, descriptor) => {
         const predicate = parsePlayingCardPredicate(descriptor);
-        return {
-          type: "Conditional",
-          condition: (game, self) => self.Discard.some(predicate),
-          effect: async (game) => {
-            const validCards = game.AttackingPlayer.Discard.filter(predicate);
-            const card = randomElement(validCards);
-            removeElement(game.AttackingPlayer.Discard, card);
-            game.AttackingPlayer.Hand.push(card);
-            game.GameLog.putIntoHand(game.AttackingPlayer, [card]);
-          },
+        effect.condition = (game, self) => self.Discard.some(predicate);
+        effect.effect = async (game: Game) => {
+          const validCards = game.AttackingPlayer.Discard.filter(predicate);
+          const card = randomElement(validCards);
+          removeElement(game.AttackingPlayer.Discard, card);
+          game.AttackingPlayer.Hand.push(card);
+          game.GameLog.putIntoHand(game.AttackingPlayer, [card]);
         };
       },
     },
     {
       pattern: /^Your opponent shuffles their hand into their deck and draws (\d+) cards\.$/,
-      transform: (_, count) => ({
-        type: "Conditional",
-        condition: () => true,
-        effect: async (game) => {
+      transform: (_, count) => {
+        effect.effect = async (game: Game) => {
           game.DefendingPlayer.shuffleHandIntoDeckAndDraw(Number(count));
-        },
-      }),
+        };
+      },
     },
     {
       pattern:
         /^Your opponent shuffles their hand into their deck and draws a card for each of their remaining points needed to win\.$/i,
-      transform: () => ({
-        type: "Conditional",
-        condition: () => true,
-        effect: async (game) => {
+      transform: () => {
+        effect.effect = async (game: Game) => {
           const cardsToDraw = game.GameRules.PrizePoints - game.DefendingPlayer.GamePoints;
           game.DefendingPlayer.shuffleHandIntoDeckAndDraw(cardsToDraw);
-        },
-      }),
+        };
+      },
     },
     {
       pattern:
         /^Each player shuffles the cards in their hand into their deck, then draws that many cards\.$/i,
-      transform: () => ({
-        type: "Conditional",
-        condition: () => true,
-        effect: async (game) => {
+      transform: () => {
+        effect.effect = async (game: Game) => {
           game.DefendingPlayer.shuffleHandIntoDeckAndDraw(game.DefendingPlayer.Hand.length);
           game.AttackingPlayer.shuffleHandIntoDeckAndDraw(game.AttackingPlayer.Hand.length);
-        },
-      }),
+        };
+      },
     },
 
     // Informational effects
     {
       pattern: /^Your opponent reveals their hand\.$/,
-      transform: () => ({
-        type: "Conditional",
-        condition: (game) => game.DefendingPlayer.Hand.length > 0,
-        effect: async (game) => {
+      transform: () => {
+        effect.condition = (game) => game.DefendingPlayer.Hand.length > 0;
+        effect.effect = async (game: Game) => {
           await game.showCards(game.AttackingPlayer, game.DefendingPlayer.Hand);
-        },
-      }),
+        };
+      },
     },
     {
       pattern: /^Look at the top (\d+) cards of your deck\.$/,
-      transform: (_, count) => ({
-        type: "Conditional",
-        condition: (game) => game.AttackingPlayer.Deck.length > 0,
-        effect: async (game) => {
+      transform: (_, count) => {
+        effect.condition = (game) => game.AttackingPlayer.Deck.length > 0;
+        effect.effect = async (game: Game) => {
           await game.showCards(
             game.AttackingPlayer,
             game.AttackingPlayer.Deck.slice(0, Number(count))
           );
-        },
-      }),
+        };
+      },
     },
     {
       pattern: /^Look at the top card of your deck\. Then, you may shuffle your deck\.$/,
-      transform: () => ({
-        type: "Conditional",
-        condition: (game) => game.AttackingPlayer.Deck.length > 0,
-        effect: async (game) => {
+      transform: () => {
+        effect.condition = (game) => game.AttackingPlayer.Deck.length > 0;
+        effect.effect = async (game: Game) => {
           await game.showCards(game.AttackingPlayer, game.AttackingPlayer.Deck.slice(0, 1));
           const choice = await game.chooseYesNo(game.AttackingPlayer, "Shuffle deck?");
           if (choice) game.AttackingPlayer.shuffleDeck();
-        },
-      }),
+        };
+      },
     },
 
     // Status effects
     {
       pattern: /^During this turn, the Retreat Cost of your Active Pokémon is (\d+) less\.$/,
-      transform: (_, modifier) => ({
-        type: "Conditional",
-        condition: () => true,
-        effect: async (game) => {
+      transform: (_, modifier) => {
+        effect.effect = async (game: Game) => {
           game.AttackingPlayer.applyPlayerStatus({
             type: "PokemonStatus",
             pokemonCondition: {
@@ -220,8 +227,8 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
               source: "Effect",
             },
           });
-        },
-      }),
+        };
+      },
     },
     {
       pattern:
@@ -230,28 +237,24 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         const appliesToPokemon = parsePokemonPredicate(selfSpecifier);
         const appliesToDefender = parsePokemonPredicate(opponentSpecifier);
 
-        return {
-          type: "Conditional",
-          condition: () => true,
-          effect: async (game) => {
-            game.AttackingPlayer.applyPlayerStatus({
-              type: "PokemonStatus",
-              pokemonCondition: {
-                test: appliesToPokemon,
-                descriptor: selfSpecifier,
+        effect.effect = async (game: Game) => {
+          game.AttackingPlayer.applyPlayerStatus({
+            type: "PokemonStatus",
+            pokemonCondition: {
+              test: appliesToPokemon,
+              descriptor: selfSpecifier,
+            },
+            source: "Effect",
+            pokemonStatus: {
+              type: "IncreaseAttack",
+              amount: Number(modifier),
+              defenderCondition: {
+                test: appliesToDefender,
+                descriptor: opponentSpecifier,
               },
               source: "Effect",
-              pokemonStatus: {
-                type: "IncreaseAttack",
-                amount: Number(modifier),
-                defenderCondition: {
-                  test: appliesToDefender,
-                  descriptor: opponentSpecifier,
-                },
-                source: "Effect",
-              },
-            });
-          },
+            },
+          });
         };
       },
     },
@@ -261,25 +264,21 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         const predicate = parsePokemonPredicate(descriptor);
         const fullType = parseEnergy(energy);
 
-        return {
-          type: "Conditional",
-          condition: () => true,
-          effect: async (game) => {
-            game.AttackingPlayer.applyPlayerStatus({
-              type: "PokemonStatus",
-              pokemonCondition: {
-                test: predicate,
-                descriptor,
-              },
+        effect.effect = async (game: Game) => {
+          game.AttackingPlayer.applyPlayerStatus({
+            type: "PokemonStatus",
+            pokemonCondition: {
+              test: predicate,
+              descriptor,
+            },
+            source: "Effect",
+            pokemonStatus: {
+              type: "ModifyAttackCost",
+              energyType: fullType,
+              amount: -Number(count),
               source: "Effect",
-              pokemonStatus: {
-                type: "ModifyAttackCost",
-                energyType: fullType,
-                amount: -Number(count),
-                source: "Effect",
-              },
-            });
-          },
+            },
+          });
         };
       },
     },
@@ -289,25 +288,21 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
       transform: (_, descriptor, modifier) => {
         const predicate = parsePokemonPredicate(descriptor);
 
-        return {
-          type: "Conditional",
-          condition: () => true,
-          effect: async (game) => {
-            game.AttackingPlayer.applyPlayerStatus({
-              type: "PokemonStatus",
-              pokemonCondition: {
-                test: predicate,
-                descriptor,
-              },
+        effect.effect = async (game: Game) => {
+          game.AttackingPlayer.applyPlayerStatus({
+            type: "PokemonStatus",
+            pokemonCondition: {
+              test: predicate,
+              descriptor,
+            },
+            source: "Effect",
+            keepNextTurn: true,
+            pokemonStatus: {
+              type: "ModifyIncomingAttackDamage",
+              amount: -Number(modifier),
               source: "Effect",
-              keepNextTurn: true,
-              pokemonStatus: {
-                type: "ModifyIncomingAttackDamage",
-                amount: -Number(modifier),
-                source: "Effect",
-              },
-            });
-          },
+            },
+          });
         };
       },
     },
@@ -321,28 +316,26 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
           descriptor,
           (p) => p.isDamaged() || p.hasSpecialCondition()
         );
-        return {
-          type: "Targeted",
-          validTargets: (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
-          effect: async (game, pokemon) => {
+        convertToTargetedEffect(
+          (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
+          async (game, pokemon) => {
             if (!pokemon.isPokemon) return;
             pokemon.healDamage(Number(modifier));
             pokemon.removeAllSpecialConditions();
-          },
-        };
+          }
+        );
       },
     },
     {
       pattern: /^Heal (\d+) damage from 1 of your ([^.]+?)\.$/,
       transform: (_, modifier, descriptor) => {
         const predicate = parsePokemonPredicate(descriptor, (p) => p.isDamaged());
-        return {
-          type: "Targeted",
-          validTargets: (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
-          effect: async (game, pokemon) => {
+        convertToTargetedEffect(
+          (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
+          async (game, pokemon) => {
             if (pokemon.isPokemon) pokemon.healDamage(Number(modifier));
-          },
-        };
+          }
+        );
       },
     },
     {
@@ -350,32 +343,28 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         /^Heal all damage from 1 of your ([^.]+?)\. If you do, discard all Energy from that Pokémon\.$/,
       transform: (_, descriptor) => {
         const predicate = parsePokemonPredicate(descriptor, (p) => p.isDamaged());
-        return {
-          type: "Targeted",
-          validTargets: (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
-          effect: async (game, pokemon) => {
+        convertToTargetedEffect(
+          (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
+          async (game, pokemon) => {
             if (!pokemon.isPokemon) return;
             pokemon.healDamage(pokemon.MaxHP - pokemon.CurrentHP);
             await game.discardAllEnergy(pokemon);
-          },
-        };
+          }
+        );
       },
     },
     {
       pattern:
         /^Heal (\d+) damage and remove a random Special Condition from your Active Pokémon\.$/,
       transform: (_, modifier) => {
-        return {
-          type: "Conditional",
-          condition: (game) => {
-            const active = game.AttackingPlayer.activeOrThrow();
-            return active.isDamaged() || active.hasSpecialCondition();
-          },
-          effect: async (game) => {
-            const active = game.AttackingPlayer.activeOrThrow();
-            active.healDamage(Number(modifier));
-            active.removeRandomSpecialCondition();
-          },
+        effect.condition = (game) => {
+          const active = game.AttackingPlayer.activeOrThrow();
+          return active.isDamaged() || active.hasSpecialCondition();
+        };
+        effect.effect = async (game: Game) => {
+          const active = game.AttackingPlayer.activeOrThrow();
+          active.healDamage(Number(modifier));
+          active.removeRandomSpecialCondition();
         };
       },
     },
@@ -388,14 +377,11 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
           (p) => p.isDamaged() && p.AttachedEnergy.includes(fullType)
         );
 
-        return {
-          type: "Conditional",
-          condition: (game) => game.AttackingPlayer.InPlayPokemon.some(predicate),
-          effect: async (game) => {
-            for (const pokemon of game.AttackingPlayer.InPlayPokemon.filter(predicate)) {
-              pokemon.healDamage(Number(modifier));
-            }
-          },
+        effect.condition = (game) => game.AttackingPlayer.InPlayPokemon.some(predicate);
+        effect.effect = async (game: Game) => {
+          for (const pokemon of game.AttackingPlayer.InPlayPokemon.filter(predicate)) {
+            pokemon.healDamage(Number(modifier));
+          }
         };
       },
     },
@@ -405,15 +391,14 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
       transform: (_, descriptor, amount) => {
         const predicate = parsePokemonPredicate(descriptor, (p) => p.isDamaged());
 
-        return {
-          type: "Targeted",
-          validTargets: (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
-          effect: async (game, target) => {
+        convertToTargetedEffect(
+          (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
+          async (game, target) => {
             if (!target.isPokemon) return;
             target.healDamage(Number(amount));
             game.applyDamage(game.DefendingPlayer.activeOrThrow(), Number(amount), false);
-          },
-        };
+          }
+        );
       },
     },
 
@@ -425,10 +410,9 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         const pt = parseEnergy(pokemonType);
         const et = parseEnergy(energyType);
 
-        return {
-          type: "Targeted",
-          validTargets: (game) => game.AttackingPlayer.InPlayPokemon.filter((x) => x.Type == pt),
-          effect: async (game, pokemon) => {
+        convertToTargetedEffect(
+          (game) => game.AttackingPlayer.InPlayPokemon.filter((x) => x.Type == pt),
+          async (game, pokemon) => {
             if (!pokemon.isPokemon) return;
             const { heads } = game.AttackingPlayer.flipUntilTails();
             await game.AttackingPlayer.attachEnergy(
@@ -436,8 +420,8 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
               new Array(heads).fill(et),
               "energyZone"
             );
-          },
-        };
+          }
+        );
       },
     },
     {
@@ -446,14 +430,13 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         const fullType = parseEnergy(energyType);
         const predicate = parsePokemonPredicate(descriptor);
 
-        return {
-          type: "Targeted",
-          validTargets: (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
-          effect: async (game, pokemon) => {
+        convertToTargetedEffect(
+          (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
+          async (game, pokemon) => {
             if (!pokemon.isPokemon) return;
             await game.AttackingPlayer.attachEnergy(pokemon, [fullType], "energyZone");
-          },
-        };
+          }
+        );
       },
     },
     {
@@ -464,16 +447,16 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         const fullType = parseEnergy(energyType);
         const energyToAttach = new Array(Number(count)).fill(fullType);
 
-        return {
-          type: "Targeted",
-          validTargets: (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
-          condition: (game) => game.AttackingPlayer.DiscardedEnergy.some((e) => e == fullType),
-          effect: async (game, pokemon) => {
+        convertToTargetedEffect(
+          (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
+          async (game, pokemon) => {
             if (!pokemon.isPokemon) return;
             await game.AttackingPlayer.attachEnergy(pokemon, energyToAttach, "energyZone");
             if (endTurn) game.endTurnResolve(true);
-          },
-        };
+          }
+        );
+        effect.condition = (game) =>
+          game.AttackingPlayer.DiscardedEnergy.some((e) => e == fullType);
       },
     },
     {
@@ -483,11 +466,9 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         const predicate = parsePokemonPredicate(descriptor);
         const fullType = parseEnergy(energyType);
 
-        return {
-          type: "Targeted",
-          validTargets: (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
-          condition: (game) => game.AttackingPlayer.DiscardedEnergy.some((e) => e == fullType),
-          effect: async (game, pokemon) => {
+        convertToTargetedEffect(
+          (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
+          async (game, pokemon) => {
             if (!pokemon.isPokemon) return;
             const energyToAttach: Energy[] = [];
             for (let i = 0; i < Number(count); i++) {
@@ -496,8 +477,10 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
               removeElement(game.AttackingPlayer.DiscardedEnergy, fullType);
             }
             await game.AttackingPlayer.attachEnergy(pokemon, energyToAttach, "discard");
-          },
-        };
+          }
+        );
+        effect.condition = (game) =>
+          game.AttackingPlayer.DiscardedEnergy.some((e) => e == fullType);
       },
     },
     {
@@ -507,79 +490,74 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
         const fullType = parseEnergy(energyType);
         const predicate = parsePokemonPredicate(descriptor);
 
-        return {
-          type: "Conditional",
-          condition: (game) => predicate(game.AttackingPlayer.activeOrThrow()),
-          effect: async (game) => {
-            for (const pokemon of game.AttackingPlayer.BenchedPokemon) {
-              const energyToMove = pokemon.AttachedEnergy.filter((e) => e == fullType);
-              if (energyToMove.length > 0) {
-                await game.AttackingPlayer.transferEnergy(
-                  pokemon,
-                  game.AttackingPlayer.activeOrThrow(),
-                  energyToMove
-                );
-              }
+        effect.condition = (game) => predicate(game.AttackingPlayer.activeOrThrow());
+        effect.effect = async (game: Game) => {
+          for (const pokemon of game.AttackingPlayer.BenchedPokemon) {
+            const energyToMove = pokemon.AttachedEnergy.filter((e) => e == fullType);
+            if (energyToMove.length > 0) {
+              await game.AttackingPlayer.transferEnergy(
+                pokemon,
+                game.AttackingPlayer.activeOrThrow(),
+                energyToMove
+              );
             }
-          },
+          }
         };
       },
     },
     {
       pattern: /^Move an Energy from 1 of your Benched Pokémon to your Active Pokémon\.$/,
-      transform: () => ({
-        type: "Targeted",
-        validTargets: (game) =>
-          game.AttackingPlayer.BenchedPokemon.filter((p) => p.AttachedEnergy.length > 0),
-        effect: async (game, target) => {
-          const player = game.AttackingPlayer;
-          if (!target.isPokemon) return;
-          const prompt = "Choose an Energy to move.";
-          const energy = await game.chooseNEnergy(player, target.AttachedEnergy, 1, prompt);
-          await player.transferEnergy(target, player.activeOrThrow(), energy);
-        },
-      }),
+      transform: () => {
+        convertToTargetedEffect(
+          (game) => game.AttackingPlayer.BenchedPokemon.filter((p) => p.AttachedEnergy.length > 0),
+          async (game, target) => {
+            const player = game.AttackingPlayer;
+            if (!target.isPokemon) return;
+            const prompt = "Choose an Energy to move.";
+            const energy = await game.chooseNEnergy(player, target.AttachedEnergy, 1, prompt);
+            await player.transferEnergy(target, player.activeOrThrow(), energy);
+          }
+        );
+      },
     },
     {
       pattern:
         /^Flip a coin until you get tails\. For each heads, discard a random Energy from your opponent’s Active Pokémon\.$/,
-      transform: () => ({
-        type: "Conditional",
-        condition: () => true,
-        effect: async (game) => {
+      transform: () => {
+        effect.effect = async (game: Game) => {
           const { heads } = game.AttackingPlayer.flipUntilTails();
           const active = game.DefendingPlayer.activeOrThrow();
           await game.DefendingPlayer.discardRandomEnergyFromPokemon(active, heads);
-        },
-      }),
+        };
+      },
     },
 
     // Switching effects
     {
       pattern: /^Switch out your opponent’s Active Pokémon to the Bench\./,
-      transform: () => ({
-        type: "Conditional",
-        condition: (game) => game.DefendingPlayer.BenchedPokemon.length > 0,
-        effect: async (game) => {
+      transform: () => {
+        effect.condition = (game) => game.DefendingPlayer.BenchedPokemon.length > 0;
+        effect.effect = async (game: Game) => {
           await game.chooseNewActivePokemon(game.DefendingPlayer);
-        },
-      }),
+        };
+      },
     },
     {
       pattern:
         /^Switch in 1 of your opponent’s Benched Pokémon that has damage on it to the Active Spot\.$/i,
-      transform: () => ({
-        type: "Targeted",
-        validTargets: (game) => game.DefendingPlayer.BenchedPokemon.filter((p) => p.isDamaged()),
-        effect: async (game, target) => {
-          if (!target.isPokemon) return;
-          await game.DefendingPlayer.swapActivePokemon(
-            target,
-            "opponentEffect",
-            game.AttackingPlayer.Name
-          );
-        },
-      }),
+      transform: () => {
+        convertToTargetedEffect(
+          (game) => game.DefendingPlayer.BenchedPokemon.filter((p) => p.isDamaged()),
+          async (game, target) => {
+            if (!target.isPokemon) return;
+            await game.DefendingPlayer.swapActivePokemon(
+              target,
+              "opponentEffect",
+              game.AttackingPlayer.Name
+            );
+          }
+        );
+      },
     },
     {
       pattern:
@@ -587,19 +565,19 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
       transform: (_, descriptor) => {
         const predicate = parsePokemonPredicate(descriptor);
 
-        return {
-          type: "Targeted",
-          condition: (game) => game.AttackingPlayer.InPlayPokemon.some(predicate),
-          validTargets: (game) => game.DefendingPlayer.BenchedPokemon,
-          effect: async (game, target) => {
+        convertToTargetedEffect(
+          (game) => game.DefendingPlayer.BenchedPokemon,
+          async (game, target) => {
             if (!target.isPokemon) return;
             await game.DefendingPlayer.swapActivePokemon(
               target,
               "opponentEffect",
               game.AttackingPlayer.Name
             );
-          },
-        };
+          }
+        );
+
+        effect.condition = (game) => game.AttackingPlayer.InPlayPokemon.some(predicate);
       },
     },
     {
@@ -607,12 +585,9 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
       transform: (_, descriptor) => {
         const predicate = parsePokemonPredicate(descriptor);
 
-        return {
-          type: "Conditional",
-          condition: (game) => predicate(game.AttackingPlayer.activeOrThrow()),
-          effect: async (game) => {
-            await game.AttackingPlayer.returnPokemonToHand(game.AttackingPlayer.activeOrThrow());
-          },
+        effect.condition = (game) => predicate(game.AttackingPlayer.activeOrThrow());
+        effect.effect = async (game: Game) => {
+          await game.AttackingPlayer.returnPokemonToHand(game.AttackingPlayer.activeOrThrow());
         };
       },
     },
@@ -621,28 +596,26 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
       transform: (_, descriptor) => {
         const predicate = parsePokemonPredicate(descriptor);
 
-        return {
-          type: "Targeted",
-          validTargets: (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
-          effect: async (game, target) => {
+        convertToTargetedEffect(
+          (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate),
+          async (game, target) => {
             if (!target.isPokemon) return;
             await game.AttackingPlayer.returnPokemonToHand(target);
-          },
-        };
+          }
+        );
       },
     },
 
     // Pokemon-playing effects
     {
       pattern: /^Put a Basic Pokémon from your opponent’s discard pile onto their Bench.$/,
-      transform: () => ({
-        type: "Conditional",
-        condition: (game) =>
+      transform: () => {
+        effect.condition = (game) =>
           game.DefendingPlayer.Bench.some((slot) => !slot.isPokemon) &&
           game.DefendingPlayer.Discard.some(
             (card) => card.CardType == "Pokemon" && card.Stage == 0
-          ),
-        effect: async (game) => {
+          );
+        effect.effect = async (game: Game) => {
           const benchIndex = game.DefendingPlayer.Bench.findIndex((slot) => !slot.isPokemon);
           if (benchIndex < 0) return;
           const validCards = game.DefendingPlayer.Discard.filter(
@@ -651,40 +624,41 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
           const card = await game.chooseCard(game.AttackingPlayer, validCards);
           if (!card) return;
           await game.DefendingPlayer.putPokemonOnBench(card as PokemonCard, benchIndex, card);
-        },
-      }),
+        };
+      },
     },
     {
       pattern:
         /^Choose 1 of your Basic Pokémon in play. If you have a Stage 2 card in your hand that evolves from that Pokémon, put that card onto the Basic Pokémon to evolve it, skipping the Stage 1. You can’t use this card during your first turn or on a Basic Pokémon that was put into play this turn.$/,
-      transform: () => ({
-        type: "Targeted",
-        validTargets: (game) => {
-          const validBasicNames = game.AttackingPlayer.Hand.filter(
-            (card) => card.CardType === "Pokemon" && card.Stage == 2
-          )
-            .map((card) => findBasicForStage2(card as PokemonCard))
-            .filter((name) => name !== null);
+      transform: () => {
+        convertToTargetedEffect(
+          (game) => {
+            const validBasicNames = game.AttackingPlayer.Hand.filter(
+              (card) => card.CardType === "Pokemon" && card.Stage == 2
+            )
+              .map((card) => findBasicForStage2(card as PokemonCard))
+              .filter((name) => name !== null);
 
-          return game.AttackingPlayer.InPlayPokemon.filter(
-            (p) => p.Stage == 0 && p.ReadyToEvolve && validBasicNames.includes(p.Name)
-          );
-        },
-        effect: async (game, target) => {
-          if (!target.isPokemon) return;
+            return game.AttackingPlayer.InPlayPokemon.filter(
+              (p) => p.Stage == 0 && p.ReadyToEvolve && validBasicNames.includes(p.Name)
+            );
+          },
+          async (game, target) => {
+            if (!target.isPokemon) return;
 
-          const validCards = game.AttackingPlayer.Hand.filter(
-            (card) =>
-              card.CardType === "Pokemon" &&
-              card.Stage == 2 &&
-              findBasicForStage2(card as PokemonCard) === target.Name
-          );
-          const card = await game.chooseCard(game.AttackingPlayer, validCards);
-          if (!card) return;
+            const validCards = game.AttackingPlayer.Hand.filter(
+              (card) =>
+                card.CardType === "Pokemon" &&
+                card.Stage == 2 &&
+                findBasicForStage2(card as PokemonCard) === target.Name
+            );
+            const card = await game.chooseCard(game.AttackingPlayer, validCards);
+            if (!card) return;
 
-          await game.AttackingPlayer.evolvePokemon(target, card as PokemonCard, true);
-        },
-      }),
+            await game.AttackingPlayer.evolvePokemon(target, card as PokemonCard, true);
+          }
+        );
+      },
     },
     {
       pattern:
@@ -692,52 +666,49 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
       transform: (_, hp, type) => {
         const fullType = parseEnergy(type);
 
-        return {
-          type: "Targeted",
-          validTargets: (game) => game.AttackingPlayer.Bench.filter((slot) => !slot.isPokemon),
-          effect: async (game, benchSlot) => {
+        convertToTargetedEffect(
+          (game) => game.AttackingPlayer.Bench.filter((slot) => !slot.isPokemon),
+          async (game, benchSlot) => {
             if (benchSlot.isPokemon) return;
             const card = game.ActiveTrainerCard as FossilCard;
 
             await game.putFossilOnBench(card, benchSlot.index, Number(hp), fullType);
-          },
-        };
+          }
+        );
       },
     },
 
     // Other effects
     {
       pattern: /Discard all Pokémon Tool cards attached to each of your opponent’s Pokémon\./i,
-      transform: () => ({
-        type: "Conditional",
-        condition: (game) =>
-          game.DefendingPlayer.InPlayPokemon.some((p) => p.AttachedToolCards.length > 0),
-        effect: async (game) => {
+      transform: () => {
+        effect.condition = (game) =>
+          game.DefendingPlayer.InPlayPokemon.some((p) => p.AttachedToolCards.length > 0);
+        effect.effect = async (game: Game) => {
           for (const pokemon of game.DefendingPlayer.InPlayPokemon) {
             await game.discardPokemonTools(pokemon);
           }
-        },
-      }),
+        };
+      },
     },
   ];
 
-  for (const { pattern, transform } of dictionary) {
-    const result = cardText.match(pattern);
-
-    if (result) {
-      const value = transform(...result);
-      return { parseSuccessful, value };
+  mainloop: while (cardText) {
+    for (const { pattern, transform } of dictionary) {
+      const result = cardText.match(pattern);
+      if (result) {
+        transform(...result);
+        cardText = cardText.replace(pattern, "").trim();
+        continue mainloop; // Restart the loop to re-evaluate the modified ability text
+      }
     }
+
+    parseSuccessful = false;
+    break;
   }
 
   return {
-    parseSuccessful: false,
-    value: {
-      type: "Conditional",
-      condition: () => true,
-      effect: async (game) => {
-        game.GameLog.notImplemented(game.AttackingPlayer);
-      },
-    },
+    parseSuccessful,
+    value: effect,
   };
 };
