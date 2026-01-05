@@ -2,7 +2,7 @@
   <div class="flip-card" :style="style">
     <div class="flip-card-inner">
       <div class="flip-card-front">
-        <PlayingCardImage :card-id="card?.ID" :height="height" />
+        <PlayingCardImage :card-id="cardId" :height="height" />
       </div>
       <div class="flip-card-back">
         <PlayingCardImage :height="height" />
@@ -16,9 +16,16 @@ import type { PlayingCard } from "@/core";
 
 export interface Props {
   heightPx?: number;
-  card?: PlayingCard;
+  card?: PlayingCard | string;
 }
 const props = defineProps<Props>();
+const cardId = computed(() => {
+  if (typeof props.card === "string" || props.card === undefined) {
+    return props.card;
+  } else {
+    return props.card.ID;
+  }
+});
 
 const ratio = 367 / 512;
 const height = computed(() => props.heightPx ?? 200);

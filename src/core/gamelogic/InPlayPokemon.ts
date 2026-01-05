@@ -4,8 +4,6 @@ import type { Game } from "./Game";
 import type { Player } from "./Player";
 import {
   EnergyMap,
-  type Ability,
-  type Attack,
   type Energy,
   type PlayerStatus,
   type PlayingCard,
@@ -23,16 +21,39 @@ export class InPlayPokemon {
   game: Game;
   logger: GameLogger;
 
-  ID: string;
-  Name: string;
-  Type: Energy;
-  BaseHP: number;
-  Stage: number;
-  RetreatCost: number;
-  Weakness?: string;
-  PrizePoints: number;
-  Attacks: Attack[];
-  Ability?: Ability;
+  get ID() {
+    return this.BaseCard.ID;
+  }
+  get Name() {
+    return this.BaseCard.Name;
+  }
+  get Type() {
+    return this.BaseCard.Type;
+  }
+  get BaseHP() {
+    return this.BaseCard.BaseHP;
+  }
+  get Stage() {
+    return this.BaseCard.Stage;
+  }
+  get RetreatCost() {
+    return this.BaseCard.RetreatCost;
+  }
+  get Weakness() {
+    return this.BaseCard.Weakness;
+  }
+  get PrizePoints() {
+    return this.BaseCard.PrizePoints;
+  }
+  get Attacks() {
+    return this.BaseCard.Attacks;
+  }
+  get Ability() {
+    return this.BaseCard.Ability;
+  }
+  get isUltraBeast() {
+    return this.BaseCard.isUltraBeast === true;
+  }
 
   CurrentHP: number;
   MaxHP: number;
@@ -94,17 +115,6 @@ export class InPlayPokemon {
     this.BaseCard = inputCard;
     this.InPlayCards.push(trueCard);
 
-    this.ID = inputCard.ID;
-    this.Name = inputCard.Name;
-    this.Type = inputCard.Type;
-    this.BaseHP = inputCard.BaseHP;
-    this.Stage = inputCard.Stage;
-    this.RetreatCost = inputCard.RetreatCost;
-    this.Weakness = inputCard.Weakness;
-    this.PrizePoints = inputCard.PrizePoints;
-    this.Attacks = inputCard.Attacks;
-    this.Ability = inputCard.Ability;
-
     this.CurrentHP = this.BaseHP;
     this.MaxHP = this.BaseHP;
   }
@@ -117,17 +127,6 @@ export class InPlayPokemon {
     const hpIncrease = inputCard.BaseHP - this.BaseHP;
     this.CurrentHP += hpIncrease;
     this.MaxHP += hpIncrease;
-
-    this.ID = inputCard.ID;
-    this.Name = inputCard.Name;
-    this.Type = inputCard.Type;
-    this.BaseHP = inputCard.BaseHP;
-    this.Stage = inputCard.Stage;
-    this.RetreatCost = inputCard.RetreatCost;
-    this.Weakness = inputCard.Weakness;
-    this.PrizePoints = inputCard.PrizePoints;
-    this.Attacks = inputCard.Attacks;
-    this.Ability = inputCard.Ability;
   }
 
   isDamaged() {

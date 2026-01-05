@@ -14,9 +14,6 @@ export class PlayerPokemonView {
     return pokemon === this.self;
   }
 
-  get BaseCard() {
-    return this.self.BaseCard;
-  }
   get ID() {
     return this.self.ID;
   }

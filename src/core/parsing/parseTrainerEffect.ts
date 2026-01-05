@@ -534,7 +534,8 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
 
     // Switching effects
     {
-      pattern: /^Switch out your opponent’s Active Pokémon to the Bench\./,
+      pattern:
+        /^Switch out your opponent’s Active Pokémon to the Bench\. \(Your opponent chooses the new Active Pokémon\.\)/i,
       transform: () => {
         effect.condition = (game) => game.DefendingPlayer.BenchedPokemon.length > 0;
         effect.effect = async (game: Game) => {
