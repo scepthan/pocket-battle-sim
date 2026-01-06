@@ -43,10 +43,10 @@ interface BaseAttack {
   calculateDamage?: DamageCalculation;
 
   /**
-   * A method that determines which Pokémon the player can choose to do damage to whenever this
-   * applies, such as "This attack also does 20 damage to one of your opponent's Benched Pokémon."
+   * A method that determines which Pokémon the player can select whenever this applies, such as
+   * for attacks that damage a specific Pokémon or generate Energy for the Bench.
    */
-  choosePokemonToAttack?: (game: Game, self: InPlayPokemon) => InPlayPokemon[];
+  validTargets?: (game: Game, self: InPlayPokemon) => InPlayPokemon[];
 
   /**
    * Effects to apply when attacking before any damage is done.

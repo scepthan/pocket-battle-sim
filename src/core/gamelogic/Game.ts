@@ -636,8 +636,8 @@ export class Game {
     }
 
     let chosenPokemon: InPlayPokemon | undefined;
-    if (attack.choosePokemonToAttack) {
-      const validPokemon = attack.choosePokemonToAttack(this, attacker);
+    if (attack.validTargets) {
+      const validPokemon = attack.validTargets(this, attacker);
       chosenPokemon = await this.choosePokemon(this.AttackingPlayer, validPokemon);
     }
 
@@ -831,19 +831,23 @@ export class Game {
     } else {
       this.GameLog.playTrainer(this.AttackingPlayer, card);
 
+      if (target && !target.isPokemon)
+        throw new Error("Cannot target an empty slot with this Trainer card");
+
+      const heads = card.Effect.coinsToFlip ? this.flipCoinsForAttack(card.Effect.coinsToFlip) : 0;
+
       if (card.Effect.type === "Targeted") {
-        if (!target || !target.isPokemon) {
+        if (!target) {
           throw new Error("Targeted effect requires a target Pokémon");
         }
         const validTargets = card.Effect.validTargets(this);
         if (!validTargets.includes(target)) {
           throw new Error("Invalid target for targeted effect");
         }
-        await card.Effect.effect(this, target);
-      } else if (card.Effect.type === "Conditional") {
-        if (card.Effect.condition(this, this.AttackingPlayer)) {
-          await card.Effect.effect(this);
-        }
+      }
+
+      for (const effect of card.Effect.sideEffects) {
+        await effect(this, this.AttackingPlayer.activeOrThrow(), heads, target);
       }
     }
 

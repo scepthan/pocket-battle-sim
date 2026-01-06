@@ -1,8 +1,16 @@
-import { isEnergy, parseEnergy, type Ability, type Energy, type PlayingCard } from "../gamelogic";
+import {
+  isEnergy,
+  parseEnergy,
+  type Ability,
+  type Energy,
+  type ItemCard,
+  type PlayingCard,
+  type SupporterCard,
+} from "../gamelogic";
 import { parseAbility } from "./parseAbility";
 import { parseAttack } from "./parseAttack";
+import { parseEffect } from "./parseEffect";
 import { parsePokemonToolEffect } from "./parsePokemonToolEffect";
-import { parseTrainerEffect } from "./parseTrainerEffect";
 import type { InputCard, ParsedResultOptional } from "./types";
 
 export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCard> => {
@@ -57,16 +65,27 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
 
     return { value: outputCard, parseSuccessful };
   } else if (inputCard.cardType == "Item" || inputCard.cardType == "Supporter") {
-    const result = parseTrainerEffect(inputCard.text);
+    const result = parseEffect(inputCard.text);
     if (!result.parseSuccessful) parseSuccessful = false;
+    const effect = result.value;
 
-    const outputCard = {
+    const outputCard: ItemCard | SupporterCard = {
       ID: inputCard.id,
       Name: inputCard.name,
       Rarity: inputCard.rarity,
       CardType: inputCard.cardType,
       Text: inputCard.text,
-      Effect: result.value,
+      Effect: {
+        ...(effect.validTargets
+          ? {
+              type: "Targeted",
+              validTargets: effect.validTargets,
+            }
+          : { type: "Conditional" }),
+        conditions: [...effect.explicitConditions, ...effect.implicitConditions],
+        coinsToFlip: effect.coinsToFlip,
+        sideEffects: [...effect.sideEffects],
+      },
     };
 
     return { value: outputCard, parseSuccessful };

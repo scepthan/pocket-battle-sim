@@ -1,16 +1,17 @@
-import type { Game, InPlayPokemon, Player } from "..";
-import type { BasicEffect } from "./Effects";
+import type { CoinFlipIndicator, Game, InPlayPokemon, SideEffect } from "..";
 
 export type TargetedEffect = (game: Game, target: InPlayPokemon) => Promise<void>;
-export type ConditionalTrainerEffect = {
+interface BaseTrainerEffect {
+  conditions: ((game: Game, self: InPlayPokemon) => boolean)[];
+  coinsToFlip?: CoinFlipIndicator;
+  sideEffects: SideEffect[];
+}
+interface ConditionalTrainerEffect extends BaseTrainerEffect {
   type: "Conditional";
-  condition: (game: Game, self: Player) => boolean;
-  effect: BasicEffect;
-};
-export type TargetedTrainerEffect = {
+}
+interface TargetedTrainerEffect extends BaseTrainerEffect {
   type: "Targeted";
   validTargets: (game: Game) => InPlayPokemon[];
-  condition?: (game: Game, self: Player) => boolean;
-  effect: TargetedEffect;
-};
+}
+
 export type TrainerEffect = ConditionalTrainerEffect | TargetedTrainerEffect;

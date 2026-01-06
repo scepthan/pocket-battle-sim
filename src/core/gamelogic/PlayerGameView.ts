@@ -184,8 +184,9 @@ export class PlayerGameView {
       }
     } else if (card.CardType == "Supporter" || card.CardType == "Item") {
       if (card.CardType == "Supporter" ? !this.canPlaySupporter : !this.canPlayItem) return false;
-      if (card.Effect.condition && !card.Effect.condition(this.game, this.player)) return false;
-      if (card.Effect.type == "Targeted") {
+      if (card.Effect.conditions.some((cond) => !cond(this.game, this.player.activeOrThrow())))
+        return false;
+      if (card.Effect.type === "Targeted") {
         const validTargets = card.Effect.validTargets(this.game);
         if (validTargets.length == 0) return false;
       }
@@ -294,7 +295,7 @@ export class PlayerGameView {
     if (card.CardType === "Fossil") {
       return this.selfBench.filter((slot) => !slot.isPokemon);
     }
-    if (card.Effect.type == "Targeted") {
+    if (card.Effect.type === "Targeted") {
       return card.Effect.validTargets(this.game).map(viewOrEmpty);
     }
     return [];

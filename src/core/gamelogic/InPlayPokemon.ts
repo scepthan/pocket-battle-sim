@@ -145,13 +145,15 @@ export class InPlayPokemon {
   /**
    * Heals a set amount of damage from this Pokémon.
    */
-  healDamage(HP: number) {
+  healDamage(HP: number): number {
     const initialHP = this.CurrentHP;
 
     this.CurrentHP += HP;
     if (this.CurrentHP > this.MaxHP) this.CurrentHP = this.MaxHP;
 
     this.logger.pokemonHealed(this.player, this, initialHP, HP);
+
+    return this.CurrentHP - initialHP;
   }
 
   attachEnergy(energy: Energy[]) {
