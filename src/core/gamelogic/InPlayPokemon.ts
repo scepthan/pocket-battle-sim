@@ -347,7 +347,7 @@ export class InPlayPokemon {
     }
 
     if (ability.effect.type === "Targeted") {
-      const validTargets = ability.effect.findValidTargets(this.player.game, this);
+      const validTargets = ability.effect.validTargets(this.player, this);
       if (validTargets.length === 0) return;
       if (!validTargets.every((x) => x.isPokemon)) {
         throw new Error("Targeted ability effect has non-Pokemon valid targets");

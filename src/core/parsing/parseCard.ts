@@ -81,7 +81,7 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
               type: "Targeted",
               validTargets: effect.validTargets,
             }
-          : { type: "Conditional" }),
+          : { type: "Standard" }),
         conditions: [...effect.explicitConditions, ...effect.implicitConditions],
         coinsToFlip: effect.coinsToFlip,
         sideEffects: [...effect.sideEffects],

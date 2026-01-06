@@ -1,11 +1,4 @@
-import type {
-  CardSlot,
-  Energy,
-  Game,
-  InPlayPokemon,
-  PokemonEffect,
-  TargetedPokemonEffect,
-} from "@/core";
+import type { Energy, InPlayPokemon, Player, PokemonEffect, TargetedPokemonEffect } from "@/core";
 import type { BaseAbility } from "./Ability";
 
 export type AbilityTrigger =
@@ -24,7 +17,7 @@ interface StandardAbilityEffect {
 }
 interface TargetedAbilityEffect {
   type: "Targeted";
-  findValidTargets: (game: Game, self: InPlayPokemon) => CardSlot[];
+  validTargets: (player: Player, self: InPlayPokemon) => InPlayPokemon[];
   effect: TargetedPokemonEffect;
 }
 

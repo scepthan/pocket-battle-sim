@@ -1,5 +1,4 @@
-import type { Game } from "../Game";
-import type { InPlayPokemon } from "../InPlayPokemon";
+import type { Game, InPlayPokemon, Player } from "..";
 import type { Energy } from "./Energy";
 
 export type CoinFlipIndicator =
@@ -46,7 +45,7 @@ interface BaseAttack {
    * A method that determines which Pokémon the player can select whenever this applies, such as
    * for attacks that damage a specific Pokémon or generate Energy for the Bench.
    */
-  validTargets?: (game: Game, self: InPlayPokemon) => InPlayPokemon[];
+  validTargets?: (player: Player, self: InPlayPokemon) => InPlayPokemon[];
 
   /**
    * Effects to apply when attacking before any damage is done.
@@ -67,7 +66,7 @@ interface BaseAttack {
    * Extraneous conditions that must be met for the attack to be used (other than the default
    * Energy and status condition requirements).
    */
-  explicitConditions: ((game: Game, self: InPlayPokemon) => boolean)[];
+  explicitConditions: ((player: Player, self: InPlayPokemon) => boolean)[];
 }
 
 // Flip a coin. If tails, this attack does nothing.

@@ -192,7 +192,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
 
         ability.effect = {
           type: "Targeted",
-          findValidTargets: (game, self) => self.player.InPlayPokemon.filter(predicate),
+          validTargets: (player) => player.InPlayPokemon.filter(predicate),
           effect: async (game, self, target) => {
             await self.player.attachEnergy(target, [fullType], "energyZone");
           },
@@ -211,7 +211,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
 
         ability.effect = {
           type: "Targeted",
-          findValidTargets: (game, self) => self.player.BenchedPokemon.filter(benchPredicate),
+          validTargets: (player) => player.BenchedPokemon.filter(benchPredicate),
           effect: async (game, self, target) => {
             const active = self.player.activeOrThrow();
 
@@ -231,7 +231,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
 
         ability.effect = {
           type: "Targeted",
-          findValidTargets: (game, self) => self.player.BenchedPokemon.filter(benchPredicate),
+          validTargets: (player) => player.BenchedPokemon.filter(benchPredicate),
           effect: async (game, self, target) => {
             const energyToMove = self.AttachedEnergy.filter((e) => e === fullType);
             await self.player.transferEnergy(self, target, energyToMove);
@@ -289,8 +289,8 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       transform: () => {
         ability.effect = {
           type: "Targeted",
-          findValidTargets: (game, self) =>
-            self.player.InPlayPokemon.filter((p) => p.isDamaged() && p !== self),
+          validTargets: (player, self) =>
+            player.InPlayPokemon.filter((p) => p.isDamaged() && p !== self),
           effect: async (game, self, target) => {
             const damage = target.currentDamage();
             game.applyDamage(self, damage, false);
@@ -331,7 +331,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       transform: (_, damage) => {
         ability.effect = {
           type: "Targeted",
-          findValidTargets: (game, self) => self.player.opponent.InPlayPokemon,
+          validTargets: (player) => player.opponent.InPlayPokemon,
           effect: async (game, self, target) => {
             game.applyDamage(target, Number(damage), false);
           },
@@ -458,8 +458,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
       transform: () => {
         ability.effect = {
           type: "Targeted",
-          findValidTargets: (game, self) =>
-            self.player.opponent.BenchedPokemon.filter((p) => p.Stage === 0),
+          validTargets: (player) => player.opponent.BenchedPokemon.filter((p) => p.Stage === 0),
           effect: async (game, self, target) => {
             await self.player.opponent.swapActivePokemon(
               target,

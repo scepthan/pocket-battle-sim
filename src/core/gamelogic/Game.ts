@@ -637,7 +637,7 @@ export class Game {
 
     let chosenPokemon: InPlayPokemon | undefined;
     if (attack.validTargets) {
-      const validPokemon = attack.validTargets(this, attacker);
+      const validPokemon = attack.validTargets(this.AttackingPlayer, attacker);
       chosenPokemon = await this.choosePokemon(this.AttackingPlayer, validPokemon);
     }
 
@@ -755,7 +755,7 @@ export class Game {
       this.UsedAbilities.add(pokemon);
     }
     if (ability.effect.type === "Targeted") {
-      if (ability.effect.findValidTargets(this, pokemon).length === 0) {
+      if (ability.effect.validTargets(pokemon.player, pokemon).length === 0) {
         throw new Error("No valid targets for ability");
       }
     }
@@ -840,7 +840,7 @@ export class Game {
         if (!target) {
           throw new Error("Targeted effect requires a target Pokémon");
         }
-        const validTargets = card.Effect.validTargets(this);
+        const validTargets = card.Effect.validTargets(this.AttackingPlayer);
         if (!validTargets.includes(target)) {
           throw new Error("Invalid target for targeted effect");
         }
