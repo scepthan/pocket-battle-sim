@@ -194,8 +194,6 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           type: "Targeted",
           findValidTargets: (game, self) => self.player.InPlayPokemon.filter(predicate),
           effect: async (game, self, target) => {
-            if (!target.isPokemon) throw new Error("Not a valid target");
-
             await self.player.attachEnergy(target, [fullType], "energyZone");
           },
         };
@@ -215,7 +213,6 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           type: "Targeted",
           findValidTargets: (game, self) => self.player.BenchedPokemon.filter(benchPredicate),
           effect: async (game, self, target) => {
-            if (!target.isPokemon) throw new Error("Not a valid target");
             const active = self.player.activeOrThrow();
 
             const energyToMove =
@@ -236,8 +233,6 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           type: "Targeted",
           findValidTargets: (game, self) => self.player.BenchedPokemon.filter(benchPredicate),
           effect: async (game, self, target) => {
-            if (!target.isPokemon) throw new Error("Not a valid target");
-
             const energyToMove = self.AttachedEnergy.filter((e) => e === fullType);
             await self.player.transferEnergy(self, target, energyToMove);
           },
@@ -297,7 +292,6 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           findValidTargets: (game, self) =>
             self.player.InPlayPokemon.filter((p) => p.isDamaged() && p !== self),
           effect: async (game, self, target) => {
-            if (!target.isPokemon) throw new Error("Not a valid target");
             const damage = target.currentDamage();
             game.applyDamage(self, damage, false);
             target.healDamage(damage);
@@ -339,7 +333,6 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           type: "Targeted",
           findValidTargets: (game, self) => self.player.opponent.InPlayPokemon,
           effect: async (game, self, target) => {
-            if (!target.isPokemon) return;
             game.applyDamage(target, Number(damage), false);
           },
         };
@@ -468,7 +461,6 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResult<Abili
           findValidTargets: (game, self) =>
             self.player.opponent.BenchedPokemon.filter((p) => p.Stage === 0),
           effect: async (game, self, target) => {
-            if (!target.isPokemon) throw new Error("Not a valid target");
             await self.player.opponent.swapActivePokemon(
               target,
               "opponentEffect",

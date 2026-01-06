@@ -1,5 +1,5 @@
 import { Game, isEnergyShort, parseEnergy, type Attack } from "../gamelogic";
-import { parseAttackEffect } from "./parseAttackEffect";
+import { parseEffect } from "./parseEffect";
 import type { InputCardAttack, ParsedResult } from "./types";
 
 export const parseAttack = (inputAttack: InputCardAttack): ParsedResult<Attack> => {
@@ -14,7 +14,7 @@ export const parseAttack = (inputAttack: InputCardAttack): ParsedResult<Attack> 
     preDamageEffects: [],
     attackingEffects: [],
     sideEffects: [],
-    extraConditions: [],
+    explicitConditions: [],
   };
 
   for (const E of inputAttack.cost) {
@@ -23,7 +23,18 @@ export const parseAttack = (inputAttack: InputCardAttack): ParsedResult<Attack> 
   }
 
   if (inputAttack.text !== undefined) {
-    if (!parseAttackEffect(attack)) {
+    const result = parseEffect(inputAttack.text, inputAttack.damage, attack.requiredEnergy);
+    const effect = result.value;
+    attack.type = effect.type;
+    attack.coinsToFlip = effect.coinsToFlip;
+    attack.calculateDamage = effect.calculateDamage;
+    attack.choosePokemonToAttack = effect.validTargets;
+    attack.preDamageEffects = effect.preDamageEffects;
+    attack.sideEffects = effect.sideEffects;
+    attack.attackingEffects = effect.attackingEffects;
+    attack.explicitConditions = effect.explicitConditions;
+
+    if (!result.parseSuccessful) {
       parseSuccessful = false;
       const anyImplemented =
         inputAttack.damage !== undefined ||

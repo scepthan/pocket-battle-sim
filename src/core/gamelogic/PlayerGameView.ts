@@ -220,7 +220,8 @@ export class PlayerGameView {
       return false;
 
     const realActive = this.player.activeOrThrow();
-    if (attack.extraConditions.some((condition) => !condition(this.game, realActive))) return false;
+    if (attack.explicitConditions.some((condition) => !condition(this.game, realActive)))
+      return false;
 
     const requiredEnergy = [...attack.requiredEnergy];
     for (const status of this.selfActive.PokemonStatuses) {

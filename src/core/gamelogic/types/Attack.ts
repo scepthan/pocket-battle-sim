@@ -14,7 +14,7 @@ export type SideEffect = (
   target?: InPlayPokemon
 ) => Promise<void>;
 
-type DamageCalculation = (game: Game, self: InPlayPokemon, heads: number) => number;
+export type DamageCalculation = (game: Game, self: InPlayPokemon, heads: number) => number;
 
 interface BaseAttack {
   // Properties inherited from InputAttack
@@ -30,9 +30,9 @@ interface BaseAttack {
    * 2. "UntilTails", which flips a coin until it lands on tails.
    * 3. A method that calculates how many coins to flip based on the game state.
    *
-   * This flip happens before any damage is dealt for attack types of "CoinFlipForDamage" or
-   * "CoinFlipForAddedDamage", and after for "NoBaseDamage" or "PredeterminableDamage". (For
-   * "CoinFlipOrDoNothing", this property is ignored and a single coin is flipped.)
+   * This flip happens before any damage is dealt for attack types of "CoinFlipForDamage",
+   * "CoinFlipForAddedDamage", or "CoinFlipOrDoNothing", and after for "NoBaseDamage" or
+   * "PredeterminableDamage".
    */
   coinsToFlip?: CoinFlipIndicator;
 
@@ -67,7 +67,7 @@ interface BaseAttack {
    * Extraneous conditions that must be met for the attack to be used (other than the default
    * Energy and status condition requirements).
    */
-  extraConditions: ((game: Game, self: InPlayPokemon) => boolean)[];
+  explicitConditions: ((game: Game, self: InPlayPokemon) => boolean)[];
 }
 
 // Flip a coin. If tails, this attack does nothing.

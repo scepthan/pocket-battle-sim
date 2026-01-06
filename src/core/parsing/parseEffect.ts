@@ -1,7 +1,8 @@
 import {
   InPlayPokemon,
   parseEnergy,
-  type Attack,
+  type CoinFlipIndicator,
+  type DamageCalculation,
   type Energy,
   type Game,
   type SideEffect,
@@ -12,6 +13,66 @@ import {
   parsePokemonPredicate as _pokemonParse,
   type InPlayPokemonPredicate,
 } from "./parsePredicates";
+import type { ParsedResult } from "./types";
+
+export interface Effect {
+  type:
+    | "CoinFlipOrDoNothing"
+    | "CoinFlipForDamage"
+    | "CoinFlipForAddedDamage"
+    | "PredeterminableDamage"
+    | "NoBaseDamage";
+
+  /**
+   * Determines how many coins to flip for the effect. There are 3 options:
+   * 1. A number, which flips that many coins.
+   * 2. "UntilTails", which flips a coin until it lands on tails.
+   * 3. A method that calculates how many coins to flip based on the game state.
+   *
+   * This flip happens before any damage is dealt for attack types of "CoinFlipForDamage",
+   * "CoinFlipForAddedDamage", or "CoinFlipOrDoNothing", and after for "NoBaseDamage" or
+   * "PredeterminableDamage".
+   */
+  coinsToFlip?: CoinFlipIndicator;
+
+  /**
+   * A method that calculates the base damage of the attack to be applied to the Defending Pokémon.
+   * This method should not have any side effects.
+   */
+  calculateDamage?: DamageCalculation;
+
+  /**
+   * A method that determines which Pokémon the player can choose to target for any side effects,
+   * such as dealing Bench damage to the opponent or healing an own Pokémon.
+   */
+  validTargets?: (game: Game, self: InPlayPokemon) => InPlayPokemon[];
+
+  /**
+   * Effects to apply when attacking before any damage is done.
+   */
+  preDamageEffects: SideEffect[];
+
+  /**
+   * Damage-dealing effects of an attack other than dealing base damage to the Defending Pokémon.
+   */
+  attackingEffects: SideEffect[];
+
+  /**
+   * Non-damage-dealing effects of an attack; all effects of a Trainer or Ability.
+   */
+  sideEffects: SideEffect[];
+
+  /**
+   * Extraneous conditions that must be met for the effect to be used (other than the default
+   * Energy and status condition requirements for attacks).
+   */
+  explicitConditions: ((game: Game, self: InPlayPokemon) => boolean)[];
+
+  /**
+   * Conditions that must be met for a Trainer or Ability with this effect to be used.
+   */
+  implicitConditions: ((game: Game, self: InPlayPokemon) => boolean)[];
+}
 
 interface EffectTransformer {
   pattern: RegExp;
@@ -29,11 +90,25 @@ const attackTargetIfExists: (damage: number) => SideEffect =
     game.attackPokemon(target, damage);
   };
 
-export const parseAttackEffect = (attack: Attack): boolean => {
+export const parseEffect = (
+  text: string,
+  baseDamage?: number,
+  requiredEnergy?: Energy[]
+): ParsedResult<Effect> => {
   let parseSuccessful = true;
   let conditionalForNextEffect:
     | ((game: Game, self: InPlayPokemon, heads: number) => boolean)
     | undefined = undefined;
+  baseDamage = baseDamage ?? 0;
+
+  const effect: Effect = {
+    type: baseDamage === undefined ? "NoBaseDamage" : "PredeterminableDamage",
+    preDamageEffects: [],
+    attackingEffects: [],
+    sideEffects: [],
+    explicitConditions: [],
+    implicitConditions: [],
+  };
 
   /**
    * Takes an effect and returns a new one that only runs if the previously parsed condition is met.
@@ -54,8 +129,8 @@ export const parseAttackEffect = (attack: Attack): boolean => {
     return effect;
   };
 
-  const addSideEffect = (effect: SideEffect) => {
-    attack.sideEffects.push(applyConditionalIfAvailable(effect));
+  const addSideEffect = (sideEffect: SideEffect) => {
+    effect.sideEffects.push(applyConditionalIfAvailable(sideEffect));
   };
 
   const parsePokemonPredicate = (descriptor: string, predicate?: InPlayPokemonPredicate) => {
@@ -74,13 +149,13 @@ export const parseAttackEffect = (attack: Attack): boolean => {
     {
       pattern: /^Flip (a|\d+) coins?\./i,
       transform: (_, count) => {
-        attack.coinsToFlip = count === "a" ? 1 : Number(count);
+        effect.coinsToFlip = count === "a" ? 1 : Number(count);
       },
     },
     {
       pattern: /^Flip a coin until you get tails\./i,
       transform: () => {
-        attack.coinsToFlip = "UntilTails";
+        effect.coinsToFlip = "UntilTails";
       },
     },
     {
@@ -88,13 +163,13 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       transform: (_, type) => {
         const fullType = type ? parseEnergy(type) : undefined;
         const predicate = fullType ? (e: Energy) => e == fullType : () => true;
-        attack.coinsToFlip = (game, self) => self.EffectiveEnergy.filter(predicate).length;
+        effect.coinsToFlip = (game, self) => self.EffectiveEnergy.filter(predicate).length;
       },
     },
     {
       pattern: /^Flip a coin for each Pokémon you have in play\./i,
       transform: () => {
-        attack.coinsToFlip = (game) => game.AttackingPlayer.InPlayPokemon.length;
+        effect.coinsToFlip = (game) => game.AttackingPlayer.InPlayPokemon.length;
       },
     },
 
@@ -103,7 +178,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
     {
       pattern: /^If tails, this attack does nothing\./i,
       transform: () => {
-        attack.type = "CoinFlipOrDoNothing";
+        effect.type = "CoinFlipOrDoNothing";
       },
     },
 
@@ -111,9 +186,9 @@ export const parseAttackEffect = (attack: Attack): boolean => {
     {
       pattern: /^This attack does (\d+) damage for each heads\./i,
       transform: (_, damage) => {
-        attack.type = "CoinFlipForDamage";
+        effect.type = "CoinFlipForDamage";
         const dmg = Number(damage);
-        attack.calculateDamage = (game, self, heads) => heads * dmg;
+        effect.calculateDamage = (game, self, heads) => heads * dmg;
       },
     },
 
@@ -121,27 +196,25 @@ export const parseAttackEffect = (attack: Attack): boolean => {
     {
       pattern: /^This attack does (\d+) more damage for each heads\./i,
       transform: (_, damage) => {
-        attack.type = "CoinFlipForAddedDamage";
+        effect.type = "CoinFlipForAddedDamage";
         const dmg = Number(damage);
-        attack.calculateDamage = (game, self, heads) => (attack.baseDamage ?? 0) + heads * dmg;
+        effect.calculateDamage = (game, self, heads) => baseDamage + heads * dmg;
       },
     },
     {
       pattern: /^If heads, this attack does (\d+) more damage\./i,
       transform: (_, damage) => {
-        attack.type = "CoinFlipForAddedDamage";
+        effect.type = "CoinFlipForAddedDamage";
         const dmg = Number(damage);
-        attack.calculateDamage = (game, self, heads) =>
-          (attack.baseDamage ?? 0) + (heads > 0 ? dmg : 0);
+        effect.calculateDamage = (game, self, heads) => baseDamage + (heads > 0 ? dmg : 0);
       },
     },
     {
       pattern: /^If both of them are heads, this attack does (\d+) more damage\./i,
       transform: (_, damage) => {
-        attack.type = "CoinFlipForAddedDamage";
+        effect.type = "CoinFlipForAddedDamage";
         const dmg = Number(damage);
-        attack.calculateDamage = (game, self, heads) =>
-          (attack.baseDamage ?? 0) + (heads > 1 ? dmg : 0);
+        effect.calculateDamage = (game, self, heads) => baseDamage + (heads > 1 ? dmg : 0);
       },
     },
 
@@ -149,7 +222,8 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       pattern: /^If this Pokémon has at least (\d+) extra (?:\{(\w)\} )?Energy attached,/i,
       transform: (_, energyCount, energyType) => {
         const e = parseEnergy(energyType || "C");
-        const secondaryRequiredEnergy = attack.requiredEnergy.slice();
+        if (!requiredEnergy) throw new Error("Could not determine required Energy for attack");
+        const secondaryRequiredEnergy = requiredEnergy.slice();
         for (let i = 0; i < Number(energyCount); i++) secondaryRequiredEnergy.push(e);
 
         conditionalForNextEffect = (game, self) =>
@@ -289,17 +363,17 @@ export const parseAttackEffect = (attack: Attack): boolean => {
         }
         const prevConditional = conditionalForNextEffect;
         conditionalForNextEffect = undefined;
-        attack.calculateDamage = (game, self) =>
-          (attack.baseDamage ?? 0) + (prevConditional(game, self, 0) ? Number(extraDamage) : 0);
+        effect.calculateDamage = (game, self) =>
+          baseDamage + (prevConditional(game, self, 0) ? Number(extraDamage) : 0);
       },
     },
     {
       pattern:
         /^This attack does (\d+)( more)? damage for each Energy attached to your opponent’s Active Pokémon\./i,
       transform: (_, damagePerEnergy, more) => {
-        attack.calculateDamage = (game) => {
+        effect.calculateDamage = (game) => {
           const energyCount = game.DefendingPlayer.activeOrThrow().EffectiveEnergy.length;
-          return (more ? attack.baseDamage ?? 0 : 0) + energyCount * Number(damagePerEnergy);
+          return (more ? baseDamage : 0) + energyCount * Number(damagePerEnergy);
         };
       },
     },
@@ -307,9 +381,9 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       pattern:
         /^This attack does (\d+)( more)? damage for each of your opponent’s Benched Pokémon\./i,
       transform: (_, damagePerBench, more) => {
-        attack.calculateDamage = (game) => {
+        effect.calculateDamage = (game) => {
           const benchedCount = game.DefendingPlayer.BenchedPokemon.length;
-          return (more ? attack.baseDamage ?? 0 : 0) + benchedCount * Number(damagePerBench);
+          return (more ? baseDamage : 0) + benchedCount * Number(damagePerBench);
         };
       },
     },
@@ -318,22 +392,22 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       transform: (_, damageEach, more, descriptor) => {
         const predicate = parsePokemonPredicate(descriptor);
 
-        attack.calculateDamage = (game) => {
+        effect.calculateDamage = (game) => {
           const pokemonCount = game.AttackingPlayer.InPlayPokemon.filter(predicate).length;
-          return (more ? attack.baseDamage ?? 0 : 0) + pokemonCount * Number(damageEach);
+          return (more ? baseDamage : 0) + pokemonCount * Number(damageEach);
         };
       },
     },
     {
       pattern: /^This attack does more damage equal to the damage this Pokémon has on it\./i,
       transform: () => {
-        attack.calculateDamage = (game, self) => (attack.baseDamage ?? 0) + self.currentDamage();
+        effect.calculateDamage = (game, self) => baseDamage + self.currentDamage();
       },
     },
     {
       pattern: /^1 of your opponent’s Pokémon is chosen at random\. Do (\d+) damage to it\./i,
       transform: (_, damage) => {
-        attack.attackingEffects.push(async (game) => {
+        effect.attackingEffects.push(async (game) => {
           const pokemon = randomElement(game.DefendingPlayer.InPlayPokemon);
           game.attackPokemon(pokemon, Number(damage));
         });
@@ -343,7 +417,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       pattern:
         /^1 of your opponent’s Pokémon is chosen at random (\d+) times\. For each time a Pokémon was chosen, do (\d+) damage to it\./i,
       transform: (_, times, damage) => {
-        attack.attackingEffects.push(async (game) => {
+        effect.attackingEffects.push(async (game) => {
           const damages = game.DefendingPlayer.InPlayPokemon.map((p) => ({
             pokemon: p,
             damage: 0,
@@ -360,7 +434,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
     {
       pattern: /^Halve your opponent’s Active Pokémon’s remaining HP, rounded down\./i,
       transform: () => {
-        attack.attackingEffects.push(async (game) => {
+        effect.attackingEffects.push(async (game) => {
           const defender = game.DefendingPlayer.activeOrThrow();
           const targetHp = Math.floor(defender.CurrentHP / 2 / 10) * 10;
           const damage = defender.CurrentHP - targetHp;
@@ -381,7 +455,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
             if (predicate(p)) game.attackPokemon(p, dmg);
           }
         });
-        attack.attackingEffects.push(benchDamageEffect);
+        effect.attackingEffects.push(benchDamageEffect);
       },
     },
     {
@@ -390,9 +464,8 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       transform: (_, damagePerEnergy, descriptor) => {
         const predicate = parsePokemonPredicate(descriptor);
 
-        attack.choosePokemonToAttack = (game) =>
-          game.DefendingPlayer.InPlayPokemon.filter(predicate);
-        attack.attackingEffects.push(async (game, self, heads, target) => {
+        effect.validTargets = (game) => game.DefendingPlayer.InPlayPokemon.filter(predicate);
+        effect.attackingEffects.push(async (game, self, heads, target) => {
           if (!target) return;
           const energyCount = target.EffectiveEnergy.length;
           game.attackPokemon(target, energyCount * Number(damagePerEnergy));
@@ -403,9 +476,8 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       pattern: /^This attack(?: also)? does (\d+) damage to 1 of your opponent’s (.+?)\./i,
       transform: (_, damage, descriptor) => {
         const predicate = parsePokemonPredicate(descriptor);
-        attack.choosePokemonToAttack = (game) =>
-          game.DefendingPlayer.InPlayPokemon.filter(predicate);
-        attack.attackingEffects.push(attackTargetIfExists(Number(damage)));
+        effect.validTargets = (game) => game.DefendingPlayer.InPlayPokemon.filter(predicate);
+        effect.attackingEffects.push(attackTargetIfExists(Number(damage)));
       },
     },
     {
@@ -417,7 +489,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
             game.attackPokemon(pokemon, dmg);
           }
         });
-        attack.attackingEffects.push(attackEffect);
+        effect.attackingEffects.push(attackEffect);
       },
     },
 
@@ -429,16 +501,15 @@ export const parseAttackEffect = (attack: Attack): boolean => {
         const selfAttackEffect = applyConditionalIfAvailable(async (game, self) => {
           game.applyDamage(self, dmg, true);
         });
-        attack.attackingEffects.push(selfAttackEffect);
+        effect.attackingEffects.push(selfAttackEffect);
       },
     },
     {
       pattern: /^This attack also does (\d+) damage to 1 of your (.+?)\./i,
       transform: (_, damage, descriptor) => {
         const predicate = parsePokemonPredicate(descriptor);
-        attack.choosePokemonToAttack = (game) =>
-          game.AttackingPlayer.InPlayPokemon.filter(predicate);
-        attack.attackingEffects.push(attackTargetIfExists(Number(damage)));
+        effect.validTargets = (game) => game.AttackingPlayer.InPlayPokemon.filter(predicate);
+        effect.attackingEffects.push(attackTargetIfExists(Number(damage)));
       },
     },
 
@@ -1045,7 +1116,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       pattern:
         /^Before doing damage, discard all Pokémon Tools from your opponent’s Active Pokémon\./i,
       transform: () => {
-        attack.preDamageEffects.push(async (game) => {
+        effect.preDamageEffects.push(async (game) => {
           await game.discardPokemonTools(game.DefendingPlayer.activeOrThrow());
         });
       },
@@ -1068,7 +1139,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
       pattern:
         /^Choose 1 of your opponent’s( Active)? Pokémon’s attacks and use it as this attack\.( If this Pokémon doesn’t have the necessary Energy to use that attack, this attack does nothing\.)?/i,
       transform: (_, active, energyRequired) => {
-        attack.attackingEffects.push(async (game: Game) => {
+        effect.attackingEffects.push(async (game: Game) => {
           const chosenPokemon = active
             ? game.DefendingPlayer.activeOrThrow()
             : await game.choosePokemon(game.AttackingPlayer, game.DefendingPlayer.InPlayPokemon);
@@ -1086,7 +1157,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
           game.GameLog.copyAttack(game.AttackingPlayer, chosenAttack.name);
           let attackFailed =
             chosenAttack.text?.includes("use it as this attack") ||
-            chosenAttack.extraConditions.some((cond) => !cond(game, chosenPokemon));
+            chosenAttack.explicitConditions.some((cond) => !cond(game, chosenPokemon));
           if (energyRequired) {
             const active = game.AttackingPlayer.activeOrThrow();
             if (!active.hasSufficientEnergy(chosenAttack.requiredEnergy)) attackFailed = true;
@@ -1102,7 +1173,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
     {
       pattern: /^You can use this attack only if you have Uxie and Azelf on your Bench\./i,
       transform: () => {
-        attack.extraConditions.push((game) =>
+        effect.explicitConditions.push((game) =>
           ["Uxie", "Azelf"].every((name) =>
             game.AttackingPlayer.BenchedPokemon.some((p) => p.Name == name)
           )
@@ -1111,13 +1182,12 @@ export const parseAttackEffect = (attack: Attack): boolean => {
     },
   ];
 
-  let attackText = attack.text;
-  mainloop: while (attackText) {
+  mainloop: while (text) {
     for (const { pattern, transform } of dictionary) {
-      const result = attackText.match(pattern);
+      const result = text.match(pattern);
       if (result) {
         transform(...result);
-        attackText = attackText.replace(pattern, "").trim();
+        text = text.replace(pattern, "").trim();
         continue mainloop; // Restart the loop to re-evaluate the modified attack text
       }
     }
@@ -1128,5 +1198,5 @@ export const parseAttackEffect = (attack: Attack): boolean => {
 
   if (conditionalForNextEffect) parseSuccessful = false;
 
-  return parseSuccessful;
+  return { parseSuccessful, value: effect };
 };
