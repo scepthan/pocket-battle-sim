@@ -120,11 +120,12 @@ export class InPlayPokemon {
   }
 
   evolveInto(inputCard: PokemonCard) {
+    const hpIncrease = inputCard.BaseHP - this.BaseHP;
+
     this.BaseCard = inputCard;
     this.InPlayCards.push(inputCard);
     this.ReadyToEvolve = false;
 
-    const hpIncrease = inputCard.BaseHP - this.BaseHP;
     this.CurrentHP += hpIncrease;
     this.MaxHP += hpIncrease;
   }

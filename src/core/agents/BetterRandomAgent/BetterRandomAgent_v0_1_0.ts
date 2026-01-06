@@ -1,5 +1,4 @@
 import type {
-  CardSlotView,
   Energy,
   GameInitState,
   ItemCard,
@@ -37,7 +36,7 @@ export class BetterRandomAgent_v0_1_0 extends PlayerAgent {
       ) as SupporterCard[];
       if (supporterCards.length > 0) {
         const card = rand(supporterCards);
-        let target: CardSlotView | undefined;
+        let target: PlayerPokemonView | undefined;
         if (card.Effect.type === "Targeted") {
           target = rand(game.validTargets(card));
         }
@@ -71,11 +70,15 @@ export class BetterRandomAgent_v0_1_0 extends PlayerAgent {
     const itemCards = game.selfHand.filter((x) => x.CardType == "Item" || x.CardType == "Fossil");
     for (const card of itemCards) {
       if (!game.canPlayCard(card) || Math.random() < 0.5) continue;
-      let target: CardSlotView | undefined;
-      if (card.Effect.type === "Targeted") {
-        target = rand(game.validTargets(card));
+      if (card.CardType === "Fossil") {
+        await game.playFossilCard(card, rand(game.validTargets(card)));
+      } else {
+        let target: PlayerPokemonView | undefined;
+        if (card.Effect.type === "Targeted") {
+          target = rand(game.validTargets(card));
+        }
+        await game.playItemCard(card, target);
       }
-      await game.playItemCard(card, target);
     }
 
     // Retreat with 100% chance if retreat cost is 0; 50% chance if cost is reduced; 12.5% chance if cost is normal

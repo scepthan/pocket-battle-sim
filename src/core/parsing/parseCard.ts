@@ -1,4 +1,4 @@
-import { isEnergy, type Ability, type Energy, type PlayingCard } from "../gamelogic";
+import { isEnergy, parseEnergy, type Ability, type Energy, type PlayingCard } from "../gamelogic";
 import { parseAbility } from "./parseAbility";
 import { parseAttack } from "./parseAttack";
 import { parsePokemonToolEffect } from "./parsePokemonToolEffect";
@@ -56,11 +56,7 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
     };
 
     return { value: outputCard, parseSuccessful };
-  } else if (
-    inputCard.cardType == "Item" ||
-    inputCard.cardType == "Fossil" ||
-    inputCard.cardType == "Supporter"
-  ) {
+  } else if (inputCard.cardType == "Item" || inputCard.cardType == "Supporter") {
     const result = parseTrainerEffect(inputCard.text);
     if (!result.parseSuccessful) parseSuccessful = false;
 
@@ -71,6 +67,21 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
       CardType: inputCard.cardType,
       Text: inputCard.text,
       Effect: result.value,
+    };
+
+    return { value: outputCard, parseSuccessful };
+  } else if (inputCard.cardType == "Fossil") {
+    const result = inputCard.text.match(/(\d+)-HP Basic \{(\w)\} Pokémon/i);
+    if (!result) parseSuccessful = false;
+
+    const outputCard = {
+      ID: inputCard.id,
+      Name: inputCard.name,
+      Rarity: inputCard.rarity,
+      CardType: inputCard.cardType,
+      Text: inputCard.text,
+      BaseHP: result ? parseInt(result[1]!) : 40,
+      Type: result ? parseEnergy(result[2]!) : "Colorless",
     };
 
     return { value: outputCard, parseSuccessful };

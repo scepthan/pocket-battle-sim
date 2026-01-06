@@ -94,7 +94,6 @@ import {
   PlayerGameView,
   PlayerPokemonView,
   removeElement,
-  type CardSlotView,
   type PlayingCard,
   type PokemonCard,
 } from "@/core";
@@ -280,13 +279,13 @@ const setupAgent = () => {
 
           case "Fossil":
             const slot = gameView.selfBench.find((p) => !p.isPokemon);
-            await gameView.playItemCard(selectedCard, slot);
+            if (slot) await gameView.playFossilCard(selectedCard, slot);
             break;
 
           case "Item":
           case "Supporter":
           case "PokemonTool":
-            const playSelectedCard = async (target?: CardSlotView) => {
+            const playSelectedCard = async (target?: PlayerPokemonView) => {
               if (selectedCard.CardType === "Supporter") {
                 await gameView.playSupporterCard(selectedCard, target);
               } else if (selectedCard.CardType === "Item") {

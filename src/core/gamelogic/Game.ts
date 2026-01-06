@@ -2,6 +2,7 @@ import { GameLogger } from "../logging";
 import { useDeckValidator } from "../parsing";
 import { isSubset, removeElement } from "../util";
 
+import type { EmptyCardSlot } from "./EmptyCardSlot";
 import type { InPlayPokemon } from "./InPlayPokemon";
 import { Player } from "./Player";
 import { PlayerGameView } from "./PlayerGameView";
@@ -14,6 +15,7 @@ import type {
   Energy,
   FossilCard,
   GameRules,
+  ItemCard,
   PlayerAgent,
   PlayerGameSetup,
   PlayerStatus,
@@ -21,6 +23,7 @@ import type {
   PokemonCard,
   PokemonStatus,
   PokemonToolCard,
+  SupporterCard,
   TrainerCard,
 } from "./types";
 
@@ -798,6 +801,9 @@ export class Game {
    * Plays a Trainer card from the player's hand. If the card requires a target (e.g. Potion,
    * Misty, any Pokémon Tool), it must be given here.
    */
+  async playTrainer(card: ItemCard | SupporterCard, target?: InPlayPokemon): Promise<void>;
+  async playTrainer(card: FossilCard, target: EmptyCardSlot): Promise<void>;
+  async playTrainer(card: PokemonToolCard, target: InPlayPokemon): Promise<void>;
   async playTrainer(card: TrainerCard, target?: CardSlot): Promise<void> {
     if (!this.AttackingPlayer.Hand.includes(card)) {
       throw new Error("Card not in hand");
@@ -819,12 +825,15 @@ export class Game {
         throw new Error("Target Pokémon cannot have any more Tool cards attached");
 
       await target.attachPokemonTool(card);
+    } else if (card.CardType === "Fossil") {
+      if (!target || target.isPokemon) throw new Error("Fossil card requires a target empty slot");
+      await this.putFossilOnBench(card, target);
     } else {
       this.GameLog.playTrainer(this.AttackingPlayer, card);
 
       if (card.Effect.type === "Targeted") {
-        if (!target) {
-          throw new Error("Targeted effect requires a target");
+        if (!target || !target.isPokemon) {
+          throw new Error("Targeted effect requires a target Pokémon");
         }
         const validTargets = card.Effect.validTargets(this);
         if (!validTargets.includes(target)) {
@@ -1016,14 +1025,14 @@ export class Game {
   /**
    * Puts a Fossil card onto the Bench as if it were a Pokémon.
    */
-  async putFossilOnBench(card: FossilCard, index: number, hp: number, type: Energy = "Colorless") {
+  async putFossilOnBench(card: FossilCard, slot: EmptyCardSlot) {
     const pokemon: PlayingCard = {
       ID: card.ID,
       Name: card.Name,
       Rarity: card.Rarity,
       CardType: "Pokemon",
-      Type: type,
-      BaseHP: Number(hp),
+      Type: card.Type,
+      BaseHP: card.BaseHP,
       Stage: 0,
       RetreatCost: -1,
       PrizePoints: 1,
@@ -1043,7 +1052,7 @@ export class Game {
       },
     };
 
-    await this.AttackingPlayer.putPokemonOnBench(pokemon, index, card);
+    await this.AttackingPlayer.putPokemonOnBench(pokemon, slot.index, card);
     await this.afterAction();
   }
 

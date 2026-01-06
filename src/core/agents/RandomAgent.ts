@@ -1,4 +1,4 @@
-import type { CardSlotView, GameInitState, PlayerGameView, PokemonCard } from "../gamelogic";
+import type { GameInitState, PlayerGameView, PlayerPokemonView, PokemonCard } from "../gamelogic";
 import { PlayerAgent } from "../gamelogic";
 import { randomElement } from "../util";
 
@@ -44,11 +44,15 @@ export class RandomAgent extends PlayerAgent {
     const itemCards = game.selfHand.filter((x) => x.CardType == "Item" || x.CardType == "Fossil");
     for (const card of itemCards) {
       if (!game.canPlayCard(card) || Math.random() < 0.5) continue;
-      let target: CardSlotView | undefined;
-      if (card.Effect.type === "Targeted") {
-        target = randomElement(game.validTargets(card));
+      if (card.CardType === "Fossil") {
+        await game.playFossilCard(card, randomElement(game.validTargets(card)));
+      } else {
+        let target: PlayerPokemonView | undefined;
+        if (card.Effect.type === "Targeted") {
+          target = randomElement(game.validTargets(card));
+        }
+        await game.playItemCard(card, target);
       }
-      await game.playItemCard(card, target);
     }
 
     // Play a random Supporter card if available
@@ -57,7 +61,7 @@ export class RandomAgent extends PlayerAgent {
       .filter((x) => game.canPlayCard(x));
     if (supporterCards.length > 0) {
       const card = randomElement(supporterCards);
-      let target: CardSlotView | undefined;
+      let target: PlayerPokemonView | undefined;
       if (card.Effect.type === "Targeted") {
         target = randomElement(game.validTargets(card));
       }

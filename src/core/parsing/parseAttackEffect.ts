@@ -43,7 +43,7 @@ export const parseAttackEffect = (attack: Attack): boolean => {
    * The "If heads," is parsed and stored as conditionalForNextEffect. The parser for "discard a
    * random card" can then call this method to only apply if the coin flip results in heads.
    */
-  const applyConditionalIfAvailable: (effect: SideEffect) => SideEffect = (effect: SideEffect) => {
+  const applyConditionalIfAvailable: (effect: SideEffect) => SideEffect = (effect) => {
     if (conditionalForNextEffect) {
       const prevConditional = conditionalForNextEffect;
       conditionalForNextEffect = undefined;

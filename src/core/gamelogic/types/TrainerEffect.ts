@@ -1,17 +1,16 @@
-import type { Game, Player } from "..";
-import type { CardSlot } from "./CardSlot";
+import type { Game, InPlayPokemon, Player } from "..";
 import type { BasicEffect } from "./Effects";
 
-export type TargetedEffect<T> = (game: Game, target: T) => Promise<void>;
+export type TargetedEffect = (game: Game, target: InPlayPokemon) => Promise<void>;
 export type ConditionalTrainerEffect = {
   type: "Conditional";
   condition: (game: Game, self: Player) => boolean;
   effect: BasicEffect;
 };
-export type TargetedTrainerEffect<T> = {
+export type TargetedTrainerEffect = {
   type: "Targeted";
-  validTargets: (game: Game) => T[];
+  validTargets: (game: Game) => InPlayPokemon[];
   condition?: (game: Game, self: Player) => boolean;
-  effect: TargetedEffect<T>;
+  effect: TargetedEffect;
 };
-export type TrainerEffect = ConditionalTrainerEffect | TargetedTrainerEffect<CardSlot>;
+export type TrainerEffect = ConditionalTrainerEffect | TargetedTrainerEffect;

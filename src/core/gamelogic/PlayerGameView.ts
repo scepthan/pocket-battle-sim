@@ -15,6 +15,7 @@ import type {
   PokemonCard,
   PokemonToolCard,
   SupporterCard,
+  TrainerCard,
 } from "./types";
 
 export type CardSlotView = PlayerPokemonView | EmptyCardSlot;
@@ -43,10 +44,6 @@ export class PlayerGameView {
     for (const pokemon of [...this.player.InPlayPokemon, ...this.opponent.InPlayPokemon])
       if (view.is(pokemon)) return pokemon;
     throw new Error("Could not find Pokemon: " + view.Name);
-  }
-  private pokemonOrEmpty(slot: CardSlotView): CardSlot {
-    if (slot.isPokemon) return this.pokemonFromView(slot);
-    return slot;
   }
 
   // Game attributes
@@ -287,9 +284,14 @@ export class PlayerGameView {
 
     return this.player.canAttachFromEnergyZone(this.pokemonFromView(pokemon));
   }
-  validTargets(card: ItemCard | FossilCard | SupporterCard | PokemonToolCard): CardSlotView[] {
+  validTargets(card: ItemCard | SupporterCard | PokemonToolCard): PlayerPokemonView[];
+  validTargets(card: FossilCard): EmptyCardSlot[];
+  validTargets(card: TrainerCard) {
     if (card.CardType === "PokemonTool") {
       return this.selfInPlayPokemon.filter((p) => p.AttachedToolCards.length < p.MaxToolCards);
+    }
+    if (card.CardType === "Fossil") {
+      return this.selfBench.filter((slot) => !slot.isPokemon);
     }
     if (card.Effect.type == "Targeted") {
       return card.Effect.validTargets(this.game).map(viewOrEmpty);
@@ -400,9 +402,15 @@ export class PlayerGameView {
     await this.game.delay();
     return true;
   }
-  async playItemCard(card: ItemCard | FossilCard, target?: CardSlotView): Promise<boolean> {
+  async playItemCard(card: ItemCard, target?: PlayerPokemonView): Promise<boolean> {
+    return await this.playItemOrSupporter(card, target);
+  }
+  async playSupporterCard(card: SupporterCard, target?: PlayerPokemonView): Promise<boolean> {
+    return await this.playItemOrSupporter(card, target);
+  }
+  private async playItemOrSupporter(card: ItemCard | SupporterCard, target?: PlayerPokemonView) {
     if (!this.canPlayCard(card)) return false;
-    const realTarget = target && this.pokemonOrEmpty(target);
+    const realTarget = target && this.pokemonFromView(target);
     if (card.Effect.type === "Targeted") {
       if (!realTarget || !card.Effect.validTargets(this.game).includes(realTarget)) return false;
     }
@@ -412,14 +420,10 @@ export class PlayerGameView {
     await this.game.delay();
     return true;
   }
-  async playSupporterCard(card: SupporterCard, target?: CardSlotView): Promise<boolean> {
+  async playFossilCard(card: FossilCard, target: EmptyCardSlot): Promise<boolean> {
     if (!this.canPlayCard(card)) return false;
-    const realTarget = target && this.pokemonOrEmpty(target);
-    if (card.Effect.type === "Targeted") {
-      if (!realTarget || !card.Effect.validTargets(this.game).includes(realTarget)) return false;
-    }
 
-    await this.game.playTrainer(card, realTarget);
+    await this.game.playTrainer(card, target);
 
     await this.game.delay();
     return true;

@@ -1,9 +1,8 @@
 import { allCards } from "@/assets";
 import type {
-  CardSlot,
   Energy,
-  FossilCard,
   Game,
+  InPlayPokemon,
   PokemonCard,
   TargetedEffect,
   TrainerEffect,
@@ -51,8 +50,8 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
     },
   };
   const convertToTargetedEffect = (
-    validTargets: (game: Game) => CardSlot[],
-    newEffect: TargetedEffect<CardSlot>
+    validTargets: (game: Game) => InPlayPokemon[],
+    newEffect: TargetedEffect
   ) => {
     effect = {
       type: "Targeted",
@@ -657,23 +656,6 @@ export const parseTrainerEffect = (cardText: string): ParsedResult<TrainerEffect
             if (!card) return;
 
             await game.AttackingPlayer.evolvePokemon(target, card as PokemonCard, true);
-          }
-        );
-      },
-    },
-    {
-      pattern:
-        /Play this card as if it were a (\d+)-HP Basic \{(\w)\} Pokémon\. At any time during your turn, you may discard this card from play\. This card can’t retreat\./i,
-      transform: (_, hp, type) => {
-        const fullType = parseEnergy(type);
-
-        convertToTargetedEffect(
-          (game) => game.AttackingPlayer.Bench.filter((slot) => !slot.isPokemon),
-          async (game, benchSlot) => {
-            if (benchSlot.isPokemon) return;
-            const card = game.ActiveTrainerCard as FossilCard;
-
-            await game.putFossilOnBench(card, benchSlot.index, Number(hp), fullType);
           }
         );
       },

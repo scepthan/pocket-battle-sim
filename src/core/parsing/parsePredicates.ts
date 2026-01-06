@@ -73,7 +73,7 @@ export const parsePokemonPredicate = (
   parsePart(/ that ha(?:s|ve) damage on (?:it|them)$/, () => (pokemon) => pokemon.isDamaged());
 
   parsePart(/^Pokémon ex$/, () => (pokemon) => pokemon.Name.endsWith(" ex"));
-  parsePart(/^Ultra Beast$/, () => (pokemon) => pokemon.isUltraBeast);
+  parsePart(/^Ultra Beasts?$/, () => (pokemon) => pokemon.isUltraBeast);
 
   if (text === "" || text === "Pokémon") {
     return {

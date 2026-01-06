@@ -30,7 +30,8 @@ export interface ItemCard extends BaseCard {
 export interface FossilCard extends BaseCard {
   CardType: "Fossil";
   Text: string;
-  Effect: TrainerEffect;
+  BaseHP: number;
+  Type: Energy;
 }
 export interface SupporterCard extends BaseCard {
   CardType: "Supporter";
