@@ -1,5 +1,5 @@
 import { Game, isEnergyShort, parseEnergy, type Attack } from "../gamelogic";
-import { parseEffect } from "./parseEffect";
+import { parseEffect, statusesToSideEffects } from "./parseEffect";
 import type { InputCardAttack, ParsedResult } from "./types";
 
 export const parseAttack = (inputAttack: InputCardAttack): ParsedResult<Attack> => {
@@ -30,8 +30,8 @@ export const parseAttack = (inputAttack: InputCardAttack): ParsedResult<Attack> 
     attack.calculateDamage = effect.calculateDamage;
     attack.validTargets = effect.validTargets;
     attack.preDamageEffects = effect.preDamageEffects;
-    attack.sideEffects = effect.sideEffects;
     attack.attackingEffects = effect.attackingEffects;
+    attack.sideEffects = [...effect.sideEffects, ...statusesToSideEffects(effect)];
     attack.explicitConditions = effect.explicitConditions;
 
     if (!result.parseSuccessful) {

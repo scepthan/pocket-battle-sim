@@ -7,7 +7,9 @@ import {
   type CoinFlipIndicator,
   type DamageCalculation,
   type Energy,
+  type PlayerStatus,
   type PokemonCard,
+  type PokemonStatus,
   type SideEffect,
 } from "../gamelogic";
 import type { AbilityTrigger } from "../gamelogic/types/ability/StandardAbility";
@@ -81,6 +83,31 @@ export interface Effect {
    * Trigger for certain abilities and Pokémon Tools.
    */
   trigger?: AbilityTrigger;
+
+  /**
+   * Statuses to apply to the player's Active Pokémon.
+   */
+  selfPokemonStatuses: PokemonStatus[];
+
+  /**
+   * Statuses to apply to the opponent's Active Pokémon.
+   */
+  opponentPokemonStatuses: PokemonStatus[];
+
+  /**
+   * Statuses to apply to the player.
+   */
+  selfPlayerStatuses: PlayerStatus[];
+
+  /**
+   * Statuses to apply to the opponent.
+   */
+  opponentPlayerStatuses: PlayerStatus[];
+
+  /**
+   * Leftover conditional for attacks that apply statuses.
+   */
+  statusConditional?: (game: Game, self: InPlayPokemon, heads: number) => boolean;
 }
 
 interface EffectTransformer {
@@ -111,6 +138,42 @@ const selfActive = (player: Player, self: InPlayPokemon) => self.player.ActivePo
 const selfBenched = (player: Player, self: InPlayPokemon) =>
   self.player.BenchedPokemon.includes(self);
 
+export const statusesToSideEffects = (effect: Effect) => {
+  const sideEffects: SideEffect[] = [];
+
+  const applyConditionalIfAvailable = (sideEffect: SideEffect) => {
+    if (effect.statusConditional) {
+      const conditional = effect.statusConditional;
+      sideEffects.push(async (game, self, heads, target) => {
+        if (conditional(game, self, heads)) await sideEffect(game, self, heads, target);
+      });
+    } else sideEffects.push(sideEffect);
+  };
+
+  for (const status of effect.selfPokemonStatuses) {
+    applyConditionalIfAvailable(async (game, self) => {
+      self.player.applyActivePokemonStatus(Object.assign({}, status));
+    });
+  }
+  for (const status of effect.opponentPokemonStatuses) {
+    applyConditionalIfAvailable(async (game, self) => {
+      self.player.opponent.applyActivePokemonStatus(Object.assign({}, status));
+    });
+  }
+  for (const status of effect.selfPlayerStatuses) {
+    applyConditionalIfAvailable(async (game, self) => {
+      self.player.applyPlayerStatus(Object.assign({}, status));
+    });
+  }
+  for (const status of effect.opponentPlayerStatuses) {
+    applyConditionalIfAvailable(async (game, self) => {
+      self.player.opponent.applyPlayerStatus(Object.assign({}, status));
+    });
+  }
+
+  return sideEffects;
+};
+
 export const parseEffect = (
   text: string,
   baseDamage?: number,
@@ -123,12 +186,17 @@ export const parseEffect = (
     sideEffects: [],
     explicitConditions: [],
     implicitConditions: [],
+    selfPokemonStatuses: [],
+    opponentPokemonStatuses: [],
+    selfPlayerStatuses: [],
+    opponentPlayerStatuses: [],
   };
   let parseSuccessful = true;
   let conditionalForNextEffect:
     | ((game: Game, self: InPlayPokemon, heads: number) => boolean)
     | undefined = undefined;
   baseDamage = baseDamage ?? 0;
+  let turnsToKeep: number | undefined;
 
   /**
    * Takes an effect and returns a new one that only runs if the previously parsed condition is met.
@@ -1455,316 +1523,462 @@ export const parseEffect = (
       },
     },
 
-    // Other status effects
+    // Status effect headers
     {
-      pattern: /^During this turn, the Retreat Cost of your Active Pokémon is (\d+) less\.$/i,
-      transform: (_, modifier) => {
-        addSideEffect(async (game) => {
-          game.AttackingPlayer.applyPlayerStatus({
-            type: "PokemonStatus",
-            pokemonCondition: {
-              test: (pokemon) => pokemon.player.ActivePokemon === pokemon,
-              descriptor: "Active Pokémon",
-            },
-            source: "Effect",
-            pokemonStatus: {
-              type: "ModifyRetreatCost",
-              amount: -Number(modifier),
-              source: "Effect",
-            },
-          });
+      pattern: /^During this turn, /i,
+      transform: () => {
+        turnsToKeep = 0;
+      },
+    },
+    {
+      pattern: / ?During (your opponent’s|their) next turn(?:, )?/i,
+      transform: () => {
+        turnsToKeep = 1;
+      },
+    },
+    {
+      pattern: /^During your next turn, /i,
+      transform: () => {
+        turnsToKeep = 2;
+      },
+    },
+
+    // Self Pokémon status effects
+    {
+      pattern:
+        /^attacks used by this Pokémon do \+(\d+) damage to your opponent’s Active Pokémon\.$/i,
+      transform: (_, amount) => {
+        effect.selfPokemonStatuses.push({
+          type: "IncreaseAttack",
+          amount: Number(amount),
+          source: "Effect",
+        });
+      },
+    },
+    {
+      pattern: /^this Pokémon takes (−|\+)(\d+) damage from attacks(?: from ([^.]+?))?\./i,
+      transform: (_, sign, amount, descriptor) => {
+        const attackerCondition = descriptor
+          ? {
+              test: parsePokemonPredicate(descriptor),
+              descriptor,
+            }
+          : undefined;
+        effect.selfPokemonStatuses.push({
+          type: "ModifyIncomingAttackDamage",
+          amount: Number(amount) * (sign === "+" ? 1 : -1),
+          source: "Effect",
+          turnsToKeep,
+          attackerCondition,
         });
       },
     },
     {
       pattern:
-        /^During this turn, attacks used by your (.+?) do \+(\d+) damage to your opponent’s (Active .+?)\.$/i,
+        /^If any damage is done to this Pokémon by attacks, flip a coin\. If heads, this Pokémon takes −(\d+) damage from that attack\.$/i,
+      transform: (_, amount) => {
+        effect.selfPokemonStatuses.push({
+          type: "ModifyIncomingAttackDamageOnCoinFlip",
+          amount: -Number(amount),
+          source: "Effect",
+        });
+      },
+    },
+    {
+      pattern:
+        /^prevent all damage done to this Pokémon by attacks(?: from your opponent’s (.+?))?\./i,
+      transform: (_, descriptor) => {
+        const attackerCondition = descriptor
+          ? {
+              test: parsePokemonPredicate(descriptor),
+              descriptor,
+            }
+          : undefined;
+        effect.selfPokemonStatuses.push({
+          type: "PreventAttackDamage",
+          source: "Effect",
+          turnsToKeep,
+          attackerCondition,
+        });
+      },
+    },
+    {
+      pattern:
+        /^prevent all effects of attacks used by your opponent’s Pokémon done to this Pokémon\./i,
+      transform: () => {
+        effect.selfPokemonStatuses.push({
+          type: "PreventAttackEffects",
+          source: "Effect",
+          turnsToKeep,
+        });
+      },
+    },
+    {
+      pattern: /^prevent all damage from—and effects of—attacks done to this Pokémon\./i,
+      transform: () => {
+        effect.selfPokemonStatuses.push({
+          type: "PreventAttackDamageAndEffects",
+          source: "Effect",
+          turnsToKeep,
+        });
+      },
+    },
+    {
+      pattern:
+        /^if this Pokémon is damaged by an attack, do (\d+) damage to the Attacking Pokémon\./i,
+      transform: (_, damage) => {
+        effect.selfPokemonStatuses.push({
+          type: "CounterAttack",
+          amount: Number(damage),
+          source: "Effect",
+          turnsToKeep,
+        });
+      },
+    },
+    {
+      pattern: /^This Pokémon can’t be affected by any Special Conditions\./i,
+      transform: () => {
+        effect.selfPokemonStatuses.push({
+          type: "PreventSpecialConditions",
+          source: "Effect",
+        });
+      },
+    },
+    {
+      pattern: /^this Pokémon can’t attack\./i,
+      transform: () => {
+        effect.selfPokemonStatuses.push({
+          type: "CannotAttack",
+          source: "Effect",
+          turnsToKeep,
+        });
+      },
+    },
+    {
+      pattern: /^this Pokémon can’t use (.+?)\./i,
+      transform: (_, attackName) => {
+        effect.selfPokemonStatuses.push({
+          type: "CannotUseSpecificAttack",
+          attackName,
+          source: "Effect",
+          turnsToKeep,
+        });
+      },
+    },
+    {
+      pattern: /^this Pokémon’s (.+?) attack does \+(\d+) damage\./i,
+      transform: (_, attackName, increaseAmount) => {
+        effect.selfPokemonStatuses.push({
+          type: "IncreaseDamageOfAttack",
+          attackName,
+          amount: Number(increaseAmount),
+          source: "Effect",
+          turnsToKeep,
+        });
+      },
+    },
+    {
+      pattern: /^attacks used by this Pokémon cost (\d+) less {(\w)} Energy\./i,
+      transform: (_, amount, energyType) => {
+        const fullType = parseEnergy(energyType);
+
+        effect.selfPokemonStatuses.push({
+          type: "ModifyAttackCost",
+          energyType: fullType,
+          amount: -Number(amount),
+          source: "Effect",
+        });
+      },
+    },
+    {
+      pattern: /^(it|this Pokémon) has no Retreat Cost\.$/i,
+      transform: () => {
+        effect.selfPokemonStatuses.push({
+          type: "NoRetreatCost",
+          source: "Effect",
+        });
+      },
+    },
+
+    // Defending Pokémon status effects
+    {
+      pattern: /^attacks used by the Defending Pokémon do −(\d+) damage\./i,
+      transform: (_, damageReduction) => {
+        effect.opponentPokemonStatuses.push({
+          type: "ReduceOwnAttackDamage",
+          amount: Number(damageReduction),
+          source: "Effect",
+          turnsToKeep,
+        });
+      },
+    },
+    {
+      pattern: /^the Defending Pokémon can’t attack\./i,
+      transform: () => {
+        effect.opponentPokemonStatuses.push({
+          type: "CannotAttack",
+          source: "Effect",
+          turnsToKeep,
+        });
+      },
+    },
+    {
+      pattern: /^the Defending Pokémon can’t retreat\./i,
+      transform: () => {
+        effect.opponentPokemonStatuses.push({
+          type: "CannotRetreat",
+          source: "Effect",
+          turnsToKeep,
+        });
+      },
+    },
+    {
+      pattern:
+        /^if the Defending Pokémon tries to use an attack, your opponent flips a coin\. If tails, that attack doesn’t happen\./i,
+      transform: () => {
+        effect.opponentPokemonStatuses.push({
+          type: "CoinFlipToAttack",
+          source: "Effect",
+          turnsToKeep,
+        });
+      },
+    },
+    {
+      pattern:
+        /^attacks used by the Defending Pokémon cost (\d+) {(\w)} more, and its Retreat Cost is (\d+) {C} more\./i,
+      transform: (_, attackCostModifier, type, retreatCostModifier) => {
+        effect.opponentPokemonStatuses.push({
+          type: "ModifyAttackCost",
+          amount: Number(attackCostModifier),
+          energyType: parseEnergy(type),
+          source: "Effect",
+          turnsToKeep,
+        });
+        effect.opponentPokemonStatuses.push({
+          type: "ModifyRetreatCost",
+          amount: Number(retreatCostModifier),
+          source: "Effect",
+          turnsToKeep,
+        });
+      },
+    },
+
+    // Self player effects
+    {
+      pattern: /^the Retreat Cost of your Active Pokémon is (\d+) less\.$/i,
+      transform: (_, modifier) => {
+        effect.selfPlayerStatuses.push({
+          type: "PokemonStatus",
+          pokemonCondition: {
+            test: (pokemon) => pokemon.player.ActivePokemon === pokemon,
+            descriptor: "Active Pokémon",
+          },
+          source: "Effect",
+          pokemonStatus: {
+            type: "ModifyRetreatCost",
+            amount: -Number(modifier),
+            source: "PlayerStatus",
+          },
+        });
+      },
+    },
+    {
+      pattern: /^attacks used by your (.+?) do \+(\d+) damage to your opponent’s (.+?)\.$/i,
       transform: (_, selfSpecifier, modifier, opponentSpecifier) => {
         const appliesToPokemon = parsePokemonPredicate(selfSpecifier);
         const appliesToDefender = parsePokemonPredicate(opponentSpecifier);
 
-        addSideEffect(async (game) => {
-          game.AttackingPlayer.applyPlayerStatus({
-            type: "PokemonStatus",
-            pokemonCondition: {
-              test: appliesToPokemon,
-              descriptor: selfSpecifier,
+        effect.selfPlayerStatuses.push({
+          type: "PokemonStatus",
+          pokemonCondition: {
+            test: appliesToPokemon,
+            descriptor: selfSpecifier,
+          },
+          source: "Effect",
+          pokemonStatus: {
+            type: "IncreaseAttack",
+            amount: Number(modifier),
+            defenderCondition: {
+              test: appliesToDefender,
+              descriptor: opponentSpecifier,
             },
-            source: "Effect",
-            pokemonStatus: {
-              type: "IncreaseAttack",
-              amount: Number(modifier),
-              defenderCondition: {
-                test: appliesToDefender,
-                descriptor: opponentSpecifier,
-              },
-              source: "Effect",
-            },
-          });
+            source: "PlayerStatus",
+          },
         });
       },
     },
     {
-      pattern: /^During this turn, attacks used by your (.+?) cost (\d+) less {(\w)} Energy\.$/i,
+      pattern: /^attacks used by your (.+?) cost (\d+) less {(\w)} Energy\.$/i,
       transform: (_, descriptor, count, energy) => {
         const predicate = parsePokemonPredicate(descriptor);
         const fullType = parseEnergy(energy);
 
-        addSideEffect(async (game) => {
-          game.AttackingPlayer.applyPlayerStatus({
-            type: "PokemonStatus",
-            pokemonCondition: {
-              test: predicate,
-              descriptor,
-            },
-            source: "Effect",
-            pokemonStatus: {
-              type: "ModifyAttackCost",
-              energyType: fullType,
-              amount: -Number(count),
-              source: "Effect",
-            },
-          });
+        effect.selfPlayerStatuses.push({
+          type: "PokemonStatus",
+          pokemonCondition: {
+            test: predicate,
+            descriptor,
+          },
+          source: "Effect",
+          pokemonStatus: {
+            type: "ModifyAttackCost",
+            energyType: fullType,
+            amount: -Number(count),
+            source: "PlayerStatus",
+          },
         });
       },
     },
     {
       pattern:
-        /^During your opponent’s next turn, all of your (.+?) take −(\d+) damage from attacks from your opponent’s Pokémon\.$/i,
+        /^all of your (.+?) take −(\d+) damage from attacks from your opponent’s Pokémon\.$/i,
       transform: (_, descriptor, modifier) => {
         const predicate = parsePokemonPredicate(descriptor);
 
-        addSideEffect(async (game) => {
-          game.AttackingPlayer.applyPlayerStatus({
-            type: "PokemonStatus",
-            pokemonCondition: {
-              test: predicate,
-              descriptor,
-            },
-            source: "Effect",
-            keepNextTurn: true,
-            pokemonStatus: {
-              type: "ModifyIncomingAttackDamage",
-              amount: -Number(modifier),
-              source: "Effect",
-            },
-          });
-        });
-      },
-    },
-    {
-      pattern:
-        /^During your opponent’s next turn, this Pokémon takes (−|\+)(\d+) damage from attacks\./i,
-      transform: (_, sign, amount) => {
-        addSideEffect(async (game) =>
-          game.AttackingPlayer.applyActivePokemonStatus({
+        effect.selfPlayerStatuses.push({
+          type: "PokemonStatus",
+          pokemonCondition: {
+            test: predicate,
+            descriptor,
+          },
+          source: "Effect",
+          keepNextTurn: true,
+          pokemonStatus: {
             type: "ModifyIncomingAttackDamage",
-            amount: Number(amount) * (sign === "+" ? 1 : -1),
-            source: "Effect",
-            turnsToKeep: 1,
-          })
-        );
-      },
-    },
-    {
-      pattern:
-        /^during your opponent’s next turn, prevent all damage done to this Pokémon by attacks\./i,
-      transform: () => {
-        addSideEffect(async (game) =>
-          game.AttackingPlayer.applyActivePokemonStatus({
-            type: "PreventAttackDamage",
-            source: "Effect",
-            turnsToKeep: 1,
-          })
-        );
-      },
-    },
-    {
-      pattern:
-        /^during your opponent’s next turn, prevent all damage from—and effects of—attacks done to this Pokémon\./i,
-      transform: () => {
-        addSideEffect(async (game) =>
-          game.AttackingPlayer.applyActivePokemonStatus({
-            type: "PreventAttackDamageAndEffects",
-            source: "Effect",
-            turnsToKeep: 1,
-          })
-        );
-      },
-    },
-    {
-      pattern:
-        /^During your opponent’s next turn, attacks used by the Defending Pokémon do −(\d+) damage\./i,
-      transform: (_, damageReduction) => {
-        addSideEffect(async (game) =>
-          game.DefendingPlayer.applyActivePokemonStatus({
-            type: "ReduceOwnAttackDamage",
-            amount: Number(damageReduction),
-            source: "Effect",
-            turnsToKeep: 1,
-          })
-        );
-      },
-    },
-    {
-      pattern:
-        /^During your opponent’s next turn, if this Pokémon is damaged by an attack, do (\d+) damage to the Attacking Pokémon\./i,
-      transform: (_, damage) => {
-        addSideEffect(async (game) =>
-          game.AttackingPlayer.applyActivePokemonStatus({
-            type: "CounterAttack",
-            amount: Number(damage),
-            source: "Effect",
-            turnsToKeep: 1,
-          })
-        );
-      },
-    },
-    {
-      // Vulpix and Omastar have the same phrase in opposite order, so we account for both arrangements
-      pattern:
-        /^(?:the Defending Pokémon can’t attack ?|during your opponent’s next turn(?:, )?){2}\./i,
-      transform: () => {
-        addSideEffect(async (game) =>
-          game.DefendingPlayer.applyActivePokemonStatus({
-            type: "CannotAttack",
-            source: "Effect",
-            turnsToKeep: 1,
-          })
-        );
-      },
-    },
-    {
-      pattern: /^During your opponent’s next turn, the Defending Pokémon can’t retreat\./i,
-      transform: () => {
-        addSideEffect(async (game) =>
-          game.DefendingPlayer.applyActivePokemonStatus({
-            type: "CannotRetreat",
-            source: "Effect",
-            turnsToKeep: 1,
-          })
-        );
-      },
-    },
-    {
-      pattern:
-        /^During your opponent’s next turn, if the Defending Pokémon tries to use an attack, your opponent flips a coin\. If tails, that attack doesn’t happen\./i,
-      transform: () => {
-        addSideEffect(async (game) =>
-          game.DefendingPlayer.applyActivePokemonStatus({
-            type: "CoinFlipToAttack",
-            source: "Effect",
-            turnsToKeep: 1,
-          })
-        );
-      },
-    },
-    {
-      pattern:
-        /^During your opponent’s next turn, attacks used by the Defending Pokémon cost (\d+) {(\w)} more, and its Retreat Cost is (\d+) {C} more\./i,
-      transform: (_, attackCostModifier, type, retreatCostModifier) => {
-        addSideEffect(async (game) => {
-          game.DefendingPlayer.applyActivePokemonStatus({
-            type: "ModifyAttackCost",
-            amount: Number(attackCostModifier),
-            energyType: parseEnergy(type),
-            source: "Effect",
-            turnsToKeep: 1,
-          });
-          game.DefendingPlayer.applyActivePokemonStatus({
-            type: "ModifyRetreatCost",
-            amount: Number(retreatCostModifier),
-            source: "Effect",
-            turnsToKeep: 1,
-          });
+            amount: -Number(modifier),
+            source: "PlayerStatus",
+          },
         });
       },
     },
     {
-      pattern: /^During your next turn, this Pokémon can’t attack\./i,
-      transform: () => {
-        addSideEffect(async (game) =>
-          game.AttackingPlayer.applyActivePokemonStatus({
-            type: "CannotAttack",
-            source: "Effect",
-            turnsToKeep: 2,
-          })
-        );
+      pattern: /^your (Active .+?)’s Retreat Cost is (\d+) less\./i,
+      transform: (_, descriptor, amount) => {
+        const predicate = parsePokemonPredicate(descriptor);
+
+        effect.selfPlayerStatuses.push({
+          type: "PokemonStatus",
+          source: "Effect",
+          pokemonCondition: {
+            test: predicate,
+            descriptor,
+          },
+          pokemonStatus: {
+            type: "ModifyRetreatCost",
+            amount: -Number(amount),
+            source: "PlayerStatus",
+          },
+        });
       },
     },
     {
-      pattern: /^During your next turn, this Pokémon can’t use (.+?)\./i,
-      transform: (_, attackName) => {
-        addSideEffect(async (game) =>
-          game.AttackingPlayer.applyActivePokemonStatus({
-            type: "CannotUseSpecificAttack",
-            attackName,
-            source: "Effect",
-            turnsToKeep: 2,
-          })
-        );
+      pattern: /^your (Active .+?) has no Retreat Cost\./i,
+      transform: (_, descriptor) => {
+        const predicate = parsePokemonPredicate(descriptor);
+
+        effect.selfPlayerStatuses.push({
+          type: "PokemonStatus",
+          source: "Effect",
+          pokemonCondition: {
+            test: predicate,
+            descriptor,
+          },
+          pokemonStatus: { type: "NoRetreatCost", source: "PlayerStatus" },
+        });
       },
     },
     {
-      pattern: /^During your next turn, this Pokémon’s (.+?) attack does \+(\d+) damage\./i,
-      transform: (_, attackName, increaseAmount) => {
-        addSideEffect(async (game) =>
-          game.AttackingPlayer.applyActivePokemonStatus({
-            type: "IncreaseDamageOfAttack",
-            attackName,
-            amount: Number(increaseAmount),
-            source: "Effect",
-            turnsToKeep: 2,
-          })
-        );
+      pattern:
+        /^Each of your (.+?) recovers from all Special Conditions and can’t be affected by any Special Conditions\.$/i,
+      transform: (_, descriptor) => {
+        const predicate = parsePokemonPredicate(descriptor);
+        effect.selfPlayerStatuses.push({
+          type: "PokemonStatus",
+          source: "Effect",
+          pokemonCondition: {
+            test: predicate,
+            descriptor,
+          },
+          pokemonStatus: { type: "PreventSpecialConditions", source: "PlayerStatus" },
+        });
+      },
+    },
+    {
+      pattern:
+        /^Each {(\w)} Energy attached to your (.+?) provides 2 {\1} Energy. This effect doesn’t stack.$/i,
+      transform: (_, energyType, descriptor) => {
+        const fullType = parseEnergy(energyType);
+        const predicate = parsePokemonPredicate(descriptor);
+
+        effect.selfPlayerStatuses.push({
+          type: "PokemonStatus",
+          source: "Effect",
+          pokemonCondition: {
+            test: predicate,
+            descriptor,
+          },
+          doesNotStack: true,
+          pokemonStatus: {
+            type: "DoubleEnergy",
+            energyType: fullType,
+            source: "PlayerStatus",
+          },
+        });
       },
     },
 
     // Opponent player effects
     {
-      pattern:
-        /^Your opponent can’t use any Supporter cards from their hand during their next turn\./i,
+      pattern: /^Your opponent can’t use any Supporter cards from their hand\./i,
       transform: () => {
-        addSideEffect(async (game) => {
-          game.DefendingPlayer.applyPlayerStatus({
-            type: "CannotUseSupporter",
-            source: "Effect",
-            keepNextTurn: true,
-          });
+        effect.opponentPlayerStatuses.push({
+          type: "CannotUseSupporter",
+          source: "Effect",
+          keepNextTurn: true,
+        });
+      },
+    },
+    {
+      pattern: /^they can’t play any Item cards from their hand\./i,
+      transform: () => {
+        effect.opponentPlayerStatuses.push({
+          type: "CannotUseItem",
+          source: "Effect",
+          keepNextTurn: true,
         });
       },
     },
     {
       pattern:
-        /^During your opponent’s next turn, they can’t play any Item cards from their hand\./i,
+        /^Your opponent can’t play any Pokémon from their hand to evolve their Active Pokémon\.$/i,
       transform: () => {
-        addSideEffect(async (game) => {
-          game.DefendingPlayer.applyPlayerStatus({
-            type: "CannotUseItem",
-            source: "Effect",
-            keepNextTurn: true,
-          });
+        effect.opponentPlayerStatuses.push({
+          type: "PokemonStatus",
+          source: "Effect",
+          pokemonCondition: {
+            test: (p) => p === p.player.ActivePokemon,
+            descriptor: "Active Pokémon",
+          },
+          pokemonStatus: { type: "CannotEvolve", source: "PlayerStatus" },
         });
       },
     },
     {
       pattern:
-        /^During your opponent’s next turn, they can’t take any Energy from their Energy Zone to attach to their Active Pokémon\./i,
+        /^they can’t take any Energy from their Energy Zone to attach to their Active Pokémon\./i,
       transform: () => {
-        addSideEffect(async (game) => {
-          game.DefendingPlayer.applyPlayerStatus({
-            type: "PokemonStatus",
-            source: "Effect",
-            keepNextTurn: true,
-            pokemonCondition: {
-              test: (pokemon) => pokemon === pokemon.player.ActivePokemon,
-              descriptor: "Active Pokémon",
-            },
-            pokemonStatus: {
-              type: "CannotAttachFromEnergyZone",
-              source: "Effect",
-            },
-          });
+        effect.opponentPlayerStatuses.push({
+          type: "PokemonStatus",
+          source: "Effect",
+          keepNextTurn: true,
+          pokemonCondition: {
+            test: (pokemon) => pokemon === pokemon.player.ActivePokemon,
+            descriptor: "Active Pokémon",
+          },
+          pokemonStatus: {
+            type: "CannotAttachFromEnergyZone",
+            source: "PlayerStatus",
+          },
         });
       },
     },
@@ -1850,7 +2064,7 @@ export const parseEffect = (
       },
     },
     {
-      pattern: /(?:You can use this card only)? if you have (.+?) in play[.,]/i,
+      pattern: /(?:You can use this card only)? ?if you have (.+?) in play[.,]/i,
       transform: (_, descriptor) => {
         const predicate = parsePokemonPredicate(descriptor);
         effect.explicitConditions.push((player) => player.InPlayPokemon.some(predicate));
@@ -1911,7 +2125,17 @@ export const parseEffect = (
     break;
   }
 
-  if (conditionalForNextEffect) parseSuccessful = false;
+  if (conditionalForNextEffect) {
+    if (statusesToSideEffects(effect).length === 0) {
+      console.warn("Unused conditional:", effect);
+      parseSuccessful = false;
+    } else {
+      effect.statusConditional = conditionalForNextEffect;
+    }
+  }
+
+  // For debugging effect text that should theoretically be parsing but isn't
+  //if (text) console.warn(`Unparsed effect text: "${text}"`);
 
   return { parseSuccessful, value: effect };
 };

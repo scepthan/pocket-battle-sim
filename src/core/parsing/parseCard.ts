@@ -5,10 +5,11 @@ import {
   type Energy,
   type ItemCard,
   type PlayingCard,
+  type StatusAbilityEffect,
   type SupporterCard,
 } from "../gamelogic";
 import { parseAttack } from "./parseAttack";
-import { parseEffect } from "./parseEffect";
+import { parseEffect, statusesToSideEffects } from "./parseEffect";
 import { parsePokemonToolEffect } from "./parsePokemonToolEffect";
 import type { InputCard, ParsedResultOptional } from "./types";
 
@@ -26,23 +27,57 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
     if (inputCard.ability) {
       const result = parseEffect(inputCard.ability.text);
       if (!result.parseSuccessful) parseSuccessful = false;
-      if (!result.value.trigger) {
-        parseSuccessful = false;
-      } else {
+      const effect = result.value;
+
+      if (effect.trigger) {
         Ability = {
           name: inputCard.ability.name,
           text: inputCard.ability.text,
           type: "Standard",
-          trigger: result.value.trigger,
-          conditions: [...result.value.explicitConditions, ...result.value.implicitConditions],
+          trigger: effect.trigger,
+          conditions: [...effect.explicitConditions, ...effect.implicitConditions],
           effect: {
-            ...(result.value.validTargets
-              ? { type: "Targeted", validTargets: result.value.validTargets }
+            ...(effect.validTargets
+              ? { type: "Targeted", validTargets: effect.validTargets }
               : { type: "Standard" }),
-            coinsToFlip: result.value.coinsToFlip,
-            sideEffects: result.value.sideEffects,
+            coinsToFlip: effect.coinsToFlip,
+            sideEffects: [...effect.sideEffects, ...statusesToSideEffects(effect)],
           },
         };
+      } else {
+        let abilityEffect: StatusAbilityEffect | undefined;
+        if (effect.selfPokemonStatuses.length === 1) {
+          abilityEffect = {
+            type: "PokemonStatus",
+            status: Object.assign({}, effect.selfPokemonStatuses[0]!),
+          };
+        } else if (effect.selfPlayerStatuses.length === 1) {
+          abilityEffect = {
+            type: "PlayerStatus",
+            status: Object.assign({}, effect.selfPlayerStatuses[0]!),
+            opponent: false,
+          };
+        } else if (effect.opponentPlayerStatuses.length === 1) {
+          abilityEffect = {
+            type: "PlayerStatus",
+            status: Object.assign({}, effect.opponentPlayerStatuses[0]!),
+            opponent: true,
+          };
+        } else {
+          if (statusesToSideEffects(effect).length > 0)
+            console.error("Multiple ability statuses:", effect);
+          parseSuccessful = false;
+        }
+        if (abilityEffect) {
+          abilityEffect.status.source = "Ability";
+          Ability = {
+            name: inputCard.ability.name,
+            text: inputCard.ability.text,
+            type: "Status",
+            effect: abilityEffect,
+            conditions: [...effect.explicitConditions, ...effect.implicitConditions],
+          };
+        }
       }
     }
 
@@ -100,7 +135,7 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
           : { type: "Standard" }),
         conditions: [...effect.explicitConditions, ...effect.implicitConditions],
         coinsToFlip: effect.coinsToFlip,
-        sideEffects: [...effect.sideEffects],
+        sideEffects: [...effect.sideEffects, ...statusesToSideEffects(effect)],
       },
     };
 
