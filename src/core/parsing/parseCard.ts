@@ -5,9 +5,9 @@ import {
   type Energy,
   type ItemCard,
   type PlayingCard,
-  type StatusAbilityEffect,
   type SupporterCard,
 } from "../gamelogic";
+import { parseAbility } from "./parseAbility";
 import { parseAttack } from "./parseAttack";
 import { parseEffect, statusesToSideEffects } from "./parseEffect";
 import { parsePokemonToolEffect } from "./parsePokemonToolEffect";
@@ -25,60 +25,9 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
 
     let Ability: Ability | undefined;
     if (inputCard.ability) {
-      const result = parseEffect(inputCard.ability.text);
+      const result = parseAbility(inputCard.ability);
       if (!result.parseSuccessful) parseSuccessful = false;
-      const effect = result.value;
-
-      if (effect.trigger) {
-        Ability = {
-          name: inputCard.ability.name,
-          text: inputCard.ability.text,
-          type: "Standard",
-          trigger: effect.trigger,
-          conditions: [...effect.explicitConditions, ...effect.implicitConditions],
-          effect: {
-            ...(effect.validTargets
-              ? { type: "Targeted", validTargets: effect.validTargets }
-              : { type: "Standard" }),
-            coinsToFlip: effect.coinsToFlip,
-            sideEffects: [...effect.sideEffects, ...statusesToSideEffects(effect)],
-          },
-        };
-      } else {
-        let abilityEffect: StatusAbilityEffect | undefined;
-        if (effect.selfPokemonStatuses.length === 1) {
-          abilityEffect = {
-            type: "PokemonStatus",
-            status: Object.assign({}, effect.selfPokemonStatuses[0]!),
-          };
-        } else if (effect.selfPlayerStatuses.length === 1) {
-          abilityEffect = {
-            type: "PlayerStatus",
-            status: Object.assign({}, effect.selfPlayerStatuses[0]!),
-            opponent: false,
-          };
-        } else if (effect.opponentPlayerStatuses.length === 1) {
-          abilityEffect = {
-            type: "PlayerStatus",
-            status: Object.assign({}, effect.opponentPlayerStatuses[0]!),
-            opponent: true,
-          };
-        } else {
-          if (statusesToSideEffects(effect).length > 0)
-            console.error("Multiple ability statuses:", effect);
-          parseSuccessful = false;
-        }
-        if (abilityEffect) {
-          abilityEffect.status.source = "Ability";
-          Ability = {
-            name: inputCard.ability.name,
-            text: inputCard.ability.text,
-            type: "Status",
-            effect: abilityEffect,
-            conditions: [...effect.explicitConditions, ...effect.implicitConditions],
-          };
-        }
-      }
+      Ability = result.value;
     }
 
     let Type: Energy = "Colorless";
