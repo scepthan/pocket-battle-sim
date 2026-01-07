@@ -10,7 +10,6 @@ import {
 import { parseAbility } from "./parseAbility";
 import { parseAttack } from "./parseAttack";
 import { parseEffect, statusesToSideEffects } from "./parseEffect";
-import { parsePokemonToolEffect } from "./parsePokemonToolEffect";
 import type { InputCard, ParsedResultOptional } from "./types";
 
 export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCard> => {
@@ -25,7 +24,7 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
 
     let Ability: Ability | undefined;
     if (inputCard.ability) {
-      const result = parseAbility(inputCard.ability);
+      const result = parseAbility(inputCard.ability, "Ability");
       if (!result.parseSuccessful) parseSuccessful = false;
       Ability = result.value;
     }
@@ -105,7 +104,13 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
 
     return { value: outputCard, parseSuccessful };
   } else if (inputCard.cardType == "PokemonTool") {
-    const result = parsePokemonToolEffect(inputCard.text);
+    const result = parseAbility(
+      {
+        name: inputCard.name,
+        text: inputCard.text,
+      },
+      "PokemonTool"
+    );
     if (!result.parseSuccessful) parseSuccessful = false;
 
     const outputCard = {

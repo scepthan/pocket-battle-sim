@@ -256,14 +256,10 @@ export class Game {
 
     // Trigger turn end effects
     for (const pokemon of this.InPlayPokemon) {
-      for (const tool of pokemon.AttachedToolCards) {
-        if (tool.Effect.trigger === "OnTurnEnd" && tool.Effect.conditions.every((c) => c(pokemon)))
-          await tool.Effect.effect(this, pokemon);
-      }
-
-      const ability = pokemon.Ability;
-      if (ability?.type === "Standard" && ability.trigger.type === "OnPokemonCheckup") {
-        await pokemon.useAbility(false);
+      for (const ability of pokemon.effectiveAbilities) {
+        if (ability.type === "Standard" && ability.trigger.type === "OnPokemonCheckup") {
+          await pokemon.useAbility(ability, false);
+        }
       }
     }
 
@@ -395,8 +391,8 @@ export class Game {
   }
 
   /**
-   * Checks all player statuses applied by abilities and removes those whose inflictors are no
-   * longer in play.
+   * Checks all player statuses applied by Abilities or Pokémon Tools and removes those whose
+   * inflictors are no longer in play.
    */
   private removeOutdatedStatuses(): void {
     for (const pokemon of this.InPlayPokemon) {
@@ -404,6 +400,13 @@ export class Game {
         if (status.source === "Ability") {
           const ability = pokemon.Ability;
           if (ability?.type !== "Status" || ability.effect.status.id !== status.id) {
+            pokemon.removePokemonStatus(status);
+          }
+        } else if (status.source === "PokemonTool") {
+          const tool = pokemon.AttachedToolCards.find(
+            (t) => t.Effect.type === "Status" && t.Effect.effect.status.id === status.id
+          );
+          if (!tool) {
             pokemon.removePokemonStatus(status);
           }
         }
@@ -441,30 +444,31 @@ export class Game {
   private checkStatusAbilityConditions(): void {
     for (const player of [this.AttackingPlayer, this.DefendingPlayer]) {
       for (const pokemon of player.InPlayPokemon) {
-        const ability = pokemon.Ability;
-        if (ability?.type !== "Status") continue;
+        for (const ability of pokemon.effectiveAbilities) {
+          if (ability.type !== "Status") continue;
 
-        const applyStatus = ability.conditions.every((cond) => cond(player, pokemon));
+          const applyStatus = ability.conditions.every((cond) => cond(player, pokemon));
 
-        if (ability.effect.type === "PlayerStatus") {
-          const statusPlayer = ability.effect.opponent ? player.opponent : player;
-          const existingStatus = pokemon.ActivePlayerStatuses.find(
-            (s) => s.id === ability.effect.status.id
-          );
+          if (ability.effect.type === "PlayerStatus") {
+            const statusPlayer = ability.effect.opponent ? player.opponent : player;
+            const existingStatus = pokemon.ActivePlayerStatuses.find(
+              (s) => s.id === ability.effect.status.id
+            );
 
-          if (existingStatus) {
-            if (!applyStatus) {
-              removeElement(pokemon.ActivePlayerStatuses, existingStatus);
-              statusPlayer.removePlayerStatus(existingStatus.id!);
+            if (existingStatus) {
+              if (!applyStatus) {
+                removeElement(pokemon.ActivePlayerStatuses, existingStatus);
+                statusPlayer.removePlayerStatus(existingStatus.id!);
+              }
+            } else {
+              if (applyStatus) statusPlayer.applyPlayerStatus(ability.effect.status, pokemon);
             }
           } else {
-            if (applyStatus) statusPlayer.applyPlayerStatus(ability.effect.status, pokemon);
-          }
-        } else {
-          if (pokemon.PokemonStatuses.some((x) => x.id === ability.effect.status.id)) {
-            if (!applyStatus) pokemon.removePokemonStatus(ability.effect.status);
-          } else {
-            if (applyStatus) pokemon.applyPokemonStatus(ability.effect.status);
+            if (pokemon.PokemonStatuses.some((x) => x.id === ability.effect.status.id)) {
+              if (!applyStatus) pokemon.removePokemonStatus(ability.effect.status);
+            } else {
+              if (applyStatus) pokemon.applyPokemonStatus(ability.effect.status);
+            }
           }
         }
       }
@@ -750,7 +754,7 @@ export class Game {
       }
     }
 
-    await pokemon.useAbility(true);
+    await pokemon.useAbility(ability, true);
     await this.afterAction();
   }
 

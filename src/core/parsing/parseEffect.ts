@@ -22,13 +22,6 @@ import {
 import type { ParsedResult } from "./types";
 
 export interface Effect {
-  type:
-    | "CoinFlipOrDoNothing"
-    | "CoinFlipForDamage"
-    | "CoinFlipForAddedDamage"
-    | "PredeterminableDamage"
-    | "NoBaseDamage";
-
   /**
    * Determines how many coins to flip for the effect. There are 3 options:
    * 1. A number, which flips that many coins.
@@ -40,6 +33,18 @@ export interface Effect {
    * "PredeterminableDamage".
    */
   coinsToFlip?: CoinFlipIndicator;
+
+  /**
+   * Different attacks use coin flip results in different ways; this indicates how the results
+   * should be used. If the attack doesn't do damage, its type will be "NoBaseDamage"; if damage
+   * isn't affected by any coin flips, its type will be "PredeterminableDamage".
+   */
+  attackType:
+    | "CoinFlipOrDoNothing"
+    | "CoinFlipForDamage"
+    | "CoinFlipForAddedDamage"
+    | "PredeterminableDamage"
+    | "NoBaseDamage";
 
   /**
    * A method that calculates the base damage of the attack to be applied to the Defending Pokémon.
@@ -112,7 +117,7 @@ export interface Effect {
 
 interface EffectTransformer {
   pattern: RegExp;
-  transform: (...args: string[]) => void;
+  transform: (...args: string[]) => string | void;
 }
 
 /**
@@ -175,12 +180,12 @@ export const statusesToSideEffects = (effect: Effect) => {
 };
 
 export const parseEffect = (
-  text: string,
+  inputText: string,
   baseDamage?: number,
   requiredEnergy?: Energy[]
 ): ParsedResult<Effect> => {
   const effect: Effect = {
-    type: baseDamage === undefined ? "NoBaseDamage" : "PredeterminableDamage",
+    attackType: baseDamage === undefined ? "NoBaseDamage" : "PredeterminableDamage",
     preDamageEffects: [],
     attackingEffects: [],
     sideEffects: [],
@@ -196,6 +201,7 @@ export const parseEffect = (
     | ((game: Game, self: InPlayPokemon, heads: number) => boolean)
     | undefined = undefined;
   baseDamage = baseDamage ?? 0;
+  let text = inputText;
   let turnsToKeep: number | undefined;
 
   /**
@@ -277,10 +283,26 @@ export const parseEffect = (
       },
     },
     {
-      pattern: /^During Pokémon Checkup, /i,
+      pattern: /^During Pokémon Checkup, |^At the end of each turn, /i,
       transform: () => {
         effect.trigger = { type: "OnPokemonCheckup" };
       },
+    },
+
+    // Pokémon Tool-specific parsing
+    {
+      pattern: /the(?: {(\w)})? Pokémon this card is attached to/i,
+      transform: (_, energyType) => {
+        if (energyType) {
+          const fullType = parseEnergy(energyType);
+          effect.explicitConditions.push((player, self) => self.Type === fullType);
+        }
+        return "this Pokémon";
+      },
+    },
+    {
+      pattern: /is your Active Pokémon/i,
+      transform: () => "is in the Active Spot",
     },
 
     // Coin flipping
@@ -316,7 +338,7 @@ export const parseEffect = (
     {
       pattern: /^If tails, this attack does nothing\./i,
       transform: () => {
-        effect.type = "CoinFlipOrDoNothing";
+        effect.attackType = "CoinFlipOrDoNothing";
       },
     },
 
@@ -324,7 +346,7 @@ export const parseEffect = (
     {
       pattern: /^This attack does (\d+) damage for each heads\./i,
       transform: (_, damage) => {
-        effect.type = "CoinFlipForDamage";
+        effect.attackType = "CoinFlipForDamage";
         const dmg = Number(damage);
         effect.calculateDamage = (game, self, heads) => heads * dmg;
       },
@@ -334,7 +356,7 @@ export const parseEffect = (
     {
       pattern: /^This attack does (\d+) more damage for each heads\./i,
       transform: (_, damage) => {
-        effect.type = "CoinFlipForAddedDamage";
+        effect.attackType = "CoinFlipForAddedDamage";
         const dmg = Number(damage);
         effect.calculateDamage = (game, self, heads) => baseDamage + heads * dmg;
       },
@@ -342,7 +364,7 @@ export const parseEffect = (
     {
       pattern: /^If heads, this attack does (\d+) more damage\./i,
       transform: (_, damage) => {
-        effect.type = "CoinFlipForAddedDamage";
+        effect.attackType = "CoinFlipForAddedDamage";
         const dmg = Number(damage);
         effect.calculateDamage = (game, self, heads) => baseDamage + (heads > 0 ? dmg : 0);
       },
@@ -350,13 +372,33 @@ export const parseEffect = (
     {
       pattern: /^If both of them are heads, this attack does (\d+) more damage\./i,
       transform: (_, damage) => {
-        effect.type = "CoinFlipForAddedDamage";
+        effect.attackType = "CoinFlipForAddedDamage";
         const dmg = Number(damage);
         effect.calculateDamage = (game, self, heads) => baseDamage + (heads > 1 ? dmg : 0);
       },
     },
 
-    // Other conditionals
+    // Non-damage-determining coin flip conditionals
+    {
+      pattern: /^If heads,/i,
+      transform: () => {
+        conditionalForNextEffect = (game, self, heads) => heads > 0;
+      },
+    },
+    {
+      pattern: /^If at least (\d+) of them (?:is|are) heads,/i,
+      transform: (_, headsNeeded) => {
+        conditionalForNextEffect = (game, self, heads) => heads >= Number(headsNeeded);
+      },
+    },
+    {
+      pattern: /^If tails,/i,
+      transform: () => {
+        conditionalForNextEffect = (game, self, heads) => heads === 0;
+      },
+    },
+
+    // Self conditionals
     {
       pattern: /^If this Pokémon has at least (\d+) extra (?:\{(\w)\} )?Energy attached,/i,
       transform: (_, energyCount, energyType) => {
@@ -370,15 +412,41 @@ export const parseEffect = (
       },
     },
     {
-      pattern: /^If your opponent’s Active Pokémon has damage on it,/i,
-      transform: () => {
-        conditionalForNextEffect = (game) => game.DefendingPlayer.activeOrThrow().isDamaged();
-      },
-    },
-    {
       pattern: /^If this Pokémon has damage on it,/i,
       transform: () => {
         conditionalForNextEffect = (game, self) => self.isDamaged();
+      },
+    },
+    {
+      pattern: /^If this Pokémon is affected by any Special Conditions,/i,
+      transform: () => {
+        effect.explicitConditions.push((game, self) => self.hasSpecialCondition());
+      },
+    },
+    {
+      pattern: /^If this Pokémon has a Pokémon Tool attached,/i,
+      transform: () => {
+        conditionalForNextEffect = (game, self) => self.AttachedToolCards.length > 0;
+      },
+    },
+    {
+      pattern: /^If this Pokémon moved from your Bench to the Active Spot this turn,/i,
+      transform: () => {
+        conditionalForNextEffect = (game) => {
+          // If any switching has happened this turn, then this condition is necessarily met
+          const switchingEvents = game.GameLog.currentTurn.filter(
+            (event) => event.type === "selectActivePokemon" || event.type === "swapActivePokemon"
+          );
+          return switchingEvents.some((event) => event.player === game.AttackingPlayer.Name);
+        };
+      },
+    },
+
+    // Defending Pokémon conditionals
+    {
+      pattern: /^If your opponent’s Active Pokémon has damage on it,/i,
+      transform: () => {
+        conditionalForNextEffect = (game) => game.DefendingPlayer.activeOrThrow().isDamaged();
       },
     },
     {
@@ -416,28 +484,6 @@ export const parseEffect = (
       },
     },
     {
-      pattern:
-        /^If any of your Pokémon were knocked out by damage from an attack during your opponent’s last turn,/i,
-      transform: () => {
-        conditionalForNextEffect = (game) =>
-          game.GameLog.previousTurn?.some((e) => e.type == "pokemonKnockedOut" && e.fromAttack) ??
-          false;
-      },
-    },
-    {
-      pattern: /^If any of your (.+?) have damage on them,/i,
-      transform: (_, descriptor) => {
-        const predicate = parsePokemonPredicate(descriptor, (p) => p.isDamaged());
-        conditionalForNextEffect = (game) => game.AttackingPlayer.InPlayPokemon.some(predicate);
-      },
-    },
-    {
-      pattern: /^If this Pokémon has a Pokémon Tool attached,/i,
-      transform: () => {
-        conditionalForNextEffect = (game, self) => self.AttachedToolCards.length > 0;
-      },
-    },
-    {
       pattern: /^If your opponent’s Active Pokémon has a Pokémon Tool attached,/i,
       transform: () => {
         conditionalForNextEffect = (game) =>
@@ -462,34 +508,22 @@ export const parseEffect = (
         };
       },
     },
+
+    // Player conditionals
     {
-      pattern: /^If this Pokémon moved from your Bench to the Active Spot this turn,/i,
+      pattern:
+        /^If any of your Pokémon were knocked out by damage from an attack during your opponent’s last turn,/i,
       transform: () => {
-        conditionalForNextEffect = (game) => {
-          // If any switching has happened this turn, then this condition is necessarily met
-          const switchingEvents = game.GameLog.currentTurn.filter(
-            (event) => event.type === "selectActivePokemon" || event.type === "swapActivePokemon"
-          );
-          return switchingEvents.some((event) => event.player === game.AttackingPlayer.Name);
-        };
+        conditionalForNextEffect = (game) =>
+          game.GameLog.previousTurn?.some((e) => e.type == "pokemonKnockedOut" && e.fromAttack) ??
+          false;
       },
     },
     {
-      pattern: /^If heads,/i,
-      transform: () => {
-        conditionalForNextEffect = (game, self, heads) => heads > 0;
-      },
-    },
-    {
-      pattern: /^If at least (\d+) of them (?:is|are) heads,/i,
-      transform: (_, headsNeeded) => {
-        conditionalForNextEffect = (game, self, heads) => heads >= Number(headsNeeded);
-      },
-    },
-    {
-      pattern: /^If tails,/i,
-      transform: () => {
-        conditionalForNextEffect = (game, self, heads) => heads === 0;
+      pattern: /^If any of your (.+?) have damage on them,/i,
+      transform: (_, descriptor) => {
+        const predicate = parsePokemonPredicate(descriptor, (p) => p.isDamaged());
+        conditionalForNextEffect = (game) => game.AttackingPlayer.InPlayPokemon.some(predicate);
       },
     },
 
@@ -756,6 +790,19 @@ export const parseEffect = (
           if (!target) return;
           target.healDamage(Number(modifier));
           target.removeAllSpecialConditions();
+        });
+      },
+    },
+    {
+      pattern: /^it recovers from all of them, and discard this card\.$/i,
+      transform: () => {
+        addSideEffect(async (game, self) => {
+          self.removeAllSpecialConditions();
+
+          const thisCard = self.AttachedToolCards.find((card) => card.Text === inputText);
+          if (!thisCard) throw new Error("Could not find this Pokemon Tool card");
+
+          await game.discardPokemonTools(self, [thisCard]);
         });
       },
     },
@@ -1449,6 +1496,12 @@ export const parseEffect = (
       },
     },
     {
+      pattern: /^the Attacking Pokémon is now Poisoned\./i,
+      transform: () => {
+        addSideEffect(async (game) => game.AttackingPlayer.poisonActivePokemon());
+      },
+    },
+    {
       pattern: /^Your opponent’s Active Pokémon is now Burned\./i,
       transform: () => {
         addSideEffect(async (game) => game.burnDefendingPokemon());
@@ -1695,6 +1748,16 @@ export const parseEffect = (
       transform: () => {
         effect.selfPokemonStatuses.push({
           type: "NoRetreatCost",
+          source: "Effect",
+        });
+      },
+    },
+    {
+      pattern: /^this Pokémon gets \+(\d+) HP\.$/i,
+      transform: (_, amount) => {
+        effect.selfPokemonStatuses.push({
+          type: "IncreaseMaxHP",
+          amount: Number(amount),
           source: "Effect",
         });
       },
@@ -2115,8 +2178,8 @@ export const parseEffect = (
     for (const { pattern, transform } of dictionary) {
       const result = text.match(pattern);
       if (result) {
-        transform(...result);
-        text = text.replace(pattern, "").trim();
+        const replace = transform(...result);
+        text = text.replace(pattern, replace ?? "").trim();
         continue mainloop; // Restart the loop to re-evaluate the modified attack text
       }
     }

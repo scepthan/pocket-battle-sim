@@ -1,8 +1,11 @@
 import type { Ability, StatusAbilityEffect } from "../gamelogic";
 import { parseEffect, statusesToSideEffects } from "./parseEffect";
-import type { InputCardAbility, ParsedResultOptional } from "./types";
+import type { InputCardAbility, ParsedResult } from "./types";
 
-export const parseAbility = (inputAbility: InputCardAbility): ParsedResultOptional<Ability> => {
+export const parseAbility = (
+  inputAbility: InputCardAbility,
+  source: "Ability" | "PokemonTool"
+): ParsedResult<Ability> => {
   let parseSuccessful = true;
 
   const result = parseEffect(inputAbility.text);
@@ -52,7 +55,7 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResultOption
       parseSuccessful = false;
     }
     if (abilityEffect) {
-      abilityEffect.status.source = "Ability";
+      abilityEffect.status.source = source;
       return {
         parseSuccessful,
         value: {
@@ -67,7 +70,17 @@ export const parseAbility = (inputAbility: InputCardAbility): ParsedResultOption
   }
 
   return {
-    parseSuccessful: false,
-    value: undefined,
+    parseSuccessful,
+    value: {
+      name: inputAbility.name,
+      text: inputAbility.text,
+      type: "Standard",
+      trigger: { type: "Manual", multiUse: false },
+      conditions: [],
+      effect: {
+        type: "Standard",
+        sideEffects: [async (game) => game.GameLog.notImplemented(game.AttackingPlayer)],
+      },
+    },
   };
 };

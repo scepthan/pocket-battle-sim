@@ -123,12 +123,13 @@ export class Player {
 
     this.logger.playToActive(this, setup.active);
 
+    const ability = pokemon.Ability;
     if (
-      pokemon.Ability?.type === "Standard" &&
-      pokemon.Ability.trigger.type === "OnEnterPlay" &&
-      !pokemon.Ability.trigger.excludeSetup
+      ability?.type === "Standard" &&
+      ability.trigger.type === "OnEnterPlay" &&
+      !ability.trigger.excludeSetup
     ) {
-      await pokemon.triggerAbility();
+      await pokemon.triggerAbility(ability);
     }
 
     // Set up the bench Pokémon

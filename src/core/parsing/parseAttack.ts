@@ -25,7 +25,7 @@ export const parseAttack = (inputAttack: InputCardAttack): ParsedResult<Attack> 
   if (inputAttack.text !== undefined) {
     const result = parseEffect(inputAttack.text, inputAttack.damage, attack.requiredEnergy);
     const effect = result.value;
-    attack.type = effect.type;
+    attack.type = effect.attackType;
     attack.coinsToFlip = effect.coinsToFlip;
     attack.calculateDamage = effect.calculateDamage;
     attack.validTargets = effect.validTargets;
