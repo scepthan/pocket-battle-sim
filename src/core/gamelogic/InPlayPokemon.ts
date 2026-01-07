@@ -337,8 +337,11 @@ export class InPlayPokemon {
     if (!ability) {
       throw new Error("Pokemon has no ability");
     }
+    if (ability.type === "Status") {
+      throw new Error("Status ability cannot be used");
+    }
 
-    if (!ability.conditions.every((condition) => condition(this))) return;
+    if (!ability.conditions.every((condition) => condition(this.player, this))) return;
 
     if (manuallyActivated) {
       this.player.logger.useAbility(this.player, this, ability.name);
@@ -346,6 +349,12 @@ export class InPlayPokemon {
       this.player.logger.triggerAbility(this.player, this, ability.name);
     }
 
+    let heads = 0;
+    if (ability.effect.coinsToFlip) {
+      heads = this.player.flipCoinsForEffect(ability.effect.coinsToFlip, this);
+    }
+
+    let target: InPlayPokemon | undefined;
     if (ability.effect.type === "Targeted") {
       const validTargets = ability.effect.validTargets(this.player, this);
       if (validTargets.length === 0) return;
@@ -353,15 +362,13 @@ export class InPlayPokemon {
         throw new Error("Targeted ability effect has non-Pokemon valid targets");
       }
 
-      const target = await this.player.game.choosePokemon(this.player, validTargets);
+      target = await this.player.game.choosePokemon(this.player, validTargets);
       if (!target || !validTargets.includes(target)) {
         throw new Error("Invalid target for targeted effect");
       }
-      await ability.effect.effect(this.game, this, target);
-    } else if (ability.effect.type === "Standard") {
-      await ability.effect.effect(this.game, this);
-    } else {
-      throw new Error(`Ability effect type '${ability.effect.type}' cannot be used`);
+    }
+    for (const effect of ability.effect.sideEffects) {
+      await effect(this.game, this, heads, target);
     }
   }
 

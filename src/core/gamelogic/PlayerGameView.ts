@@ -252,7 +252,7 @@ export class PlayerGameView {
     if (!ability.trigger.multiUse) {
       if (this.game.UsedAbilities.has(realPokemon)) return false;
     }
-    if (!ability.conditions.every((condition) => condition(realPokemon))) return false;
+    if (!ability.conditions.every((condition) => condition(this.player, realPokemon))) return false;
     if (ability.effect.type == "Targeted") {
       if (ability.effect.validTargets(this.player, realPokemon).length == 0) return false;
     }

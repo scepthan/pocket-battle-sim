@@ -1,4 +1,4 @@
-import type { Game, InPlayPokemon } from "..";
+import type { Game, InPlayPokemon, Player } from "..";
 
 export type BasicEffect = (game: Game) => Promise<void>;
 export type PokemonEffect = (game: Game, self: InPlayPokemon) => Promise<void>;
@@ -9,6 +9,7 @@ export type TargetedPokemonEffect = (
 ) => Promise<void>;
 
 export type PokemonConditional = (pokemon: InPlayPokemon) => boolean;
+export type PlayerPokemonConditional = (player: Player, pokemon: InPlayPokemon) => boolean;
 export interface PokemonDescriptor {
   test: PokemonConditional;
   descriptor: string;

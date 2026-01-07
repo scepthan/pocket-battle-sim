@@ -459,6 +459,17 @@ export class GameLogger {
     });
   }
 
+  pokemonHpSet(player: Player, pokemon: InPlayPokemon, initialHP: number, HP: number) {
+    this.addEntry({
+      type: "pokemonHpSet",
+      player: player.Name,
+      targetPokemon: player.pokemonToDescriptor(pokemon),
+      initialHP,
+      finalHP: HP,
+      maxHP: pokemon.MaxHP,
+    });
+  }
+
   pokemonKnockedOut(player: Player, pokemon: InPlayPokemon, fromAttack: boolean) {
     this.addEntry({
       type: "pokemonKnockedOut",

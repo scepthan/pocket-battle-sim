@@ -7,7 +7,6 @@ import {
   type PlayingCard,
   type SupporterCard,
 } from "../gamelogic";
-import { parseAbility } from "./parseAbility";
 import { parseAttack } from "./parseAttack";
 import { parseEffect } from "./parseEffect";
 import { parsePokemonToolEffect } from "./parsePokemonToolEffect";
@@ -25,9 +24,26 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
 
     let Ability: Ability | undefined;
     if (inputCard.ability) {
-      const result = parseAbility(inputCard.ability);
-      Ability = result.value;
+      const result = parseEffect(inputCard.ability.text);
       if (!result.parseSuccessful) parseSuccessful = false;
+      if (!result.value.trigger) {
+        parseSuccessful = false;
+      } else {
+        Ability = {
+          name: inputCard.ability.name,
+          text: inputCard.ability.text,
+          type: "Standard",
+          trigger: result.value.trigger,
+          conditions: [...result.value.explicitConditions, ...result.value.implicitConditions],
+          effect: {
+            ...(result.value.validTargets
+              ? { type: "Targeted", validTargets: result.value.validTargets }
+              : { type: "Standard" }),
+            coinsToFlip: result.value.coinsToFlip,
+            sideEffects: result.value.sideEffects,
+          },
+        };
+      }
     }
 
     let Type: Energy = "Colorless";

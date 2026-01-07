@@ -444,7 +444,7 @@ export class Game {
         const ability = pokemon.Ability;
         if (ability?.type !== "Status") continue;
 
-        const applyStatus = ability.conditions.every((cond) => cond(pokemon));
+        const applyStatus = ability.conditions.every((cond) => cond(player, pokemon));
 
         if (ability.effect.type === "PlayerStatus") {
           const statusPlayer = ability.effect.opponent ? player.opponent : player;
@@ -573,17 +573,7 @@ export class Game {
   // Helper methods for the attack process
 
   private flipCoinsForAttack(coinsToFlip: CoinFlipIndicator): number {
-    if (coinsToFlip === "UntilTails") {
-      return this.AttackingPlayer.flipUntilTails().heads;
-    } else if (typeof coinsToFlip === "number") {
-      if (coinsToFlip === 1) {
-        return +this.AttackingPlayer.flipCoin();
-      }
-      return this.AttackingPlayer.flipMultiCoins(coinsToFlip).heads;
-    }
-
-    const actualCount = coinsToFlip(this, this.AttackingPokemon!);
-    return this.AttackingPlayer.flipMultiCoins(actualCount).heads;
+    return this.AttackingPlayer.flipCoinsForEffect(coinsToFlip, this.AttackingPokemon!);
   }
 
   private shouldPreventDamage(pokemon: InPlayPokemon): boolean {
@@ -934,6 +924,16 @@ export class Game {
   }
 
   /**
+   * Sets a Pokémon's remaining HP directly.
+   */
+  setHP(target: InPlayPokemon, HP: number): void {
+    const initialHP = target.CurrentHP;
+
+    target.CurrentHP = HP;
+    this.GameLog.pokemonHpSet(target.player, target, initialHP, HP);
+  }
+
+  /**
    * Directly knocks out a Pokémon from any amount of remaining HP.
    */
   async knockOutPokemon(pokemon: InPlayPokemon): Promise<void> {
@@ -1049,9 +1049,11 @@ export class Game {
         text: "Discard this Pokémon from play.",
         effect: {
           type: "Standard",
-          effect: async (game: Game, self: InPlayPokemon) => {
-            await game.AttackingPlayer.discardPokemonFromPlay(self);
-          },
+          sideEffects: [
+            async (game: Game, self: InPlayPokemon) => {
+              await game.AttackingPlayer.discardPokemonFromPlay(self);
+            },
+          ],
         },
       },
     };

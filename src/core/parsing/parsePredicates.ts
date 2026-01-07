@@ -44,8 +44,13 @@ export const parsePokemonPredicate = (
     }
   };
 
+  parsePart(/^the /, () => () => true);
+
   parsePart(/^Benched /, () => (pokemon) => pokemon.player.BenchedPokemon.includes(pokemon));
-  parsePart(/^Active /, () => (pokemon) => pokemon.player.ActivePokemon === pokemon);
+  parsePart(
+    /^Active | in the Active Spot$/,
+    () => (pokemon) => pokemon.player.ActivePokemon === pokemon
+  );
 
   parsePart(/^Basic /, () => (pokemon) => pokemon.Stage === 0);
   parsePart(/^Stage 2 /, () => (pokemon) => pokemon.Stage === 2);
