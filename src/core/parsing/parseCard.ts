@@ -1,8 +1,15 @@
-import { isEnergy, parseEnergy, type Ability, type Energy, type PlayingCard } from "../gamelogic";
+import {
+  isEnergy,
+  parseEnergy,
+  type Ability,
+  type Energy,
+  type ItemCard,
+  type PlayingCard,
+  type SupporterCard,
+} from "../gamelogic";
 import { parseAbility } from "./parseAbility";
 import { parseAttack } from "./parseAttack";
-import { parsePokemonToolEffect } from "./parsePokemonToolEffect";
-import { parseTrainerEffect } from "./parseTrainerEffect";
+import { parseEffect, statusesToSideEffects } from "./parseEffect";
 import type { InputCard, ParsedResultOptional } from "./types";
 
 export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCard> => {
@@ -17,9 +24,9 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
 
     let Ability: Ability | undefined;
     if (inputCard.ability) {
-      const result = parseAbility(inputCard.ability);
-      Ability = result.value;
+      const result = parseAbility(inputCard.ability, "Ability");
       if (!result.parseSuccessful) parseSuccessful = false;
+      Ability = result.value;
     }
 
     let Type: Energy = "Colorless";
@@ -57,16 +64,27 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
 
     return { value: outputCard, parseSuccessful };
   } else if (inputCard.cardType == "Item" || inputCard.cardType == "Supporter") {
-    const result = parseTrainerEffect(inputCard.text);
+    const result = parseEffect(inputCard.text);
     if (!result.parseSuccessful) parseSuccessful = false;
+    const effect = result.value;
 
-    const outputCard = {
+    const outputCard: ItemCard | SupporterCard = {
       ID: inputCard.id,
       Name: inputCard.name,
       Rarity: inputCard.rarity,
       CardType: inputCard.cardType,
       Text: inputCard.text,
-      Effect: result.value,
+      Effect: {
+        ...(effect.validTargets
+          ? {
+              type: "Targeted",
+              validTargets: effect.validTargets,
+            }
+          : { type: "Standard" }),
+        conditions: [...effect.explicitConditions, ...effect.implicitConditions],
+        coinsToFlip: effect.coinsToFlip,
+        sideEffects: [...effect.sideEffects, ...statusesToSideEffects(effect)],
+      },
     };
 
     return { value: outputCard, parseSuccessful };
@@ -86,7 +104,13 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
 
     return { value: outputCard, parseSuccessful };
   } else if (inputCard.cardType == "PokemonTool") {
-    const result = parsePokemonToolEffect(inputCard.text);
+    const result = parseAbility(
+      {
+        name: inputCard.name,
+        text: inputCard.text,
+      },
+      "PokemonTool"
+    );
     if (!result.parseSuccessful) parseSuccessful = false;
 
     const outputCard = {

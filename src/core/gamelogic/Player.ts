@@ -11,6 +11,7 @@ import { EmptyCardSlot } from "./EmptyCardSlot";
 import type { Game } from "./Game";
 import { InPlayPokemon } from "./InPlayPokemon";
 import type {
+  CoinFlipIndicator,
   Deck,
   Energy,
   PlayerGameSetup,
@@ -122,12 +123,13 @@ export class Player {
 
     this.logger.playToActive(this, setup.active);
 
+    const ability = pokemon.Ability;
     if (
-      pokemon.Ability?.type === "Standard" &&
-      pokemon.Ability.trigger.type === "OnEnterPlay" &&
-      !pokemon.Ability.trigger.excludeSetup
+      ability?.type === "Standard" &&
+      ability.trigger.type === "OnEnterPlay" &&
+      !ability.trigger.excludeSetup
     ) {
-      await pokemon.triggerAbility();
+      await pokemon.triggerAbility(ability);
     }
 
     // Set up the bench Pokémon
@@ -668,5 +670,18 @@ export class Player {
   }
   flipUntilTails() {
     return this.flipper.untilTailsCoinFlip();
+  }
+  flipCoinsForEffect(coinsToFlip: CoinFlipIndicator, pokemon: InPlayPokemon): number {
+    if (coinsToFlip === "UntilTails") {
+      return this.flipUntilTails().heads;
+    } else if (typeof coinsToFlip === "number") {
+      if (coinsToFlip === 1) {
+        return +this.flipCoin();
+      }
+      return this.flipMultiCoins(coinsToFlip).heads;
+    }
+
+    const actualCount = coinsToFlip(this.game, pokemon);
+    return this.flipMultiCoins(actualCount).heads;
   }
 }

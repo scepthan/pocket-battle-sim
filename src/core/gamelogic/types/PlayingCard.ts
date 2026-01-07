@@ -1,6 +1,6 @@
 import type { Ability } from "./ability/Ability";
 import type { Attack } from "./Attack";
-import type { BasicEffect, PokemonConditional, PokemonEffect } from "./Effects";
+import type { BasicEffect } from "./Effects";
 import type { Energy } from "./Energy";
 import type { TrainerEffect } from "./TrainerEffect";
 
@@ -39,17 +39,10 @@ export interface SupporterCard extends BaseCard {
   Effect: TrainerEffect;
 }
 
-export type PokemonToolTrigger = "OnAttach" | "OnAttackDamage" | "OnTurnEnd" | "OnKnockOut";
-export interface PokemonToolEffect {
-  trigger: PokemonToolTrigger;
-  conditions: PokemonConditional[];
-  effect: PokemonEffect;
-  undo?: PokemonEffect;
-}
 export interface PokemonToolCard extends BaseCard {
   CardType: "PokemonTool";
   Text: string;
-  Effect: PokemonToolEffect;
+  Effect: Ability;
 }
 export interface StadiumCard extends BaseCard {
   CardType: "Stadium";

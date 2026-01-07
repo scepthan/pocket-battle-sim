@@ -241,17 +241,22 @@ interface PokemonDamagedEvent extends HpChangeEvent {
   damageDealt: number;
   weaknessBoost?: boolean;
 }
-interface PokemonKnockedOutEvent {
-  type: "pokemonKnockedOut";
-  player: string;
-  targetPokemon: InPlayPokemonDescriptor;
-  fromAttack: boolean;
-}
 interface PokemonHealedEvent extends HpChangeEvent {
   type: "pokemonHealed";
   player: string;
   targetPokemon: InPlayPokemonDescriptor;
   healingDealt: number;
+}
+interface PokemonHpSetEvent extends HpChangeEvent {
+  type: "pokemonHpSet";
+  player: string;
+  targetPokemon: InPlayPokemonDescriptor;
+}
+interface PokemonKnockedOutEvent {
+  type: "pokemonKnockedOut";
+  player: string;
+  targetPokemon: InPlayPokemonDescriptor;
+  fromAttack: boolean;
 }
 interface SpecialConditionAppliedEvent {
   type: "specialConditionApplied";
@@ -364,8 +369,9 @@ export type LoggedEvent =
   | UseAttackEvent
   | CopyAttackEvent
   | PokemonDamagedEvent
-  | PokemonKnockedOutEvent
   | PokemonHealedEvent
+  | PokemonHpSetEvent
+  | PokemonKnockedOutEvent
   | SpecialConditionAppliedEvent
   | SpecialConditionEndedEvent
   | SpecialConditionDamageEvent

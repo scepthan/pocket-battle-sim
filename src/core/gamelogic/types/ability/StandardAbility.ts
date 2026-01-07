@@ -1,11 +1,4 @@
-import type {
-  CardSlot,
-  Energy,
-  Game,
-  InPlayPokemon,
-  PokemonEffect,
-  TargetedPokemonEffect,
-} from "@/core";
+import type { CoinFlipIndicator, Energy, InPlayPokemon, Player, SideEffect } from "@/core";
 import type { BaseAbility } from "./Ability";
 
 export type AbilityTrigger =
@@ -18,14 +11,16 @@ export type AbilityTrigger =
   | { type: "OnEndOwnTurn"; firstOnly?: boolean }
   | { type: "OnPokemonCheckup" };
 
-interface StandardAbilityEffect {
-  type: "Standard";
-  effect: PokemonEffect;
+interface BaseAbilityEffect {
+  sideEffects: SideEffect[];
+  coinsToFlip?: CoinFlipIndicator;
 }
-interface TargetedAbilityEffect {
+interface StandardAbilityEffect extends BaseAbilityEffect {
+  type: "Standard";
+}
+interface TargetedAbilityEffect extends BaseAbilityEffect {
   type: "Targeted";
-  findValidTargets: (game: Game, self: InPlayPokemon) => CardSlot[];
-  effect: TargetedPokemonEffect;
+  validTargets: (player: Player, self: InPlayPokemon) => InPlayPokemon[];
 }
 
 export interface StandardAbility extends BaseAbility {

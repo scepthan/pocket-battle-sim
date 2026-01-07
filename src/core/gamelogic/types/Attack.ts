@@ -1,5 +1,4 @@
-import type { Game } from "../Game";
-import type { InPlayPokemon } from "../InPlayPokemon";
+import type { Game, InPlayPokemon, Player } from "..";
 import type { Energy } from "./Energy";
 
 export type CoinFlipIndicator =
@@ -14,7 +13,7 @@ export type SideEffect = (
   target?: InPlayPokemon
 ) => Promise<void>;
 
-type DamageCalculation = (game: Game, self: InPlayPokemon, heads: number) => number;
+export type DamageCalculation = (game: Game, self: InPlayPokemon, heads: number) => number;
 
 interface BaseAttack {
   // Properties inherited from InputAttack
@@ -30,9 +29,9 @@ interface BaseAttack {
    * 2. "UntilTails", which flips a coin until it lands on tails.
    * 3. A method that calculates how many coins to flip based on the game state.
    *
-   * This flip happens before any damage is dealt for attack types of "CoinFlipForDamage" or
-   * "CoinFlipForAddedDamage", and after for "NoBaseDamage" or "PredeterminableDamage". (For
-   * "CoinFlipOrDoNothing", this property is ignored and a single coin is flipped.)
+   * This flip happens before any damage is dealt for attack types of "CoinFlipForDamage",
+   * "CoinFlipForAddedDamage", or "CoinFlipOrDoNothing", and after for "NoBaseDamage" or
+   * "PredeterminableDamage".
    */
   coinsToFlip?: CoinFlipIndicator;
 
@@ -43,10 +42,10 @@ interface BaseAttack {
   calculateDamage?: DamageCalculation;
 
   /**
-   * A method that determines which Pokémon the player can choose to do damage to whenever this
-   * applies, such as "This attack also does 20 damage to one of your opponent's Benched Pokémon."
+   * A method that determines which Pokémon the player can select whenever this applies, such as
+   * for attacks that damage a specific Pokémon or generate Energy for the Bench.
    */
-  choosePokemonToAttack?: (game: Game, self: InPlayPokemon) => InPlayPokemon[];
+  validTargets?: (player: Player, self: InPlayPokemon) => InPlayPokemon[];
 
   /**
    * Effects to apply when attacking before any damage is done.
@@ -67,7 +66,7 @@ interface BaseAttack {
    * Extraneous conditions that must be met for the attack to be used (other than the default
    * Energy and status condition requirements).
    */
-  extraConditions: ((game: Game, self: InPlayPokemon) => boolean)[];
+  explicitConditions: ((player: Player, self: InPlayPokemon) => boolean)[];
 }
 
 // Flip a coin. If tails, this attack does nothing.

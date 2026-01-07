@@ -256,14 +256,10 @@ export class Game {
 
     // Trigger turn end effects
     for (const pokemon of this.InPlayPokemon) {
-      for (const tool of pokemon.AttachedToolCards) {
-        if (tool.Effect.trigger === "OnTurnEnd" && tool.Effect.conditions.every((c) => c(pokemon)))
-          await tool.Effect.effect(this, pokemon);
-      }
-
-      const ability = pokemon.Ability;
-      if (ability?.type === "Standard" && ability.trigger.type === "OnPokemonCheckup") {
-        await pokemon.useAbility(false);
+      for (const ability of pokemon.effectiveAbilities) {
+        if (ability.type === "Standard" && ability.trigger.type === "OnPokemonCheckup") {
+          await pokemon.useAbility(ability, false);
+        }
       }
     }
 
@@ -395,8 +391,8 @@ export class Game {
   }
 
   /**
-   * Checks all player statuses applied by abilities and removes those whose inflictors are no
-   * longer in play.
+   * Checks all player statuses applied by Abilities or Pokémon Tools and removes those whose
+   * inflictors are no longer in play.
    */
   private removeOutdatedStatuses(): void {
     for (const pokemon of this.InPlayPokemon) {
@@ -404,6 +400,13 @@ export class Game {
         if (status.source === "Ability") {
           const ability = pokemon.Ability;
           if (ability?.type !== "Status" || ability.effect.status.id !== status.id) {
+            pokemon.removePokemonStatus(status);
+          }
+        } else if (status.source === "PokemonTool") {
+          const tool = pokemon.AttachedToolCards.find(
+            (t) => t.Effect.type === "Status" && t.Effect.effect.status.id === status.id
+          );
+          if (!tool) {
             pokemon.removePokemonStatus(status);
           }
         }
@@ -441,30 +444,31 @@ export class Game {
   private checkStatusAbilityConditions(): void {
     for (const player of [this.AttackingPlayer, this.DefendingPlayer]) {
       for (const pokemon of player.InPlayPokemon) {
-        const ability = pokemon.Ability;
-        if (ability?.type !== "Status") continue;
+        for (const ability of pokemon.effectiveAbilities) {
+          if (ability.type !== "Status") continue;
 
-        const applyStatus = ability.conditions.every((cond) => cond(pokemon));
+          const applyStatus = ability.conditions.every((cond) => cond(player, pokemon));
 
-        if (ability.effect.type === "PlayerStatus") {
-          const statusPlayer = ability.effect.opponent ? player.opponent : player;
-          const existingStatus = pokemon.ActivePlayerStatuses.find(
-            (s) => s.id === ability.effect.status.id
-          );
+          if (ability.effect.type === "PlayerStatus") {
+            const statusPlayer = ability.effect.opponent ? player.opponent : player;
+            const existingStatus = pokemon.ActivePlayerStatuses.find(
+              (s) => s.id === ability.effect.status.id
+            );
 
-          if (existingStatus) {
-            if (!applyStatus) {
-              removeElement(pokemon.ActivePlayerStatuses, existingStatus);
-              statusPlayer.removePlayerStatus(existingStatus.id!);
+            if (existingStatus) {
+              if (!applyStatus) {
+                removeElement(pokemon.ActivePlayerStatuses, existingStatus);
+                statusPlayer.removePlayerStatus(existingStatus.id!);
+              }
+            } else {
+              if (applyStatus) statusPlayer.applyPlayerStatus(ability.effect.status, pokemon);
             }
           } else {
-            if (applyStatus) statusPlayer.applyPlayerStatus(ability.effect.status, pokemon);
-          }
-        } else {
-          if (pokemon.PokemonStatuses.some((x) => x.id === ability.effect.status.id)) {
-            if (!applyStatus) pokemon.removePokemonStatus(ability.effect.status);
-          } else {
-            if (applyStatus) pokemon.applyPokemonStatus(ability.effect.status);
+            if (pokemon.PokemonStatuses.some((x) => x.id === ability.effect.status.id)) {
+              if (!applyStatus) pokemon.removePokemonStatus(ability.effect.status);
+            } else {
+              if (applyStatus) pokemon.applyPokemonStatus(ability.effect.status);
+            }
           }
         }
       }
@@ -573,17 +577,7 @@ export class Game {
   // Helper methods for the attack process
 
   private flipCoinsForAttack(coinsToFlip: CoinFlipIndicator): number {
-    if (coinsToFlip === "UntilTails") {
-      return this.AttackingPlayer.flipUntilTails().heads;
-    } else if (typeof coinsToFlip === "number") {
-      if (coinsToFlip === 1) {
-        return +this.AttackingPlayer.flipCoin();
-      }
-      return this.AttackingPlayer.flipMultiCoins(coinsToFlip).heads;
-    }
-
-    const actualCount = coinsToFlip(this, this.AttackingPokemon!);
-    return this.AttackingPlayer.flipMultiCoins(actualCount).heads;
+    return this.AttackingPlayer.flipCoinsForEffect(coinsToFlip, this.AttackingPokemon!);
   }
 
   private shouldPreventDamage(pokemon: InPlayPokemon): boolean {
@@ -636,8 +630,8 @@ export class Game {
     }
 
     let chosenPokemon: InPlayPokemon | undefined;
-    if (attack.choosePokemonToAttack) {
-      const validPokemon = attack.choosePokemonToAttack(this, attacker);
+    if (attack.validTargets) {
+      const validPokemon = attack.validTargets(this.AttackingPlayer, attacker);
       chosenPokemon = await this.choosePokemon(this.AttackingPlayer, validPokemon);
     }
 
@@ -755,12 +749,12 @@ export class Game {
       this.UsedAbilities.add(pokemon);
     }
     if (ability.effect.type === "Targeted") {
-      if (ability.effect.findValidTargets(this, pokemon).length === 0) {
+      if (ability.effect.validTargets(pokemon.player, pokemon).length === 0) {
         throw new Error("No valid targets for ability");
       }
     }
 
-    await pokemon.useAbility(true);
+    await pokemon.useAbility(ability, true);
     await this.afterAction();
   }
 
@@ -831,19 +825,23 @@ export class Game {
     } else {
       this.GameLog.playTrainer(this.AttackingPlayer, card);
 
+      if (target && !target.isPokemon)
+        throw new Error("Cannot target an empty slot with this Trainer card");
+
+      const heads = card.Effect.coinsToFlip ? this.flipCoinsForAttack(card.Effect.coinsToFlip) : 0;
+
       if (card.Effect.type === "Targeted") {
-        if (!target || !target.isPokemon) {
+        if (!target) {
           throw new Error("Targeted effect requires a target Pokémon");
         }
-        const validTargets = card.Effect.validTargets(this);
+        const validTargets = card.Effect.validTargets(this.AttackingPlayer);
         if (!validTargets.includes(target)) {
           throw new Error("Invalid target for targeted effect");
         }
-        await card.Effect.effect(this, target);
-      } else if (card.Effect.type === "Conditional") {
-        if (card.Effect.condition(this, this.AttackingPlayer)) {
-          await card.Effect.effect(this);
-        }
+      }
+
+      for (const effect of card.Effect.sideEffects) {
+        await effect(this, this.AttackingPlayer.activeOrThrow(), heads, target);
       }
     }
 
@@ -927,6 +925,16 @@ export class Game {
 
     target.applyDamage(HP);
     this.GameLog.pokemonDamaged(target.player, target, initialHP, HP, fromAttack);
+  }
+
+  /**
+   * Sets a Pokémon's remaining HP directly.
+   */
+  setHP(target: InPlayPokemon, HP: number): void {
+    const initialHP = target.CurrentHP;
+
+    target.CurrentHP = HP;
+    this.GameLog.pokemonHpSet(target.player, target, initialHP, HP);
   }
 
   /**
@@ -1045,9 +1053,11 @@ export class Game {
         text: "Discard this Pokémon from play.",
         effect: {
           type: "Standard",
-          effect: async (game: Game, self: InPlayPokemon) => {
-            await game.AttackingPlayer.discardPokemonFromPlay(self);
-          },
+          sideEffects: [
+            async (game: Game, self: InPlayPokemon) => {
+              await game.AttackingPlayer.discardPokemonFromPlay(self);
+            },
+          ],
         },
       },
     };

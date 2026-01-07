@@ -4,6 +4,7 @@ import type { Game } from "./Game";
 import type { Player } from "./Player";
 import {
   EnergyMap,
+  type Ability,
   type Energy,
   type PlayerStatus,
   type PlayingCard,
@@ -50,6 +51,13 @@ export class InPlayPokemon {
   }
   get Ability() {
     return this.BaseCard.Ability;
+  }
+  get effectiveAbilities() {
+    const abilities = this.Ability ? [this.Ability] : [];
+    for (const tool of this.AttachedToolCards) {
+      abilities.push(tool.Effect);
+    }
+    return abilities;
   }
   get isUltraBeast() {
     return this.BaseCard.isUltraBeast === true;
@@ -145,13 +153,15 @@ export class InPlayPokemon {
   /**
    * Heals a set amount of damage from this Pokémon.
    */
-  healDamage(HP: number) {
+  healDamage(HP: number): number {
     const initialHP = this.CurrentHP;
 
     this.CurrentHP += HP;
     if (this.CurrentHP > this.MaxHP) this.CurrentHP = this.MaxHP;
 
     this.logger.pokemonHealed(this.player, this, initialHP, HP);
+
+    return this.CurrentHP - initialHP;
   }
 
   attachEnergy(energy: Energy[]) {
@@ -278,9 +288,6 @@ export class InPlayPokemon {
     this.AttachedToolCards.push(card);
     this.InPlayCards.push(card);
     this.player.InPlay.push(card);
-
-    if (card.Effect.trigger === "OnAttach" && card.Effect.conditions.every((cond) => cond(this)))
-      await this.triggerPokemonTool(card);
   }
 
   /**
@@ -293,13 +300,6 @@ export class InPlayPokemon {
     removeElement(this.AttachedToolCards, card);
     removeElement(this.InPlayCards, card);
     removeElement(this.player.InPlay, card);
-
-    if (
-      card.Effect.trigger === "OnAttach" &&
-      card.Effect.undo &&
-      card.Effect.conditions.every((cond) => cond(this))
-    )
-      await card.Effect.undo(this.game, this);
   }
 
   private energyIsSufficient(energies: Energy[], energyAvailable: Energy[]) {
@@ -326,17 +326,19 @@ export class InPlayPokemon {
     return this.energyIsSufficient(energies, this.AttachedEnergy);
   }
 
-  async triggerAbility() {
-    await this.useAbility(false);
+  async triggerAbility(ability: Ability) {
+    await this.useAbility(ability, false);
   }
 
-  async useAbility(manuallyActivated: boolean) {
-    const ability = this.Ability;
+  async useAbility(ability: Ability, manuallyActivated: boolean) {
     if (!ability) {
       throw new Error("Pokemon has no ability");
     }
+    if (ability.type === "Status") {
+      throw new Error("Status ability cannot be used");
+    }
 
-    if (!ability.conditions.every((condition) => condition(this))) return;
+    if (!ability.conditions.every((condition) => condition(this.player, this))) return;
 
     if (manuallyActivated) {
       this.player.logger.useAbility(this.player, this, ability.name);
@@ -344,56 +346,55 @@ export class InPlayPokemon {
       this.player.logger.triggerAbility(this.player, this, ability.name);
     }
 
+    let heads = 0;
+    if (ability.effect.coinsToFlip) {
+      heads = this.player.flipCoinsForEffect(ability.effect.coinsToFlip, this);
+    }
+
+    let target: InPlayPokemon | undefined;
     if (ability.effect.type === "Targeted") {
-      const validTargets = ability.effect.findValidTargets(this.player.game, this);
+      const validTargets = ability.effect.validTargets(this.player, this);
       if (validTargets.length === 0) return;
       if (!validTargets.every((x) => x.isPokemon)) {
         throw new Error("Targeted ability effect has non-Pokemon valid targets");
       }
 
-      const target = await this.player.game.choosePokemon(this.player, validTargets);
+      target = await this.player.game.choosePokemon(this.player, validTargets);
       if (!target || !validTargets.includes(target)) {
         throw new Error("Invalid target for targeted effect");
       }
-      await ability.effect.effect(this.game, this, target);
-    } else if (ability.effect.type === "Standard") {
-      await ability.effect.effect(this.game, this);
-    } else {
-      throw new Error(`Ability effect type '${ability.effect.type}' cannot be used`);
     }
-  }
-
-  async triggerPokemonTool(tool: PokemonToolCard) {
-    this.logger.triggerPokemonTool(this.player, tool, this);
-    await tool.Effect.effect(this.game, this);
+    for (const effect of ability.effect.sideEffects) {
+      await effect(this.game, this, heads, target);
+    }
   }
 
   // Event handlers for abilities and tools
   async onEnterPlay() {
-    if (this.Ability?.type === "Standard" && this.Ability.trigger.type === "OnEnterPlay") {
-      await this.triggerAbility();
+    for (const ability of this.effectiveAbilities) {
+      if (ability.type === "Standard" && ability.trigger.type === "OnEnterPlay") {
+        await this.triggerAbility(ability);
+      }
     }
   }
 
   async onEnergyZoneAttach(energy: Energy[]) {
-    if (this.Ability?.type === "Standard" && this.Ability.trigger.type === "OnEnergyZoneAttach") {
-      const expectedEnergy = this.Ability.trigger.energy;
-      for (const e of energy) {
-        if (!expectedEnergy || expectedEnergy === e) await this.triggerAbility();
+    for (const ability of this.effectiveAbilities) {
+      if (ability.type === "Standard" && ability.trigger.type === "OnEnergyZoneAttach") {
+        const expectedEnergy = ability.trigger.energy;
+        for (const e of energy) {
+          if (!expectedEnergy || expectedEnergy === e) await this.triggerAbility(ability);
+        }
       }
     }
   }
 
   async afterDamagedByAttack() {
-    if (this.Ability?.type === "Standard" && this.Ability.trigger.type === "AfterDamagedByAttack") {
-      if (this.game.DefendingPlayer.InPlayPokemon.includes(this)) await this.triggerAbility();
-    }
-    for (const tool of this.AttachedToolCards) {
-      if (
-        tool.Effect.trigger === "OnAttackDamage" &&
-        tool.Effect.conditions.every((cond) => cond(this))
-      )
-        await this.triggerPokemonTool(tool);
+    for (const ability of this.effectiveAbilities) {
+      if (ability.type === "Standard" && ability.trigger.type === "AfterDamagedByAttack") {
+        if (this.game.DefendingPlayer.InPlayPokemon.includes(this))
+          await this.triggerAbility(ability);
+      }
     }
     for (const status of this.PokemonStatuses) {
       if (status.type === "CounterAttack")
@@ -402,27 +403,20 @@ export class InPlayPokemon {
   }
 
   async beforeKnockedOutByAttack() {
-    if (
-      this.Ability?.type === "Standard" &&
-      this.Ability.trigger.type === "BeforeKnockedOutByAttack"
-    ) {
-      if (this.game.DefendingPlayer.InPlayPokemon.includes(this)) await this.triggerAbility();
+    for (const ability of this.effectiveAbilities) {
+      if (ability.type === "Standard" && ability.trigger.type === "BeforeKnockedOutByAttack") {
+        if (this.game.DefendingPlayer.InPlayPokemon.includes(this))
+          await this.triggerAbility(ability);
+      }
     }
   }
 
   async afterKnockedOutByAttack() {
-    if (
-      this.Ability?.type === "Standard" &&
-      this.Ability.trigger.type === "AfterKnockedOutByAttack"
-    ) {
-      if (this.game.DefendingPlayer.InPlayPokemon.includes(this)) await this.triggerAbility();
-    }
-    for (const tool of this.AttachedToolCards) {
-      if (
-        tool.Effect.trigger === "OnKnockOut" &&
-        tool.Effect.conditions.every((cond) => cond(this))
-      )
-        await this.triggerPokemonTool(tool);
+    for (const ability of this.effectiveAbilities) {
+      if (ability.type === "Standard" && ability.trigger.type === "AfterKnockedOutByAttack") {
+        if (this.game.DefendingPlayer.InPlayPokemon.includes(this))
+          await this.triggerAbility(ability);
+      }
     }
   }
 }

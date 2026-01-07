@@ -258,6 +258,13 @@
           </p>
         </div>
 
+        <div v-else-if="entry.type == 'pokemonHpSet'" class="sub-entry">
+          <p>
+            <CardName :card-id="entry.targetPokemon.cardId" />'s HP is now {{ entry.finalHP }}!
+            <HpChange :event="entry" />
+          </p>
+        </div>
+
         <div v-else-if="entry.type == 'specialConditionApplied'" class="sub-entry">
           <p v-for="(condition, i) in entry.specialConditions" :key="i">
             <CardName :card-id="entry.targetPokemon.cardId" /> is now {{ condition }}!

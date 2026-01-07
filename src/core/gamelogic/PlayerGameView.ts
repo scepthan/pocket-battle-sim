@@ -184,9 +184,10 @@ export class PlayerGameView {
       }
     } else if (card.CardType == "Supporter" || card.CardType == "Item") {
       if (card.CardType == "Supporter" ? !this.canPlaySupporter : !this.canPlayItem) return false;
-      if (card.Effect.condition && !card.Effect.condition(this.game, this.player)) return false;
-      if (card.Effect.type == "Targeted") {
-        const validTargets = card.Effect.validTargets(this.game);
+      if (card.Effect.conditions.some((cond) => !cond(this.player, this.player.activeOrThrow())))
+        return false;
+      if (card.Effect.type === "Targeted") {
+        const validTargets = card.Effect.validTargets(this.player);
         if (validTargets.length == 0) return false;
       }
       return true;
@@ -220,7 +221,8 @@ export class PlayerGameView {
       return false;
 
     const realActive = this.player.activeOrThrow();
-    if (attack.extraConditions.some((condition) => !condition(this.game, realActive))) return false;
+    if (attack.explicitConditions.some((condition) => !condition(this.player, realActive)))
+      return false;
 
     const requiredEnergy = [...attack.requiredEnergy];
     for (const status of this.selfActive.PokemonStatuses) {
@@ -250,9 +252,9 @@ export class PlayerGameView {
     if (!ability.trigger.multiUse) {
       if (this.game.UsedAbilities.has(realPokemon)) return false;
     }
-    if (!ability.conditions.every((condition) => condition(realPokemon))) return false;
+    if (!ability.conditions.every((condition) => condition(this.player, realPokemon))) return false;
     if (ability.effect.type == "Targeted") {
-      if (ability.effect.findValidTargets(this.game, realPokemon).length == 0) return false;
+      if (ability.effect.validTargets(this.player, realPokemon).length == 0) return false;
     }
     return true;
   }
@@ -293,8 +295,8 @@ export class PlayerGameView {
     if (card.CardType === "Fossil") {
       return this.selfBench.filter((slot) => !slot.isPokemon);
     }
-    if (card.Effect.type == "Targeted") {
-      return card.Effect.validTargets(this.game).map(viewOrEmpty);
+    if (card.Effect.type === "Targeted") {
+      return card.Effect.validTargets(this.player).map(viewOrEmpty);
     }
     return [];
   }
@@ -412,7 +414,7 @@ export class PlayerGameView {
     if (!this.canPlayCard(card)) return false;
     const realTarget = target && this.pokemonFromView(target);
     if (card.Effect.type === "Targeted") {
-      if (!realTarget || !card.Effect.validTargets(this.game).includes(realTarget)) return false;
+      if (!realTarget || !card.Effect.validTargets(this.player).includes(realTarget)) return false;
     }
 
     await this.game.playTrainer(card, realTarget);
