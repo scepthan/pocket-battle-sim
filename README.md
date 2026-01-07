@@ -9,8 +9,8 @@ Backend todo:
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
   - [x] A3: 157/157 (100%)
-  - [ ] A3a: 53/72 (73.6%)
-    - [ ] Ultra Beasts
+  - [ ] A3a: 56/72 (77.8%)
+    - [x] Ultra Beasts
     - [ ] Abilities
       - [ ] New triggers
         - [ ] End of your first turn
@@ -27,25 +27,24 @@ Backend todo:
         - [ ] Specific mon is on Bench
         - [ ] Supporter has been used this turn
       - [ ] New effects
-        - [ ] Flip coins to shuffle cards from opponent's hand into deck
+        - [x] Flip coins to shuffle cards from opponent's hand into deck
         - [ ] Knock out defending mon
         - [ ] Discard cards from both player's decks
     - [ ] Items/Supporters
       - [ ] If opponent has no points, apply ModifyIncomingAttackDamage
-      - [ ] Switch opponent's (predicate) Active to the Bench
+      - [x] Switch opponent's (predicate) Active to the Bench
       - [ ] View all (predicate) cards in opponent's deck
       - [ ] If opponent has any points, attach energy from discard to mon
     - [ ] Pokemon Tools
-      - [ ] New triggers
-        - [ ] On Knocked Out
+      - [x] New triggers
+        - [x] On Knocked Out
       - [ ] New effects
         - [ ] Move energy from this mon to Benched mon
         - [ ] Do extra damage per point scored
     - [ ] New Pokemon Statuses
       - [ ] PreventHealing
-    - [ ] New Pokemon predicates
-      - [ ] Ultra Beast
-    - [ ] New card predicates
+    - [x] New Pokemon predicates
+      - [x] Ultra Beast
     - [ ] Unique promo cards
       - [x] Dawn Wings Necrozma
       - [x] Dusk Mane Necrozma
@@ -61,10 +60,10 @@ Backend todo:
   - [x] Combine statuses that increase and decrease the same stat
     - [ ] ReduceOwnAttackDamage/IncreaseAttack
   - [ ] Implement max Energy and HP/damage limits
-  - [ ] Possibly rework how Tools that apply statuses work?
-    - [ ] Current bug: Eevee with Leaf Cape evolving into Leafeon will not gain HP
+  - [x] Possibly rework how Tools that apply statuses work?
+    - [x] Current bug: Eevee with Leaf Cape evolving into Leafeon will not gain HP
   - [ ] Some properties on `PlayerPokemonView` can be maliciously modified by agents—use `.slice()` and make deep copies
-  - [ ] Parsing logic is duplicated across different parsing files; there's probably a way to combine all the natural language parsing into one method
+  - [x] Parsing logic is duplicated across different parsing files; there's probably a way to combine all the natural language parsing into one method
   - [ ] A lot of the reactive logic that I'm currently hard-coding could possibly be simplified by switching everything to Vue's `ref`/`computed`/`watch`
     - Biggest downside I see with this approach is maintaining order-of-operations (OOO) becomes much trickier to keep track of (for example, every action _must_ be logged before the relevant property is modified)
     - Callbacks still feel like a better approach for things like knockouts which happen out of sequence with the property they're related to (can't just do `watch(hp, (val) => { if (val == 0) ... })`)

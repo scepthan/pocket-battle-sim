@@ -291,12 +291,10 @@ export const parseEffect = (
 
     // Pokémon Tool-specific parsing
     {
-      pattern: /the(?: {(\w)})? Pokémon this card is attached to/i,
-      transform: (_, energyType) => {
-        if (energyType) {
-          const fullType = parseEnergy(energyType);
-          effect.explicitConditions.push((player, self) => self.Type === fullType);
-        }
+      pattern: /the (.+?) this card is attached to/i,
+      transform: (_, descriptor) => {
+        const predicate = parsePokemonPredicate(descriptor);
+        effect.explicitConditions.push((game, self) => predicate(self));
         return "this Pokémon";
       },
     },
@@ -333,7 +331,7 @@ export const parseEffect = (
       },
     },
 
-    // Set the type based on what we're doing with the coin flips
+    // Set the attack type based on what we're doing with the coin flips
     // CoinFlipOrDoNothing
     {
       pattern: /^If tails, this attack does nothing\./i,
@@ -1388,9 +1386,13 @@ export const parseEffect = (
     },
     {
       pattern:
-        /^Switch out your opponent’s Active Pokémon to the Bench\. \(Your opponent chooses the new Active Pokémon\.\)/i,
-      transform: () => {
-        effect.implicitConditions.push((player) => player.opponent.BenchedPokemon.length > 0);
+        /^Switch out your opponent’s Active (.+?) to the Bench\. \(Your opponent chooses the new Active Pokémon\.\)/i,
+      transform: (_, descriptor) => {
+        const predicate = parsePokemonPredicate(descriptor);
+        effect.implicitConditions.push(
+          (player) =>
+            predicate(player.opponent.activeOrThrow()) && player.opponent.BenchedPokemon.length > 0
+        );
         addSideEffect(async (game) => {
           await game.chooseNewActivePokemon(game.DefendingPlayer);
         });
