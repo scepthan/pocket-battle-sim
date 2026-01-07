@@ -291,7 +291,7 @@ export const parseEffect = (
 
     // Pokémon Tool-specific parsing
     {
-      pattern: /the (.+?) this card is attached to/i,
+      pattern: /the ((?:(?! the ).)+?) this card is attached to/i,
       transform: (_, descriptor) => {
         const predicate = parsePokemonPredicate(descriptor);
         effect.explicitConditions.push((game, self) => predicate(self));
