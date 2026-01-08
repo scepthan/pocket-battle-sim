@@ -101,7 +101,10 @@ const onClick = () => {
   }
 };
 const saveDeck = () => {
-  deckStore.saveCustomDeck(passedProps.deckName, passedProps.deck);
+  deckStore.saveCustomDeck(passedProps.deckName, {
+    ...passedProps.deck,
+    InvalidReasons: validation.value === true ? [] : validation.value,
+  });
   if (passedProps.editingDeck && passedProps.editingDeck !== passedProps.deckName) {
     deckStore.deleteCustomDeck(passedProps.editingDeck);
   }

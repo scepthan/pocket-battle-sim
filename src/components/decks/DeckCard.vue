@@ -1,5 +1,8 @@
 <template>
-  <EmptyDeckCard @click="true">
+  <EmptyDeckCard
+    :disabled="disableIfInvalid && deck.InvalidReasons && deck.InvalidReasons.length > 0"
+    @click="true"
+  >
     <div class="d-flex justify-center ga-2 pa-2">
       <div v-for="(card, i) in highlightCards" :key="i">
         <PlayingCardImage :card-id="card" height="100" />
@@ -30,6 +33,7 @@ export interface Props {
   builtinName?: string;
   deckName: string;
   noDialog?: boolean;
+  disableIfInvalid?: boolean;
 }
 const props = defineProps<Props>();
 

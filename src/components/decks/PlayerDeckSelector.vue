@@ -17,6 +17,7 @@
         <div class="d-flex flex-wrap ga-4">
           <div v-for="(deck, name) in selectedDecklist.decks" :key="name">
             <DeckCard
+              disable-if-invalid
               :deck="deck"
               :builtin-name="selectedDecklist.name"
               :deck-name="name"

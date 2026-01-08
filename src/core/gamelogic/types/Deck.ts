@@ -21,4 +21,10 @@ export interface DeckInfo {
    * highlight cards will be inferred from card names included in the deck name.
    */
   HighlightCards?: string[];
+
+  /**
+   * List of reasons why the deck is considered invalid. If empty or not provided, the deck is
+   * valid. Used for custom decks only.
+   */
+  InvalidReasons?: string[];
 }
