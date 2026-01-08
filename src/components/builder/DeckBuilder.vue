@@ -38,7 +38,7 @@
 
 <script setup lang="ts">
 import { type DeckInfo, type Energy, type PlayingCard } from "@/core";
-import { usePlayingCardStore } from "@/stores";
+import { useDeckStore, usePlayingCardStore } from "@/stores";
 
 export interface Props {
   name: string;
@@ -53,11 +53,19 @@ export interface Emits {
 const emit = defineEmits<Emits>();
 
 const cardStore = usePlayingCardStore();
+const deckStore = useDeckStore();
 
 const selectedCards = ref<PlayingCard[]>(
   props.initialDeck.Cards.map((id) => cardStore.getCardById(id)).filter((x) => x !== undefined)
 );
 const deckName = ref(props.name);
+if (deckName.value === "") {
+  let newDeckNumber = 1;
+  while (Object.keys(deckStore.CustomDecks).includes(`New Deck ${newDeckNumber}`)) {
+    newDeckNumber++;
+  }
+  deckName.value = `New Deck ${newDeckNumber}`;
+}
 const energyTypes = ref<Energy[]>(props.initialDeck.EnergyTypes.slice());
 
 const deck = computed<DeckInfo>(() => ({

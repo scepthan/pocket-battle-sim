@@ -46,5 +46,11 @@
       "Cards": ["A3a-046", "A3a-046", "A3a-047", "A3a-048", "A3a-048", "A3a-049", "A3a-049", "A3a-050", "A3a-051", "A3a-051", "A3a-052", "A3a-060", "A3a-060", "A3a-061", "A3a-067", "A3a-068", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
       "EnergyTypes": ["Metal"]
     }
+  },
+  "A3a Custom": {
+    "Trevenant & Shiinotic": {
+      "Cards": ["A3a-022", "A3a-022", "A3a-023", "A3a-023", "A3a-024", "A3a-024", "A3a-025", "A3a-025", "A3a-026", "A3a-026", "A3a-027", "A3a-027", "A3a-059", "A3a-064", "PROMO-A-001", "PROMO-A-002", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Psychic"]
+    }
   }
 }

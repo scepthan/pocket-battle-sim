@@ -1,10 +1,10 @@
 <template>
-  <v-tooltip text="Can't save deck without a name!" location="top" :disabled="!!deckName">
+  <v-tooltip :text="cannotSaveReason" location="top" :disabled="!cannotSaveReason">
     <template #activator="{ props }">
       <div v-bind="props" class="d-inline-block">
         <TooltipButton
           :tooltip="tooltip"
-          :disabled="!deckName"
+          :disabled="!!cannotSaveReason"
           :color="color"
           icon="mdi-content-save"
           size="small"
@@ -55,6 +55,15 @@ const emit = defineEmits<Emits>();
 
 const snackbar = ref(false);
 const dialogOpen = ref(false);
+const cannotSaveReason = computed(() => {
+  if (!passedProps.deckName) {
+    return "Deck must have a name to be saved.";
+  }
+  if (passedProps.deck.Cards.length === 0) {
+    return "Deck must contain at least one card.";
+  }
+  return "";
+});
 
 const deckStore = useDeckStore();
 
@@ -78,7 +87,7 @@ const tooltip = computed(() =>
     : "Save"
 );
 const color = computed(() =>
-  passedProps.deckName && validation.value !== true ? "warning" : "default"
+  !cannotSaveReason.value && validation.value !== true ? "warning" : "default"
 );
 
 const onClick = () => {
