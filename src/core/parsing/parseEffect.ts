@@ -1381,10 +1381,15 @@ export const parseEffect = (
 
     // Switching effects
     {
-      pattern: /^Switch this Pokémon with 1 of your Benched (.+?)\./i,
-      transform: (_, descriptor) => {
-        const predicate = parsePokemonPredicate(descriptor);
-        effect.validTargets = (player) => player.BenchedPokemon.filter(predicate);
+      pattern: /^Switch (?:this Pokémon|your Active (.+?)) with 1 of your Benched (.+?)\./i,
+      transform: (_, activeDescriptor, benchDescriptor) => {
+        if (activeDescriptor) {
+          const activePredicate = parsePokemonPredicate(activeDescriptor);
+          effect.implicitConditions.push((player) => activePredicate(player.activeOrThrow()));
+        }
+
+        const benchPredicate = parsePokemonPredicate(benchDescriptor);
+        effect.validTargets = (player) => player.BenchedPokemon.filter(benchPredicate);
         addSideEffect(async (game, self, heads, target) => {
           if (!target) return;
           await game.AttackingPlayer.swapActivePokemon(target, "selfEffect");
