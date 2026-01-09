@@ -1967,6 +1967,22 @@ export const parseEffect = (
 
     // Opponent player effects
     {
+      pattern: /^attacks used by your opponent’s (.+?) do −(\d+) damage\./i,
+      transform: (_, descriptor, damageReduction) => {
+        effect.opponentPlayerStatuses.push(
+          parsePokemonPlayerStatus(
+            {
+              type: "ReduceOwnAttackDamage",
+              amount: Number(damageReduction),
+              source: "PlayerStatus",
+              turnsToKeep,
+            },
+            descriptor
+          )
+        );
+      },
+    },
+    {
       pattern: /^Your opponent can’t use any Supporter cards from their hand\./i,
       transform: () => {
         effect.opponentPlayerStatuses.push(PlayerStatus.CannotUseSupporter());

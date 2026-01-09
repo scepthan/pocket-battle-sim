@@ -9,14 +9,14 @@ Backend todo:
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
   - [x] A3: 157/157 (100%)
-  - [ ] A3a: 56/72 (77.8%)
+  - [ ] A3a: 57/72 (79.2%)
     - [x] Ultra Beasts
     - [ ] Abilities
       - [ ] New triggers
         - [ ] End of your first turn
       - [ ] New conditionals
       - [ ] New effects
-        - [ ] Apply ReduceOwnAttackDamage to opponent
+        - [x] Apply ReduceOwnAttackDamage to opponent
         - [x] Draw random card from deck
         - [ ] Apply PreventHealing to both players
         - [ ] Apply ExtraPoisonDamage to opponent's Active
