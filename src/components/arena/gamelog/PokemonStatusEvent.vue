@@ -17,14 +17,12 @@
   <span v-else-if="entry.status.type == 'CounterAttack'">
     will do {{ entry.status.amount }} damage if attacked</span
   >
-  <span v-else-if="entry.status.type == 'ReduceOwnAttackDamage'">
-    will attack for &minus;{{ entry.status.amount }} damage</span
+  <span v-else-if="entry.status.type == 'ModifyAttackDamage'">
+    will attack for <SignedNumber :number="entry.status.amount" /> damage</span
   >
-  <span v-else-if="entry.status.type == 'IncreaseAttack'">
-    will attack for +{{ entry.status.amount }} damage</span
-  >
-  <span v-else-if="entry.status.type == 'IncreaseDamageOfAttack'">
-    will attack for +{{ entry.status.amount }} damage with {{ entry.status.attackName }}</span
+  <span v-else-if="entry.status.type == 'ModifyDamageOfAttack'">
+    will attack for <SignedNumber :number="entry.status.amount" /> damage with
+    {{ entry.status.attackName }}</span
   >
   <span v-else-if="entry.status.type == 'CannotAttack'"> cannot attack</span>
   <span v-else-if="entry.status.type == 'CannotUseSpecificAttack'">

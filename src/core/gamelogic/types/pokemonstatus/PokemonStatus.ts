@@ -1,5 +1,5 @@
-import type { AttackPokemonStatus } from "./AttackPokemonStatus";
-import type { DefensePokemonStatus } from "./DefensePokemonStatus";
+import { AttackPokemonStatus } from "./AttackPokemonStatus";
+import { DefensePokemonStatus } from "./DefensePokemonStatus";
 import type { OtherPokemonStatus } from "./OtherPokemonStatus";
 
 export interface BasePokemonStatus {
@@ -9,3 +9,4 @@ export interface BasePokemonStatus {
 }
 
 export type PokemonStatus = DefensePokemonStatus | AttackPokemonStatus | OtherPokemonStatus;
+export const PokemonStatus = { ...DefensePokemonStatus, ...AttackPokemonStatus };

@@ -8,12 +8,10 @@
           for <b>{{ entry.player }}'s</b> <PokemonDescriptor :text="descriptor" /></span
         ><span v-if="entry.status.source == 'Effect'"> for this turn</span>!
       </p>
-      <p v-else-if="pokemonStatus.type == 'IncreaseAttack'">
+      <p v-else-if="pokemonStatus.type == 'ModifyAttackDamage'">
         Attacks used<span v-if="descriptor"> by your <PokemonDescriptor :text="descriptor" /></span
-        ><span v-if="entry.status.source == 'Effect'"> this turn</span> do +{{
-          pokemonStatus.amount
-        }}
-        damage to the opponent's Active Pokemon!
+        ><span v-if="entry.status.source == 'Effect'"> this turn</span> do
+        <SignedNumber :number="pokemonStatus.amount" /> damage to the opponent's Active Pokemon!
       </p>
       <p v-else-if="pokemonStatus.type == 'ModifyIncomingAttackDamage'">
         Attacks used<span v-if="entry.status.source == 'Effect'"> next turn</span> do

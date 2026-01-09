@@ -16,7 +16,7 @@ Backend todo:
         - [ ] End of your first turn
       - [ ] New conditionals
       - [ ] New effects
-        - [x] Apply ReduceOwnAttackDamage to opponent
+        - [x] Apply ModifyAttackDamage to opponent
         - [x] Draw random card from deck
         - [ ] Apply PreventHealing to both players
         - [ ] Apply ExtraPoisonDamage to opponent's Active
@@ -58,7 +58,7 @@ Backend todo:
   - [ ] A4b-B1a
 - [ ] Game logic improvements
   - [x] Combine statuses that increase and decrease the same stat
-    - [ ] ReduceOwnAttackDamage/IncreaseAttack
+    - [x] ModifyAttackDamage/IncreaseAttack
   - [ ] Implement max Energy and HP/damage limits
   - [x] Possibly rework how Tools that apply statuses work?
     - [x] Current bug: Eevee with Leaf Cape evolving into Leafeon will not gain HP
