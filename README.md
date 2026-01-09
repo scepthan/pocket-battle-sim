@@ -9,7 +9,7 @@ Backend todo:
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
   - [x] A3: 157/157 (100%)
-  - [ ] A3a: 58/72 (80.6%)
+  - [ ] A3a: 59/72 (81.9%)
     - [x] Ultra Beasts
     - [ ] Abilities
       - [x] New triggers
@@ -23,7 +23,7 @@ Backend todo:
         - [ ] Swap (predicate) Active mon with (predicate) Benched mon
     - [ ] Attacks
       - [ ] New conditionals
-        - [ ] Specific mon is on Bench
+        - [x] Specific mon is on Bench
         - [ ] Supporter has been used this turn
       - [ ] New effects
         - [x] Flip coins to shuffle cards from opponent's hand into deck

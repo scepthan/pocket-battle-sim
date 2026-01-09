@@ -552,7 +552,14 @@ export const parseEffect = (
       pattern: /^If any of your (.+?) have damage on them,/i,
       transform: (_, descriptor) => {
         const predicate = parsePokemonPredicate(descriptor, (p) => p.isDamaged());
-        conditionalForNextEffect = (game) => game.AttackingPlayer.InPlayPokemon.some(predicate);
+        conditionalForNextEffect = (game, self) => self.player.InPlayPokemon.some(predicate);
+      },
+    },
+    {
+      pattern: /^If (.+?) is on your Bench,/i,
+      transform: (_, descriptor) => {
+        const predicate = parsePokemonPredicate(descriptor);
+        conditionalForNextEffect = (game, self) => self.player.BenchedPokemon.some(predicate);
       },
     },
 
