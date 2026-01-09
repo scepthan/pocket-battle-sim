@@ -9,7 +9,11 @@
           >'s <PokemonDescriptor :text="descriptor" /></span
         ><span v-if="entry.status.source == 'Effect'"> for this turn</span>!
       </p>
-      <p v-else-if="pokemonStatus.type == 'ModifyAttackDamage'">
+      <p
+        v-else-if="
+          pokemonStatus.type == 'ModifyAttackDamage' && typeof pokemonStatus.amount === 'number'
+        "
+      >
         Attacks used<span v-if="descriptor">
           by <b>{{ entry.player }}</b
           >'s <PokemonDescriptor :text="descriptor" /></span

@@ -9,7 +9,7 @@ Backend todo:
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
   - [x] A3: 157/157 (100%)
-  - [ ] A3a: 62/72 (86.1%)
+  - [ ] A3a: 63/72 (87.5%)
     - [x] Ultra Beasts
     - [ ] Abilities
       - [x] New triggers
@@ -39,7 +39,7 @@ Backend todo:
         - [x] On Knocked Out
       - [ ] New effects
         - [ ] Move energy from this mon to Benched mon
-        - [ ] Do extra damage per point scored
+        - [x] Do extra damage per point scored
     - [ ] New Pokemon Statuses
       - [ ] PreventHealing
       - [x] IncreasePoisonDamage

@@ -1291,7 +1291,7 @@ export const parseEffect = (
           const energyToAttach: Energy[] = [];
           for (let i = 0; i < Number(count); i++) {
             if (!game.AttackingPlayer.DiscardedEnergy.some(energyFilter)) break;
-            const e = fullType ?? randomElement(game.AttackingPlayer.DiscardedEnergy)
+            const e = fullType ?? randomElement(game.AttackingPlayer.DiscardedEnergy);
             energyToAttach.push(e);
             removeElement(game.AttackingPlayer.DiscardedEnergy, e);
           }
@@ -1645,6 +1645,16 @@ export const parseEffect = (
     },
 
     // Self Pokémon status effects
+    {
+      pattern:
+        /^attacks used by this Pokémon do \+(\d+) damage to your opponent’s Active Pokémon for each point you have gotten\.$/i,
+      transform: (_, amount) => {
+        effect.implicitConditions.push((player) => player.GamePoints >= 1);
+        addSelfPokemonStatus(
+          PokemonStatus.ModifyAttackDamage((self) => +amount * self.player.GamePoints)
+        );
+      },
+    },
     {
       pattern:
         /^attacks used by this Pokémon do \+(\d+) damage to your opponent’s Active Pokémon\.$/i,

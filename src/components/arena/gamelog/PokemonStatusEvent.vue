@@ -17,7 +17,9 @@
   <span v-else-if="entry.status.type == 'CounterAttack'">
     will do {{ entry.status.amount }} damage if attacked</span
   >
-  <span v-else-if="entry.status.type == 'ModifyAttackDamage'">
+  <span
+    v-else-if="entry.status.type == 'ModifyAttackDamage' && typeof entry.status.amount === 'number'"
+  >
     will attack for <SignedNumber :number="entry.status.amount" /> damage</span
   >
   <span v-else-if="entry.status.type == 'ModifyDamageOfAttack'">

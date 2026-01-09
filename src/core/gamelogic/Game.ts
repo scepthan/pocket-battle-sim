@@ -679,8 +679,10 @@ export class Game {
     const defender = this.DefendingPlayer.activeOrThrow();
     for (const status of attacker.PokemonStatuses) {
       if (status.type == "ModifyAttackDamage") {
-        if (!status.defenderCondition || status.defenderCondition.test(defender))
-          totalDamage += status.amount;
+        if (!status.defenderCondition || status.defenderCondition.test(defender)) {
+          if (typeof status.amount === "function") totalDamage += status.amount(attacker);
+          else totalDamage += status.amount;
+        }
       } else if (status.type == "ModifyDamageOfAttack") {
         if (status.attackName == this.CurrentAttack?.name) totalDamage += status.amount;
       }

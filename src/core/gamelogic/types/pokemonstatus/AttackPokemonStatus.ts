@@ -1,5 +1,6 @@
 import type { ParsedResult } from "@/core/parsing";
 import { parsePokemonPredicate } from "@/core/parsing/parsePredicates";
+import type { InPlayPokemon } from "../../InPlayPokemon";
 import type { PokemonDescriptor } from "../Effects";
 import type { BasePokemonStatus } from "./PokemonStatus";
 
@@ -10,7 +11,7 @@ interface BaseAttackPokemonStatus extends BasePokemonStatus {
 // Statuses that affect outgoing attacks
 interface ModifyAttackDamagePokemonStatus extends BaseAttackPokemonStatus {
   type: "ModifyAttackDamage";
-  amount: number;
+  amount: number | ((self: InPlayPokemon) => number);
 }
 interface ModifyDamageOfAttackPokemonStatus extends BaseAttackPokemonStatus {
   type: "ModifyDamageOfAttack";
@@ -40,7 +41,11 @@ const parseDefenderCondition = (pokemonStatus: AttackPokemonStatus, descriptor?:
 const source = "Effect";
 
 export const AttackPokemonStatus = {
-  ModifyAttackDamage: (amount: number, turnsToKeep?: number, descriptor?: string) =>
+  ModifyAttackDamage: (
+    amount: number | ((self: InPlayPokemon) => number),
+    turnsToKeep?: number,
+    descriptor?: string
+  ) =>
     parseDefenderCondition({ type: "ModifyAttackDamage", source, turnsToKeep, amount }, descriptor),
   ModifyDamageOfAttack: (
     attackName: string,
