@@ -9,12 +9,11 @@ Backend todo:
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
   - [x] A3: 157/157 (100%)
-  - [ ] A3a: 57/72 (79.2%)
+  - [ ] A3a: 58/72 (80.6%)
     - [x] Ultra Beasts
     - [ ] Abilities
-      - [ ] New triggers
-        - [ ] End of your first turn
-      - [ ] New conditionals
+      - [x] New triggers
+        - [x] End of your first turn
       - [ ] New effects
         - [x] Apply ModifyAttackDamage to opponent
         - [x] Draw random card from deck

@@ -201,7 +201,7 @@ export class Game {
       this.AttackingPlayer.chooseNextEnergy();
     }
 
-    // Log the Special Conditions that will affect the Active Pokemon
+    // Log the Special Conditions that will affect the Active Pokémon
     const attackingPokemon = this.AttackingPlayer.activeOrThrow();
     const status = attackingPokemon.PrimaryCondition;
     if (status == "Asleep" || status == "Paralyzed") {
@@ -300,7 +300,7 @@ export class Game {
       }
     }
 
-    // Remove paralysis status from attacking player's Active Pokemon
+    // Remove paralysis status from attacking player's Active Pokémon
     if (attacker.PrimaryCondition == "Paralyzed") {
       attacker.PrimaryCondition = undefined;
       this.GameLog.specialConditionEnded(attacker, ["Paralyzed"]);
@@ -873,7 +873,7 @@ export class Game {
     let weaknessBoost = false;
 
     // First, apply any of the attacker's own damage modification statuses
-    // Currently all modifications only affect the opponent's Active Pokemon--this may change
+    // Currently all modifications only affect the opponent's Active Pokémon--this may change
     if (totalDamage > 0 && attackingActive) {
       totalDamage = this.calculateModifiedBaseDamage(totalDamage);
     }

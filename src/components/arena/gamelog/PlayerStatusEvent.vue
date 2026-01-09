@@ -5,13 +5,16 @@
         Retreat cost is {{ Math.abs(pokemonStatus.amount) }}
         {{ pokemonStatus.amount < 0 ? "less" : "more"
         }}<span v-if="descriptor">
-          for <b>{{ entry.player }}'s</b> <PokemonDescriptor :text="descriptor" /></span
+          for <b>{{ entry.player }}</b
+          >'s <PokemonDescriptor :text="descriptor" /></span
         ><span v-if="entry.status.source == 'Effect'"> for this turn</span>!
       </p>
       <p v-else-if="pokemonStatus.type == 'ModifyAttackDamage'">
-        Attacks used<span v-if="descriptor"> by your <PokemonDescriptor :text="descriptor" /></span
+        Attacks used<span v-if="descriptor">
+          by <b>{{ entry.player }}</b
+          >'s <PokemonDescriptor :text="descriptor" /></span
         ><span v-if="entry.status.source == 'Effect'"> this turn</span> do
-        <SignedNumber :number="pokemonStatus.amount" /> damage to the opponent's Active Pokemon!
+        <SignedNumber :number="pokemonStatus.amount" /> damage to the opponent's Active Pokémon!
       </p>
       <p v-else-if="pokemonStatus.type == 'ModifyIncomingAttackDamage'">
         Attacks used<span v-if="entry.status.source == 'Effect'"> next turn</span> do
@@ -56,7 +59,7 @@
         >!
       </p>
       <p v-else>
-        Unknown Pokemon status applied to <b>{{ entry.player }}</b
+        Unknown Pokémon status applied to <b>{{ entry.player }}</b
         >'s <PokemonDescriptor :text="descriptor" />: {{ pokemonStatus.type }}
       </p>
     </div>

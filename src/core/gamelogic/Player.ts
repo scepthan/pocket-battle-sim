@@ -31,7 +31,7 @@ export class Player {
   DiscardedEnergy: Energy[] = []; // Energy that has been discarded during the game
   GamePoints: number = 0; // The number of prize cards the player has taken (for winning the game)
 
-  ActivePokemon: InPlayPokemon | EmptyCardSlot; // The active Pokémon card (EmptyCardSlot during setup phase and when active is knocked out)
+  ActivePokemon: InPlayPokemon | EmptyCardSlot; // The Active Pokémon card (EmptyCardSlot during setup phase and when active is knocked out)
   Bench: (InPlayPokemon | EmptyCardSlot)[]; // Pokémon cards on the bench, EmptyCardSlot if no Pokémon is in a slot
   AvailableEnergy?: Energy; // The energy type available for use this turn, if any (not used in all game modes)
   NextEnergy: Energy = "Colorless"; // The next energy type to be used for attaching to Pokémon, set when the game starts
@@ -108,7 +108,7 @@ export class Player {
   }
 
   async setupPokemon(setup: PlayerGameSetup) {
-    // Set up the active Pokémon
+    // Set up the Active Pokémon
     if (!this.Hand.includes(setup.active)) {
       throw new Error("Card not in hand");
     }
@@ -413,7 +413,7 @@ export class Player {
 
   activeOrThrow(): InPlayPokemon {
     if (!this.ActivePokemon.isPokemon) {
-      throw new Error("No active Pokemon");
+      throw new Error("No Active Pokémon");
     }
     return this.ActivePokemon;
   }
@@ -453,7 +453,7 @@ export class Player {
       throw new Error("Cannot retreat while " + currentActive.PrimaryCondition);
     }
     if (!currentActive.hasSufficientActualEnergy(energyToDiscard)) {
-      throw new Error("Energy not attached to active Pokemon");
+      throw new Error("Energy not attached to Active Pokémon");
     }
 
     const effectiveEnergyToDiscard = currentActive.calculateEffectiveEnergy(energyToDiscard);

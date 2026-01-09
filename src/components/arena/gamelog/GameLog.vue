@@ -48,7 +48,7 @@
         <div v-else-if="entry.type == 'playToActive'">
           <p>
             <b>{{ entry.player }}</b> chooses <CardName :card-id="entry.cardId" /> as their Active
-            Pokemon!
+            Pokémon!
           </p>
         </div>
 
@@ -148,10 +148,10 @@
           </p>
           <p v-else-if="entry.choosingPlayer && entry.choosingPlayer != entry.player">
             <b>{{ entry.choosingPlayer }}</b> switches <b>{{ entry.player }}</b
-            >'s active Pokemon to <CardName :card-id="entry.toPokemon.cardId" />!
+            >'s Active Pokémon to <CardName :card-id="entry.toPokemon.cardId" />!
           </p>
           <p v-else>
-            <b>{{ entry.player }}</b> switches their active Pokemon to
+            <b>{{ entry.player }}</b> switches their Active Pokémon to
             <CardName :card-id="entry.toPokemon.cardId" />!
           </p>
         </div>
@@ -355,11 +355,11 @@
         <div v-else-if="entry.type == 'selectActivePokemon'" class="sub-entry">
           <p>
             <b>{{ entry.player }}</b> chooses <CardName :card-id="entry.toPokemon.cardId" /> as
-            their next Active Pokemon!
+            their next Active Pokémon!
           </p>
         </div>
 
-        <h5 v-else-if="entry.type == 'pokemonCheckup'">Pokemon Checkup phase</h5>
+        <h5 v-else-if="entry.type == 'pokemonCheckup'">Pokémon Checkup phase</h5>
 
         <div v-else-if="entry.type == 'gameOver'">
           <p v-if="entry.winner">

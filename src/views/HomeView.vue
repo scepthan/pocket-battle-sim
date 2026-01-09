@@ -1,5 +1,5 @@
 <template>
-  <h1>Pokemon TCG Pocket Battle Simulator</h1>
+  <h1>Pokémon TCG Pocket Battle Simulator</h1>
   <v-list>
     <v-list-item>
       <RouterLink to="/arena">Arena</RouterLink>

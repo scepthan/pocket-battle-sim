@@ -143,6 +143,10 @@ const findBasicForStage2 = (stage2: PokemonCard) => {
 const selfActive = (player: Player, self: InPlayPokemon) => self.player.ActivePokemon == self;
 const selfBenched = (player: Player, self: InPlayPokemon) =>
   self.player.BenchedPokemon.includes(self);
+const isOwnFirstTurn = (player: Player) => {
+  const turnNumber = player.game.TurnNumber;
+  return player === player.game.AttackingPlayer && 1 <= turnNumber && turnNumber <= 2;
+};
 
 export const statusesToSideEffects = (effect: Effect) => {
   const sideEffects: SideEffect[] = [];
@@ -306,6 +310,13 @@ export const parseEffect = (
       pattern: /^During Pokémon Checkup, |^At the end of each turn, /i,
       transform: () => {
         effect.trigger = { type: "OnPokemonCheckup" };
+      },
+    },
+    {
+      pattern: /^At the end of your first turn, /i,
+      transform: () => {
+        effect.trigger = { type: "OnPokemonCheckup" };
+        effect.explicitConditions.push(isOwnFirstTurn);
       },
     },
 
@@ -1999,10 +2010,7 @@ export const parseEffect = (
     {
       pattern: /^During your first turn, /i,
       transform: () => {
-        effect.explicitConditions.push((player) => {
-          const turnNumber = player.game.TurnNumber;
-          return player === player.game.AttackingPlayer && 1 <= turnNumber && turnNumber <= 2;
-        });
+        effect.explicitConditions.push(isOwnFirstTurn);
       },
     },
   ];
