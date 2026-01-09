@@ -16,3 +16,16 @@ export type GameRulePlayerStatus =
   | CannotUseSupporterPlayerStatus
   | CannotUseItemPlayerStatus
   | DummyPlayerStatus;
+
+export const GameRulePlayerStatus = {
+  CannotUseSupporter: (keepNextTurn: boolean = true) => ({
+    type: "CannotUseSupporter",
+    source: "Effect",
+    keepNextTurn,
+  }),
+  CannotUseItem: (keepNextTurn: boolean = true) => ({
+    type: "CannotUseItem",
+    source: "Effect",
+    keepNextTurn,
+  }),
+} satisfies Record<string, (...args: never) => GameRulePlayerStatus>;

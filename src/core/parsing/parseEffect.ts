@@ -4,10 +4,10 @@ import {
   InPlayPokemon,
   parseEnergy,
   Player,
+  PlayerStatus,
   type CoinFlipIndicator,
   type DamageCalculation,
   type Energy,
-  type PlayerStatus,
   type PokemonCard,
   type PokemonStatus,
   type SideEffect,
@@ -18,6 +18,7 @@ import {
   parsePlayingCardPredicate as _cardParse,
   parsePokemonPredicate as _pokemonParse,
   type InPlayPokemonPredicate,
+  type PlayingCardPredicate,
 } from "./parsePredicates";
 import type { ParsedResult } from "./types";
 
@@ -227,16 +228,20 @@ export const parseEffect = (
     effect.sideEffects.push(applyConditionalIfAvailable(sideEffect));
   };
 
-  const parsePokemonPredicate = (descriptor: string, predicate?: InPlayPokemonPredicate) => {
-    const { parseSuccessful: success, value } = _pokemonParse(descriptor, predicate);
-    if (!success) parseSuccessful = false;
-    return value;
+  const cascadeParseFailure = <T>(result: ParsedResult<T>): T => {
+    if (!result.parseSuccessful) parseSuccessful = false;
+    return result.value;
   };
-  const parsePlayingCardPredicate = (descriptor: string) => {
-    const { parseSuccessful: success, value } = _cardParse(descriptor);
-    if (!success) parseSuccessful = false;
-    return value;
-  };
+
+  const parsePokemonPredicate = (descriptor: string, predicate?: InPlayPokemonPredicate) =>
+    cascadeParseFailure(_pokemonParse(descriptor, predicate));
+  const parsePlayingCardPredicate = (descriptor: string, predicate?: PlayingCardPredicate) =>
+    cascadeParseFailure(_cardParse(descriptor, predicate));
+  const parsePokemonPlayerStatus = (
+    pokemonStatus: PokemonStatus,
+    descriptor: string,
+    doesNotStack: boolean = false
+  ) => cascadeParseFailure(PlayerStatus.fromPokemonStatus(pokemonStatus, descriptor, doesNotStack));
 
   const dictionary: EffectTransformer[] = [
     // Triggers
@@ -1830,68 +1835,57 @@ export const parseEffect = (
 
     // Self player effects
     {
-      pattern: /^the Retreat Cost of your Active Pokémon is (\d+) less\.$/i,
-      transform: (_, modifier) => {
-        effect.selfPlayerStatuses.push({
-          type: "PokemonStatus",
-          pokemonCondition: {
-            test: (pokemon) => pokemon.player.ActivePokemon === pokemon,
-            descriptor: "Active Pokémon",
-          },
-          source: "Effect",
-          pokemonStatus: {
-            type: "ModifyRetreatCost",
-            amount: -Number(modifier),
-            source: "PlayerStatus",
-          },
-        });
+      pattern: /^the Retreat Cost of your (.+?) is (\d+) less\.$/i,
+      transform: (_, descriptor, modifier) => {
+        effect.selfPlayerStatuses.push(
+          parsePokemonPlayerStatus(
+            {
+              type: "ModifyRetreatCost",
+              amount: -Number(modifier),
+              source: "PlayerStatus",
+            },
+            descriptor
+          )
+        );
       },
     },
     {
       pattern: /^attacks used by your (.+?) do \+(\d+) damage to your opponent’s (.+?)\.$/i,
       transform: (_, selfSpecifier, modifier, opponentSpecifier) => {
-        const appliesToPokemon = parsePokemonPredicate(selfSpecifier);
         const appliesToDefender = parsePokemonPredicate(opponentSpecifier);
 
-        effect.selfPlayerStatuses.push({
-          type: "PokemonStatus",
-          pokemonCondition: {
-            test: appliesToPokemon,
-            descriptor: selfSpecifier,
-          },
-          source: "Effect",
-          pokemonStatus: {
-            type: "IncreaseAttack",
-            amount: Number(modifier),
-            defenderCondition: {
-              test: appliesToDefender,
-              descriptor: opponentSpecifier,
+        effect.selfPlayerStatuses.push(
+          parsePokemonPlayerStatus(
+            {
+              type: "IncreaseAttack",
+              amount: Number(modifier),
+              defenderCondition: {
+                test: appliesToDefender,
+                descriptor: opponentSpecifier,
+              },
+              source: "PlayerStatus",
             },
-            source: "PlayerStatus",
-          },
-        });
+            selfSpecifier
+          )
+        );
       },
     },
     {
       pattern: /^attacks used by your (.+?) cost (\d+) less {(\w)} Energy\.$/i,
       transform: (_, descriptor, count, energy) => {
-        const predicate = parsePokemonPredicate(descriptor);
         const fullType = parseEnergy(energy);
 
-        effect.selfPlayerStatuses.push({
-          type: "PokemonStatus",
-          pokemonCondition: {
-            test: predicate,
-            descriptor,
-          },
-          source: "Effect",
-          pokemonStatus: {
-            type: "ModifyAttackCost",
-            energyType: fullType,
-            amount: -Number(count),
-            source: "PlayerStatus",
-          },
-        });
+        effect.selfPlayerStatuses.push(
+          parsePokemonPlayerStatus(
+            {
+              type: "ModifyAttackCost",
+              energyType: fullType,
+              amount: -Number(count),
+              source: "PlayerStatus",
+            },
+            descriptor
+          )
+        );
       },
     },
     {
@@ -1919,53 +1913,36 @@ export const parseEffect = (
     {
       pattern: /^your (Active .+?)’s Retreat Cost is (\d+) less\./i,
       transform: (_, descriptor, amount) => {
-        const predicate = parsePokemonPredicate(descriptor);
-
-        effect.selfPlayerStatuses.push({
-          type: "PokemonStatus",
-          source: "Effect",
-          pokemonCondition: {
-            test: predicate,
-            descriptor,
-          },
-          pokemonStatus: {
-            type: "ModifyRetreatCost",
-            amount: -Number(amount),
-            source: "PlayerStatus",
-          },
-        });
+        effect.selfPlayerStatuses.push(
+          parsePokemonPlayerStatus(
+            {
+              type: "ModifyRetreatCost",
+              amount: -Number(amount),
+              source: "PlayerStatus",
+            },
+            descriptor
+          )
+        );
       },
     },
     {
       pattern: /^your (Active .+?) has no Retreat Cost\./i,
       transform: (_, descriptor) => {
-        const predicate = parsePokemonPredicate(descriptor);
-
-        effect.selfPlayerStatuses.push({
-          type: "PokemonStatus",
-          source: "Effect",
-          pokemonCondition: {
-            test: predicate,
-            descriptor,
-          },
-          pokemonStatus: { type: "NoRetreatCost", source: "PlayerStatus" },
-        });
+        effect.selfPlayerStatuses.push(
+          parsePokemonPlayerStatus({ type: "NoRetreatCost", source: "PlayerStatus" }, descriptor)
+        );
       },
     },
     {
       pattern:
         /^Each of your (.+?) recovers from all Special Conditions and can’t be affected by any Special Conditions\.$/i,
       transform: (_, descriptor) => {
-        const predicate = parsePokemonPredicate(descriptor);
-        effect.selfPlayerStatuses.push({
-          type: "PokemonStatus",
-          source: "Effect",
-          pokemonCondition: {
-            test: predicate,
-            descriptor,
-          },
-          pokemonStatus: { type: "PreventSpecialConditions", source: "PlayerStatus" },
-        });
+        effect.selfPlayerStatuses.push(
+          parsePokemonPlayerStatus(
+            { type: "PreventSpecialConditions", source: "PlayerStatus" },
+            descriptor
+          )
+        );
       },
     },
     {
@@ -1973,22 +1950,18 @@ export const parseEffect = (
         /^Each {(\w)} Energy attached to your (.+?) provides 2 {\1} Energy. This effect doesn’t stack.$/i,
       transform: (_, energyType, descriptor) => {
         const fullType = parseEnergy(energyType);
-        const predicate = parsePokemonPredicate(descriptor);
 
-        effect.selfPlayerStatuses.push({
-          type: "PokemonStatus",
-          source: "Effect",
-          pokemonCondition: {
-            test: predicate,
+        effect.selfPlayerStatuses.push(
+          parsePokemonPlayerStatus(
+            {
+              type: "DoubleEnergy",
+              energyType: fullType,
+              source: "PlayerStatus",
+            },
             descriptor,
-          },
-          doesNotStack: true,
-          pokemonStatus: {
-            type: "DoubleEnergy",
-            energyType: fullType,
-            source: "PlayerStatus",
-          },
-        });
+            true
+          )
+        );
       },
     },
 
@@ -1996,55 +1969,35 @@ export const parseEffect = (
     {
       pattern: /^Your opponent can’t use any Supporter cards from their hand\./i,
       transform: () => {
-        effect.opponentPlayerStatuses.push({
-          type: "CannotUseSupporter",
-          source: "Effect",
-          keepNextTurn: true,
-        });
+        effect.opponentPlayerStatuses.push(PlayerStatus.CannotUseSupporter());
       },
     },
     {
       pattern: /^they can’t play any Item cards from their hand\./i,
       transform: () => {
-        effect.opponentPlayerStatuses.push({
-          type: "CannotUseItem",
-          source: "Effect",
-          keepNextTurn: true,
-        });
+        effect.opponentPlayerStatuses.push(PlayerStatus.CannotUseItem());
       },
     },
     {
-      pattern:
-        /^Your opponent can’t play any Pokémon from their hand to evolve their Active Pokémon\.$/i,
-      transform: () => {
-        effect.opponentPlayerStatuses.push({
-          type: "PokemonStatus",
-          source: "Effect",
-          pokemonCondition: {
-            test: (p) => p === p.player.ActivePokemon,
-            descriptor: "Active Pokémon",
-          },
-          pokemonStatus: { type: "CannotEvolve", source: "PlayerStatus" },
-        });
+      pattern: /^Your opponent can’t play any Pokémon from their hand to evolve their (.+?)\.$/i,
+      transform: (_, descriptor) => {
+        effect.opponentPlayerStatuses.push(
+          parsePokemonPlayerStatus({ type: "CannotEvolve", source: "PlayerStatus" }, descriptor)
+        );
       },
     },
     {
-      pattern:
-        /^they can’t take any Energy from their Energy Zone to attach to their Active Pokémon\./i,
-      transform: () => {
-        effect.opponentPlayerStatuses.push({
-          type: "PokemonStatus",
-          source: "Effect",
-          keepNextTurn: true,
-          pokemonCondition: {
-            test: (pokemon) => pokemon === pokemon.player.ActivePokemon,
-            descriptor: "Active Pokémon",
-          },
-          pokemonStatus: {
-            type: "CannotAttachFromEnergyZone",
-            source: "PlayerStatus",
-          },
-        });
+      pattern: /^they can’t take any Energy from their Energy Zone to attach to their (.+?)\./i,
+      transform: (_, descriptor) => {
+        effect.opponentPlayerStatuses.push(
+          parsePokemonPlayerStatus(
+            {
+              type: "CannotAttachFromEnergyZone",
+              source: "PlayerStatus",
+            },
+            descriptor
+          )
+        );
       },
     },
 

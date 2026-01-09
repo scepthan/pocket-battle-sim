@@ -1,1 +1,1 @@
-export type { PlayerStatus } from "./PlayerStatus";
+export { PlayerStatus, type PokemonPlayerStatus } from "./PlayerStatus";

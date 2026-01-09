@@ -17,7 +17,7 @@ Backend todo:
       - [ ] New conditionals
       - [ ] New effects
         - [ ] Apply ReduceOwnAttackDamage to opponent
-        - [ ] Draw random card from deck
+        - [x] Draw random card from deck
         - [ ] Apply PreventHealing to both players
         - [ ] Apply ExtraPoisonDamage to opponent's Active
         - [ ] Apply ModifyAttackCost(Colorless, +1) to opponent's Active

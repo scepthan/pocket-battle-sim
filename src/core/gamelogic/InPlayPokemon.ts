@@ -9,12 +9,12 @@ import {
   type PlayerStatus,
   type PlayingCard,
   type PokemonCard,
+  type PokemonPlayerStatus,
   type PokemonStatus,
   type PokemonToolCard,
   type PrimaryCondition,
   type SecondaryCondition,
 } from "./types";
-import type { PokemonPlayerStatus } from "./types/playerstatus/PokemonPlayerStatus";
 
 export class InPlayPokemon {
   BaseCard: PokemonCard;
