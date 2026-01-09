@@ -1279,18 +1279,21 @@ export const parseEffect = (
       },
     },
     {
-      pattern: /^Attach (\d+) \{(\w)\} Energy from your discard pile to that Pokémon\.$/i,
+      pattern:
+        /^Attach (\d+) (?:\{(\w)\}|random) Energy from your discard pile to that Pokémon\.$/i,
       transform: (_, count, energyType) => {
-        const fullType = parseEnergy(energyType);
+        const fullType = energyType ? parseEnergy(energyType) : undefined;
+        const energyFilter = (e: Energy) => fullType === undefined || e === fullType;
 
-        effect.implicitConditions.push((player) => player.DiscardedEnergy.includes(fullType));
+        effect.implicitConditions.push((player) => player.DiscardedEnergy.some(energyFilter));
         addSideEffect(async (game, self, heads, target) => {
           if (!target) return;
           const energyToAttach: Energy[] = [];
           for (let i = 0; i < Number(count); i++) {
-            if (!game.AttackingPlayer.DiscardedEnergy.includes(fullType)) break;
-            energyToAttach.push(fullType);
-            removeElement(game.AttackingPlayer.DiscardedEnergy, fullType);
+            if (!game.AttackingPlayer.DiscardedEnergy.some(energyFilter)) break;
+            const e = fullType ?? randomElement(game.AttackingPlayer.DiscardedEnergy)
+            energyToAttach.push(e);
+            removeElement(game.AttackingPlayer.DiscardedEnergy, e);
           }
           await game.AttackingPlayer.attachEnergy(target, energyToAttach, "discard");
         });
@@ -1995,6 +1998,12 @@ export const parseEffect = (
       transform: (_, descriptor) => {
         const predicate = parsePokemonPredicate(descriptor);
         effect.explicitConditions.push((player) => player.InPlayPokemon.some(predicate));
+      },
+    },
+    {
+      pattern: /You can use this card only if your opponent has gotten at least 1 point\./i,
+      transform: () => {
+        effect.explicitConditions.push((player) => player.opponent.GamePoints >= 1);
       },
     },
     {

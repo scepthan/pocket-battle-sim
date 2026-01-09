@@ -9,7 +9,7 @@ Backend todo:
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
   - [x] A3: 157/157 (100%)
-  - [ ] A3a: 61/72 (84.7%)
+  - [ ] A3a: 62/72 (86.1%)
     - [x] Ultra Beasts
     - [ ] Abilities
       - [x] New triggers
@@ -33,7 +33,7 @@ Backend todo:
       - [ ] If opponent has no points, apply ModifyIncomingAttackDamage
       - [x] Switch opponent's (predicate) Active to the Bench
       - [ ] View all (predicate) cards in opponent's deck
-      - [ ] If opponent has any points, attach energy from discard to mon
+      - [x] If opponent has any points, attach energy from discard to mon
     - [ ] Pokemon Tools
       - [x] New triggers
         - [x] On Knocked Out
