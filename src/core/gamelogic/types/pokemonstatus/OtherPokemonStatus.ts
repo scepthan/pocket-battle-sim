@@ -2,13 +2,13 @@ import type { Energy } from "../Energy";
 import type { BasePokemonStatus } from "./PokemonStatus";
 
 // Other statuses
-interface CoinFlipToAttackPokemonStatus extends BasePokemonStatus {
-  type: "CoinFlipToAttack";
-}
 interface ModifyAttackCostPokemonStatus extends BasePokemonStatus {
   type: "ModifyAttackCost";
   energyType: Energy;
   amount: number;
+}
+interface CoinFlipToAttackPokemonStatus extends BasePokemonStatus {
+  type: "CoinFlipToAttack";
 }
 interface CannotUseSpecificAttackPokemonStatus extends BasePokemonStatus {
   type: "CannotUseSpecificAttack";
@@ -41,6 +41,11 @@ interface IncreaseMaxHPPokemonStatus extends BasePokemonStatus {
 interface PreventSpecialConditionsPokemonStatus extends BasePokemonStatus {
   type: "PreventSpecialConditions";
 }
+interface IncreasePoisonDamagePokemonStatus extends BasePokemonStatus {
+  type: "IncreasePoisonDamage";
+  amount: number;
+}
+
 interface CannotEvolvePokemonStatus extends BasePokemonStatus {
   type: "CannotEvolve";
 }
@@ -49,21 +54,37 @@ interface CannotAttachFromEnergyZonePokemonStatus extends BasePokemonStatus {
 }
 
 export type OtherPokemonStatus =
+  | ModifyAttackCostPokemonStatus
+  | CoinFlipToAttackPokemonStatus
+  | CannotUseSpecificAttackPokemonStatus
+  | CannotAttackPokemonStatus
   | CannotRetreatPokemonStatus
   | NoRetreatCostPokemonStatus
   | ModifyRetreatCostPokemonStatus
   | DoubleEnergyPokemonStatus
   | IncreaseMaxHPPokemonStatus
-  | ModifyAttackCostPokemonStatus
   | PreventSpecialConditionsPokemonStatus
+  | IncreasePoisonDamagePokemonStatus
   | CannotEvolvePokemonStatus
-  | CoinFlipToAttackPokemonStatus
-  | CannotUseSpecificAttackPokemonStatus
-  | CannotAttackPokemonStatus
   | CannotAttachFromEnergyZonePokemonStatus;
 
 const source = "Effect";
 export const OtherPokemonStatus = {
+  ModifyAttackCost: (energyType: Energy, amount: number, turnsToKeep?: number) => ({
+    type: "ModifyAttackCost",
+    source,
+    turnsToKeep,
+    energyType,
+    amount,
+  }),
+  CoinFlipToAttack: (turnsToKeep?: number) => ({ type: "CoinFlipToAttack", source, turnsToKeep }),
+  CannotUseSpecificAttack: (attackName: string, turnsToKeep?: number) => ({
+    type: "CannotUseSpecificAttack",
+    source,
+    turnsToKeep,
+    attackName,
+  }),
+  CannotAttack: (turnsToKeep?: number) => ({ type: "CannotAttack", source, turnsToKeep }),
   CannotRetreat: (turnsToKeep?: number) => ({ type: "CannotRetreat", source, turnsToKeep }),
   NoRetreatCost: (turnsToKeep?: number) => ({ type: "NoRetreatCost", source, turnsToKeep }),
   ModifyRetreatCost: (amount: number, turnsToKeep?: number) => ({
@@ -84,27 +105,18 @@ export const OtherPokemonStatus = {
     turnsToKeep,
     amount,
   }),
-  ModifyAttackCost: (energyType: Energy, amount: number, turnsToKeep?: number) => ({
-    type: "ModifyAttackCost",
-    source,
-    turnsToKeep,
-    energyType,
-    amount,
-  }),
   PreventSpecialConditions: (turnsToKeep?: number) => ({
     type: "PreventSpecialConditions",
     source,
     turnsToKeep,
   }),
-  CannotEvolve: (turnsToKeep?: number) => ({ type: "CannotEvolve", source, turnsToKeep }),
-  CoinFlipToAttack: (turnsToKeep?: number) => ({ type: "CoinFlipToAttack", source, turnsToKeep }),
-  CannotUseSpecificAttack: (attackName: string, turnsToKeep?: number) => ({
-    type: "CannotUseSpecificAttack",
+  IncreasePoisonDamage: (amount: number, turnsToKeep?: number) => ({
+    type: "IncreasePoisonDamage",
     source,
     turnsToKeep,
-    attackName,
+    amount,
   }),
-  CannotAttack: (turnsToKeep?: number) => ({ type: "CannotAttack", source, turnsToKeep }),
+  CannotEvolve: (turnsToKeep?: number) => ({ type: "CannotEvolve", source, turnsToKeep }),
   CannotAttachFromEnergyZone: (turnsToKeep?: number) => ({
     type: "CannotAttachFromEnergyZone",
     source,

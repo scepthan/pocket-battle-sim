@@ -1896,6 +1896,14 @@ export const parseEffect = (
         );
       },
     },
+    {
+      pattern: /^Your opponent’s (.+?) takes \+(\d+) damage from being Poisoned\./i,
+      transform: (_, descriptor, amount) => {
+        effect.opponentPlayerStatuses.push(
+          parsePokemonPlayerStatus(PokemonStatus.IncreasePoisonDamage(+amount), descriptor)
+        );
+      },
+    },
 
     // Other side effects
     {

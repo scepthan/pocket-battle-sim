@@ -58,6 +58,15 @@
           this turn</span
         >!
       </p>
+      <p v-else-if="pokemonStatus.type == 'IncreasePoisonDamage'">
+        <b>{{ entry.player }}</b
+        >'s <PokemonDescriptor :text="descriptor" /> will take
+        <SignedNumber :number="pokemonStatus.amount" /> damage from being Poisoned<span
+          v-if="entry.status.source == 'Effect'"
+        >
+          this turn</span
+        >!
+      </p>
       <p v-else>
         Unknown Pokémon status applied to <b>{{ entry.player }}</b
         >'s <PokemonDescriptor :text="descriptor" />: {{ pokemonStatus.type }}

@@ -267,7 +267,10 @@ export class Game {
     for (const pokemon of [attacker, defender]) {
       if (pokemon.isPoisoned()) {
         const initialHP = pokemon.CurrentHP;
-        const damage = pokemon.SecondaryConditions.has("Poisoned+") ? 20 : 10;
+        let damage = pokemon.SecondaryConditions.has("Poisoned+") ? 20 : 10;
+        for (const status of pokemon.PokemonStatuses) {
+          if (status.type === "IncreasePoisonDamage") damage += status.amount;
+        }
 
         pokemon.applyDamage(damage);
         this.GameLog.specialConditionDamage(pokemon, "Poisoned", initialHP, damage);
