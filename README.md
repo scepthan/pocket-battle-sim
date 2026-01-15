@@ -9,7 +9,7 @@ Backend todo:
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
   - [x] A3: 157/157 (100%)
-  - [ ] A3a: 65/72 (90.3%)
+  - [ ] A3a: 66/72 (91.7%)
     - [x] Ultra Beasts
     - [ ] Abilities
       - [x] New triggers
@@ -34,14 +34,14 @@ Backend todo:
       - [x] Switch opponent's (predicate) Active to the Bench
       - [ ] View all (predicate) cards in opponent's deck
       - [x] If opponent has any points, attach energy from discard to mon
-    - [ ] Pokemon Tools
+    - [x] Pokemon Tools
       - [x] New triggers
         - [x] On Knocked Out
-      - [ ] New effects
-        - [ ] Move energy from this mon to Benched mon
+      - [x] New effects
+        - [x] Move energy from this mon to Benched mon
         - [x] Do extra damage per point scored
-    - [ ] New Pokemon Statuses
-      - [ ] PreventHealing
+    - [x] New Pokemon Statuses
+      - [x] PreventHealing
       - [x] IncreasePoisonDamage
     - [x] New Pokemon predicates
       - [x] Ultra Beast

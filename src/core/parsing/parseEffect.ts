@@ -70,7 +70,7 @@ export const statusesToSideEffects = (effect: ParsedEffect) => {
   }
   for (const status of effect.opponentPokemonStatuses) {
     applyConditionalIfAvailable(async (game, self) => {
-      game.applyPokemonStatus(self.player.opponent.activeOrThrow(), Object.assign({}, status));
+      game.applyPokemonStatus(self.opponent.activeOrThrow(), Object.assign({}, status));
     });
   }
   for (const status of effect.selfPlayerStatuses) {
@@ -80,7 +80,7 @@ export const statusesToSideEffects = (effect: ParsedEffect) => {
   }
   for (const status of effect.opponentPlayerStatuses) {
     applyConditionalIfAvailable(async (game, self) => {
-      self.player.opponent.applyPlayerStatus(Object.assign({}, status));
+      self.opponent.applyPlayerStatus(Object.assign({}, status));
     });
   }
 
@@ -261,7 +261,7 @@ export const parseEffect = (
     {
       pattern: /^Flip a coin for each Pokémon you have in play\./i,
       transform: () => {
-        effect.coinsToFlip = (game) => game.AttackingPlayer.InPlayPokemon.length;
+        effect.coinsToFlip = (game, self) => self.player.InPlayPokemon.length;
       },
     },
 
@@ -364,12 +364,12 @@ export const parseEffect = (
     {
       pattern: /^If this Pokémon moved from your Bench to the Active Spot this turn,/i,
       transform: () => {
-        conditionalForNextEffect = (game) => {
+        conditionalForNextEffect = (game, self) => {
           // If any switching has happened this turn, then this condition is necessarily met
           const switchingEvents = game.GameLog.currentTurn.filter(
             (event) => event.type === "selectActivePokemon" || event.type === "swapActivePokemon"
           );
-          return switchingEvents.some((event) => event.player === game.AttackingPlayer.Name);
+          return switchingEvents.some((event) => event.player === self.player.Name);
         };
       },
     },
@@ -378,60 +378,60 @@ export const parseEffect = (
     {
       pattern: /^If your opponent’s Active Pokémon has damage on it,/i,
       transform: () => {
-        conditionalForNextEffect = (game) => game.DefendingPlayer.activeOrThrow().isDamaged();
+        conditionalForNextEffect = (game, self) => self.opponent.activeOrThrow().isDamaged();
       },
     },
     {
       pattern: /^If your opponent’s Active Pokémon has more remaining HP than this Pokémon,/i,
       transform: () => {
         conditionalForNextEffect = (game, self) =>
-          game.DefendingPlayer.activeOrThrow().CurrentHP > self.CurrentHP;
+          self.opponent.activeOrThrow().CurrentHP > self.CurrentHP;
       },
     },
     {
       pattern: /^If your opponent’s Active Pokémon is Poisoned,/i,
       transform: () => {
-        conditionalForNextEffect = (game) => game.DefendingPlayer.activeOrThrow().isPoisoned();
+        conditionalForNextEffect = (game, self) => self.opponent.activeOrThrow().isPoisoned();
       },
     },
     {
       pattern: /^If your opponent’s Active Pokémon is affected by a Special Condition,/i,
       transform: () => {
-        conditionalForNextEffect = (game) =>
-          game.DefendingPlayer.activeOrThrow().hasSpecialCondition();
+        conditionalForNextEffect = (game, self) =>
+          self.opponent.activeOrThrow().hasSpecialCondition();
       },
     },
     {
       pattern: /^If your opponent’s Active Pokémon is a ([^,]+?),/i,
       transform: (_, descriptor) => {
         const predicate = parsePokemonPredicate(descriptor);
-        conditionalForNextEffect = (game) => predicate(game.DefendingPlayer.activeOrThrow());
+        conditionalForNextEffect = (game, self) => predicate(self.opponent.activeOrThrow());
       },
     },
     {
       pattern: /^If your opponent’s Active Pokémon has an Ability,/i,
       transform: () => {
-        conditionalForNextEffect = (game) =>
-          game.DefendingPlayer.activeOrThrow().Ability !== undefined;
+        conditionalForNextEffect = (game, self) =>
+          self.opponent.activeOrThrow().Ability !== undefined;
       },
     },
     {
       pattern: /^If your opponent’s Active Pokémon has a Pokémon Tool attached,/i,
       transform: () => {
-        conditionalForNextEffect = (game) =>
-          game.DefendingPlayer.activeOrThrow().AttachedToolCards.length > 0;
+        conditionalForNextEffect = (game, self) =>
+          self.opponent.activeOrThrow().AttachedToolCards.length > 0;
       },
     },
     {
       pattern: /^If your opponent’s Pokémon is knocked out by damage from this attack,/i,
       transform: () => {
-        conditionalForNextEffect = (game) => {
+        conditionalForNextEffect = (game, self) => {
           const damageEvents = game.GameLog.currentTurn.filter(
             (event) => event.type === "pokemonDamaged"
           );
           const activeAttackEvent = damageEvents.find(
             (event) =>
-              event.player === game.DefendingPlayer.Name &&
+              event.player === self.opponent.Name &&
               event.targetPokemon.location === "active" &&
               event.fromAttack
           );
@@ -484,8 +484,8 @@ export const parseEffect = (
       pattern:
         /^This attack does (\d+)( more)? damage for each Energy attached to your opponent’s Active Pokémon\./i,
       transform: (_, damagePerEnergy, more) => {
-        effect.calculateDamage = (game) => {
-          const energyCount = game.DefendingPlayer.activeOrThrow().EffectiveEnergy.length;
+        effect.calculateDamage = (game, self) => {
+          const energyCount = self.opponent.activeOrThrow().EffectiveEnergy.length;
           return (more ? baseDamage : 0) + energyCount * Number(damagePerEnergy);
         };
       },
@@ -494,8 +494,8 @@ export const parseEffect = (
       pattern:
         /^This attack does (\d+)( more)? damage for each of your opponent’s Benched Pokémon\./i,
       transform: (_, damagePerBench, more) => {
-        effect.calculateDamage = (game) => {
-          const benchedCount = game.DefendingPlayer.BenchedPokemon.length;
+        effect.calculateDamage = (game, self) => {
+          const benchedCount = self.opponent.BenchedPokemon.length;
           return (more ? baseDamage : 0) + benchedCount * Number(damagePerBench);
         };
       },
@@ -505,8 +505,8 @@ export const parseEffect = (
       transform: (_, damageEach, more, descriptor) => {
         const predicate = parsePokemonPredicate(descriptor);
 
-        effect.calculateDamage = (game) => {
-          const pokemonCount = game.AttackingPlayer.InPlayPokemon.filter(predicate).length;
+        effect.calculateDamage = (game, self) => {
+          const pokemonCount = self.player.InPlayPokemon.filter(predicate).length;
           return (more ? baseDamage : 0) + pokemonCount * Number(damageEach);
         };
       },
@@ -520,8 +520,8 @@ export const parseEffect = (
     {
       pattern: /^1 of your opponent’s Pokémon is chosen at random\. Do (\d+) damage to it\./i,
       transform: (_, damage) => {
-        effect.attackingEffects.push(async (game) => {
-          const pokemon = randomElement(game.DefendingPlayer.InPlayPokemon);
+        effect.attackingEffects.push(async (game, self) => {
+          const pokemon = randomElement(self.opponent.InPlayPokemon);
           game.attackPokemon(pokemon, Number(damage));
         });
       },
@@ -530,8 +530,8 @@ export const parseEffect = (
       pattern:
         /^1 of your opponent’s Pokémon is chosen at random (\d+) times\. For each time a Pokémon was chosen, do (\d+) damage to it\./i,
       transform: (_, times, damage) => {
-        effect.attackingEffects.push(async (game) => {
-          const damages = game.DefendingPlayer.InPlayPokemon.map((p) => ({
+        effect.attackingEffects.push(async (game, self) => {
+          const damages = self.opponent.InPlayPokemon.map((p) => ({
             pokemon: p,
             damage: 0,
           }));
@@ -547,8 +547,8 @@ export const parseEffect = (
     {
       pattern: /^Halve your opponent’s Active Pokémon’s remaining HP, rounded down\./i,
       transform: () => {
-        effect.attackingEffects.push(async (game) => {
-          const defender = game.DefendingPlayer.activeOrThrow();
+        effect.attackingEffects.push(async (game, self) => {
+          const defender = self.opponent.activeOrThrow();
           const targetHp = Math.floor(defender.CurrentHP / 2 / 10) * 10;
           game.setHP(defender, targetHp);
         });
@@ -558,7 +558,7 @@ export const parseEffect = (
       pattern: /^do (\d+) damage to (?:the Attacking Pokémon|your opponent’s Active Pokémon)\.$/i,
       transform: (_, damage) => {
         addSideEffect(async (game, self) => {
-          game.applyDamage(self.player.opponent.activeOrThrow(), Number(damage), false);
+          game.applyDamage(self.opponent.activeOrThrow(), Number(damage), false);
         });
       },
     },
@@ -569,8 +569,8 @@ export const parseEffect = (
       transform: (_, benchDamage, descriptor) => {
         const dmg = Number(benchDamage);
         const predicate = parsePokemonPredicate(descriptor);
-        const benchDamageEffect = applyConditionalIfAvailable(async (game) => {
-          for (const p of game.DefendingPlayer.BenchedPokemon) {
+        const benchDamageEffect = applyConditionalIfAvailable(async (game, self) => {
+          for (const p of self.opponent.BenchedPokemon) {
             if (predicate(p)) game.attackPokemon(p, dmg);
           }
         });
@@ -603,8 +603,8 @@ export const parseEffect = (
       pattern: /^This attack does (\d+) damage to each of your opponent’s Pokémon\./i,
       transform: (_, damage) => {
         const dmg = Number(damage);
-        const attackEffect = applyConditionalIfAvailable(async (game) => {
-          for (const pokemon of game.DefendingPlayer.InPlayPokemon) {
+        const attackEffect = applyConditionalIfAvailable(async (game, self) => {
+          for (const pokemon of self.opponent.InPlayPokemon) {
             game.attackPokemon(pokemon, dmg);
           }
         });
@@ -615,7 +615,7 @@ export const parseEffect = (
       pattern: /^do (\d+) damage to your opponent’s Active Pokémon\.$/i,
       transform: (_, damage) => {
         addSideEffect(async (game, self) => {
-          game.applyDamage(self.player.opponent.activeOrThrow(), Number(damage), false);
+          game.applyDamage(self.opponent.activeOrThrow(), Number(damage), false);
         });
       },
     },
@@ -670,7 +670,7 @@ export const parseEffect = (
           );
           const activeAttackEvent = damageEvents.find(
             (event) =>
-              event.player === game.DefendingPlayer.Name &&
+              event.player === self.opponent.Name &&
               event.targetPokemon.location === "active" &&
               event.fromAttack
           );
@@ -684,8 +684,8 @@ export const parseEffect = (
       transform: (_, healing, descriptor) => {
         const predicate = parsePokemonPredicate(descriptor, (p) => p.isDamaged());
         effect.implicitConditions.push((player) => player.InPlayPokemon.some(predicate));
-        addSideEffect(async (game) => {
-          for (const pokemon of game.AttackingPlayer.InPlayPokemon.filter(predicate)) {
+        addSideEffect(async (game, self) => {
+          for (const pokemon of self.player.InPlayPokemon.filter(predicate)) {
             pokemon.healDamage(Number(healing));
           }
         });
@@ -695,8 +695,8 @@ export const parseEffect = (
       pattern: /^heal (\d+) damage from your Active Pokémon\.$/i,
       transform: (_, modifier) => {
         effect.implicitConditions.push((player) => player.activeOrThrow().isDamaged());
-        addSideEffect(async (game) => {
-          const active = game.AttackingPlayer.activeOrThrow();
+        addSideEffect(async (game, self) => {
+          const active = self.player.activeOrThrow();
           active.healDamage(Number(modifier));
         });
       },
@@ -709,8 +709,8 @@ export const parseEffect = (
           const active = player.activeOrThrow();
           return active.isDamaged() || active.hasSpecialCondition();
         });
-        addSideEffect(async (game) => {
-          const active = game.AttackingPlayer.activeOrThrow();
+        addSideEffect(async (game, self) => {
+          const active = self.player.activeOrThrow();
           active.healDamage(Number(modifier));
           active.removeRandomSpecialCondition();
         });
@@ -775,7 +775,7 @@ export const parseEffect = (
         addSideEffect(async (game, self, heads, target) => {
           if (!target) return;
           const damageHealed = target.healDamage(Number(amount));
-          game.applyDamage(game.DefendingPlayer.activeOrThrow(), damageHealed, false);
+          game.applyDamage(self.opponent.activeOrThrow(), damageHealed, false);
         });
       },
     },
@@ -806,16 +806,16 @@ export const parseEffect = (
       transform: (_, count) => {
         const cardCount = count == "a" ? 1 : Number(count);
         effect.implicitConditions.push((player) => player.canDraw(true));
-        addSideEffect(async (game) => game.AttackingPlayer.drawCards(cardCount));
+        addSideEffect(async (game, self) => self.player.drawCards(cardCount));
       },
     },
     {
       pattern:
         /^Shuffle your hand into your deck\. Draw a card for each card in your opponent’s hand\./i,
       transform: () => {
-        addSideEffect(async (game) => {
-          game.AttackingPlayer.shuffleHandIntoDeck();
-          game.AttackingPlayer.drawCards(game.DefendingPlayer.Hand.length);
+        addSideEffect(async (game, self) => {
+          self.player.shuffleHandIntoDeck();
+          self.player.drawCards(self.opponent.Hand.length);
         });
       },
     },
@@ -824,8 +824,8 @@ export const parseEffect = (
       transform: (_, descriptor) => {
         const predicate = parsePlayingCardPredicate(descriptor);
         effect.implicitConditions.push((player) => player.canDraw());
-        addSideEffect(async (game) => {
-          game.AttackingPlayer.drawRandomFilteredToHand(predicate);
+        addSideEffect(async (game, self) => {
+          self.player.drawRandomFilteredToHand(predicate);
         });
       },
     },
@@ -836,8 +836,8 @@ export const parseEffect = (
         effect.implicitConditions.push(
           (player) => player.canDraw(true) && player.Bench.some((p) => !p.isPokemon)
         );
-        addSideEffect(async (game) => {
-          await game.AttackingPlayer.playRandomFilteredToBench(predicate);
+        addSideEffect(async (game, self) => {
+          await self.player.playRandomFilteredToBench(predicate);
         });
       },
     },
@@ -848,16 +848,16 @@ export const parseEffect = (
         const predicate = parsePlayingCardPredicate(descriptor);
 
         effect.implicitConditions.push((player) => player.canDraw(true));
-        addSideEffect(async (game) => {
-          const topCard = game.AttackingPlayer.Deck.shift()!;
-          await game.showCards(game.AttackingPlayer, [topCard]);
+        addSideEffect(async (game, self) => {
+          const topCard = self.player.Deck.shift()!;
+          await game.showCards(self.player, [topCard]);
 
           if (predicate(topCard)) {
-            game.AttackingPlayer.Hand.push(topCard);
-            game.GameLog.putIntoHand(game.AttackingPlayer, [topCard]);
+            self.player.Hand.push(topCard);
+            game.GameLog.putIntoHand(self.player, [topCard]);
           } else {
-            game.AttackingPlayer.Deck.push(topCard);
-            game.GameLog.returnToBottomOfDeck(game.AttackingPlayer, [topCard]);
+            self.player.Deck.push(topCard);
+            game.GameLog.returnToBottomOfDeck(self.player, [topCard]);
           }
         });
       },
@@ -867,27 +867,27 @@ export const parseEffect = (
       transform: (_, descriptor) => {
         const predicate = parsePlayingCardPredicate(descriptor);
         effect.implicitConditions.push((player) => player.Hand.some(predicate));
-        addSideEffect(async (game) => {
-          const validHandCards = game.AttackingPlayer.Hand.filter(predicate);
-          const chosen = await game.chooseCard(game.AttackingPlayer, validHandCards);
+        addSideEffect(async (game, self) => {
+          const validHandCards = self.player.Hand.filter(predicate);
+          const chosen = await game.chooseCard(self.player, validHandCards);
           if (!chosen) return;
 
-          const validDeckCards = game.AttackingPlayer.Deck.filter(predicate);
+          const validDeckCards = self.player.Deck.filter(predicate);
           if (validDeckCards.length == 0) {
-            game.GameLog.noValidCards(game.AttackingPlayer);
+            game.GameLog.noValidCards(self.player);
             return;
           }
           const pokemonFromDeck = randomElement(validDeckCards);
 
-          removeElement(game.AttackingPlayer.Hand, chosen);
-          game.AttackingPlayer.Deck.push(chosen);
-          game.GameLog.returnToDeck(game.AttackingPlayer, [chosen], "hand");
+          removeElement(self.player.Hand, chosen);
+          self.player.Deck.push(chosen);
+          game.GameLog.returnToDeck(self.player, [chosen], "hand");
 
-          removeElement(game.AttackingPlayer.Deck, pokemonFromDeck);
-          game.AttackingPlayer.Hand.push(pokemonFromDeck);
-          game.GameLog.putIntoHand(game.AttackingPlayer, [pokemonFromDeck]);
+          removeElement(self.player.Deck, pokemonFromDeck);
+          self.player.Hand.push(pokemonFromDeck);
+          game.GameLog.putIntoHand(self.player, [pokemonFromDeck]);
 
-          game.AttackingPlayer.shuffleDeck();
+          self.player.shuffleDeck();
         });
       },
     },
@@ -896,20 +896,20 @@ export const parseEffect = (
       transform: (_, descriptor) => {
         const predicate = parsePlayingCardPredicate(descriptor);
         effect.implicitConditions.push((player) => player.Discard.some(predicate));
-        addSideEffect(async (game) => {
-          const validCards = game.AttackingPlayer.Discard.filter(predicate);
+        addSideEffect(async (game, self) => {
+          const validCards = self.player.Discard.filter(predicate);
           const card = randomElement(validCards);
-          removeElement(game.AttackingPlayer.Discard, card);
-          game.AttackingPlayer.Hand.push(card);
-          game.GameLog.putIntoHand(game.AttackingPlayer, [card]);
+          removeElement(self.player.Discard, card);
+          self.player.Hand.push(card);
+          game.GameLog.putIntoHand(self.player, [card]);
         });
       },
     },
     {
       pattern: /^Discard the top (\d+) cards of your deck\./i,
       transform: (_, count) => {
-        addSideEffect(async (game) => {
-          game.AttackingPlayer.discardTopOfDeck(Number(count));
+        addSideEffect(async (game, self) => {
+          self.player.discardTopOfDeck(Number(count));
         });
       },
     },
@@ -918,8 +918,8 @@ export const parseEffect = (
     {
       pattern: /^Your opponent shuffles their hand into their deck and draws (\d+) cards\.$/i,
       transform: (_, count) => {
-        addSideEffect(async (game) => {
-          game.DefendingPlayer.shuffleHandIntoDeckAndDraw(Number(count));
+        addSideEffect(async (game, self) => {
+          self.opponent.shuffleHandIntoDeckAndDraw(Number(count));
         });
       },
     },
@@ -927,9 +927,9 @@ export const parseEffect = (
       pattern:
         /^Your opponent shuffles their hand into their deck and draws a card for each of their remaining points needed to win\.$/i,
       transform: () => {
-        addSideEffect(async (game) => {
-          const cardsToDraw = game.GameRules.PrizePoints - game.DefendingPlayer.GamePoints;
-          game.DefendingPlayer.shuffleHandIntoDeckAndDraw(cardsToDraw);
+        addSideEffect(async (game, self) => {
+          const cardsToDraw = game.GameRules.PrizePoints - self.opponent.GamePoints;
+          self.opponent.shuffleHandIntoDeckAndDraw(cardsToDraw);
         });
       },
     },
@@ -947,8 +947,8 @@ export const parseEffect = (
       pattern: /^discard a random (.+?) from your opponent’s hand\./i,
       transform: (_, descriptor) => {
         const predicate = parsePlayingCardPredicate(descriptor);
-        addSideEffect(async (game) => {
-          game.DefendingPlayer.discardRandomFiltered(predicate);
+        addSideEffect(async (game, self) => {
+          self.opponent.discardRandomFiltered(predicate);
         });
       },
     },
@@ -956,10 +956,10 @@ export const parseEffect = (
       pattern:
         /^Your opponent reveals their hand\. Choose a card you find there and shuffle it into your opponent’s deck\./i,
       transform: () => {
-        addSideEffect(async (game) => {
-          const card = await game.chooseCard(game.AttackingPlayer, game.DefendingPlayer.Hand);
+        addSideEffect(async (game, self) => {
+          const card = await game.chooseCard(self.player, self.opponent.Hand);
           if (!card) return;
-          game.DefendingPlayer.returnToDeck([card]);
+          self.opponent.returnToDeck([card]);
         });
       },
     },
@@ -967,11 +967,11 @@ export const parseEffect = (
       pattern:
         /^your opponent reveals a random card from their hand and shuffles it into their deck\./i,
       transform: () => {
-        addSideEffect(async (game) => {
-          if (game.DefendingPlayer.Hand.length === 0) return;
-          const card = randomElement(game.DefendingPlayer.Hand);
-          await game.showCards(game.AttackingPlayer, [card]);
-          game.DefendingPlayer.returnToDeck([card]);
+        addSideEffect(async (game, self) => {
+          if (self.opponent.Hand.length === 0) return;
+          const card = randomElement(self.opponent.Hand);
+          await game.showCards(self.player, [card]);
+          self.opponent.returnToDeck([card]);
         });
       },
     },
@@ -980,21 +980,21 @@ export const parseEffect = (
         /^For each heads, a card is chosen at random from your opponent’s hand\. Your opponent reveals that card and shuffles it into their deck\./i,
       transform: () => {
         addSideEffect(async (game, self, heads) => {
-          if (game.DefendingPlayer.Hand.length === 0 || heads === 0) return;
+          if (self.opponent.Hand.length === 0 || heads === 0) return;
           const cards = [];
-          while (heads-- > 0 && game.DefendingPlayer.Hand.length > 0) {
-            cards.push(randomElement(game.DefendingPlayer.Hand));
+          while (heads-- > 0 && self.opponent.Hand.length > 0) {
+            cards.push(randomElement(self.opponent.Hand));
           }
-          await game.showCards(game.AttackingPlayer, cards);
-          game.DefendingPlayer.returnToDeck(cards);
+          await game.showCards(self.player, cards);
+          self.opponent.returnToDeck(cards);
         });
       },
     },
     {
       pattern: /^Your opponent reveals their hand\./i,
       transform: () => {
-        addSideEffect(async (game) => {
-          await game.showCards(game.AttackingPlayer, game.DefendingPlayer.Hand);
+        addSideEffect(async (game, self) => {
+          await game.showCards(self.player, self.opponent.Hand);
         });
       },
     },
@@ -1004,11 +1004,8 @@ export const parseEffect = (
       pattern: /^Look at the top (\d+) cards of your deck\.$/i,
       transform: (_, count) => {
         effect.implicitConditions.push((player) => player.Deck.length > 0);
-        addSideEffect(async (game) => {
-          await game.showCards(
-            game.AttackingPlayer,
-            game.AttackingPlayer.Deck.slice(0, Number(count))
-          );
+        addSideEffect(async (game, self) => {
+          await game.showCards(self.player, self.player.Deck.slice(0, Number(count)));
         });
       },
     },
@@ -1016,17 +1013,17 @@ export const parseEffect = (
       pattern: /^Look at the top card of your deck\./i,
       transform: () => {
         effect.implicitConditions.push((player) => player.Deck.length > 0);
-        addSideEffect(async (game) => {
-          await game.showCards(game.AttackingPlayer, game.AttackingPlayer.Deck.slice(0, 1));
+        addSideEffect(async (game, self) => {
+          await game.showCards(self.player, self.player.Deck.slice(0, 1));
         });
       },
     },
     {
       pattern: /^Then, you may shuffle your deck\./i,
       transform: () => {
-        addSideEffect(async (game) => {
-          const choice = await game.chooseYesNo(game.AttackingPlayer, "Shuffle deck?");
-          if (choice) game.AttackingPlayer.shuffleDeck();
+        addSideEffect(async (game, self) => {
+          const choice = await game.chooseYesNo(self.player, "Shuffle deck?");
+          if (choice) self.player.shuffleDeck();
         });
       },
     },
@@ -1035,7 +1032,7 @@ export const parseEffect = (
       transform: () => {
         effect.implicitConditions.push((player) => player.Deck.length > 0);
         addSideEffect(async (game, self) => {
-          const options = { Self: self.player, Opponent: self.player.opponent };
+          const options = { Self: self.player, Opponent: self.opponent };
           const chosenPlayer = await game.choose(self.player, options, "Choose a player.");
           if (!chosenPlayer) throw new Error("No player chosen");
 
@@ -1073,7 +1070,7 @@ export const parseEffect = (
       pattern: /^Discard a random Energy from your opponent’s Active Pokémon\./i,
       transform: () => {
         addSideEffect(
-          async (game) => await game.discardRandomEnergy(game.DefendingPlayer.activeOrThrow())
+          async (game, self) => await game.discardRandomEnergy(self.opponent.activeOrThrow())
         );
       },
     },
@@ -1081,17 +1078,17 @@ export const parseEffect = (
       pattern: /^For each heads, discard a random Energy from your opponent’s Active Pokémon\.$/i,
       transform: () => {
         addSideEffect(async (game, self, heads) => {
-          const active = game.DefendingPlayer.activeOrThrow();
-          await game.DefendingPlayer.discardRandomEnergyFromPokemon(active, heads);
+          const active = self.opponent.activeOrThrow();
+          await self.opponent.discardRandomEnergyFromPokemon(active, heads);
         });
       },
     },
     {
       pattern: /^Discard a random Energy from both Active Pokémon\./i,
       transform: () => {
-        addSideEffect(async (game) => {
+        addSideEffect(async (game, self) => {
           await game.discardRandomEnergy(game.AttackingPlayer.activeOrThrow());
-          await game.discardRandomEnergy(game.DefendingPlayer.activeOrThrow());
+          await game.discardRandomEnergy(self.opponent.activeOrThrow());
         });
       },
     },
@@ -1100,12 +1097,8 @@ export const parseEffect = (
         /^Discard a random Energy from among the Energy attached to all Pokémon \(both yours and your opponent’s\)\./i,
       transform: () => {
         addSideEffect(async (game) => {
-          const allPokemon = [
-            ...game.AttackingPlayer.InPlayPokemon,
-            ...game.DefendingPlayer.InPlayPokemon,
-          ];
           const allEnergy: { pokemon: InPlayPokemon; energy: Energy }[] = [];
-          for (const p of allPokemon) {
+          for (const p of game.InPlayPokemon) {
             for (const e of p.AttachedEnergy) {
               allEnergy.push({ pokemon: p, energy: e });
             }
@@ -1125,7 +1118,7 @@ export const parseEffect = (
         const energy = new Array(energyCount).fill(parseEnergy(type));
 
         addSideEffect(async (game, self) => {
-          await game.AttackingPlayer.attachEnergy(self, energy, "energyZone");
+          await self.player.attachEnergy(self, energy, "energyZone");
           if (endTurn) game.endTurnResolve(true);
         });
       },
@@ -1143,7 +1136,7 @@ export const parseEffect = (
 
         addSideEffect(async (game, self, heads, target) => {
           if (!target) return;
-          await game.AttackingPlayer.attachEnergy(target, energy, "energyZone");
+          await self.player.attachEnergy(target, energy, "energyZone");
           if (endTurn) game.endTurnResolve(true);
         });
       },
@@ -1151,15 +1144,14 @@ export const parseEffect = (
     {
       pattern:
         /^Choose 2 of your ([^.]+?)\. For each of those Pokémon, take a \{(\w)\} Energy from your Energy Zone and attach it to that Pokémon\./i,
-      transform: (_, pokemonSpecifier, type) => {
+      transform: (_, descriptor, type) => {
         const energy = parseEnergy(type);
-        const predicate = parsePokemonPredicate(pokemonSpecifier);
+        const predicate = parsePokemonPredicate(descriptor);
 
-        addSideEffect(async (game) => {
-          const pokemon = game.AttackingPlayer.InPlayPokemon.filter(predicate);
-          const chosenPokemon = await game.chooseNPokemon(game.AttackingPlayer, pokemon, 2);
-          for (const p of chosenPokemon)
-            await game.AttackingPlayer.attachEnergy(p, [energy], "energyZone");
+        addSideEffect(async (game, self) => {
+          const pokemon = self.player.InPlayPokemon.filter(predicate);
+          const chosenPokemon = await game.chooseNPokemon(self.player, pokemon, 2);
+          for (const p of chosenPokemon) await self.player.attachEnergy(p, [energy], "energyZone");
         });
       },
     },
@@ -1171,16 +1163,12 @@ export const parseEffect = (
         const predicate = parsePokemonPredicate(pokemonSpecifier);
 
         addSideEffect(async (game, self, heads) => {
-          const validPokemon = game.AttackingPlayer.InPlayPokemon.filter(predicate);
+          const validPokemon = self.player.InPlayPokemon.filter(predicate);
           if (validPokemon.length == 0) {
-            game.GameLog.noValidTargets(game.AttackingPlayer);
+            game.GameLog.noValidTargets(self.player);
             return;
           }
-          await game.distributeEnergy(
-            game.AttackingPlayer,
-            new Array(heads).fill(et),
-            validPokemon
-          );
+          await game.distributeEnergy(self.player, new Array(heads).fill(et), validPokemon);
         });
       },
     },
@@ -1192,7 +1180,7 @@ export const parseEffect = (
 
         addSideEffect(async (game, self, heads, target) => {
           if (!target) return;
-          await game.AttackingPlayer.attachEnergy(target, new Array(heads).fill(et), "energyZone");
+          await self.player.attachEnergy(target, new Array(heads).fill(et), "energyZone");
         });
       },
     },
@@ -1208,12 +1196,12 @@ export const parseEffect = (
           if (!target) return;
           const energyToAttach: Energy[] = [];
           for (let i = 0; i < Number(count); i++) {
-            if (!game.AttackingPlayer.DiscardedEnergy.some(energyFilter)) break;
-            const e = fullType ?? randomElement(game.AttackingPlayer.DiscardedEnergy);
+            if (!self.player.DiscardedEnergy.some(energyFilter)) break;
+            const e = fullType ?? randomElement(self.player.DiscardedEnergy);
             energyToAttach.push(e);
-            removeElement(game.AttackingPlayer.DiscardedEnergy, e);
+            removeElement(self.player.DiscardedEnergy, e);
           }
-          await game.AttackingPlayer.attachEnergy(target, energyToAttach, "discard");
+          await self.player.attachEnergy(target, energyToAttach, "discard");
         });
       },
     },
@@ -1227,15 +1215,11 @@ export const parseEffect = (
         const predicate = parsePokemonPredicate(descriptor);
 
         effect.implicitConditions.push((player) => predicate(player.activeOrThrow()));
-        addSideEffect(async (game) => {
-          for (const pokemon of game.AttackingPlayer.BenchedPokemon) {
+        addSideEffect(async (game, self) => {
+          for (const pokemon of self.player.BenchedPokemon) {
             const energyToMove = pokemon.AttachedEnergy.filter((e) => e == fullType);
             if (energyToMove.length > 0) {
-              await game.AttackingPlayer.transferEnergy(
-                pokemon,
-                game.AttackingPlayer.activeOrThrow(),
-                energyToMove
-              );
+              await self.player.transferEnergy(pokemon, self.player.activeOrThrow(), energyToMove);
             }
           }
         });
@@ -1284,6 +1268,26 @@ export const parseEffect = (
         });
       },
     },
+    {
+      pattern:
+        /^move 2 \{(\w)\} Energy from that Pokémon and attach 1 Energy each to 2 of your ([^.]+?)\./i,
+      transform: (_, type, descriptor) => {
+        const energy = parseEnergy(type);
+        const predicate = parsePokemonPredicate(descriptor);
+        effect.implicitConditions.push(
+          (player, pokemon) =>
+            pokemon.AttachedEnergy.filter((e) => e === energy).length > 0 &&
+            player.InPlayPokemon.filter(predicate).length > 0
+        );
+
+        addSideEffect(async (game, self) => {
+          const energyCount = Math.min(2, self.AttachedEnergy.filter((e) => e === energy).length);
+          const pokemon = self.player.InPlayPokemon.filter(predicate);
+          const chosenPokemon = await game.chooseNPokemon(self.player, pokemon, energyCount);
+          for (const p of chosenPokemon) await self.player.transferEnergy(self, p, [energy]);
+        });
+      },
+    },
 
     // Pokemon Tool effects
     {
@@ -1292,8 +1296,8 @@ export const parseEffect = (
         effect.implicitConditions.push((player) =>
           player.opponent.InPlayPokemon.some((p) => p.AttachedToolCards.length > 0)
         );
-        addSideEffect(async (game) => {
-          for (const pokemon of game.DefendingPlayer.InPlayPokemon) {
+        addSideEffect(async (game, self) => {
+          for (const pokemon of self.opponent.InPlayPokemon) {
             await game.discardPokemonTools(pokemon);
           }
         });
@@ -1313,7 +1317,7 @@ export const parseEffect = (
         effect.validTargets = (player) => player.BenchedPokemon.filter(benchPredicate);
         addSideEffect(async (game, self, heads, target) => {
           if (!target) return;
-          await game.AttackingPlayer.swapActivePokemon(target, "selfEffect");
+          await self.player.swapActivePokemon(target, "selfEffect");
         });
       },
     },
@@ -1321,7 +1325,7 @@ export const parseEffect = (
       pattern: /^switch it with your Active Pokémon\./i,
       transform: () => {
         addSideEffect(async (game, self) => {
-          await game.AttackingPlayer.swapActivePokemon(self, "selfEffect");
+          await self.player.swapActivePokemon(self, "selfEffect");
         });
       },
     },
@@ -1331,8 +1335,8 @@ export const parseEffect = (
         const predicate = parsePokemonPredicate(descriptor);
 
         effect.implicitConditions.push((player) => predicate(player.activeOrThrow()));
-        addSideEffect(async (game) => {
-          await game.AttackingPlayer.returnPokemonToHand(game.AttackingPlayer.activeOrThrow());
+        addSideEffect(async (game, self) => {
+          await self.player.returnPokemonToHand(self.player.activeOrThrow());
         });
       },
     },
@@ -1344,7 +1348,7 @@ export const parseEffect = (
         effect.validTargets = (player) => player.InPlayPokemon.filter(predicate);
         addSideEffect(async (game, self, heads, target) => {
           if (!target) return;
-          await game.AttackingPlayer.returnPokemonToHand(target);
+          await self.player.returnPokemonToHand(target);
         });
       },
     },
@@ -1357,8 +1361,8 @@ export const parseEffect = (
           (player) =>
             predicate(player.opponent.activeOrThrow()) && player.opponent.BenchedPokemon.length > 0
         );
-        addSideEffect(async (game) => {
-          await game.chooseNewActivePokemon(game.DefendingPlayer);
+        addSideEffect(async (game, self) => {
+          await game.chooseNewActivePokemon(self.opponent);
         });
       },
     },
@@ -1369,27 +1373,23 @@ export const parseEffect = (
         effect.validTargets = (player) => player.opponent.BenchedPokemon.filter(predicate);
         addSideEffect(async (game, self, heads, target) => {
           if (!target) return;
-          await game.DefendingPlayer.swapActivePokemon(
-            target,
-            "opponentEffect",
-            game.AttackingPlayer.Name
-          );
+          await self.opponent.swapActivePokemon(target, "opponentEffect", self.player.Name);
         });
       },
     },
     {
       pattern: /^your opponent shuffles their Active Pokémon into their deck\./i,
       transform: () => {
-        addSideEffect(async (game) => {
-          await game.DefendingPlayer.shufflePokemonIntoDeck(game.DefendingPlayer.activeOrThrow());
+        addSideEffect(async (game, self) => {
+          await self.opponent.shufflePokemonIntoDeck(self.opponent.activeOrThrow());
         });
       },
     },
     {
       pattern: /^put your opponent’s Active Pokémon into their hand\./i,
       transform: () => {
-        addSideEffect(async (game) => {
-          await game.DefendingPlayer.returnPokemonToHand(game.DefendingPlayer.activeOrThrow());
+        addSideEffect(async (game, self) => {
+          await self.opponent.returnPokemonToHand(self.opponent.activeOrThrow());
         });
       },
     },
@@ -1403,15 +1403,15 @@ export const parseEffect = (
             player.opponent.Bench.some((slot) => !slot.isPokemon) &&
             player.opponent.Discard.some((card) => card.CardType == "Pokemon" && card.Stage == 0)
         );
-        addSideEffect(async (game) => {
-          const benchIndex = game.DefendingPlayer.Bench.findIndex((slot) => !slot.isPokemon);
+        addSideEffect(async (game, self) => {
+          const benchIndex = self.opponent.Bench.findIndex((slot) => !slot.isPokemon);
           if (benchIndex < 0) return;
-          const validCards = game.DefendingPlayer.Discard.filter(
+          const validCards = self.opponent.Discard.filter(
             (card) => card.CardType == "Pokemon" && card.Stage == 0
           );
-          const card = await game.chooseCard(game.AttackingPlayer, validCards);
+          const card = await game.chooseCard(self.player, validCards);
           if (!card) return;
-          await game.DefendingPlayer.putPokemonOnBench(card as PokemonCard, benchIndex, card);
+          await self.opponent.putPokemonOnBench(card as PokemonCard, benchIndex, card);
         });
       },
     },
@@ -1433,16 +1433,16 @@ export const parseEffect = (
         addSideEffect(async (game, self, heads, target) => {
           if (!target) return;
 
-          const validCards = game.AttackingPlayer.Hand.filter(
+          const validCards = self.player.Hand.filter(
             (card) =>
               card.CardType === "Pokemon" &&
               card.Stage == 2 &&
               findBasicForStage2(card as PokemonCard) === target.Name
           );
-          const card = await game.chooseCard(game.AttackingPlayer, validCards);
+          const card = await game.chooseCard(self.player, validCards);
           if (!card) return;
 
-          await game.AttackingPlayer.evolvePokemon(target, card as PokemonCard, true);
+          await self.player.evolvePokemon(target, card as PokemonCard, true);
         });
       },
     },
@@ -1510,12 +1510,13 @@ export const parseEffect = (
       pattern:
         /^1 Special Condition from among Asleep, Burned, Confused, Paralyzed, and Poisoned is chosen at random, and your opponent’s Active Pokémon is now affected by that Special Condition\. Any Special Conditions already affecting that Pokémon will not be chosen\.$/i,
       transform: () => {
-        addSideEffect(async (game) => {
+        addSideEffect(async (game, self) => {
           const conditions = (
             ["Asleep", "Burned", "Confused", "Paralyzed", "Poisoned"] as const
           ).filter(
             (c) =>
-              !game.DefendingPlayer.activeOrThrow()
+              !self.opponent
+                .activeOrThrow()
                 .CurrentConditions.map((c2) => c2.replace(/\+$/, ""))
                 .includes(c)
           );
@@ -1862,8 +1863,8 @@ export const parseEffect = (
       pattern:
         /^Before doing damage, discard all Pokémon Tools from your opponent’s Active Pokémon\./i,
       transform: () => {
-        effect.preDamageEffects.push(async (game) => {
-          await game.discardPokemonTools(game.DefendingPlayer.activeOrThrow());
+        effect.preDamageEffects.push(async (game, self) => {
+          await game.discardPokemonTools(self.opponent.activeOrThrow());
         });
       },
     },
@@ -1874,8 +1875,8 @@ export const parseEffect = (
         const possibleEnergies = energyTypes
           .split(/, or |, /)
           .map((x) => parseEnergy(x.slice(1, 2)));
-        addSideEffect(async (game) => {
-          game.DefendingPlayer.changeNextEnergy(randomElement(possibleEnergies));
+        addSideEffect(async (game, self) => {
+          self.opponent.changeNextEnergy(randomElement(possibleEnergies));
         });
       },
     },
@@ -1885,33 +1886,31 @@ export const parseEffect = (
       pattern:
         /^Choose 1 of your opponent’s( Active)? Pokémon’s attacks and use it as this attack\.( If this Pokémon doesn’t have the necessary Energy to use that attack, this attack does nothing\.)?/i,
       transform: (_, active, energyRequired) => {
-        effect.attackingEffects.push(async (game) => {
+        effect.attackingEffects.push(async (game, self) => {
           const chosenPokemon = active
-            ? game.DefendingPlayer.activeOrThrow()
-            : await game.choosePokemon(game.AttackingPlayer, game.DefendingPlayer.InPlayPokemon);
+            ? self.opponent.activeOrThrow()
+            : await game.choosePokemon(self.player, self.opponent.InPlayPokemon);
           if (!chosenPokemon) {
-            game.GameLog.attackFailed(game.AttackingPlayer);
+            game.GameLog.attackFailed(self.player);
             return;
           }
           const attacks = Object.fromEntries(chosenPokemon.Attacks.map((a) => [a.name, a]));
           const prompt = `Choose an attack to copy from ${chosenPokemon.Name}.`;
-          const chosenAttack = await game.choose(game.AttackingPlayer, attacks, prompt);
+          const chosenAttack = await game.choose(self.player, attacks, prompt);
           if (!chosenAttack) {
-            game.GameLog.attackFailed(game.AttackingPlayer);
+            game.GameLog.attackFailed(self.player);
             return;
           }
-          game.GameLog.copyAttack(game.AttackingPlayer, chosenAttack.name);
+          game.GameLog.copyAttack(self.player, chosenAttack.name);
           let attackFailed =
             chosenAttack.text?.includes("use it as this attack") ||
-            chosenAttack.explicitConditions.some(
-              (cond) => !cond(game.AttackingPlayer, chosenPokemon)
-            );
+            chosenAttack.explicitConditions.some((cond) => !cond(self.player, chosenPokemon));
           if (energyRequired) {
-            const active = game.AttackingPlayer.activeOrThrow();
+            const active = self.player.activeOrThrow();
             if (!active.hasSufficientEnergy(chosenAttack.requiredEnergy)) attackFailed = true;
           }
           if (attackFailed) {
-            game.GameLog.attackFailed(game.AttackingPlayer);
+            game.GameLog.attackFailed(self.player);
           } else {
             await game.executeAttack(chosenAttack);
           }

@@ -576,7 +576,7 @@ export class Game {
   private async handleKnockOut(pokemon: InPlayPokemon, fromAttack: boolean): Promise<void> {
     await pokemon.player.handleKnockOut(pokemon, fromAttack);
 
-    pokemon.player.opponent.GamePoints += pokemon.PrizePoints;
+    pokemon.opponent.GamePoints += pokemon.PrizePoints;
   }
 
   // Helper methods for the attack process
@@ -1172,7 +1172,7 @@ export class Game {
     player: Player,
     options: InPlayPokemon[],
     n: number,
-    prompt: string = `Choose ${n} Pokémon`
+    prompt: string = `Choose ${n} Pokémon.`
   ): Promise<InPlayPokemon[]> {
     if (options.length == 0) {
       this.GameLog.noValidTargets(player);

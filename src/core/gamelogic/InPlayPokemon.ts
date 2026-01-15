@@ -21,6 +21,9 @@ export class InPlayPokemon {
   player: Player;
   game: Game;
   logger: GameLogger;
+  get opponent() {
+    return this.player.opponent;
+  }
 
   get ID() {
     return this.BaseCard.ID;
