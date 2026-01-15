@@ -318,6 +318,12 @@ export const parseEffect = (
       },
     },
     {
+      pattern: /^If both of them are heads,/i,
+      transform: () => {
+        conditionalForNextEffect = (game, self, heads) => heads >= 2;
+      },
+    },
+    {
       pattern: /^If at least (\d+) of them (?:is|are) heads,/i,
       transform: (_, headsNeeded) => {
         conditionalForNextEffect = (game, self, heads) => heads >= Number(headsNeeded);
@@ -551,6 +557,14 @@ export const parseEffect = (
           const defender = self.opponent.activeOrThrow();
           const targetHp = Math.floor(defender.CurrentHP / 2 / 10) * 10;
           game.setHP(defender, targetHp);
+        });
+      },
+    },
+    {
+      pattern: /^your opponent’s Active Pokémon is Knocked Out\./i,
+      transform: () => {
+        addSideEffect(async (game, self) => {
+          await game.knockOutPokemon(self.opponent.activeOrThrow());
         });
       },
     },

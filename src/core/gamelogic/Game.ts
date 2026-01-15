@@ -948,7 +948,9 @@ export class Game {
   async knockOutPokemon(pokemon: InPlayPokemon): Promise<void> {
     if (this.shouldPreventEffects(pokemon)) return;
 
+    const attackerPrizePoints = this.AttackingPlayer.GamePoints;
     await this.handleKnockOut(pokemon, false);
+    this.AttackingPlayer.checkPrizePointsChange(attackerPrizePoints);
   }
 
   /**
