@@ -9,7 +9,7 @@ Backend todo:
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
   - [x] A3: 157/157 (100%)
-  - [ ] A3a: 67/72 (93.1%)
+  - [ ] A3a: 68/72 (94.4%)
     - [x] Ultra Beasts
     - [ ] Abilities
       - [x] New triggers
@@ -30,7 +30,7 @@ Backend todo:
         - [ ] Knock out defending mon
         - [x] Discard cards from both player's decks
     - [ ] Items/Supporters
-      - [ ] If opponent has no points, apply ModifyIncomingAttackDamage
+      - [x] If opponent has no points, apply ModifyIncomingAttackDamage
       - [x] Switch opponent's (predicate) Active to the Bench
       - [ ] View all (predicate) cards in opponent's deck
       - [x] If opponent has any points, attach energy from discard to mon
@@ -45,10 +45,10 @@ Backend todo:
       - [x] IncreasePoisonDamage
     - [x] New Pokemon predicates
       - [x] Ultra Beast
-    - [ ] Unique promo cards
+    - [x] Unique promo cards
       - [x] Dawn Wings Necrozma
       - [x] Dusk Mane Necrozma
-      - [ ] Ultra Necrozma ex
+      - [x] Ultra Necrozma ex
   - [ ] A3b
   - [ ] A4
     - [ ] Baby Pokémon (0-cost attacks)

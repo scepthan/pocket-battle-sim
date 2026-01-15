@@ -1953,7 +1953,13 @@ export const parseEffect = (
       },
     },
     {
-      pattern: /You can use this card only if your opponent has gotten at least 1 point\./i,
+      pattern: /^You can use this card only if your opponent hasn’t gotten any points\./i,
+      transform: () => {
+        effect.explicitConditions.push((player) => player.opponent.GamePoints === 0);
+      },
+    },
+    {
+      pattern: /^You can use this card only if your opponent has gotten at least 1 point\./i,
       transform: () => {
         effect.explicitConditions.push((player) => player.opponent.GamePoints >= 1);
       },
