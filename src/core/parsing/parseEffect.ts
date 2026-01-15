@@ -6,13 +6,10 @@ import {
   Player,
   PlayerStatus,
   PokemonStatus,
-  type CoinFlipIndicator,
-  type DamageCalculation,
   type Energy,
   type PokemonCard,
   type SideEffect,
 } from "../gamelogic";
-import type { AbilityTrigger } from "../gamelogic/types/ability/StandardAbility";
 import { randomElement, removeElement } from "../util";
 import {
   parsePlayingCardPredicate as _cardParse,
@@ -20,101 +17,7 @@ import {
   type InPlayPokemonPredicate,
   type PlayingCardPredicate,
 } from "./parsePredicates";
-import type { ParsedResult } from "./types";
-
-export interface Effect {
-  /**
-   * Determines how many coins to flip for the effect. There are 3 options:
-   * 1. A number, which flips that many coins.
-   * 2. "UntilTails", which flips a coin until it lands on tails.
-   * 3. A method that calculates how many coins to flip based on the game state.
-   *
-   * This flip happens before any damage is dealt for attack types of "CoinFlipForDamage",
-   * "CoinFlipForAddedDamage", or "CoinFlipOrDoNothing", and after for "NoBaseDamage" or
-   * "PredeterminableDamage".
-   */
-  coinsToFlip?: CoinFlipIndicator;
-
-  /**
-   * Different attacks use coin flip results in different ways; this indicates how the results
-   * should be used. If the attack doesn't do damage, its type will be "NoBaseDamage"; if damage
-   * isn't affected by any coin flips, its type will be "PredeterminableDamage".
-   */
-  attackType:
-    | "CoinFlipOrDoNothing"
-    | "CoinFlipForDamage"
-    | "CoinFlipForAddedDamage"
-    | "PredeterminableDamage"
-    | "NoBaseDamage";
-
-  /**
-   * A method that calculates the base damage of the attack to be applied to the Defending Pokémon.
-   * This method should not have any side effects.
-   */
-  calculateDamage?: DamageCalculation;
-
-  /**
-   * A method that determines which Pokémon the player can choose to target for any side effects,
-   * such as dealing Bench damage to the opponent or healing an own Pokémon.
-   */
-  validTargets?: (player: Player, self?: InPlayPokemon) => InPlayPokemon[];
-
-  /**
-   * Effects to apply when attacking before any damage is done.
-   */
-  preDamageEffects: SideEffect[];
-
-  /**
-   * Damage-dealing effects of an attack other than dealing base damage to the Defending Pokémon.
-   */
-  attackingEffects: SideEffect[];
-
-  /**
-   * Non-damage-dealing effects of an attack; all effects of a Trainer or Ability.
-   */
-  sideEffects: SideEffect[];
-
-  /**
-   * Extraneous conditions that must be met for the effect to be used (other than the default
-   * Energy and status condition requirements for attacks).
-   */
-  explicitConditions: ((player: Player, self: InPlayPokemon) => boolean)[];
-
-  /**
-   * Conditions that must be met for a Trainer or Ability with this effect to be used.
-   */
-  implicitConditions: ((player: Player, self: InPlayPokemon) => boolean)[];
-
-  /**
-   * Trigger for certain abilities and Pokémon Tools.
-   */
-  trigger?: AbilityTrigger;
-
-  /**
-   * Statuses to apply to the player's Active Pokémon.
-   */
-  selfPokemonStatuses: PokemonStatus[];
-
-  /**
-   * Statuses to apply to the opponent's Active Pokémon.
-   */
-  opponentPokemonStatuses: PokemonStatus[];
-
-  /**
-   * Statuses to apply to the player.
-   */
-  selfPlayerStatuses: PlayerStatus[];
-
-  /**
-   * Statuses to apply to the opponent.
-   */
-  opponentPlayerStatuses: PlayerStatus[];
-
-  /**
-   * Leftover conditional for attacks that apply statuses.
-   */
-  statusConditional?: (game: Game, self: InPlayPokemon, heads: number) => boolean;
-}
+import type { ParsedEffect, ParsedResult } from "./types";
 
 interface EffectTransformer {
   pattern: RegExp;
@@ -148,7 +51,7 @@ const isOwnFirstTurn = (player: Player) => {
   return player === player.game.AttackingPlayer && 1 <= turnNumber && turnNumber <= 2;
 };
 
-export const statusesToSideEffects = (effect: Effect) => {
+export const statusesToSideEffects = (effect: ParsedEffect) => {
   const sideEffects: SideEffect[] = [];
 
   const applyConditionalIfAvailable = (sideEffect: SideEffect) => {
@@ -188,8 +91,8 @@ export const parseEffect = (
   inputText: string,
   baseDamage?: number,
   requiredEnergy?: Energy[]
-): ParsedResult<Effect> => {
-  const effect: Effect = {
+): ParsedResult<ParsedEffect> => {
+  const effect: ParsedEffect = {
     attackType: baseDamage === undefined ? "NoBaseDamage" : "PredeterminableDamage",
     preDamageEffects: [],
     attackingEffects: [],
@@ -1651,7 +1554,10 @@ export const parseEffect = (
       transform: (_, amount) => {
         effect.implicitConditions.push((player) => player.GamePoints >= 1);
         addSelfPokemonStatus(
-          PokemonStatus.ModifyAttackDamage((self) => +amount * self.player.GamePoints)
+          PokemonStatus.ModifyAttackDamage({
+            descriptor: "+10 damage for each point you have gotten",
+            calc: (self) => +amount * self.player.GamePoints,
+          })
         );
       },
     },

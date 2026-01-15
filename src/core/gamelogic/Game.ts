@@ -467,7 +467,7 @@ export class Game {
               if (applyStatus) statusPlayer.applyPlayerStatus(ability.effect.status, pokemon);
             }
           } else {
-            if (pokemon.PokemonStatuses.some((x) => x.id === ability.effect.status.id)) {
+            if (pokemon.PokemonStatuses.some((x) => x === ability.effect.status)) {
               if (!applyStatus) pokemon.removePokemonStatus(ability.effect.status);
             } else {
               if (applyStatus) pokemon.applyPokemonStatus(ability.effect.status);
@@ -680,8 +680,8 @@ export class Game {
     for (const status of attacker.PokemonStatuses) {
       if (status.type == "ModifyAttackDamage") {
         if (!status.defenderCondition || status.defenderCondition.test(defender)) {
-          if (typeof status.amount === "function") totalDamage += status.amount(attacker);
-          else totalDamage += status.amount;
+          if (typeof status.amount === "number") totalDamage += status.amount;
+          else totalDamage += status.amount.calc(attacker);
         }
       } else if (status.type == "ModifyDamageOfAttack") {
         if (status.attackName == this.CurrentAttack?.name) totalDamage += status.amount;

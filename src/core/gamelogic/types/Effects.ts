@@ -8,6 +8,13 @@ export type TargetedPokemonEffect = (
   target: InPlayPokemon
 ) => Promise<void>;
 
+export type NumberOrCalculation =
+  | number
+  | {
+      calc: (pokemon: InPlayPokemon) => number;
+      descriptor: string;
+    };
+
 export type PokemonConditional = (pokemon: InPlayPokemon) => boolean;
 export type PlayerPokemonConditional = (player: Player, pokemon: InPlayPokemon) => boolean;
 export interface PokemonDescriptor {

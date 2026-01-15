@@ -50,8 +50,11 @@ export const parseAbility = (
         opponent: true,
       };
     } else {
-      if (statusesToSideEffects(effect).length > 0)
-        console.error("Multiple ability statuses:", effect);
+      const remainingStatuses = statusesToSideEffects(effect).length;
+      if (remainingStatuses > 1) console.error("Multiple ability statuses:", effect);
+      else if (remainingStatuses === 1)
+        console.error("Invalid opponent Pokémon status for ability:", effect);
+      else console.error("Failed to create ability with no trigger and no status:", effect);
       parseSuccessful = false;
     }
     if (abilityEffect) {
