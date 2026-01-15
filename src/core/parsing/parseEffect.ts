@@ -976,6 +976,21 @@ export const parseEffect = (
       },
     },
     {
+      pattern:
+        /^For each heads, a card is chosen at random from your opponent’s hand\. Your opponent reveals that card and shuffles it into their deck\./i,
+      transform: () => {
+        addSideEffect(async (game, self, heads) => {
+          if (game.DefendingPlayer.Hand.length === 0 || heads === 0) return;
+          const cards = [];
+          while (heads-- > 0 && game.DefendingPlayer.Hand.length > 0) {
+            cards.push(randomElement(game.DefendingPlayer.Hand));
+          }
+          await game.showCards(game.AttackingPlayer, cards);
+          game.DefendingPlayer.returnToDeck(cards);
+        });
+      },
+    },
+    {
       pattern: /^Your opponent reveals their hand\./i,
       transform: () => {
         addSideEffect(async (game) => {
