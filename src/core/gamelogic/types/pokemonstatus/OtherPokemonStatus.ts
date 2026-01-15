@@ -52,6 +52,9 @@ interface CannotEvolvePokemonStatus extends BasePokemonStatus {
 interface CannotAttachFromEnergyZonePokemonStatus extends BasePokemonStatus {
   type: "CannotAttachFromEnergyZone";
 }
+interface CannotHealPokemonStatus extends BasePokemonStatus {
+  type: "CannotHeal";
+}
 
 export type OtherPokemonStatus =
   | ModifyAttackCostPokemonStatus
@@ -66,7 +69,8 @@ export type OtherPokemonStatus =
   | PreventSpecialConditionsPokemonStatus
   | IncreasePoisonDamagePokemonStatus
   | CannotEvolvePokemonStatus
-  | CannotAttachFromEnergyZonePokemonStatus;
+  | CannotAttachFromEnergyZonePokemonStatus
+  | CannotHealPokemonStatus;
 
 const source = "Effect";
 export const OtherPokemonStatus = {
@@ -122,4 +126,5 @@ export const OtherPokemonStatus = {
     source,
     turnsToKeep,
   }),
+  CannotHeal: (turnsToKeep?: number) => ({ type: "CannotHeal", source, turnsToKeep }),
 } satisfies Record<string, (...args: never) => OtherPokemonStatus>;

@@ -394,20 +394,20 @@ export class Game {
   }
 
   /**
-   * Checks all player statuses applied by Abilities or Pokémon Tools and removes those whose
-   * inflictors are no longer in play.
+   * Checks all statuses applied by Abilities or Pokémon Tools and removes those whose inflictors
+   * are no longer in play.
    */
   private removeOutdatedStatuses(): void {
     for (const pokemon of this.InPlayPokemon) {
       for (const status of pokemon.PokemonStatuses) {
         if (status.source === "Ability") {
           const ability = pokemon.Ability;
-          if (ability?.type !== "Status" || ability.effect.status.id !== status.id) {
+          if (ability?.type !== "Status" || !ability.effect.some((e) => e.status === status)) {
             pokemon.removePokemonStatus(status);
           }
         } else if (status.source === "PokemonTool") {
           const tool = pokemon.AttachedToolCards.find(
-            (t) => t.Effect.type === "Status" && t.Effect.effect.status.id === status.id
+            (t) => t.Effect.type === "Status" && t.Effect.effect.some((e) => e.status === status)
           );
           if (!tool) {
             pokemon.removePokemonStatus(status);
@@ -427,7 +427,7 @@ export class Game {
           for (const pokemon of triggeringPokemon) {
             if (
               pokemon.Ability?.type === "Status" &&
-              pokemon.Ability.effect.status.id === status.id
+              pokemon.Ability.effect.some((e) => e.status.id === status.id)
             ) {
               validPokemon = true;
             } else {
@@ -452,25 +452,27 @@ export class Game {
 
           const applyStatus = ability.conditions.every((cond) => cond(player, pokemon));
 
-          if (ability.effect.type === "PlayerStatus") {
-            const statusPlayer = ability.effect.opponent ? player.opponent : player;
-            const existingStatus = pokemon.ActivePlayerStatuses.find(
-              (s) => s.id === ability.effect.status.id
-            );
+          for (const effect of ability.effect) {
+            if (effect.type === "PlayerStatus") {
+              const statusPlayer = effect.opponent ? player.opponent : player;
+              const existingStatus = pokemon.ActivePlayerStatuses.find(
+                (s) => s.id === effect.status.id
+              );
 
-            if (existingStatus) {
-              if (!applyStatus) {
-                removeElement(pokemon.ActivePlayerStatuses, existingStatus);
-                statusPlayer.removePlayerStatus(existingStatus.id!);
+              if (existingStatus) {
+                if (!applyStatus) {
+                  removeElement(pokemon.ActivePlayerStatuses, existingStatus);
+                  statusPlayer.removePlayerStatus(existingStatus.id!);
+                }
+              } else {
+                if (applyStatus) statusPlayer.applyPlayerStatus(effect.status, pokemon);
               }
             } else {
-              if (applyStatus) statusPlayer.applyPlayerStatus(ability.effect.status, pokemon);
-            }
-          } else {
-            if (pokemon.PokemonStatuses.some((x) => x === ability.effect.status)) {
-              if (!applyStatus) pokemon.removePokemonStatus(ability.effect.status);
-            } else {
-              if (applyStatus) pokemon.applyPokemonStatus(ability.effect.status);
+              if (pokemon.PokemonStatuses.some((x) => x === effect.status)) {
+                if (!applyStatus) pokemon.removePokemonStatus(effect.status);
+              } else {
+                if (applyStatus) pokemon.applyPokemonStatus(effect.status);
+              }
             }
           }
         }
@@ -989,7 +991,8 @@ export class Game {
   }
 
   /**
-   * Applies a given PokemonStatus to a Pokémon.
+   * Applies a given PokemonStatus to a Pokémon if it is not prohibited by an existing status.
+   * Should only be used for Attack effects.
    */
   applyPokemonStatus(pokemon: InPlayPokemon, status: PokemonStatus) {
     if (this.shouldPreventEffects(pokemon)) return;

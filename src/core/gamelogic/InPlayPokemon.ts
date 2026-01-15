@@ -154,6 +154,11 @@ export class InPlayPokemon {
    * Heals a set amount of damage from this Pokémon.
    */
   healDamage(HP: number): number {
+    if (this.PokemonStatuses.some((s) => s.type === "CannotHeal")) {
+      this.logger.effectPrevented(this.player, this);
+      return 0;
+    }
+
     const initialHP = this.CurrentHP;
 
     this.CurrentHP += HP;
@@ -252,6 +257,7 @@ export class InPlayPokemon {
    */
   removePokemonStatus(status: PokemonStatus) {
     removeElement(this._PokemonStatuses, status);
+    this.logger.removePokemonStatus(this, status);
 
     if (status.type === "IncreaseMaxHP") {
       const hpIncrease = status.amount;

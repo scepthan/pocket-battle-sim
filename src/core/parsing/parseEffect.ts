@@ -65,12 +65,12 @@ export const statusesToSideEffects = (effect: ParsedEffect) => {
 
   for (const status of effect.selfPokemonStatuses) {
     applyConditionalIfAvailable(async (game, self) => {
-      self.player.applyActivePokemonStatus(Object.assign({}, status));
+      game.applyPokemonStatus(self, Object.assign({}, status));
     });
   }
   for (const status of effect.opponentPokemonStatuses) {
     applyConditionalIfAvailable(async (game, self) => {
-      self.player.opponent.applyActivePokemonStatus(Object.assign({}, status));
+      game.applyPokemonStatus(self.player.opponent.activeOrThrow(), Object.assign({}, status));
     });
   }
   for (const status of effect.selfPlayerStatuses) {
@@ -1772,6 +1772,19 @@ export const parseEffect = (
 
         effect.selfPlayerStatuses.push(
           parsePokemonPlayerStatus(PokemonStatus.DoubleEnergy(fullType), descriptor, true)
+        );
+      },
+    },
+
+    // Both player effects
+    {
+      pattern: /^Pokémon \(both yours and your opponent’s\) can’t be healed\.$/i,
+      transform: () => {
+        effect.selfPlayerStatuses.push(
+          parsePokemonPlayerStatus(PokemonStatus.CannotHeal(turnsToKeep), "Pokémon")
+        );
+        effect.opponentPlayerStatuses.push(
+          parsePokemonPlayerStatus(PokemonStatus.CannotHeal(turnsToKeep), "Pokémon")
         );
       },
     },

@@ -9,7 +9,7 @@ Backend todo:
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
   - [x] A3: 157/157 (100%)
-  - [ ] A3a: 63/72 (87.5%)
+  - [ ] A3a: 64/72 (88.9%)
     - [x] Ultra Beasts
     - [ ] Abilities
       - [x] New triggers
@@ -17,7 +17,7 @@ Backend todo:
       - [ ] New effects
         - [x] Apply ModifyAttackDamage to opponent
         - [x] Draw random card from deck
-        - [ ] Apply PreventHealing to both players
+        - [x] Apply PreventHealing to both players
         - [x] Apply IncreasePoisonDamage to opponent's Active
         - [ ] Apply ModifyAttackCost(Colorless, +1) to opponent's Active
         - [x] Swap (predicate) Active mon with (predicate) Benched mon

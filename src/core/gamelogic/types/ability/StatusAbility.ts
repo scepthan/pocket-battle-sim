@@ -14,5 +14,5 @@ export type StatusAbilityEffect = PlayerStatusAbilityEffect | PokemonStatusAbili
 
 export interface StatusAbility extends BaseAbility {
   type: "Status";
-  effect: StatusAbilityEffect;
+  effect: StatusAbilityEffect[];
 }

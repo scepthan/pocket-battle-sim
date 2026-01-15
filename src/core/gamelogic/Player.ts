@@ -18,7 +18,6 @@ import type {
   PlayerStatus,
   PlayingCard,
   PokemonCard,
-  PokemonStatus,
 } from "./types";
 
 export class Player {
@@ -584,49 +583,46 @@ export class Player {
     this.logger.discardFromDeck(this, discarded);
   }
 
-  shouldPreventSpecialConditions(pokemon: InPlayPokemon): boolean {
-    const result = pokemon.PokemonStatuses.some(
+  shouldPreventSpecialConditions(): boolean {
+    const active = this.activeOrThrow();
+    const result = active.PokemonStatuses.some(
       (status) => status.type === "PreventSpecialConditions"
     );
-    if (result) this.logger.specialConditionPrevented(this, pokemon);
+    if (result) this.logger.specialConditionPrevented(this, active);
     return result;
   }
 
   poisonActivePokemon() {
-    if (this.shouldPreventSpecialConditions(this.activeOrThrow())) return;
+    if (this.shouldPreventSpecialConditions()) return;
     this.activeOrThrow().SecondaryConditions.add("Poisoned");
     this.activeOrThrow().SecondaryConditions.delete("Poisoned+");
     this.logger.specialConditionApplied(this, "Poisoned");
   }
   poisonPlusActivePokemon() {
-    if (this.shouldPreventSpecialConditions(this.activeOrThrow())) return;
+    if (this.shouldPreventSpecialConditions()) return;
     this.activeOrThrow().SecondaryConditions.add("Poisoned+");
     this.activeOrThrow().SecondaryConditions.delete("Poisoned");
     this.logger.specialConditionApplied(this, "Poisoned");
   }
   burnActivePokemon() {
-    if (this.shouldPreventSpecialConditions(this.activeOrThrow())) return;
+    if (this.shouldPreventSpecialConditions()) return;
     this.activeOrThrow().SecondaryConditions.add("Burned");
     this.logger.specialConditionApplied(this, "Burned");
   }
   sleepActivePokemon() {
-    if (this.shouldPreventSpecialConditions(this.activeOrThrow())) return;
+    if (this.shouldPreventSpecialConditions()) return;
     this.activeOrThrow().PrimaryCondition = "Asleep";
     this.logger.specialConditionApplied(this, "Asleep");
   }
   paralyzeActivePokemon() {
-    if (this.shouldPreventSpecialConditions(this.activeOrThrow())) return;
+    if (this.shouldPreventSpecialConditions()) return;
     this.activeOrThrow().PrimaryCondition = "Paralyzed";
     this.logger.specialConditionApplied(this, "Paralyzed");
   }
   confuseActivePokemon() {
-    if (this.shouldPreventSpecialConditions(this.activeOrThrow())) return;
+    if (this.shouldPreventSpecialConditions()) return;
     this.activeOrThrow().PrimaryCondition = "Confused";
     this.logger.specialConditionApplied(this, "Confused");
-  }
-
-  applyActivePokemonStatus(status: PokemonStatus) {
-    this.activeOrThrow().applyPokemonStatus(status);
   }
 
   applyPlayerStatus(status: PlayerStatus, pokemon?: InPlayPokemon) {

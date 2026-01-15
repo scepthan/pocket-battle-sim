@@ -31,59 +31,61 @@ export const parseAbility = (
       },
     };
   } else {
-    let abilityEffect: StatusAbilityEffect | undefined;
-    if (effect.selfPokemonStatuses.length === 1) {
-      abilityEffect = {
+    const abilityEffects: StatusAbilityEffect[] = [];
+    for (const status of effect.selfPokemonStatuses) {
+      abilityEffects.push({
         type: "PokemonStatus",
-        status: Object.assign({}, effect.selfPokemonStatuses[0]!),
-      };
-    } else if (effect.selfPlayerStatuses.length === 1) {
-      abilityEffect = {
-        type: "PlayerStatus",
-        status: Object.assign({}, effect.selfPlayerStatuses[0]!),
-        opponent: false,
-      };
-    } else if (effect.opponentPlayerStatuses.length === 1) {
-      abilityEffect = {
-        type: "PlayerStatus",
-        status: Object.assign({}, effect.opponentPlayerStatuses[0]!),
-        opponent: true,
-      };
-    } else {
-      const remainingStatuses = statusesToSideEffects(effect).length;
-      if (remainingStatuses > 1) console.error("Multiple ability statuses:", effect);
-      else if (remainingStatuses === 1)
-        console.error("Invalid opponent Pokémon status for ability:", effect);
-      else console.error("Failed to create ability with no trigger and no status:", effect);
-      parseSuccessful = false;
+        status: Object.assign({}, status),
+      });
     }
-    if (abilityEffect) {
-      abilityEffect.status.source = source;
+    for (const status of effect.selfPlayerStatuses) {
+      abilityEffects.push({
+        type: "PlayerStatus",
+        status: Object.assign({}, status),
+        opponent: false,
+      });
+    }
+    for (const status of effect.opponentPlayerStatuses) {
+      abilityEffects.push({
+        type: "PlayerStatus",
+        status: Object.assign({}, status),
+        opponent: true,
+      });
+    }
+
+    if (abilityEffects.length === 0) {
+      if (effect.opponentPokemonStatuses.length > 0)
+        console.error("Failed to create Ability for opponent Pokémon status", effect);
+      parseSuccessful = false;
+
       return {
         parseSuccessful,
         value: {
           name: inputAbility.name,
           text: inputAbility.text,
-          type: "Status",
-          effect: abilityEffect,
-          conditions: [...effect.explicitConditions, ...effect.implicitConditions],
+          type: "Standard",
+          trigger: { type: "Manual", multiUse: false },
+          conditions: [],
+          effect: {
+            type: "Standard",
+            sideEffects: [async (game) => game.GameLog.notImplemented(game.AttackingPlayer)],
+          },
         },
       };
     }
-  }
 
-  return {
-    parseSuccessful,
-    value: {
-      name: inputAbility.name,
-      text: inputAbility.text,
-      type: "Standard",
-      trigger: { type: "Manual", multiUse: false },
-      conditions: [],
-      effect: {
-        type: "Standard",
-        sideEffects: [async (game) => game.GameLog.notImplemented(game.AttackingPlayer)],
+    for (const abilityEffect of abilityEffects) {
+      abilityEffect.status.source = source;
+    }
+    return {
+      parseSuccessful,
+      value: {
+        name: inputAbility.name,
+        text: inputAbility.text,
+        type: "Status",
+        effect: abilityEffects,
+        conditions: [...effect.explicitConditions, ...effect.implicitConditions],
       },
-    },
-  };
+    };
+  }
 };
