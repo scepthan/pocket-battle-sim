@@ -998,6 +998,15 @@ export const parseEffect = (
         });
       },
     },
+    {
+      pattern: /^Discard the top (\d+) cards of each player’s deck\./i,
+      transform: (_, count) => {
+        addSideEffect(async (game, self) => {
+          self.player.discardTopOfDeck(+count);
+          self.opponent.discardTopOfDeck(+count);
+        });
+      },
+    },
 
     // Deck manipulation effects
     {

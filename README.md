@@ -9,7 +9,7 @@ Backend todo:
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
   - [x] A3: 157/157 (100%)
-  - [ ] A3a: 66/72 (91.7%)
+  - [ ] A3a: 67/72 (93.1%)
     - [x] Ultra Beasts
     - [ ] Abilities
       - [x] New triggers
@@ -28,7 +28,7 @@ Backend todo:
       - [ ] New effects
         - [x] Flip coins to shuffle cards from opponent's hand into deck
         - [ ] Knock out defending mon
-        - [ ] Discard cards from both player's decks
+        - [x] Discard cards from both player's decks
     - [ ] Items/Supporters
       - [ ] If opponent has no points, apply ModifyIncomingAttackDamage
       - [x] Switch opponent's (predicate) Active to the Bench
