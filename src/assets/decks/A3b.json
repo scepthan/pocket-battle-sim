@@ -1,0 +1,46 @@
+{
+  "A3b Solo Battles": {
+    "Tsareena & Buzzwole ex": {
+      "Cards": ["A1a-068", "A1a-068", "A3-144", "A3-144", "A3-147", "A3-147", "A3-154", "A3-154", "A3a-006", "A3a-006", "A3a-069", "A3b-003", "A3b-003", "A3b-004", "A3b-005", "A3b-005", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Grass"]
+    },
+    "Flareon ex & Flareon": {
+      "Cards": ["A1a-068", "A2-148", "A2-148", "A2-150", "A2b-071", "A3b-008", "A3b-008", "A3b-009", "A3b-009", "A3b-010", "A3b-055", "A3b-055", "A3b-056", "A3b-056", "A3b-066", "A3b-066", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Fire"]
+    },
+    "Primarina ex & Pyukumuku": {
+      "Cards": ["A2-034", "A2-146", "A2-147", "A2-150", "A3-045", "A3-045", "A3-047", "A3-054", "A3-054", "A3-144", "A3-144", "A3-155", "A3b-024", "A3b-024", "A3b-068", "A3b-068", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Water"]
+    },
+    "Sylveon ex & Sylveon": {
+      "Cards": ["A1-225", "A2-150", "A3-151", "A3b-028", "A3b-028", "A3b-033", "A3b-033", "A3b-034", "A3b-034", "A3b-055", "A3b-055", "A3b-056", "A3b-056", "A3b-066", "A3b-066", "PROMO-A-005", "PROMO-A-005", "PROMO-A-006", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Psychic"]
+    }
+  },
+  "A3b Rentals": {
+    "Flareon ex & Eevee ex": {
+      "Cards": ["A3b-008", "A3b-009", "A3b-010", "A3b-011", "A3b-011", "A3b-012", "A3b-012", "A3b-013", "A3b-014", "A3b-014", "A3b-015", "A3b-055", "A3b-055", "A3b-056", "A3b-066", "PROMO-A-001", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Fire"]
+    },
+    "Primarina ex": {
+      "Cards": ["A3b-017", "A3b-021", "A3b-021", "A3b-022", "A3b-022", "A3b-023", "A3b-023", "A3b-024", "A3b-055", "A3b-055", "A3b-060", "A3b-062", "A3b-062", "A3b-063", "A3b-068", "PROMO-A-001", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Water"]
+    },
+    "Sylveon ex & Eevee ex": {
+      "Cards": ["A3b-029", "A3b-029", "A3b-030", "A3b-030", "A3b-033", "A3b-034", "A3b-035", "A3b-054", "A3b-055", "A3b-055", "A3b-056", "A3b-064", "A3b-064", "A3b-065", "A3b-066", "A3b-067", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Psychic"]
+    },
+    "Sweets Relay": {
+      "Cards": ["A3b-006", "A3b-006", "A3b-007", "A3b-007", "A3b-018", "A3b-018", "A3b-019", "A3b-019", "A3b-031", "A3b-031", "A3b-032", "A3b-036", "A3b-036", "A3b-037", "PROMO-A-002", "PROMO-A-002", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Grass", "Water"]
+    },
+    "Dragonite ex": {
+      "Cards": ["A3b-016", "A3b-025", "A3b-051", "A3b-051", "A3b-052", "A3b-052", "A3b-053", "A3b-055", "A3b-055", "A3b-061", "A3b-061", "A3b-062", "A3b-062", "A3b-063", "A3b-063", "PROMO-A-002", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Lightning", "Water"]
+    },
+    "Snorlax ex": {
+      "Cards": ["A3b-043", "A3b-044", "A3b-045", "A3b-045", "A3b-046", "A3b-055", "A3b-055", "A3b-057", "A3b-058", "A3b-058", "A3b-059", "A3b-064", "A3b-064", "A3b-065", "A3b-067", "A3b-067", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Darkness"]
+    }
+  }
+}

@@ -422,7 +422,7 @@ export const parseEffect = (
       },
     },
     {
-      pattern: /^If your opponent’s Active Pokémon is a ([^,]+?),/i,
+      pattern: /^If (?:your opponent’s Active|the Defending) Pokémon is a ([^,]+?),/i,
       transform: (_, descriptor) => {
         const predicate = parsePokemonPredicate(descriptor);
         conditionalForNextEffect = (game, self) => predicate(self.opponent.activeOrThrow());
@@ -680,7 +680,7 @@ export const parseEffect = (
 
     // Healing effects
     {
-      pattern: /^Heal (\d+) damage from this Pokémon\./i,
+      pattern: /^Heal (\d+) damage from (?:it|(?:this|that) Pokémon)\./i,
       transform: (_, healing) => {
         effect.implicitConditions.push((player, self) => self.isDamaged());
         addSideEffect(async (game, self) => {
@@ -1110,7 +1110,7 @@ export const parseEffect = (
       },
     },
     {
-      pattern: /^Discard all Energy from this Pokémon\./i,
+      pattern: /^Discard all Energy (?:from|attached to) this Pokémon\./i,
       transform: () => {
         addSideEffect(async (game, self) => game.discardAllEnergy(self));
       },
@@ -1730,7 +1730,7 @@ export const parseEffect = (
       },
     },
     {
-      pattern: /^the Defending Pokémon can’t attack\./i,
+      pattern: /^(?:it|the Defending Pokémon) can’t attack\./i,
       transform: () => {
         addOpponentPokemonStatus(PokemonStatus.CannotAttack(turnsToKeep));
       },

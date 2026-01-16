@@ -10,46 +10,38 @@ Backend todo:
   - [x] A2b: 73/73 (100%)
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
-    - [x] Ultra Beasts
-    - [x] Abilities
-      - [x] New triggers
-        - [x] End of your first turn
-      - [x] New effects
-        - [x] Apply ModifyAttackDamage to opponent
-        - [x] Draw random card from deck
-        - [x] Apply PreventHealing to both players
-        - [x] Apply IncreasePoisonDamage to opponent's Active
-        - [x] Apply ModifyAttackCost(Colorless, +1) to opponent's Active
-        - [x] Swap (predicate) Active mon with (predicate) Benched mon
-    - [x] Attacks
-      - [x] New conditionals
-        - [x] Specific mon is on Bench
-        - [x] Supporter has been used this turn
-      - [x] New effects
-        - [x] Flip coins to shuffle cards from opponent's hand into deck
-        - [x] Knock out defending mon
-        - [x] Discard cards from both player's decks
-    - [x] Items/Supporters
-      - [x] If opponent has no points, apply ModifyIncomingAttackDamage
-      - [x] Switch opponent's (predicate) Active to the Bench
-      - [x] View all (predicate) cards in opponent's deck
-      - [x] If opponent has any points, attach energy from discard to mon
-    - [x] Pokemon Tools
-      - [x] New triggers
-        - [x] On Knocked Out
-      - [x] New effects
-        - [x] Move energy from this mon to Benched mon
-        - [x] Do extra damage per point scored
-    - [x] New Pokemon Statuses
-      - [x] PreventHealing
-      - [x] IncreasePoisonDamage
-    - [x] New Pokemon predicates
-      - [x] Ultra Beast
-    - [x] Unique promo cards
-      - [x] Dawn Wings Necrozma
-      - [x] Dusk Mane Necrozma
-      - [x] Ultra Necrozma ex
-  - [ ] A3b
+  - [ ] A3b: 50/71 (70.4%)
+    - [ ] New triggers
+      - [ ] When played to evolve
+      - [ ] At end of your turn
+    - [ ] New conditionals
+      - [ ] Specific Attack was used during your last turn
+      - [ ] Self evolved during this turn
+    - [ ] New damage modifiers
+      - [ ] Extra damage per Energy attached to self
+      - [ ] Extra damage per Energy attached to all of opponent's mon
+      - [ ] Damage per times attack used by your mon during current game
+    - [ ] New attacking effects
+      - [ ] Damage to each of your Benched mon
+    - [ ] New side effects
+      - [ ] Discard all Tools from opponent's Active mon
+      - [ ] Look at random Supporter from opponent's deck and use its effect
+    - [ ] New statuses
+      - [ ] CanEvolveAs(name)
+    - [ ] Other new parsing
+      - [ ] "Choose 1: [effect A] [effect B]"
+    - [ ] Parsing modifications
+      - [ ] "Attach _a_ {X} Energy from your discard pile to _this_ Pokémon."
+      - [x] "Discard all Energy _attached to_ this Pokémon."
+      - [ ] "This attack does 30 more damage for each _[predicate] on your Bench_."
+      - [ ] Attack-copying effect should consume conditional if available
+      - [x] "If _the Defending Pokémon_ is a [predicate],"
+      - [x] "_it_ can't attack."
+      - [x] "Heal N damage from _it_."
+      - [x] "Heal N damage from _that Pokémon_."
+    - [x] Unique Promo cards
+      - [x] Dragonair
+      - [x] Audino
   - [ ] A4
     - [ ] Baby Pokémon (0-cost attacks)
   - [ ] A4a
