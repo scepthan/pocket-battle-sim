@@ -201,6 +201,23 @@ export class PlayerGameView {
 
     return false;
   }
+  findEffectiveAttackCost(attack: Attack): Energy[] {
+    if (!this.hasActivePokemon()) return [];
+    const requiredEnergy = [...attack.requiredEnergy];
+    for (const status of this.selfActive.PokemonStatuses) {
+      if (status.type == "ModifyAttackCost") {
+        if (status.amount < 0) {
+          for (let i = 0; i < -status.amount; i++) {
+            if (requiredEnergy.includes(status.energyType))
+              removeElement(requiredEnergy, status.energyType);
+          }
+        } else {
+          requiredEnergy.push(...Array(status.amount).fill(status.energyType));
+        }
+      }
+    }
+    return requiredEnergy;
+  }
   canUseAttack(
     attack: Attack,
     ignoreCanPlay: boolean = false
@@ -224,20 +241,7 @@ export class PlayerGameView {
     if (attack.explicitConditions.some((condition) => !condition(this.player, realActive)))
       return false;
 
-    const requiredEnergy = [...attack.requiredEnergy];
-    for (const status of this.selfActive.PokemonStatuses) {
-      if (status.type == "ModifyAttackCost") {
-        if (status.amount < 0) {
-          for (let i = 0; i < -status.amount; i++) {
-            if (requiredEnergy.includes(status.energyType))
-              removeElement(requiredEnergy, status.energyType);
-          }
-        } else {
-          requiredEnergy.push(...Array(status.amount).fill(status.energyType));
-        }
-      }
-    }
-    return this.selfActive.hasSufficientEnergy(requiredEnergy);
+    return this.selfActive.hasSufficientEnergy(this.findEffectiveAttackCost(attack));
   }
   canUseAbility(
     pokemon: PlayerPokemonView,

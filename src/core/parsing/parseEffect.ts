@@ -894,7 +894,9 @@ export const parseEffect = (
       pattern: /^Choose a (.+?) in your hand and switch it with a random \1 in your deck\.$/i,
       transform: (_, descriptor) => {
         const predicate = parsePlayingCardPredicate(descriptor);
-        effect.implicitConditions.push((player) => player.Hand.some(predicate));
+        effect.implicitConditions.push(
+          (player) => player.Hand.some(predicate) && player.Deck.length > 0
+        );
         addSideEffect(async (game, self) => {
           const validHandCards = self.player.Hand.filter(predicate);
           const chosen = await game.chooseCard(self.player, validHandCards);
@@ -1859,6 +1861,17 @@ export const parseEffect = (
         effect.opponentPlayerStatuses.push(
           parsePokemonPlayerStatus(
             PokemonStatus.ModifyAttackDamage(-damageReduction, turnsToKeep),
+            descriptor
+          )
+        );
+      },
+    },
+    {
+      pattern: /^attacks used by your opponent’s (.+?) cost (\d+) \{C\} more\./i,
+      transform: (_, descriptor, modifier) => {
+        effect.opponentPlayerStatuses.push(
+          parsePokemonPlayerStatus(
+            PokemonStatus.ModifyAttackCost("Colorless", +modifier, turnsToKeep),
             descriptor
           )
         );
