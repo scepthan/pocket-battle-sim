@@ -336,6 +336,20 @@ export const parseEffect = (
       },
     },
 
+    // Player conditionals
+    {
+      pattern: /^If you played a Supporter card from your hand during this turn,/i,
+      transform: () => {
+        conditionalForNextEffect = (game, self) =>
+          game.GameLog.currentTurn.some(
+            (e) =>
+              e.type === "playTrainer" &&
+              e.trainerType === "Supporter" &&
+              e.player === self.player.Name
+          );
+      },
+    },
+
     // Self conditionals
     {
       pattern: /^If this Pokémon has at least (\d+) extra (?:\{(\w)\} )?Energy attached,/i,

@@ -5,6 +5,7 @@ import type {
   PrimaryCondition,
   SecondaryCondition,
   SpecialCondition,
+  TrainerCard,
 } from "../../gamelogic";
 import type { InPlayPokemonDescriptor } from "./InPlayPokemonDescriptor";
 
@@ -95,7 +96,7 @@ interface PlayTrainerEvent {
   type: "playTrainer";
   player: string;
   cardId: string;
-  trainerType: string;
+  trainerType: TrainerCard["CardType"];
   targetPokemon?: InPlayPokemonDescriptor;
 }
 interface AttachPokemonToolEvent {
