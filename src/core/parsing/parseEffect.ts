@@ -349,6 +349,16 @@ export const parseEffect = (
           );
       },
     },
+    {
+      pattern: /^If 1 of your Pokémon used (.+?) during your last turn,/i,
+      transform: (_, attackName) => {
+        conditionalForNextEffect = (game, self) =>
+          game.GameLog.turns[2]?.some(
+            (e) =>
+              e.type === "useAttack" && e.attackName === attackName && e.player === self.player.Name
+          ) ?? false;
+      },
+    },
 
     // Self conditionals
     {
@@ -528,6 +538,19 @@ export const parseEffect = (
         effect.calculateDamage = (game, self) => {
           const pokemonCount = self.player.InPlayPokemon.filter(predicate).length;
           return (more ? baseDamage : 0) + pokemonCount * Number(damageEach);
+        };
+      },
+    },
+    {
+      pattern:
+        /^This attack does (\d+) damage for each time your Pokémon used (.+?) during this game\./i,
+      transform: (_, damage, attackName) => {
+        effect.calculateDamage = (game, self) => {
+          const attackCount = game.GameLog.entries.filter(
+            (e) =>
+              e.type === "useAttack" && e.attackName === attackName && e.player === self.player.Name
+          ).length;
+          return attackCount * +damage;
         };
       },
     },

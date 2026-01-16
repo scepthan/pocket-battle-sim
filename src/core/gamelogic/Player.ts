@@ -459,10 +459,9 @@ export class Player {
     if (this.effectiveRetreatCost > effectiveEnergyToDiscard.length)
       throw new Error("Not enough energy provided");
 
+    await this.swapActivePokemon(newActive, "retreat");
     currentActive.removeEnergy(energyToDiscard);
     this.discardEnergy(energyToDiscard, "retreat", currentActive);
-
-    await this.swapActivePokemon(newActive, "retreat");
   }
 
   async swapActivePokemon(
