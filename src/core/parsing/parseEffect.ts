@@ -1027,6 +1027,16 @@ export const parseEffect = (
       },
     },
     {
+      pattern: /^Your opponent reveals all of the (.+?) in their deck\./i,
+      transform: (_, descriptor) => {
+        const predicate = parsePlayingCardPredicate(descriptor);
+        addSideEffect(async (game, self) => {
+          await game.showCards(self.player, self.opponent.Deck.filter(predicate));
+          self.opponent.shuffleDeck();
+        });
+      },
+    },
+    {
       pattern: /^Discard the top (\d+) cards of each player’s deck\./i,
       transform: (_, count) => {
         addSideEffect(async (game, self) => {

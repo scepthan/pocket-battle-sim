@@ -132,6 +132,8 @@ export const parsePlayingCardPredicate = (
     };
   }
 
+  if (text.endsWith(" cards")) text = text.slice(0, -1);
+
   if (text === "Pokémon") {
     return {
       parseSuccessful: true,

@@ -9,7 +9,7 @@ Backend todo:
   - [x] A2a: 77/77 (100%)
   - [x] A2b: 73/73 (100%)
   - [x] A3: 157/157 (100%)
-  - [ ] A3a: 70/72 (97.2%)
+  - [ ] A3a: 71/72 (98.6%)
     - [x] Ultra Beasts
     - [ ] Abilities
       - [x] New triggers
@@ -29,10 +29,10 @@ Backend todo:
         - [x] Flip coins to shuffle cards from opponent's hand into deck
         - [x] Knock out defending mon
         - [x] Discard cards from both player's decks
-    - [ ] Items/Supporters
+    - [x] Items/Supporters
       - [x] If opponent has no points, apply ModifyIncomingAttackDamage
       - [x] Switch opponent's (predicate) Active to the Bench
-      - [ ] View all (predicate) cards in opponent's deck
+      - [x] View all (predicate) cards in opponent's deck
       - [x] If opponent has any points, attach energy from discard to mon
     - [x] Pokemon Tools
       - [x] New triggers
