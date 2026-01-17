@@ -20,6 +20,9 @@ export class PlayerPokemonView {
   get Name() {
     return this.self.Name;
   }
+  get EvolvesAs() {
+    return this.self.EvolvesAs;
+  }
   get Type() {
     return this.self.Type;
   }

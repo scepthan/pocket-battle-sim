@@ -49,6 +49,10 @@ interface IncreasePoisonDamagePokemonStatus extends BasePokemonStatus {
 interface CannotEvolvePokemonStatus extends BasePokemonStatus {
   type: "CannotEvolve";
 }
+interface CanEvolveAsPokemonStatus extends BasePokemonStatus {
+  type: "CanEvolveAs";
+  pokemonName: string;
+}
 interface CannotAttachFromEnergyZonePokemonStatus extends BasePokemonStatus {
   type: "CannotAttachFromEnergyZone";
 }
@@ -69,6 +73,7 @@ export type OtherPokemonStatus =
   | PreventSpecialConditionsPokemonStatus
   | IncreasePoisonDamagePokemonStatus
   | CannotEvolvePokemonStatus
+  | CanEvolveAsPokemonStatus
   | CannotAttachFromEnergyZonePokemonStatus
   | CannotHealPokemonStatus;
 
@@ -121,6 +126,12 @@ export const OtherPokemonStatus = {
     amount,
   }),
   CannotEvolve: (turnsToKeep?: number) => ({ type: "CannotEvolve", source, turnsToKeep }),
+  CanEvolveAs: (pokemonName: string, turnsToKeep?: number) => ({
+    type: "CanEvolveAs",
+    source,
+    turnsToKeep,
+    pokemonName,
+  }),
   CannotAttachFromEnergyZone: (turnsToKeep?: number) => ({
     type: "CannotAttachFromEnergyZone",
     source,

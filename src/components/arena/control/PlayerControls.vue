@@ -11,7 +11,7 @@
   <div v-else-if="stage === 'selectCard'">
     <SelectionMenu
       :selector="cardSelector"
-      :button-text="(card: PlayingCard) => card.Name"
+      :button-text="(card) => card.Name"
       default-text="Select a card:"
     />
   </div>
@@ -19,7 +19,7 @@
   <div v-else-if="stage === 'selectPokemon'">
     <SelectionMenu
       :selector="pokemonSelector"
-      :button-text="(pokemon: PlayerPokemonView) => pokemon.Name"
+      :button-text="(pokemon) => pokemon.Name"
       default-text="Select a Pokémon:"
     />
   </div>
@@ -27,7 +27,7 @@
   <div v-else-if="stage === 'selectAny'">
     <SelectionMenu
       :selector="baseSelector"
-      :button-text="(option: string) => option"
+      :button-text="(option) => option"
       default-text="Select one:"
     />
   </div>
@@ -248,7 +248,8 @@ const setupAgent = () => {
               await gameView.playPokemonToBench(selectedCard, index);
             } else {
               const evolvablePokemon = gameView.selfInPlayPokemon.filter(
-                (p) => p.isPokemon && p.Name === selectedCard.EvolvesFrom && gameView.canEvolve(p),
+                (p) =>
+                  p.isPokemon && p.EvolvesAs === selectedCard.EvolvesFrom && gameView.canEvolve(p),
               );
               if (evolvablePokemon.length === 0) {
                 console.log("No valid Pokémon to evolve.");

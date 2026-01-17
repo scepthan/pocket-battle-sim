@@ -179,7 +179,8 @@ export class PlayerGameView {
         return this.selfBenched.length < 3;
       } else {
         return this.selfInPlayPokemon.some(
-          (pokemon) => card.EvolvesFrom == pokemon?.Name && this.canEvolve(pokemon, ignoreCanPlay),
+          (pokemon) =>
+            card.EvolvesFrom === pokemon.EvolvesAs && this.canEvolve(pokemon, ignoreCanPlay),
         );
       }
     } else if (card.CardType == "Supporter" || card.CardType == "Item") {
@@ -356,7 +357,7 @@ export class PlayerGameView {
     if (!this.canPlay) return false;
     if (!this.canEvolve(inPlayPokemon)) return false;
 
-    if (pokemon.EvolvesFrom == inPlayPokemon.Name) {
+    if (pokemon.EvolvesFrom == inPlayPokemon.EvolvesAs) {
       const realPokemon = this.pokemonFromView(inPlayPokemon);
       await this.game.evolvePokemon(realPokemon, pokemon);
 

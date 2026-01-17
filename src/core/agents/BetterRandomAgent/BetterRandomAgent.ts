@@ -116,12 +116,12 @@ export class BetterRandomAgent extends PlayerAgent {
       (x) =>
         x.CardType == "Pokemon" &&
         x.Stage > 0 &&
-        evolveablePokemon.some((y) => y.Name == x.EvolvesFrom),
+        evolveablePokemon.some((y) => y.EvolvesAs == x.EvolvesFrom),
     ) as PokemonCard[];
     if (pokemonToEvolveWith.length > 0) {
       const randomEvolver = rand(pokemonToEvolveWith);
       const pokemonToEvolveFrom = evolveablePokemon.filter(
-        (x) => x.Name == randomEvolver.EvolvesFrom,
+        (x) => x.EvolvesAs == randomEvolver.EvolvesFrom,
       );
       const randomEvolvee = rand(pokemonToEvolveFrom);
       await game.playPokemonToEvolve(randomEvolver, randomEvolvee);
@@ -227,7 +227,7 @@ export class BetterRandomAgent extends PlayerAgent {
 
   findPotentialEvolutions(game: PlayerGameView, pokemon: PlayerPokemonView) {
     const allPokemon: PokemonCard[] = [];
-    let currentPokemon = [pokemon.Name];
+    let currentPokemon = [pokemon.EvolvesAs];
     while (currentPokemon.length > 0) {
       const nextEvolutions: PokemonCard[] = [];
       for (const mon of currentPokemon) {

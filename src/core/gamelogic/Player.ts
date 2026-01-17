@@ -308,7 +308,7 @@ export class Player {
     if (!this.Hand.includes(card)) {
       throw new Error("Card not in hand");
     }
-    if (card.EvolvesFrom != pokemon.Name && !skipStage1) {
+    if (card.EvolvesFrom !== pokemon.EvolvesAs && !skipStage1) {
       throw new Error("Card does not evolve from this Pokemon");
     }
     if (!pokemon.ReadyToEvolve) {

@@ -34,6 +34,9 @@
   <span v-else-if="entry.status.type == 'CoinFlipToAttack'"> must flip a coin to attack</span>
   <span v-else-if="entry.status.type == 'CannotRetreat'"> cannot retreat</span>
   <span v-else-if="entry.status.type == 'NoRetreatCost'"> has no retreat cost</span>
+  <span v-else-if="entry.status.type == 'CanEvolveAs'">
+    can evolve into any Pokémon that evolves from {{ entry.status.pokemonName }}</span
+  >
   <span v-else-if="entry.status.type == 'IncreaseMaxHP'">
     has its max HP increased by {{ entry.status.amount }}</span
   >

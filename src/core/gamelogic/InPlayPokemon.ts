@@ -31,6 +31,11 @@ export class InPlayPokemon {
   get Name() {
     return this.BaseCard.Name;
   }
+  get EvolvesAs() {
+    const status = this.PokemonStatuses.find((s) => s.type === "CanEvolveAs");
+    if (status) return status.pokemonName;
+    return this.Name;
+  }
   get Type() {
     return this.BaseCard.Type;
   }

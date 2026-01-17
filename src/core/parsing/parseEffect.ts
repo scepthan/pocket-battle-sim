@@ -1503,7 +1503,7 @@ export const parseEffect = (
             .filter((name) => name !== null);
 
           return player.InPlayPokemon.filter(
-            (p) => p.Stage == 0 && p.ReadyToEvolve && validBasicNames.includes(p.Name),
+            (p) => p.Stage == 0 && p.ReadyToEvolve && validBasicNames.includes(p.EvolvesAs),
           );
         };
         addSideEffect(async (game, self, heads, target) => {
@@ -1513,7 +1513,7 @@ export const parseEffect = (
             (card) =>
               card.CardType === "Pokemon" &&
               card.Stage == 2 &&
-              findBasicForStage2(card as PokemonCard) === target.Name,
+              findBasicForStage2(card as PokemonCard) === target.EvolvesAs,
           );
           const card = await game.chooseCard(self.player, validCards);
           if (!card) return;
@@ -1746,6 +1746,13 @@ export const parseEffect = (
       pattern: /^this Pokémon gets \+(\d+) HP\.$/i,
       transform: (_, amount) => {
         addSelfPokemonStatus(PokemonStatus.IncreaseMaxHP(+amount, turnsToKeep));
+      },
+    },
+    {
+      pattern:
+        /^This Pokémon can evolve into any Pokémon that evolves from (.+?) if you play it from your hand onto this Pokémon\. \(This Pokémon can’t evolve during your first turn or the turn you play it\.\)$/,
+      transform: (_, pokemonName) => {
+        addSelfPokemonStatus(PokemonStatus.CanEvolveAs(pokemonName));
       },
     },
 

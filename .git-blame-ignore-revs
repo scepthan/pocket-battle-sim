@@ -1,0 +1,8 @@
+# Run this command to always ignore formatting commits in `git blame`
+# git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# 2025-08-01: Changed line length from 80 to 100
+e0bca08324b0eeaca3fd79fcac76c975ff7c7e83
+
+# 2026-01-16: Reformatted everything, mostly trailing commas
+c0406f0b1aa28929702163dacbc18bb26fb7c53b

@@ -10,7 +10,7 @@ Backend todo:
   - [x] A2b: 73/73 (100%)
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
-  - [ ] A3b: 57/71 (80.3%)
+  - [ ] A3b: 58/71 (81.7%)
     - [ ] New triggers
       - [ ] When played to evolve
       - [ ] At end of your turn
@@ -26,8 +26,8 @@ Backend todo:
     - [ ] New side effects
       - [ ] Discard all Tools from opponent's Active mon
       - [ ] Look at random Supporter from opponent's deck and use its effect
-    - [ ] New statuses
-      - [ ] CanEvolveAs(name)
+    - [x] New statuses
+      - [x] CanEvolveAs(name)
     - [ ] Other new parsing
       - [ ] "Choose 1: [effect A] [effect B]"
     - [ ] Parsing modifications
