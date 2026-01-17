@@ -26,7 +26,7 @@ import { useDeckStore } from "@/stores";
 
 const deckStore = useDeckStore();
 const decklists = computed(() =>
-  Object.entries(deckStore.BuiltinDecklists).map(([name, decks]) => ({ name, decks }))
+  Object.entries(deckStore.BuiltinDecklists).map(([name, decks]) => ({ name, decks })),
 );
 
 const selectedDecklist = ref<{ name: string; decks: DeckList }>(decklists.value[0]!);

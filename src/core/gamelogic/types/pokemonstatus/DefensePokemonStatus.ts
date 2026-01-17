@@ -59,16 +59,16 @@ export const DefensePokemonStatus = {
   ModifyIncomingAttackDamage: (amount: number, turnsToKeep?: number, descriptor?: string) =>
     parseAttackerCondition(
       { type: "ModifyIncomingAttackDamage", source, turnsToKeep, amount },
-      descriptor
+      descriptor,
     ),
   ModifyIncomingAttackDamageOnCoinFlip: (
     amount: number,
     turnsToKeep?: number,
-    descriptor?: string
+    descriptor?: string,
   ) =>
     parseAttackerCondition(
       { type: "ModifyIncomingAttackDamageOnCoinFlip", source, turnsToKeep, amount },
-      descriptor
+      descriptor,
     ),
   PreventAttackDamage: (turnsToKeep?: number, descriptor?: string) =>
     parseAttackerCondition({ type: "PreventAttackDamage", source, turnsToKeep }, descriptor),
@@ -77,7 +77,7 @@ export const DefensePokemonStatus = {
   PreventAttackDamageAndEffects: (turnsToKeep?: number, descriptor?: string) =>
     parseAttackerCondition(
       { type: "PreventAttackDamageAndEffects", source, turnsToKeep },
-      descriptor
+      descriptor,
     ),
   CounterAttack: (amount: number, turnsToKeep?: number, descriptor?: string) =>
     parseAttackerCondition({ type: "CounterAttack", source, turnsToKeep, amount }, descriptor),

@@ -26,10 +26,10 @@
               entry.failureReason == "deckEmpty"
                 ? "deck is empty"
                 : entry.failureReason == "handFull"
-                ? "hand is full"
-                : entry.failureReason == "noValidCards"
-                ? "no valid cards in deck"
-                : "unknown reason"
+                  ? "hand is full"
+                  : entry.failureReason == "noValidCards"
+                    ? "no valid cards in deck"
+                    : "unknown reason"
             }}).
           </span>
           <span v-else-if="shownPlayers.includes(entry.player)">
@@ -377,14 +377,14 @@
               entry.reason == "notImplemented"
                 ? "Effect not implemented"
                 : entry.reason == "noBenchedPokemon"
-                ? "Player has no benched Pokemon"
-                : entry.reason == "benchFull"
-                ? "Player's bench is full"
-                : entry.reason == "noValidTargets"
-                ? "Effect has no valid targets"
-                : entry.reason == "noValidCards"
-                ? "No valid cards"
-                : "Unknown reason"
+                  ? "Player has no benched Pokemon"
+                  : entry.reason == "benchFull"
+                    ? "Player's bench is full"
+                    : entry.reason == "noValidTargets"
+                      ? "Effect has no valid targets"
+                      : entry.reason == "noValidCards"
+                        ? "No valid cards"
+                        : "Unknown reason"
             }})
           </p>
         </div>

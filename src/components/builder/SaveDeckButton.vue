@@ -84,10 +84,10 @@ const validation = computed(() => deckValidator.validateDeck(fullDeck.value));
 const tooltip = computed(() =>
   validation.value !== true
     ? "Deck can be saved but not used:\n\n" + validation.value.join("; ")
-    : "Save"
+    : "Save",
 );
 const color = computed(() =>
-  !cannotSaveReason.value && validation.value !== true ? "warning" : "default"
+  !cannotSaveReason.value && validation.value !== true ? "warning" : "default",
 );
 
 const onClick = () => {

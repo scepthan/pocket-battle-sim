@@ -54,7 +54,7 @@ const width = computed(() => height.value * ratio);
 const hpPercent = computed(() =>
   props.card && "isPokemon" in props.card && props.card.isPokemon
     ? (props.card.CurrentHP / props.card.MaxHP) * 100
-    : 0
+    : 0,
 );
 
 const cardStyle = computed(() => ({
@@ -88,9 +88,15 @@ const hpBarPaddingStyle = computed(() => ({
 
   font-weight: bold;
   color: black;
-  text-shadow: 0 0.07em 0.04em white, 0.07em 0.07em 0.04em white, 0.07em 0 0.04em white,
-    0.07em -0.07em 0.04em white, 0 -0.07em 0.04em white, -0.07em -0.07em 0.04em white,
-    -0.07em 0 0.04em white, -0.07em 0.07em 0.04em white;
+  text-shadow:
+    0 0.07em 0.04em white,
+    0.07em 0.07em 0.04em white,
+    0.07em 0 0.04em white,
+    0.07em -0.07em 0.04em white,
+    0 -0.07em 0.04em white,
+    -0.07em -0.07em 0.04em white,
+    -0.07em 0 0.04em white,
+    -0.07em 0.07em 0.04em white;
 }
 
 .hp-bar-container {

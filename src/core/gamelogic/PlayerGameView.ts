@@ -179,7 +179,7 @@ export class PlayerGameView {
         return this.selfBenched.length < 3;
       } else {
         return this.selfInPlayPokemon.some(
-          (pokemon) => card.EvolvesFrom == pokemon?.Name && this.canEvolve(pokemon, ignoreCanPlay)
+          (pokemon) => card.EvolvesFrom == pokemon?.Name && this.canEvolve(pokemon, ignoreCanPlay),
         );
       }
     } else if (card.CardType == "Supporter" || card.CardType == "Item") {
@@ -195,7 +195,7 @@ export class PlayerGameView {
       return this.selfBench.some((slot) => !slot.isPokemon);
     } else if (card.CardType == "PokemonTool") {
       return this.selfInPlayPokemon.some(
-        (pokemon) => pokemon.AttachedToolCards.length < pokemon.MaxToolCards
+        (pokemon) => pokemon.AttachedToolCards.length < pokemon.MaxToolCards,
       );
     }
 
@@ -220,7 +220,7 @@ export class PlayerGameView {
   }
   canUseAttack(
     attack: Attack,
-    ignoreCanPlay: boolean = false
+    ignoreCanPlay: boolean = false,
   ): this is PlayerGameViewWithActivePokemon {
     if (!this.hasActivePokemon()) return false;
     if (!this.canPlay && !ignoreCanPlay) return false;
@@ -232,7 +232,7 @@ export class PlayerGameView {
       this.selfActive.PokemonStatuses.some(
         (status) =>
           status.type == "CannotAttack" ||
-          (status.type == "CannotUseSpecificAttack" && status.attackName == attack.name)
+          (status.type == "CannotUseSpecificAttack" && status.attackName == attack.name),
       )
     )
       return false;
@@ -246,7 +246,7 @@ export class PlayerGameView {
   canUseAbility(
     pokemon: PlayerPokemonView,
     ability: Ability,
-    ignoreCanPlay: boolean = false
+    ignoreCanPlay: boolean = false,
   ): boolean {
     if (!this.canPlay && !ignoreCanPlay) return false;
 
@@ -309,7 +309,7 @@ export class PlayerGameView {
     const pokemon = this.pokemonFromView(this.selfActive);
     const baseDamage = attack.calculateDamage
       ? attack.calculateDamage(this.game, pokemon, attack.type === "CoinFlipForDamage" ? 1 : 0)
-      : attack.baseDamage ?? 0;
+      : (attack.baseDamage ?? 0);
     const modifiedBaseDamage = this.game.calculateModifiedBaseDamage(baseDamage);
 
     if (attack.type === "CoinFlipForAddedDamage") {
@@ -351,7 +351,7 @@ export class PlayerGameView {
   }
   async playPokemonToEvolve(
     pokemon: PokemonCard,
-    inPlayPokemon: PlayerPokemonView
+    inPlayPokemon: PlayerPokemonView,
   ): Promise<boolean> {
     if (!this.canPlay) return false;
     if (!this.canEvolve(inPlayPokemon)) return false;
@@ -384,13 +384,13 @@ export class PlayerGameView {
   }
   async retreatActivePokemon(
     benchedPokemon: PlayerPokemonView,
-    energy?: Energy[]
+    energy?: Energy[],
   ): Promise<boolean> {
     if (!this.canRetreat()) return false;
 
     if (!energy) {
       const canSelectFewer = this.selfActive.PokemonStatuses.some(
-        (status) => status.type == "DoubleEnergy"
+        (status) => status.type == "DoubleEnergy",
       );
 
       energy = await this.game.chooseNEnergy(
@@ -398,7 +398,7 @@ export class PlayerGameView {
         this.selfActive.AttachedEnergy,
         this.player.effectiveRetreatCost,
         "Choose Energy to discard.",
-        canSelectFewer
+        canSelectFewer,
       );
     }
 

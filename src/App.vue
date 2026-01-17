@@ -69,8 +69,8 @@ onMounted(() => {
   const unusedCards = uniqueCards.filter(
     (card) =>
       !Object.values(decklists).some((decks) =>
-        Object.values(decks).some((deck) => deck.Cards.includes(card.id))
-      )
+        Object.values(decks).some((deck) => deck.Cards.includes(card.id)),
+      ),
   );
 
   const unusedCardGroups: Record<string, InputCard[]> = {};
@@ -86,17 +86,17 @@ onMounted(() => {
         ([key, cards]) =>
           `- ${key} (${cards.length}): ${cards
             .map((card) => `${card.id} (${card.name})`)
-            .join("; ")}`
+            .join("; ")}`,
       )
-      .join("\n")}`
+      .join("\n")}`,
   );
 
   if (debugMultiUseCards) {
     const multiUseCards = uniqueCards.filter(
       (card) =>
         Object.values(decklists).flatMap((decks) =>
-          Object.values(decks).filter((deck) => deck.Cards.includes(card.id))
-        ).length > 1
+          Object.values(decks).filter((deck) => deck.Cards.includes(card.id)),
+        ).length > 1,
     );
 
     console.log(
@@ -107,12 +107,12 @@ onMounted(() => {
             `${card.id} (${card.name}): ${Object.entries(decklists)
               .flatMap(([setName, set]) =>
                 Object.entries(set).flatMap(([deckName, deck]) =>
-                  deck.Cards.includes(card.id) ? `${deckName} (${setName})` : []
-                )
+                  deck.Cards.includes(card.id) ? `${deckName} (${setName})` : [],
+                ),
               )
-              .join(", ")}`
+              .join(", ")}`,
         )
-        .join("\n")
+        .join("\n"),
     );
   }
 

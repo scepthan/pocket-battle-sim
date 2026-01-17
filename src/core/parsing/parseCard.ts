@@ -109,7 +109,7 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
         name: inputCard.name,
         text: inputCard.text,
       },
-      "PokemonTool"
+      "PokemonTool",
     );
     if (!result.parseSuccessful) parseSuccessful = false;
 

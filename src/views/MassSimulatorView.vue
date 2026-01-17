@@ -57,8 +57,8 @@ const entrants = ref(["none"]);
 const selectedEntrant = ref("none");
 const filteredRecords = computed(() =>
   Object.entries(matchupRecords).filter(([matchupName]) =>
-    matchupName.includes(selectedEntrant.value)
-  )
+    matchupName.includes(selectedEntrant.value),
+  ),
 );
 
 const overallData = computed(() =>
@@ -69,7 +69,7 @@ const overallData = computed(() =>
     ties: record.ties,
     gamesPlayed: record.gamesPlayed,
     winrate: ((record.wins / record.gamesPlayed || 0) * 100).toFixed(2) + "%",
-  }))
+  })),
 );
 
 const matchupData = computed(() =>
@@ -79,7 +79,7 @@ const matchupData = computed(() =>
     secondWins: record.secondWins,
     ties: record.ties,
     gamesPlayed: record.gamesPlayed,
-  }))
+  })),
 );
 
 onMounted(() => {

@@ -10,7 +10,7 @@ export type SideEffect = (
   game: Game,
   self: InPlayPokemon,
   heads: number,
-  target?: InPlayPokemon
+  target?: InPlayPokemon,
 ) => Promise<void>;
 
 export type DamageCalculation = (game: Game, self: InPlayPokemon, heads: number) => number;

@@ -1,4 +1,4 @@
-<template>{{ count }} {{ count === 1 ? single : plural ?? single + "s" }}</template>
+<template>{{ count }} {{ count === 1 ? single : (plural ?? single + "s") }}</template>
 
 <script setup lang="ts">
 export interface Props {

@@ -71,10 +71,10 @@ const emit = defineEmits<{
 }>();
 
 const energyDisplay = computed(() =>
-  sortedBy(energyTypes.value, (x) => x, Object.values(EnergyMap))
+  sortedBy(energyTypes.value, (x) => x, Object.values(EnergyMap)),
 );
 
 const filteredEnergyTypes = computed(
-  () => Object.values(EnergyMap).filter((x) => !["Colorless", "Dragon"].includes(x)) as Energy[]
+  () => Object.values(EnergyMap).filter((x) => !["Colorless", "Dragon"].includes(x)) as Energy[],
 );
 </script>

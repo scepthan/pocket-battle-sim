@@ -21,7 +21,7 @@ const cardWidth = ref(cardHeight.value * ratio);
 
 const maxWidth = ref(360);
 const cardMargin = computed(
-  () => (maxWidth.value - 1 - cardWidth.value) / (props.count - 1) - cardWidth.value
+  () => (maxWidth.value - 1 - cardWidth.value) / (props.count - 1) - cardWidth.value,
 );
 const baseMargin = ref(-100);
 

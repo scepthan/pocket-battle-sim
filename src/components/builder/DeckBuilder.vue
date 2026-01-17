@@ -60,7 +60,7 @@ const cardStore = usePlayingCardStore();
 const deckStore = useDeckStore();
 
 const selectedCards = ref<PlayingCard[]>(
-  props.initialDeck.Cards.map((id) => cardStore.getCardById(id)).filter((x) => x !== undefined)
+  props.initialDeck.Cards.map((id) => cardStore.getCardById(id)).filter((x) => x !== undefined),
 );
 const deckName = ref(props.name);
 if (deckName.value === "") {
@@ -79,7 +79,7 @@ const computedEnergy = computed<Set<Energy>>(() => {
     card.Attacks.forEach((attack) =>
       attack.requiredEnergy.forEach((energy) => {
         if (energy !== "Colorless" && requiredEnergyTypes.size < 3) requiredEnergyTypes.add(energy);
-      })
+      }),
     );
   });
   requiredEnergyTypes.delete("Colorless");
@@ -96,7 +96,7 @@ watch(
       energyTypes.value = Array.from(newVal);
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 // Mark as custom if selected energy types differ from computed energy
 watch(energyTypes, () => {

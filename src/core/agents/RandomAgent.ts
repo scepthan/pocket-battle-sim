@@ -5,7 +5,7 @@ import { randomElement } from "../util";
 export class RandomAgent extends PlayerAgent {
   async setupPokemon(game: GameInitState) {
     const basicPokemon = game.hand.filter(
-      (x) => x.CardType == "Pokemon" && x.Stage == 0
+      (x) => x.CardType == "Pokemon" && x.Stage == 0,
     ) as PokemonCard[];
     if (basicPokemon.length === 0) {
       throw new Error("No basic Pokemon in hand");
@@ -27,7 +27,7 @@ export class RandomAgent extends PlayerAgent {
 
     // Play a random Basic Pokemon to the Bench if available
     const handBasics = game.selfHand.filter(
-      (x) => x.CardType == "Pokemon" && x.Stage == 0
+      (x) => x.CardType == "Pokemon" && x.Stage == 0,
     ) as PokemonCard[];
     if (handBasics.length > 0) {
       const randomBasic = randomElement(handBasics);
@@ -86,12 +86,12 @@ export class RandomAgent extends PlayerAgent {
       (x) =>
         x.CardType == "Pokemon" &&
         x.Stage > 0 &&
-        evolveablePokemon.some((y) => y.Name == x.EvolvesFrom)
+        evolveablePokemon.some((y) => y.Name == x.EvolvesFrom),
     ) as PokemonCard[];
     if (pokemonToEvolveWith.length > 0) {
       const randomEvolver = randomElement(pokemonToEvolveWith);
       const pokemonToEvolveFrom = evolveablePokemon.filter(
-        (x) => x.Name == randomEvolver.EvolvesFrom
+        (x) => x.Name == randomEvolver.EvolvesFrom,
       );
       const randomEvolvee = randomElement(pokemonToEvolveFrom);
       await game.playPokemonToEvolve(randomEvolver, randomEvolvee);

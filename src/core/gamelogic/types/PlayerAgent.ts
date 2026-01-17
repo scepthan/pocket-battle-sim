@@ -46,7 +46,7 @@ export abstract class PlayerAgent {
    */
   async chooseNewActivePokemon(
     game: PlayerGameView,
-    reason: "opponentEffect" | "activeKnockedOut"
+    reason: "opponentEffect" | "activeKnockedOut",
   ): Promise<PlayerPokemonView> {
     return this.choosePokemon(game.selfBenched, "Choose a new Active Pokémon.");
   }
@@ -81,7 +81,7 @@ export abstract class PlayerAgent {
   async chooseNPokemon(
     pokemon: PlayerPokemonView[],
     n: number,
-    prompt: string
+    prompt: string,
   ): Promise<PlayerPokemonView[]> {
     return randomElements(pokemon, n);
   }

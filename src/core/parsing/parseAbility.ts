@@ -4,7 +4,7 @@ import type { InputCardAbility, ParsedResult } from "./types";
 
 export const parseAbility = (
   inputAbility: InputCardAbility,
-  source: "Ability" | "PokemonTool"
+  source: "Ability" | "PokemonTool",
 ): ParsedResult<Ability> => {
   let parseSuccessful = true;
 

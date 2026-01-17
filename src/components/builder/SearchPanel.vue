@@ -106,8 +106,8 @@ const cardsFiltered = computed(() =>
       }
       return true;
     }),
-    sortBy.value
-  )
+    sortBy.value,
+  ),
 );
 const cardRows = computed(() => {
   const rows = [];

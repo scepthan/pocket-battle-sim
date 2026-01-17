@@ -348,7 +348,7 @@ export class Player {
     pokemon: InPlayPokemon,
     energy: Energy[],
     from: AttachEnergySource,
-    fromPokemon?: InPlayPokemon
+    fromPokemon?: InPlayPokemon,
   ) {
     if ((from === "turn" || from === "energyZone") && !this.canAttachFromEnergyZone(pokemon)) {
       // Log prevention?
@@ -467,7 +467,7 @@ export class Player {
   async swapActivePokemon(
     newActive: InPlayPokemon,
     reason: "retreat" | "selfEffect" | "opponentEffect",
-    choosingPlayer?: string
+    choosingPlayer?: string,
   ) {
     const currentActive = this.activeOrThrow();
 
@@ -585,7 +585,7 @@ export class Player {
   shouldPreventSpecialConditions(): boolean {
     const active = this.activeOrThrow();
     const result = active.PokemonStatuses.some(
-      (status) => status.type === "PreventSpecialConditions"
+      (status) => status.type === "PreventSpecialConditions",
     );
     if (result) this.logger.specialConditionPrevented(this, active);
     return result;
@@ -648,7 +648,7 @@ export class Player {
 
     if (status.source === "Ability") {
       const otherPokemonWithStatus = this.InPlayPokemon.filter((p) =>
-        p.ActivePlayerStatuses.some((s) => s.id === statusId)
+        p.ActivePlayerStatuses.some((s) => s.id === statusId),
       );
       if (otherPokemonWithStatus.length > 0) return;
     }

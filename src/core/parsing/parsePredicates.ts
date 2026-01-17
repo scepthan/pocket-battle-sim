@@ -27,13 +27,13 @@ const parsePokemonNames = (text: string): ParsedResult<string[]> => {
  */
 export const parsePokemonPredicate = (
   text: string,
-  basePredicate: InPlayPokemonPredicate = () => true
+  basePredicate: InPlayPokemonPredicate = () => true,
 ): ParsedResult<InPlayPokemonPredicate> => {
   let predicate: InPlayPokemonPredicate = basePredicate;
 
   const parsePart = (
     regex: RegExp,
-    transform: (match: RegExpMatchArray) => InPlayPokemonPredicate
+    transform: (match: RegExpMatchArray) => InPlayPokemonPredicate,
   ) => {
     const match = text.match(regex);
     if (match) {
@@ -49,7 +49,7 @@ export const parsePokemonPredicate = (
   parsePart(/^Benched /, () => (pokemon) => pokemon.player.BenchedPokemon.includes(pokemon));
   parsePart(
     /^Active | in the Active Spot$/,
-    () => (pokemon) => pokemon.player.ActivePokemon === pokemon
+    () => (pokemon) => pokemon.player.ActivePokemon === pokemon,
   );
 
   parsePart(/^Basic /, () => (pokemon) => pokemon.Stage === 0);
@@ -101,7 +101,7 @@ export const parsePokemonPredicate = (
  */
 export const parsePlayingCardPredicate = (
   text: string,
-  basePredicate: PlayingCardPredicate = () => true
+  basePredicate: PlayingCardPredicate = () => true,
 ): ParsedResult<PlayingCardPredicate> => {
   let predicate: PlayingCardPredicate = basePredicate;
 

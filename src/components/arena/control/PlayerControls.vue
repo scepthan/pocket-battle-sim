@@ -107,25 +107,26 @@ const agent = defineModel<PlayerAgent>("agent");
 const game = ref<PlayerGameView>();
 
 const playableCards = computed(
-  () => game.value?.selfHand.filter((card) => game.value?.canPlayCard(card, true)) ?? []
+  () => game.value?.selfHand.filter((card) => game.value?.canPlayCard(card, true)) ?? [],
 );
 const usableAbilities = computed(
   () =>
     game.value?.selfInPlayPokemon.filter(
-      (pokemon) => pokemon.Ability && game.value?.canUseAbility(pokemon, pokemon.Ability, true)
-    ) ?? []
+      (pokemon) => pokemon.Ability && game.value?.canUseAbility(pokemon, pokemon.Ability, true),
+    ) ?? [],
 );
 const usableAttacks = computed(() =>
   game.value?.selfActive.isPokemon
-    ? game.value.selfActive.Attacks.filter((attack) => game.value?.canUseAttack(attack, true)) ?? []
-    : []
+    ? (game.value.selfActive.Attacks.filter((attack) => game.value?.canUseAttack(attack, true)) ??
+      [])
+    : [],
 );
 
 const actionsLeft = computed(
   () =>
     playableCards.value.some((x) => x.CardType === "Supporter" || x.CardType === "Pokemon") ||
     game.value?.selfAvailableEnergy ||
-    usableAbilities.value.length > 0
+    usableAbilities.value.length > 0,
 );
 
 const stage = ref<string>("idle");
@@ -148,7 +149,7 @@ const setupAgent = () => {
       stage.value = "selectCard";
       cardSelector.text.value = "Select your Active Pokémon:";
       cardSelector.options.value = gameView.hand.filter(
-        (card) => card.CardType === "Pokemon" && card.Stage === 0
+        (card) => card.CardType === "Pokemon" && card.Stage === 0,
       );
 
       const active = (await cardSelector.selectionPromise()) as PokemonCard;
@@ -207,7 +208,7 @@ const setupAgent = () => {
         stage.value = "selectPokemon";
         pokemonSelector.text.value = "Select a Pokémon to attach energy to:";
         pokemonSelector.options.value = gameView.selfInPlayPokemon.filter((p) =>
-          gameView.canAttachFromEnergyZone(p, true)
+          gameView.canAttachFromEnergyZone(p, true),
         );
         pokemonSelector.addCancelButton.value = true;
 
@@ -247,7 +248,7 @@ const setupAgent = () => {
               await gameView.playPokemonToBench(selectedCard, index);
             } else {
               const evolvablePokemon = gameView.selfInPlayPokemon.filter(
-                (p) => p.isPokemon && p.Name === selectedCard.EvolvesFrom && gameView.canEvolve(p)
+                (p) => p.isPokemon && p.Name === selectedCard.EvolvesFrom && gameView.canEvolve(p),
               );
               if (evolvablePokemon.length === 0) {
                 console.log("No valid Pokémon to evolve.");
@@ -304,7 +305,7 @@ const setupAgent = () => {
               stage.value = "selectPokemon";
               pokemonSelector.text.value = "Select a Pokémon to use it on:";
               pokemonSelector.options.value = gameView.validTargets(
-                selectedCard
+                selectedCard,
               ) as PlayerPokemonView[];
               pokemonSelector.addCancelButton.value = true;
 

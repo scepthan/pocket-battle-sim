@@ -21,6 +21,6 @@ import { type Energy, EnergyMap } from "@/core";
 const selectedTypes = defineModel<Energy[]>();
 
 const allTypes = computed(
-  () => Object.values(EnergyMap).filter((e) => e !== "Colorless") as Energy[]
+  () => Object.values(EnergyMap).filter((e) => e !== "Colorless") as Energy[],
 );
 </script>

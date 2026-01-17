@@ -13,7 +13,7 @@ import { randomElement as rand, removeElement } from "../../util";
 export class BetterRandomAgent_v0_1_0 extends PlayerAgent {
   async setupPokemon(game: GameInitState) {
     const basicPokemon = game.hand.filter(
-      (x) => x.CardType == "Pokemon" && x.Stage == 0
+      (x) => x.CardType == "Pokemon" && x.Stage == 0,
     ) as PokemonCard[];
 
     return {
@@ -32,7 +32,7 @@ export class BetterRandomAgent_v0_1_0 extends PlayerAgent {
     } else if (Math.random() > 0.5) {
       // Play a random Supporter card if available
       const supporterCards = game.selfHand.filter(
-        (x) => x.CardType == "Supporter" && game.canPlayCard(x)
+        (x) => x.CardType == "Supporter" && game.canPlayCard(x),
       ) as SupporterCard[];
       if (supporterCards.length > 0) {
         const card = rand(supporterCards);
@@ -55,7 +55,7 @@ export class BetterRandomAgent_v0_1_0 extends PlayerAgent {
 
     // Play random Basic Pokemon to the Bench if available
     const handBasics = game.selfHand.filter(
-      (x) => x.CardType == "Pokemon" && x.Stage == 0
+      (x) => x.CardType == "Pokemon" && x.Stage == 0,
     ) as PokemonCard[];
     const bench = game.selfBench;
     for (let i = 0; i < 3 && handBasics.length > 0; i++) {
@@ -100,12 +100,12 @@ export class BetterRandomAgent_v0_1_0 extends PlayerAgent {
       (x) =>
         x.CardType == "Pokemon" &&
         x.Stage > 0 &&
-        evolveablePokemon.some((y) => y.Name == x.EvolvesFrom)
+        evolveablePokemon.some((y) => y.Name == x.EvolvesFrom),
     ) as PokemonCard[];
     if (pokemonToEvolveWith.length > 0) {
       const randomEvolver = rand(pokemonToEvolveWith);
       const pokemonToEvolveFrom = evolveablePokemon.filter(
-        (x) => x.Name == randomEvolver.EvolvesFrom
+        (x) => x.Name == randomEvolver.EvolvesFrom,
       );
       const randomEvolvee = rand(pokemonToEvolveFrom);
       await game.playPokemonToEvolve(randomEvolver, randomEvolvee);
@@ -115,7 +115,7 @@ export class BetterRandomAgent_v0_1_0 extends PlayerAgent {
 
     // If any Pokemon has a usable Ability, use it
     const pokemonWithAbilities = ownPokemon.filter(
-      (x) => x.Ability && game.canUseAbility(x, x.Ability)
+      (x) => x.Ability && game.canUseAbility(x, x.Ability),
     );
     for (const pokemon of pokemonWithAbilities) {
       // Fossils are given a pseudo-Ability to discard themselves; don't use it unless in the Active Spot
@@ -130,8 +130,8 @@ export class BetterRandomAgent_v0_1_0 extends PlayerAgent {
     if (
       active.Attacks.some((a) =>
         this.findRemainingEnergy(active, a.requiredEnergy).some(
-          (e) => e == game.selfAvailableEnergy || e == "Colorless"
-        )
+          (e) => e == game.selfAvailableEnergy || e == "Colorless",
+        ),
       )
     ) {
       // If the active Pokemon needs the available energy for any attack, attach it
@@ -155,10 +155,10 @@ export class BetterRandomAgent_v0_1_0 extends PlayerAgent {
       });
 
       const pokemonNeedingExtraEnergy = pokemonEnergyRequirements.filter(
-        (x) => x.maxEnergyRequired >= 2
+        (x) => x.maxEnergyRequired >= 2,
       );
       const pokemonNeedingSomeEnergy = pokemonEnergyRequirements.filter(
-        (x) => x.maxEnergyRequired >= 1
+        (x) => x.maxEnergyRequired >= 1,
       );
       if (pokemonNeedingExtraEnergy.length > 0) {
         // If any Pokemon need 2 or more energy, attach to one of them at random

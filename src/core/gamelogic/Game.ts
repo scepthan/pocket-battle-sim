@@ -149,7 +149,7 @@ export class Game {
       try {
         await this.nextTurn();
       } catch (error) {
-        const outError = error instanceof Error ? error.stack ?? error.message : String(error);
+        const outError = error instanceof Error ? (error.stack ?? error.message) : String(error);
         console.error("Error during turn:", outError);
         this.GameLog.invalidGameState();
         this.GameOver = true;
@@ -226,7 +226,7 @@ export class Game {
           });
       });
     } catch (error) {
-      const outError = error instanceof Error ? error.stack ?? error.message : String(error);
+      const outError = error instanceof Error ? (error.stack ?? error.message) : String(error);
       console.error("Error during turn:", outError);
       this.GameLog.turnError(this.AttackingPlayer, String(error));
     }
@@ -407,7 +407,7 @@ export class Game {
           }
         } else if (status.source === "PokemonTool") {
           const tool = pokemon.AttachedToolCards.find(
-            (t) => t.Effect.type === "Status" && t.Effect.effect.some((e) => e.status === status)
+            (t) => t.Effect.type === "Status" && t.Effect.effect.some((e) => e.status === status),
           );
           if (!tool) {
             pokemon.removePokemonStatus(status);
@@ -420,7 +420,7 @@ export class Game {
       for (const status of player.PlayerStatuses) {
         if (status.source === "Ability") {
           const triggeringPokemon = this.InPlayPokemon.filter((p) =>
-            p.ActivePlayerStatuses.some((s) => s.id === status.id)
+            p.ActivePlayerStatuses.some((s) => s.id === status.id),
           );
 
           let validPokemon = false;
@@ -456,7 +456,7 @@ export class Game {
             if (effect.type === "PlayerStatus") {
               const statusPlayer = effect.opponent ? player.opponent : player;
               const existingStatus = pokemon.ActivePlayerStatuses.find(
-                (s) => s.id === effect.status.id
+                (s) => s.id === effect.status.id,
               );
 
               if (existingStatus) {
@@ -546,13 +546,13 @@ export class Game {
     if (!this.Player1.ActivePokemon.isPokemon) {
       promises[0] = this.Agent1.chooseNewActivePokemon(
         new PlayerGameView(this, this.Player1),
-        "activeKnockedOut"
+        "activeKnockedOut",
       );
     }
     if (!this.Player2.ActivePokemon.isPokemon) {
       promises[1] = this.Agent2.chooseNewActivePokemon(
         new PlayerGameView(this, this.Player2),
-        "activeKnockedOut"
+        "activeKnockedOut",
       );
     }
     if (promises.length > 0) {
@@ -560,11 +560,11 @@ export class Game {
       const newActive = await Promise.all(promises);
       if (newActive[0])
         await this.Player1.setNewActivePokemon(
-          this.viewToPokemon(newActive[0], this.Player1.BenchedPokemon)
+          this.viewToPokemon(newActive[0], this.Player1.BenchedPokemon),
         );
       if (newActive[1])
         await this.Player2.setNewActivePokemon(
-          this.viewToPokemon(newActive[1], this.Player2.BenchedPokemon)
+          this.viewToPokemon(newActive[1], this.Player2.BenchedPokemon),
         );
     }
   }
@@ -592,7 +592,7 @@ export class Game {
         (status.type === "PreventAttackDamage" ||
           status.type === "PreventAttackDamageAndEffects") &&
         (!status.attackerCondition ||
-          status.attackerCondition.test(this.AttackingPlayer.activeOrThrow()))
+          status.attackerCondition.test(this.AttackingPlayer.activeOrThrow())),
     );
     if (result) this.GameLog.damagePrevented(this.DefendingPlayer, pokemon);
     return result;
@@ -606,7 +606,7 @@ export class Game {
         (status.type === "PreventAttackEffects" ||
           status.type === "PreventAttackDamageAndEffects") &&
         (!status.attackerCondition ||
-          status.attackerCondition.test(this.AttackingPlayer.activeOrThrow()))
+          status.attackerCondition.test(this.AttackingPlayer.activeOrThrow())),
     );
     if (result) this.GameLog.effectPrevented(this.DefendingPlayer, pokemon);
     return result;
@@ -703,7 +703,7 @@ export class Game {
     const attacker = this.AttackingPlayer.activeOrThrow();
 
     let coinFlipsToAttack = attacker.PokemonStatuses.filter(
-      (status) => status.type === "CoinFlipToAttack"
+      (status) => status.type === "CoinFlipToAttack",
     ).length;
     if (attacker.PrimaryCondition === "Confused") {
       this.GameLog.specialConditionEffective(attacker);
@@ -980,7 +980,7 @@ export class Game {
    */
   async discardPokemonTools(
     pokemon: InPlayPokemon,
-    tools: PokemonToolCard[] = pokemon.AttachedToolCards.slice()
+    tools: PokemonToolCard[] = pokemon.AttachedToolCards.slice(),
   ): Promise<void> {
     if (this.shouldPreventEffects(pokemon)) return;
     if (tools.length === 0) return;
@@ -1088,7 +1088,7 @@ export class Game {
   async choose<T>(
     player: Player,
     options: Record<string, T>,
-    prompt: string
+    prompt: string,
   ): Promise<T | undefined>;
   async choose<T>(player: Player, options: string[] | Record<string, T>, prompt: string) {
     const inputs = Array.isArray(options) ? options : Object.keys(options);
@@ -1137,7 +1137,7 @@ export class Game {
       const agent = this.findAgent(player);
       const newActiveView = await agent.chooseNewActivePokemon(
         new PlayerGameView(this, player),
-        "opponentEffect"
+        "opponentEffect",
       );
       newActive = this.viewToPokemon(newActiveView, player.BenchedPokemon);
     }
@@ -1152,7 +1152,7 @@ export class Game {
   async choosePokemon(
     player: Player,
     validPokemon: InPlayPokemon[],
-    prompt: string = "Choose a Pokémon."
+    prompt: string = "Choose a Pokémon.",
   ): Promise<InPlayPokemon | undefined> {
     if (validPokemon.length == 0) {
       this.GameLog.noValidTargets(player);
@@ -1174,7 +1174,7 @@ export class Game {
     player: Player,
     options: InPlayPokemon[],
     n: number,
-    prompt: string = `Choose ${n} Pokémon.`
+    prompt: string = `Choose ${n} Pokémon.`,
   ): Promise<InPlayPokemon[]> {
     if (options.length == 0) {
       this.GameLog.noValidTargets(player);
@@ -1185,7 +1185,7 @@ export class Game {
     const agent = this.findAgent(player);
     const pokemonViews = options.map((p) => new PlayerPokemonView(p));
     const selected = (await agent.chooseNPokemon(pokemonViews, n, prompt)).map((v) =>
-      this.viewToPokemon(v, options)
+      this.viewToPokemon(v, options),
     );
     if (!isSubset(options, selected)) {
       throw new Error("Invalid Pokémon selected");
@@ -1199,7 +1199,7 @@ export class Game {
   async chooseCard(
     player: Player,
     options: PlayingCard[],
-    prompt: string = "Choose a card."
+    prompt: string = "Choose a card.",
   ): Promise<PlayingCard | undefined> {
     if (options.length == 0) {
       this.GameLog.noValidTargets(player);
@@ -1222,7 +1222,7 @@ export class Game {
     player: Player,
     options: PlayingCard[],
     n: number,
-    prompt: string = `Choose ${n} cards`
+    prompt: string = `Choose ${n} cards`,
   ): Promise<PlayingCard[]> {
     if (options.length == 0) {
       this.GameLog.noValidTargets(player);
@@ -1256,7 +1256,7 @@ export class Game {
     options: Energy[],
     n: number,
     prompt: string,
-    canSelectFewer?: boolean
+    canSelectFewer?: boolean,
   ): Promise<Energy[]> {
     if (n === 0) return [];
 
@@ -1284,7 +1284,7 @@ export class Game {
     const agent = this.findAgent(player);
     const distribution = await agent.distributeEnergy(
       validPokemon.map((p) => new PlayerPokemonView(p)),
-      energy
+      energy,
     );
     const sorted = distribution.flat().sort().join(",");
     if (sorted !== energy.slice().sort().join(",")) throw new Error("Invalid energy distribution");

@@ -26,7 +26,7 @@ export const PlayerStatus = {
     pokemonStatus: PokemonStatus,
     descriptor: string,
     keepNextTurn?: boolean,
-    doesNotStack?: boolean
+    doesNotStack?: boolean,
   ): ParsedResult<PlayerStatus> => {
     const predicate = parsePokemonPredicate(descriptor);
     pokemonStatus.source = "PlayerStatus";

@@ -104,9 +104,9 @@ export interface Props {
 const props = defineProps<Props>();
 
 const pokemonStatus = computed(() =>
-  props.entry.status.type === "PokemonStatus" ? props.entry.status.pokemonStatus : null
+  props.entry.status.type === "PokemonStatus" ? props.entry.status.pokemonStatus : null,
 );
 const descriptor = computed(() =>
-  props.entry.status.type === "PokemonStatus" ? props.entry.status.pokemonCondition.descriptor : ""
+  props.entry.status.type === "PokemonStatus" ? props.entry.status.pokemonCondition.descriptor : "",
 );
 </script>

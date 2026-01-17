@@ -28,7 +28,7 @@ export const usePlayingCardStore = defineStore("playing-cards", () => {
     }
   }
   console.log(
-    `${inputCards.length} cards found: ${successCount} successfully parsed, ${softFailCount} soft failed`
+    `${inputCards.length} cards found: ${successCount} successfully parsed, ${softFailCount} soft failed`,
   );
   console.log(outputCards);
   Cards.value = outputCards;

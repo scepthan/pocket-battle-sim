@@ -44,7 +44,7 @@ const cardStore = usePlayingCardStore();
 
 const cards = computed(() => {
   let output = props.deck.Cards.map((id) => cardStore.getCardById(id)).filter(
-    (x) => x !== undefined
+    (x) => x !== undefined,
   );
   output = sortedBy(output, (card) => (card.CardType === "Pokemon" ? card.Type : card.CardType), [
     ...Object.values(EnergyMap),

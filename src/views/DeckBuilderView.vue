@@ -29,7 +29,7 @@ if (route.query.clone === "1") {
     const deckInfo = deckStore.BuiltinDecklists[route.query.builtinList as string]?.[name.value];
     if (!deckInfo)
       throw new Error(
-        `Could not find builtin deck: ${route.query.builtinList} - ${route.query.name}`
+        `Could not find builtin deck: ${route.query.builtinList} - ${route.query.name}`,
       );
     deck.value = deckInfo;
   } else {

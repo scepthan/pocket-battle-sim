@@ -5,7 +5,7 @@ export type PokemonEffect = (game: Game, self: InPlayPokemon) => Promise<void>;
 export type TargetedPokemonEffect = (
   game: Game,
   self: InPlayPokemon,
-  target: InPlayPokemon
+  target: InPlayPokemon,
 ) => Promise<void>;
 
 export type NumberOrCalculation =

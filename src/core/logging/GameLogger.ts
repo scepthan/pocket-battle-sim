@@ -104,7 +104,7 @@ export class GameLogger {
     fromPokemon: InPlayPokemon,
     toPokemon: InPlayPokemon,
     reason: SwapActivePokemonReason,
-    choosingPlayer?: string
+    choosingPlayer?: string,
   ) {
     this.addEntry({
       type: "swapActivePokemon",
@@ -207,7 +207,7 @@ export class GameLogger {
       player: player.Name,
       source: "inPlay",
       cardIds: pokemon.InPlayCards.filter((card) => card.CardType !== "PokemonTool").map(
-        (card) => card.ID
+        (card) => card.ID,
       ),
     });
   }
@@ -218,7 +218,7 @@ export class GameLogger {
       player: player.Name,
       source: "inPlay",
       cardIds: pokemon.InPlayCards.filter((card) => card.CardType !== "PokemonTool").map(
-        (card) => card.ID
+        (card) => card.ID,
       ),
     });
   }
@@ -245,7 +245,7 @@ export class GameLogger {
     targetPokemon: InPlayPokemon,
     energyTypes: Energy[],
     from: AttachEnergySource,
-    fromPokemon?: InPlayPokemon
+    fromPokemon?: InPlayPokemon,
   ) {
     this.addEntry({
       type: "attachEnergy",
@@ -261,7 +261,7 @@ export class GameLogger {
     player: Player,
     energyTypes: Energy[],
     source: DiscardEnergySource,
-    targetPokemon?: InPlayPokemon
+    targetPokemon?: InPlayPokemon,
   ) {
     this.addEntry({
       type: "discardEnergy",
@@ -295,7 +295,7 @@ export class GameLogger {
     pokemon: InPlayPokemon,
     condition: SecondaryCondition,
     initialHP: number,
-    damage: number
+    damage: number,
   ) {
     this.addEntry({
       type: "specialConditionDamage",
@@ -421,7 +421,7 @@ export class GameLogger {
     pokemon: InPlayPokemon,
     initialHP: number,
     damageDealt: number,
-    weaknessBoost?: boolean
+    weaknessBoost?: boolean,
   ) {
     this.pokemonDamaged(player, pokemon, initialHP, damageDealt, true, weaknessBoost);
   }
@@ -432,7 +432,7 @@ export class GameLogger {
     initialHP: number,
     damageDealt: number,
     fromAttack: boolean,
-    weaknessBoost?: boolean
+    weaknessBoost?: boolean,
   ) {
     this.addEntry({
       type: "pokemonDamaged",

@@ -93,7 +93,7 @@ const start = async (agentNames: string[]) => {
         });
       }
       console.log(
-        `Matchup ${agentName1} v. ${agentName2} completed in ${Date.now() - startTime}ms`
+        `Matchup ${agentName1} v. ${agentName2} completed in ${Date.now() - startTime}ms`,
       );
     }
   }

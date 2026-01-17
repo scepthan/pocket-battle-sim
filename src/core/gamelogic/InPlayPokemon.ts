@@ -77,11 +77,11 @@ export class InPlayPokemon {
   private _PokemonStatuses: PokemonStatus[] = [];
   get PokemonStatuses() {
     const filteredPlayerStatuses = this.player.PlayerStatuses.filter(
-      (status) => status.type === "PokemonStatus" && status.pokemonCondition.test(this)
+      (status) => status.type === "PokemonStatus" && status.pokemonCondition.test(this),
     ) as PokemonPlayerStatus[];
 
     return this._PokemonStatuses.concat(
-      filteredPlayerStatuses.map((status) => status.pokemonStatus)
+      filteredPlayerStatuses.map((status) => status.pokemonStatus),
     );
   }
   ActivePlayerStatuses: PlayerStatus[] = []; // PlayerStatuses currently in play from this Pokemon's Ability
@@ -93,7 +93,7 @@ export class InPlayPokemon {
 
   get CurrentConditions() {
     return [this.PrimaryCondition, ...this.SecondaryConditions].filter(
-      (condition) => condition !== undefined
+      (condition) => condition !== undefined,
     );
   }
 
@@ -176,7 +176,7 @@ export class InPlayPokemon {
     const energyOrder = Object.values(EnergyMap);
     for (const e of energy) {
       const index = this.AttachedEnergy.findIndex(
-        (en) => energyOrder.indexOf(e) < energyOrder.indexOf(en)
+        (en) => energyOrder.indexOf(e) < energyOrder.indexOf(en),
       );
       if (index !== -1) {
         this.AttachedEnergy.splice(index, 0, e);

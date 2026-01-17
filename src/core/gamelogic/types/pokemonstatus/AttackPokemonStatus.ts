@@ -46,10 +46,10 @@ export const AttackPokemonStatus = {
     attackName: string,
     amount: number,
     turnsToKeep?: number,
-    descriptor?: string
+    descriptor?: string,
   ) =>
     parseDefenderCondition(
       { type: "ModifyDamageOfAttack", source, turnsToKeep, attackName, amount },
-      descriptor
+      descriptor,
     ),
 } satisfies Record<string, (...args: never) => ParsedResult<AttackPokemonStatus>>;

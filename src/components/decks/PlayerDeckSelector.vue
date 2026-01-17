@@ -70,7 +70,7 @@ const setRandomDeck = () => {
 onMounted(() => {
   if (selectedDeckName.value) {
     selectedDecklist.value = decklists.value.find((list) =>
-      selectedDeckName.value!.startsWith(list.name + " - ")
+      selectedDeckName.value!.startsWith(list.name + " - "),
     )!;
   }
 });
