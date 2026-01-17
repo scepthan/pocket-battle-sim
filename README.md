@@ -10,7 +10,7 @@ Backend todo:
   - [x] A2b: 73/73 (100%)
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
-  - [ ] A3b: 60/71 (84.5%)
+  - [ ] A3b: 61/71 (85.9%)
     - [ ] New triggers
       - [ ] When played to evolve
       - [ ] At end of your turn
@@ -19,7 +19,7 @@ Backend todo:
       - [ ] Self evolved during this turn
     - [ ] New damage modifiers
       - [ ] Extra damage per Energy attached to self
-      - [ ] Extra damage per Energy attached to all of opponent's mon
+      - [x] Extra damage per Energy attached to all of opponent's mon
       - [x] Damage per times attack used by your mon during current game
     - [ ] New attacking effects
       - [ ] Damage to each of your Benched mon

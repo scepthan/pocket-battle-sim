@@ -545,6 +545,16 @@ export const parseEffect = (
     },
     {
       pattern:
+        /^This attack does (\d+)( more)? damage for each Energy attached to all of your opponent’s Pokémon\./i,
+      transform: (_, damagePerEnergy, more) => {
+        effect.calculateDamage = (game, self) => {
+          const energyCount = self.opponent.InPlayPokemon.flatMap((p) => p.EffectiveEnergy).length;
+          return (more ? baseDamage : 0) + energyCount * Number(damagePerEnergy);
+        };
+      },
+    },
+    {
+      pattern:
         /^This attack does (\d+)( more)? damage for each of your opponent’s Benched Pokémon\./i,
       transform: (_, damagePerBench, more) => {
         effect.calculateDamage = (game, self) => {
