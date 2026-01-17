@@ -10,7 +10,7 @@ Backend todo:
   - [x] A2b: 73/73 (100%)
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
-  - [ ] A3b: 58/71 (81.7%)
+  - [ ] A3b: 59/71 (83.1%)
     - [ ] New triggers
       - [ ] When played to evolve
       - [ ] At end of your turn
@@ -31,7 +31,7 @@ Backend todo:
     - [ ] Other new parsing
       - [ ] "Choose 1: [effect A] [effect B]"
     - [ ] Parsing modifications
-      - [ ] "Attach _a_ {X} Energy from your discard pile to _this_ Pokémon."
+      - [x] "Attach _a_ {X} Energy from your discard pile to _this_ Pokémon."
       - [x] "Discard all Energy _attached to_ this Pokémon."
       - [ ] "This attack does 30 more damage for each _[predicate] on your Bench_."
       - [ ] Attack-copying effect should consume conditional if available

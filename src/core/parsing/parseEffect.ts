@@ -704,6 +704,14 @@ export const parseEffect = (
         effect.attackingEffects.push(attackTargetIfExists(Number(damage)));
       },
     },
+    {
+      pattern: /^If you do, do (\d+) damage to this Pokémon\./i,
+      transform: (_, damage) => {
+        addSideEffect(async (game, self) => {
+          game.applyDamage(self, Number(damage), false);
+        });
+      },
+    },
 
     // Healing effects
     {
@@ -1262,16 +1270,18 @@ export const parseEffect = (
     },
     {
       pattern:
-        /^Attach (\d+) (?:\{(\w)\}|random) Energy from your discard pile to that Pokémon\.$/i,
-      transform: (_, count, energyType) => {
+        /^Attach (a|\d+) (?:\{(\w)\}|random) Energy from your discard pile to (this|that) Pokémon\./i,
+      transform: (_, count, energyType, targeting) => {
+        const amount = count === "a" ? 1 : Number(count);
         const fullType = energyType ? parseEnergy(energyType) : undefined;
         const energyFilter = (e: Energy) => fullType === undefined || e === fullType;
 
         effect.implicitConditions.push((player) => player.DiscardedEnergy.some(energyFilter));
         addSideEffect(async (game, self, heads, target) => {
+          target = targeting === "this" ? self : target;
           if (!target) return;
           const energyToAttach: Energy[] = [];
-          for (let i = 0; i < Number(count); i++) {
+          for (let i = 0; i < amount; i++) {
             if (!self.player.DiscardedEnergy.some(energyFilter)) break;
             const e = fullType ?? randomElement(self.player.DiscardedEnergy);
             energyToAttach.push(e);
