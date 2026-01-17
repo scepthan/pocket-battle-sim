@@ -42,5 +42,19 @@
       "Cards": ["A3b-043", "A3b-044", "A3b-045", "A3b-045", "A3b-046", "A3b-055", "A3b-055", "A3b-057", "A3b-058", "A3b-058", "A3b-059", "A3b-064", "A3b-064", "A3b-065", "A3b-067", "A3b-067", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
       "EnergyTypes": ["Darkness"]
     }
+  },
+  "A3b Custom": {
+    "Whiscash & Mienshao": {
+      "Cards": ["A3b-001", "A3b-001", "A3b-038", "A3b-038", "A3b-039", "A3b-039", "A3b-040", "A3b-040", "A3b-041", "A3b-041", "A3b-042", "A3b-042", "A3b-067", "PROMO-A-002", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007", "PROMO-A-089", "PROMO-A-089"],
+      "EnergyTypes": ["Fighting"]
+    },
+    "Mawile & Melmetal": {
+      "Cards": ["A3b-047", "A3b-047", "A3b-048", "A3b-048", "A3b-049", "A3b-049", "A3b-050", "A3b-050", "A3b-060", "A3b-061", "A3b-064", "A3b-064", "A3b-065", "A3b-065", "A3b-067", "PROMO-A-002", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Metal"]
+    },
+    "Penny": {
+      "Cards": ["A2a-010", "A2a-010", "A3-147", "A3a-064", "A3b-002", "A3b-002", "A3b-033", "A3b-034", "A3b-034", "A3b-055", "A3b-055", "A3b-056", "A3b-056", "A3b-066", "A3b-066", "A3b-069", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Grass", "Psychic"]
+    }
   }
 }

@@ -562,6 +562,19 @@ export const parseEffect = (
     },
     {
       pattern:
+        /^This attack does (\d+)( more)? damage for each(?: \{(\w)\}) Energy attached to this Pokémon\./i,
+      transform: (_, damagePerEnergy, more, energyType) => {
+        const fullEnergy = energyType ? parseEnergy(energyType) : undefined;
+        effect.calculateDamage = (game, self) => {
+          const energyCount = self.EffectiveEnergy.filter(
+            (e) => fullEnergy === undefined || e === fullEnergy,
+          ).length;
+          return (more ? baseDamage : 0) + energyCount * Number(damagePerEnergy);
+        };
+      },
+    },
+    {
+      pattern:
         /^This attack does (\d+)( more)? damage for each Energy attached to your opponent’s Active Pokémon\./i,
       transform: (_, damagePerEnergy, more) => {
         effect.calculateDamage = (game, self) => {
