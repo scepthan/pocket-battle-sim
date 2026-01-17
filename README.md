@@ -10,7 +10,7 @@ Backend todo:
   - [x] A2b: 73/73 (100%)
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
-  - [ ] A3b: 63/71 (88.7%)
+  - [ ] A3b: 64/71 (90.1%)
     - [ ] New triggers
       - [x] When played to evolve
       - [ ] At end of your turn
@@ -33,11 +33,11 @@ Backend todo:
       - [x] Evolution Pokémon
     - [x] Other new parsing
       - [x] "Choose 1: [effect A] [effect B]"
-    - [ ] Parsing modifications
+    - [x] Parsing modifications
       - [x] "Attach _a_ {X} Energy from your discard pile to _this_ Pokémon."
       - [x] "Discard all Energy _attached to_ this Pokémon."
       - [x] "This attack does 30 more damage for each _[predicate] on your Bench_."
-      - [ ] Attack-copying effect should consume conditional if available
+      - [x] Attack-copying effect should consume conditional if available
       - [x] "If _the Defending Pokémon_ is a [predicate],"
       - [x] "_it_ can't attack."
       - [x] "Heal N damage from _it_."

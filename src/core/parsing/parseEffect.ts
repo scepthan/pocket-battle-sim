@@ -2039,7 +2039,7 @@ export const parseEffect = (
       pattern:
         /^Choose 1 of your opponent’s( Active)? Pokémon’s attacks and use it as this attack\.( If this Pokémon doesn’t have the necessary Energy to use that attack, this attack does nothing\.)?/i,
       transform: (_, active, energyRequired) => {
-        effect.attackingEffects.push(async (game, self) => {
+        addSideEffect(async (game, self) => {
           const chosenPokemon = active
             ? self.opponent.activeOrThrow()
             : await game.choosePokemon(self.player, self.opponent.InPlayPokemon);
