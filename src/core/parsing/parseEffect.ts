@@ -575,6 +575,17 @@ export const parseEffect = (
       },
     },
     {
+      pattern: /^This attack does (\d+)( more)? damage for each ([^.]+) on your Bench\./i,
+      transform: (_, damageEach, more, descriptor) => {
+        const predicate = parsePokemonPredicate(descriptor);
+
+        effect.calculateDamage = (game, self) => {
+          const pokemonCount = self.player.BenchedPokemon.filter(predicate).length;
+          return (more ? baseDamage : 0) + pokemonCount * Number(damageEach);
+        };
+      },
+    },
+    {
       pattern:
         /^This attack does (\d+) damage for each time your Pokémon used (.+?) during this game\./i,
       transform: (_, damage, attackName) => {

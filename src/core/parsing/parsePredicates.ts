@@ -54,6 +54,7 @@ export const parsePokemonPredicate = (
   );
 
   parsePart(/^Basic /, () => (pokemon) => pokemon.Stage === 0);
+  parsePart(/^Evolution /, () => (pokemon) => pokemon.Stage > 0);
   parsePart(/^Stage 2 /, () => (pokemon) => pokemon.Stage === 2);
 
   const energyTypes: Energy[] = [];
