@@ -2029,6 +2029,14 @@ export const parseEffect = (
       },
     },
     {
+      pattern: /^Discard all Pokémon Tools from your opponent’s Active Pokémon\./i,
+      transform: () => {
+        addSideEffect(async (game, self) => {
+          await game.discardPokemonTools(self.opponent.activeOrThrow());
+        });
+      },
+    },
+    {
       pattern:
         /^Change the type of the next Energy that will be generated for your opponent to 1 of the following at random: ([^.]+?)\./i,
       transform: (_, energyTypes) => {
