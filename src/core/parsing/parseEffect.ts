@@ -244,6 +244,13 @@ export const parseEffect = (
       },
     },
     {
+      pattern: /^At the end of your turn, /i,
+      transform: () => {
+        effect.trigger = { type: "OnPokemonCheckup" };
+        effect.explicitConditions.push((player) => player === player.game.AttackingPlayer);
+      },
+    },
+    {
       pattern: /^At the end of your first turn, /i,
       transform: () => {
         effect.trigger = { type: "OnPokemonCheckup" };
