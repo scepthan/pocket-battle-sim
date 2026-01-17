@@ -30,6 +30,7 @@ export const parsePokemonPredicate = (
   basePredicate: InPlayPokemonPredicate = () => true,
 ): ParsedResult<InPlayPokemonPredicate> => {
   let predicate: InPlayPokemonPredicate = basePredicate;
+  let parseSuccessful = true;
 
   const parsePart = (
     regex: RegExp,
@@ -80,6 +81,13 @@ export const parsePokemonPredicate = (
   parsePart(/^Pokémon ex$/, () => (pokemon) => pokemon.Name.endsWith(" ex"));
   parsePart(/^Ultra Beasts?$/, () => (pokemon) => pokemon.isUltraBeast);
 
+  parsePart(/^Pokémon that evolves? from (.+)/, ([, namesText]) => {
+    const { parseSuccessful: ps, value: names } = parsePokemonNames(namesText!);
+    if (!ps) parseSuccessful = false;
+    return (pokemon) =>
+      pokemon.BaseCard.EvolvesFrom != undefined && names.includes(pokemon.BaseCard.EvolvesFrom);
+  });
+
   if (text === "" || text === "Pokémon") {
     return {
       parseSuccessful: true,
@@ -87,7 +95,8 @@ export const parsePokemonPredicate = (
     };
   }
 
-  const { parseSuccessful, value: names } = parsePokemonNames(text);
+  const { parseSuccessful: ps, value: names } = parsePokemonNames(text);
+  if (!ps) parseSuccessful = false;
   return {
     parseSuccessful,
     value: (pokemon) => names.includes(pokemon.Name) && predicate(pokemon),

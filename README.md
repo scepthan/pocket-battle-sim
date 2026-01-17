@@ -10,7 +10,7 @@ Backend todo:
   - [x] A2b: 73/73 (100%)
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
-  - [ ] A3b: 59/71 (83.1%)
+  - [ ] A3b: 60/71 (84.5%)
     - [ ] New triggers
       - [ ] When played to evolve
       - [ ] At end of your turn
@@ -28,8 +28,10 @@ Backend todo:
       - [ ] Look at random Supporter from opponent's deck and use its effect
     - [x] New statuses
       - [x] CanEvolveAs(name)
-    - [ ] Other new parsing
-      - [ ] "Choose 1: [effect A] [effect B]"
+    - [x] New Pokémon predicates
+      - [x] Pokémon that evolves from [name]
+    - [x] Other new parsing
+      - [x] "Choose 1: [effect A] [effect B]"
     - [ ] Parsing modifications
       - [x] "Attach _a_ {X} Energy from your discard pile to _this_ Pokémon."
       - [x] "Discard all Energy _attached to_ this Pokémon."

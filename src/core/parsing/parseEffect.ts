@@ -166,6 +166,27 @@ export const parseEffect = (
   };
 
   const dictionary: EffectTransformer[] = [
+    {
+      pattern: /^Choose 1: {2,}(.+?\.) {2,}(.+?\.)$/i,
+      transform: (_, text1, text2) => {
+        const effect1 = parseEffect(text1, baseDamage, requiredEnergy);
+        if (!effect1.parseSuccessful) parseSuccessful = false;
+        const sideEffects1 = effect1.value.sideEffects.concat(statusesToSideEffects(effect1.value));
+
+        const effect2 = parseEffect(text2, baseDamage, requiredEnergy);
+        if (!effect2.parseSuccessful) parseSuccessful = false;
+        const sideEffects2 = effect2.value.sideEffects.concat(statusesToSideEffects(effect2.value));
+
+        const choices = { "Effect 1": sideEffects1, "Effect 2": sideEffects2 };
+        const prompt = "Which effect will you use?";
+        addSideEffect(async (game, self, heads, target) => {
+          const chosenEffect = await game.choose(self.player, choices, prompt);
+          if (!chosenEffect) return;
+          for (const se of chosenEffect) await se(game, self, heads, target);
+        });
+      },
+    },
+
     // Triggers
     {
       pattern: /^Once during your turn, you may /i,
