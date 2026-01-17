@@ -48,6 +48,14 @@
     }
   },
   "A3a Custom": {
+    "Decidueye": {
+      "Cards": ["A1-219", "A3-144", "A3-144", "A3-147", "A3-147", "A3-155", "A3a-003", "A3a-003", "A3a-004", "A3a-005", "A3a-005", "A3a-007", "A3a-007", "A3a-008", "A3a-008", "A3a-064", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Grass"]
+    },
+    "Sharpedo & Silvally": {
+      "Cards": ["A2-147", "A2a-072", "A3a-010", "A3a-010", "A3a-011", "A3a-011", "A3a-012", "A3a-012", "A3a-060", "A3a-060", "A3a-061", "A3a-061", "A3a-064", "A3a-067", "A3a-067", "PROMO-A-002", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
+      "EnergyTypes": ["Water"]
+    },
     "Trevenant & Shiinotic": {
       "Cards": ["A3a-022", "A3a-022", "A3a-023", "A3a-023", "A3a-024", "A3a-024", "A3a-025", "A3a-025", "A3a-026", "A3a-026", "A3a-027", "A3a-027", "A3a-059", "A3a-064", "PROMO-A-001", "PROMO-A-002", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
       "EnergyTypes": ["Psychic"]

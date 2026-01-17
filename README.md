@@ -72,7 +72,7 @@ Backend todo:
 - [ ] Basic logic-based AI opponent (at least as competitive as Auto Mode)
   - [ ] Evolve multiple mon per turn
   - [ ] Avoid putting down multiple of the same mon if others are available
-  - [ ] Properly calculate energy costs for attacking
+  - [x] Properly calculate energy costs for attacking
   - [ ] Why is the bot not switching into mon that are ready to attack?
 - [x] Mass battle simulation
 - [ ] Deck fine-tuning via iteration
@@ -90,7 +90,7 @@ Frontend todo:
   - [ ] Auto mode toggle? (Will need to adjust BetterRandomAgent to be able to stop and start in the middle of a turn)
 - [x] Allow user to select decks for arena
 - [x] Allow user control of one or both players in arena
-  - [ ] Control selectNPokemon()
+  - [x] Control selectNPokemon()
   - [ ] Control distributeEnergy()
 - [ ] Allow user to select set of decks to run in mass simulator
 - [x] Deck list UI
