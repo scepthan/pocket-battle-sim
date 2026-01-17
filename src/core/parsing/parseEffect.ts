@@ -429,6 +429,19 @@ export const parseEffect = (
       },
     },
     {
+      pattern: /^If this Pokémon evolved during this turn,/i,
+      transform: () => {
+        conditionalForNextEffect = (game, self) =>
+          self.ReadyToEvolve === false &&
+          game.GameLog.currentTurn.some(
+            (event) =>
+              event.type === "evolvePokemon" &&
+              event.cardId === self.ID &&
+              event.player === self.player.Name,
+          );
+      },
+    },
+    {
       pattern: /^If this Pokémon moved from your Bench to the Active Spot this turn,/i,
       transform: () => {
         conditionalForNextEffect = (game, self) => {

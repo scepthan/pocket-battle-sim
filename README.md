@@ -10,13 +10,13 @@ Backend todo:
   - [x] A2b: 73/73 (100%)
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
-  - [ ] A3b: 67/71 (94.4%)
+  - [ ] A3b: 68/71 (95.8%)
     - [x] New triggers
       - [x] When played to evolve
       - [x] At end of your turn
-    - [ ] New conditionals
+    - [x] New conditionals
       - [x] Specific Attack was used during your last turn
-      - [ ] Self evolved during this turn
+      - [x] Self evolved during this turn
     - [ ] New damage modifiers
       - [ ] Extra damage per Energy attached to self
       - [x] Extra damage per Energy attached to all of opponent's mon
