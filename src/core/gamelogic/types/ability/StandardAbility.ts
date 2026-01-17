@@ -4,6 +4,7 @@ import type { BaseAbility } from "./Ability";
 export type AbilityTrigger =
   | { type: "Manual"; multiUse: boolean }
   | { type: "OnEnterPlay"; excludeSetup?: boolean }
+  | { type: "OnEvolution"; optional?: boolean }
   | { type: "AfterDamagedByAttack" }
   | { type: "BeforeKnockedOutByAttack" }
   | { type: "AfterKnockedOutByAttack" }

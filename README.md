@@ -10,9 +10,9 @@ Backend todo:
   - [x] A2b: 73/73 (100%)
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
-  - [ ] A3b: 62/71 (87.3%)
+  - [ ] A3b: 63/71 (88.7%)
     - [ ] New triggers
-      - [ ] When played to evolve
+      - [x] When played to evolve
       - [ ] At end of your turn
     - [ ] New conditionals
       - [x] Specific Attack was used during your last turn

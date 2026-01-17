@@ -224,6 +224,13 @@ export const parseEffect = (
     },
     {
       pattern:
+        /^Once during your turn, when you play this Pokémon from your hand to evolve 1 of your Pokémon, you may /i,
+      transform: () => {
+        effect.trigger = { type: "OnEvolution", optional: true };
+      },
+    },
+    {
+      pattern:
         /^Whenever you attach (?:a {(\w)}|an) Energy from your Energy Zone to (?:this Pokémon|it), /i,
       transform: (_, energyType) => {
         const fullType = energyType ? parseEnergy(energyType) : undefined;

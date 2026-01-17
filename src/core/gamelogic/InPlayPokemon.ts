@@ -135,7 +135,7 @@ export class InPlayPokemon {
     this.MaxHP = this.BaseHP;
   }
 
-  evolveInto(inputCard: PokemonCard) {
+  async evolveInto(inputCard: PokemonCard) {
     const hpIncrease = inputCard.BaseHP - this.BaseHP;
 
     this.BaseCard = inputCard;
@@ -144,6 +144,11 @@ export class InPlayPokemon {
 
     this.CurrentHP += hpIncrease;
     this.MaxHP += hpIncrease;
+
+    this.removeAllSpecialConditionsAndStatuses();
+
+    await this.onEvolution();
+    await this.onEnterPlay();
   }
 
   isDamaged() {
@@ -354,6 +359,12 @@ export class InPlayPokemon {
 
     if (!ability.conditions.every((condition) => condition(this.player, this))) return;
 
+    if ("optional" in ability.trigger && ability.trigger.optional) {
+      const prompt = `Use the effect of ${ability.name}?`;
+      const useAbility = await this.player.game.chooseYesNo(this.player, prompt);
+      if (!useAbility) return;
+    }
+
     if (manuallyActivated) {
       this.player.logger.useAbility(this.player, this, ability.name);
     } else {
@@ -387,6 +398,14 @@ export class InPlayPokemon {
   async onEnterPlay() {
     for (const ability of this.effectiveAbilities) {
       if (ability.type === "Standard" && ability.trigger.type === "OnEnterPlay") {
+        await this.triggerAbility(ability);
+      }
+    }
+  }
+
+  async onEvolution() {
+    for (const ability of this.effectiveAbilities) {
+      if (ability.type === "Standard" && ability.trigger.type === "OnEvolution") {
         await this.triggerAbility(ability);
       }
     }

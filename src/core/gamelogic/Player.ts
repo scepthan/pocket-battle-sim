@@ -322,11 +322,7 @@ export class Player {
     this.InPlay.push(card);
 
     this.logger.evolvePokemon(this, pokemon, card);
-    pokemon.evolveInto(card);
-
-    pokemon.removeAllSpecialConditionsAndStatuses();
-
-    await pokemon.onEnterPlay();
+    await pokemon.evolveInto(card);
   }
 
   canAttachFromEnergyZone(pokemon: InPlayPokemon) {
