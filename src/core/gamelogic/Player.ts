@@ -311,7 +311,7 @@ export class Player {
     if (card.EvolvesFrom !== pokemon.EvolvesAs && !skipStage1) {
       throw new Error("Card does not evolve from this Pokemon");
     }
-    if (!pokemon.ReadyToEvolve) {
+    if (pokemon.PlayedThisTurn) {
       throw new Error("Pokemon is not ready to evolve");
     }
     if (pokemon.PokemonStatuses.some((status) => status.type == "CannotEvolve")) {

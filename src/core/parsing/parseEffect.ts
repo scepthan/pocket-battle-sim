@@ -375,13 +375,7 @@ export const parseEffect = (
     {
       pattern: /^If you played a Supporter card from your hand during this turn,/i,
       transform: () => {
-        conditionalForNextEffect = (game, self) =>
-          game.GameLog.currentTurn.some(
-            (e) =>
-              e.type === "playTrainer" &&
-              e.trainerType === "Supporter" &&
-              e.player === self.player.Name,
-          );
+        conditionalForNextEffect = (game) => game.HasPlayedSupporter;
       },
     },
     {
@@ -431,14 +425,7 @@ export const parseEffect = (
     {
       pattern: /^If this Pokémon evolved during this turn,/i,
       transform: () => {
-        conditionalForNextEffect = (game, self) =>
-          self.ReadyToEvolve === false &&
-          game.GameLog.currentTurn.some(
-            (event) =>
-              event.type === "evolvePokemon" &&
-              event.cardId === self.ID &&
-              event.player === self.player.Name,
-          );
+        conditionalForNextEffect = (game, self) => self.PlayedThisTurn && self.Stage > 0;
       },
     },
     {
@@ -1595,7 +1582,7 @@ export const parseEffect = (
             .filter((name) => name !== null);
 
           return player.InPlayPokemon.filter(
-            (p) => p.Stage == 0 && p.ReadyToEvolve && validBasicNames.includes(p.EvolvesAs),
+            (p) => p.Stage == 0 && !p.PlayedThisTurn && validBasicNames.includes(p.EvolvesAs),
           );
         };
         addSideEffect(async (game, self, heads, target) => {

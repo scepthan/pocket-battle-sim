@@ -92,7 +92,7 @@ export class InPlayPokemon {
   ActivePlayerStatuses: PlayerStatus[] = []; // PlayerStatuses currently in play from this Pokemon's Ability
 
   InPlayCards: PlayingCard[] = [];
-  ReadyToEvolve: boolean = false;
+  PlayedThisTurn: boolean = true;
 
   isPokemon = true as const;
 
@@ -140,7 +140,7 @@ export class InPlayPokemon {
 
     this.BaseCard = inputCard;
     this.InPlayCards.push(inputCard);
-    this.ReadyToEvolve = false;
+    this.PlayedThisTurn = true;
 
     this.CurrentHP += hpIncrease;
     this.MaxHP += hpIncrease;

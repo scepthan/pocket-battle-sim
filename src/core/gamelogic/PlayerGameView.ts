@@ -136,7 +136,7 @@ export class PlayerGameView {
 
   get canPlaySupporter() {
     return (
-      this.game.CanPlaySupporter &&
+      !this.game.HasPlayedSupporter &&
       !this.player.PlayerStatuses.some((status) => status.type == "CannotUseSupporter")
     );
   }
@@ -267,7 +267,7 @@ export class PlayerGameView {
     if (!this.hasActivePokemon()) return false;
     if (!this.canPlay && !ignoreCanPlay) return false;
 
-    if (!this.game.CanRetreat) return false;
+    if (this.game.HasRetreated) return false;
     if (this.selfBenched.length == 0) return false;
     if (this.selfActive.RetreatCost == -1) return false;
     if (this.selfActive.PrimaryCondition == "Asleep") return false;

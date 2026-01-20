@@ -38,8 +38,8 @@ export class Game {
   TurnOver: boolean = false;
   AttackingPlayer: Player;
   DefendingPlayer: Player;
-  CanRetreat: boolean = true;
-  CanPlaySupporter: boolean = true;
+  HasRetreated: boolean = false;
+  HasPlayedSupporter: boolean = false;
   ActiveTrainerCard?: TrainerCard;
   CurrentAttack: Attack | undefined;
   AttackingPokemon?: InPlayPokemon;
@@ -177,14 +177,14 @@ export class Game {
     this.TurnNumber += 1;
 
     // Reset turn-based flags
-    this.CanRetreat = true;
-    this.CanPlaySupporter = true;
+    this.HasRetreated = false;
+    this.HasPlayedSupporter = false;
     this.UsedAbilities = new Set();
     this.AttackDamagedPokemon = new Set();
     this.AttackKnockedOutPokemon = new Set();
     if (this.TurnNumber > 2) {
       for (const pokemon of this.AttackingPlayer.InPlayPokemon) {
-        pokemon.ReadyToEvolve = true;
+        pokemon.PlayedThisTurn = false;
       }
     }
 
@@ -792,7 +792,7 @@ export class Game {
    */
   async retreatActivePokemon(benchedPokemon: InPlayPokemon, energy: Energy[]): Promise<void> {
     await this.AttackingPlayer.retreatActivePokemon(benchedPokemon, energy);
-    this.CanRetreat = false;
+    this.HasRetreated = true;
     await this.afterAction();
   }
 
@@ -808,10 +808,10 @@ export class Game {
       throw new Error("Card not in hand");
     }
     if (card.CardType == "Supporter") {
-      if (!this.CanPlaySupporter) {
+      if (this.HasPlayedSupporter) {
         throw new Error("Cannot play supporter card currently");
       }
-      this.CanPlaySupporter = false;
+      this.HasPlayedSupporter = true;
     }
 
     removeElement(this.AttackingPlayer.Hand, card);

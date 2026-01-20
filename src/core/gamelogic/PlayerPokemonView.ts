@@ -84,7 +84,7 @@ export class PlayerPokemonView {
     return this.self.InPlayCards;
   }
   get ReadyToEvolve() {
-    return this.self.ReadyToEvolve;
+    return !this.self.PlayedThisTurn;
   }
 
   calculateEffectiveEnergy(energies: Energy[]): Energy[] {
