@@ -11,7 +11,7 @@
     <div>
       <EnergyIcon v-for="(energy, i) in deck.EnergyTypes" :key="i" :energy="energy" inline />
     </div>
-    <div class="deck-name">{{ deckName }}</div>
+    <div class="deck-name">{{ displayName ?? deckName }}</div>
 
     <v-dialog v-if="!noDialog" v-model="dialog" activator="parent" width="850">
       <DeckDisplayDialog
@@ -32,6 +32,7 @@ export interface Props {
   deck: DeckInfo;
   builtinName?: string;
   deckName: string;
+  displayName?: string;
   noDialog?: boolean;
   disableIfInvalid?: boolean;
 }

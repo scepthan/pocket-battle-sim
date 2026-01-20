@@ -2,7 +2,8 @@
   <DeckCard
     v-if="selectedDeck"
     :deck="selectedDeck"
-    :deck-name="selectedDeckName!"
+    :display-name="selectedDeckName"
+    :deck-name="selectedDeckName!.replace(/.+? - /, '')"
     no-dialog
     @click="dialog = true"
   />
