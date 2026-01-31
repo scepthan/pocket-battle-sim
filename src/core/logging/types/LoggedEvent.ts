@@ -59,7 +59,8 @@ interface ActionFailedEvent {
     | "noBenchedPokemon"
     | "benchFull"
     | "noValidCards"
-    | "noValidTargets";
+    | "noValidTargets"
+    | "conditionNotMet";
 }
 interface TurnErrorEvent {
   type: "turnError";
@@ -97,6 +98,13 @@ interface PlayTrainerEvent {
   player: string;
   cardId: string;
   trainerType: TrainerCard["CardType"];
+  targetPokemon?: InPlayPokemonDescriptor;
+}
+interface CopyTrainerEvent {
+  type: "copyTrainer";
+  player: string;
+  cardId: string;
+  user?: InPlayPokemonDescriptor;
   targetPokemon?: InPlayPokemonDescriptor;
 }
 interface AttachPokemonToolEvent {
@@ -349,6 +357,7 @@ export type LoggedEvent =
   | PlayToActiveEvent
   | PlayToBenchEvent
   | PlayTrainerEvent
+  | CopyTrainerEvent
   | AttachPokemonToolEvent
   | TriggerPokemonToolEvent
   | RemovePokemonToolEvent

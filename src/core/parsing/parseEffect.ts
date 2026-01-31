@@ -1143,6 +1143,26 @@ export const parseEffect = (
       },
     },
     {
+      pattern:
+        /^Look at a random Supporter card that’s not Penny from your opponent’s deck and shuffle it back into their deck\. Use the effect of that card as the effect of this card\./i,
+      transform: () => {
+        addSideEffect(async (game, self) => {
+          const supporters = self.opponent.Deck.filter(
+            (card) => card.CardType === "Supporter",
+          ).filter((card) => card.Name !== "Penny");
+          if (supporters.length === 0) {
+            game.GameLog.noValidCards(self.player);
+            return;
+          }
+          const chosenCard = randomElement(supporters);
+          await game.showCards(self.player, [chosenCard]);
+          self.opponent.returnToDeck([chosenCard]);
+          self.opponent.shuffleDeck();
+          await game.copyTrainer(chosenCard);
+        });
+      },
+    },
+    {
       pattern: /^Discard the top (\d+) cards of each player’s deck\./i,
       transform: (_, count) => {
         addSideEffect(async (game, self) => {

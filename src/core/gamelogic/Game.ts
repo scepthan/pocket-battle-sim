@@ -833,21 +833,7 @@ export class Game {
       if (target && !target.isPokemon)
         throw new Error("Cannot target an empty slot with this Trainer card");
 
-      const heads = card.Effect.coinsToFlip ? this.flipCoinsForAttack(card.Effect.coinsToFlip) : 0;
-
-      if (card.Effect.type === "Targeted") {
-        if (!target) {
-          throw new Error("Targeted effect requires a target Pokémon");
-        }
-        const validTargets = card.Effect.validTargets(this.AttackingPlayer);
-        if (!validTargets.includes(target)) {
-          throw new Error("Invalid target for targeted effect");
-        }
-      }
-
-      for (const effect of card.Effect.sideEffects) {
-        await effect(this, this.AttackingPlayer.activeOrThrow(), heads, target);
-      }
+      await this.useTrainerEffect(card, target);
     }
 
     await this.afterAction();
@@ -858,6 +844,46 @@ export class Game {
     if (!this.AttackingPlayer.InPlay.includes(card)) {
       this.AttackingPlayer.Discard.push(card);
       this.GameLog.discardFromHand(this.AttackingPlayer, [card]);
+    }
+  }
+
+  async copyTrainer(card: ItemCard | SupporterCard, user?: InPlayPokemon): Promise<void> {
+    this.GameLog.copyTrainer(this.AttackingPlayer, card, user);
+
+    let target: InPlayPokemon | undefined;
+    const player = this.AttackingPlayer;
+    if (card.Effect.conditions.some((cond) => !cond(player, player.activeOrThrow()))) {
+      this.GameLog.conditionNotMet(this.AttackingPlayer);
+      return;
+    }
+    if (card.Effect.type === "Targeted") {
+      const validTargets = card.Effect.validTargets(player);
+      if (validTargets.length == 0) {
+        this.GameLog.noValidTargets(this.AttackingPlayer);
+        return;
+      }
+      const validPokemon = card.Effect.validTargets(this.AttackingPlayer);
+      target = await this.choosePokemon(this.AttackingPlayer, validPokemon);
+    }
+
+    await this.useTrainerEffect(card, target);
+  }
+
+  private async useTrainerEffect(card: ItemCard | SupporterCard, target?: InPlayPokemon) {
+    const heads = card.Effect.coinsToFlip ? this.flipCoinsForAttack(card.Effect.coinsToFlip) : 0;
+
+    if (card.Effect.type === "Targeted") {
+      if (!target) {
+        throw new Error("Targeted effect requires a target Pokémon");
+      }
+      const validTargets = card.Effect.validTargets(this.AttackingPlayer);
+      if (!validTargets.includes(target)) {
+        throw new Error("Invalid target for targeted effect");
+      }
+    }
+
+    for (const effect of card.Effect.sideEffects) {
+      await effect(this, this.AttackingPlayer.activeOrThrow(), heads, target);
     }
   }
 

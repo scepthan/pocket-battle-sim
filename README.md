@@ -10,7 +10,7 @@ Backend todo:
   - [x] A2b: 73/73 (100%)
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
-  - [ ] A3b: 69/71 (97.2%)
+  - [ ] A3b: 70/71 (98.6%)
     - [x] New triggers
       - [x] When played to evolve
       - [x] At end of your turn
@@ -23,9 +23,9 @@ Backend todo:
       - [x] Damage per times attack used by your mon during current game
     - [ ] New attacking effects
       - [ ] Damage to each of your Benched mon
-    - [ ] New side effects
+    - [x] New side effects
       - [x] Discard all Tools from opponent's Active mon
-      - [ ] Look at random Supporter from opponent's deck and use its effect
+      - [x] Look at random Supporter from opponent's deck and use its effect
     - [x] New statuses
       - [x] CanEvolveAs(name)
     - [x] New Pokémon predicates

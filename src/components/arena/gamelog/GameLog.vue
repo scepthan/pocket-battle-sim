@@ -162,6 +162,13 @@
           </p>
         </div>
 
+        <div v-else-if="entry.type == 'copyTrainer'" class="sub-entry">
+          <p>
+            <CardName v-if="entry.user" :card-id="entry.user.cardId" />
+            <b v-else>{{ entry.player }}</b> copies <CardName :card-id="entry.cardId" />!
+          </p>
+        </div>
+
         <div v-else-if="entry.type == 'attachPokemonTool'">
           <p>
             <b>{{ entry.player }}</b> attaches <CardName :card-id="entry.cardId" /> to
@@ -370,23 +377,17 @@
 
         <div v-else-if="entry.type == 'actionFailed'" class="sub-entry">
           <p v-if="entry.reason == 'partiallyImplemented'">
-            An effect of this attack was not triggered... (Not implemented)
+            Part of this effect is not yet implemented...
           </p>
-          <p v-else>
-            But it fails! ({{
-              entry.reason == "notImplemented"
-                ? "Effect not implemented"
-                : entry.reason == "noBenchedPokemon"
-                  ? "Player has no benched Pokemon"
-                  : entry.reason == "benchFull"
-                    ? "Player's bench is full"
-                    : entry.reason == "noValidTargets"
-                      ? "Effect has no valid targets"
-                      : entry.reason == "noValidCards"
-                        ? "No valid cards"
-                        : "Unknown reason"
-            }})
+          <p v-else-if="entry.reason == 'notImplemented'">This effect is not yet implemented...</p>
+          <p v-else-if="entry.reason == 'noBenchedPokemon'">Player has no benched Pokemon.</p>
+          <p v-else-if="entry.reason == 'benchFull'">Player's bench is full.</p>
+          <p v-else-if="entry.reason == 'noValidTargets'">Effect has no valid targets.</p>
+          <p v-else-if="entry.reason == 'noValidCards'">No valid cards available.</p>
+          <p v-else-if="entry.reason == 'conditionNotMet'">
+            A condition of the effect has not been met.
           </p>
+          <p v-else>Unknown reason: {{ entry.reason }}</p>
         </div>
 
         <p v-else>{{ entry }}</p>

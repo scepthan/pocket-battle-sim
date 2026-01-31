@@ -380,6 +380,15 @@ export class GameLogger {
     });
   }
 
+  copyTrainer(player: Player, card: TrainerCard, user?: InPlayPokemon) {
+    this.addEntry({
+      type: "copyTrainer",
+      player: player.Name,
+      cardId: card.ID,
+      user: user ? player.pokemonToDescriptor(user) : undefined,
+    });
+  }
+
   attachPokemonTool(player: Player, card: PlayingCard, targetPokemon: InPlayPokemon) {
     this.addEntry({
       type: "attachPokemonTool",
@@ -593,6 +602,14 @@ export class GameLogger {
       type: "actionFailed",
       player: player.Name,
       reason: "noValidCards",
+    });
+  }
+
+  conditionNotMet(player: Player) {
+    this.addEntry({
+      type: "actionFailed",
+      player: player.Name,
+      reason: "conditionNotMet",
     });
   }
 
