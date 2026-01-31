@@ -11,42 +11,50 @@ Backend todo:
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
   - [x] A3b: 71/71 (100%)
-    - [x] New triggers
-      - [x] When played to evolve
-      - [x] At end of your turn
-    - [x] New conditionals
-      - [x] Specific Attack was used during your last turn
-      - [x] Self evolved during this turn
-    - [x] New damage modifiers
-      - [x] Extra damage per Energy attached to self
-      - [x] Extra damage per Energy attached to all of opponent's mon
-      - [x] Damage per times attack used by your mon during current game
-    - [x] New attacking effects
-      - [x] Damage to each of your Benched mon
-    - [x] New side effects
-      - [x] Discard all Tools from opponent's Active mon
-      - [x] Look at random Supporter from opponent's deck and use its effect
-    - [x] New statuses
-      - [x] CanEvolveAs(name)
-    - [x] New Pokémon predicates
-      - [x] Pokémon that evolves from [name]
-      - [x] Evolution Pokémon
-    - [x] Other new parsing
-      - [x] "Choose 1: [effect A] [effect B]"
-    - [x] Parsing modifications
-      - [x] "Attach _a_ {X} Energy from your discard pile to _this_ Pokémon."
-      - [x] "Discard all Energy _attached to_ this Pokémon."
-      - [x] "This attack does 30 more damage for each _[predicate] on your Bench_."
-      - [x] Attack-copying effect should consume conditional if available
-      - [x] "If _the Defending Pokémon_ is a [predicate],"
-      - [x] "_it_ can't attack."
-      - [x] "Heal N damage from _it_."
-      - [x] "Heal N damage from _that Pokémon_."
-    - [x] Unique Promo cards
-      - [x] Dragonair
-      - [x] Audino
-  - [ ] A4
+  - [ ] A4: 132/164 (80.5%)
     - [ ] Baby Pokémon (0-cost attacks)
+    - [ ] New conditionals
+      - [ ] If this Pokémon has no damage on it
+      - [ ] If defender is Burned
+      - [ ] If Unown in play with Ability other than [name]
+      - [ ] If damaged by an attack during previous turn
+    - [ ] New damage modifiers
+      - [ ] Extra damage per Energy in defender's Retreat Cost
+      - [ ] Choose Benched Pokémon to discard for extra damage
+      - [ ] Extra damage per Energy on self
+    - [ ] New attacking effects
+      - [ ] Damage any other Pokémon at random
+    - [ ] New side effects
+      - [ ] Confused but not (FlipCoinToAttack with no turnsToKeep limit)
+      - [ ] Set defender's HP to N
+      - [ ] Put both Active Pokémon to sleep
+      - [ ] Evolve self with random evolution from deck
+      - [ ] Apply ModifyAttackCost(+1, C) to defender
+      - [ ] Draw cards until holding same number as opponent
+      - [ ] Randomize type of random Energy on defender
+      - [ ] Apply ModifyIncomingAttackDamage and PreventSpecialConditions to self
+      - [ ] Put self into hand instead of discard
+      - [ ] For each heads, return random Pokémon from discard to hand
+      - [ ] For each of your [type] Pokémon, look at top cards of own deck and rearrange
+    - [ ] New statuses
+      - [ ] PreventAttackDamageOnCoinFlip
+      - [ ] PreventSpecificSpecialCondition (or PreventAsleep)
+      - [ ] NextCoinFlipHeads
+    - [ ] New Pokémon predicates
+      - [ ] Evolution Pokémon
+    - [ ] Parsing modifications
+      - [ ] _make your opponent’s Active Pokémon_ Burned
+      - [ ] Take _[multiple types]_ Energy from your Energy Zone and attach it...
+      - [ ] Move all _[typeless]_ Energy from this Pokémon to 1 of...
+      - [ ] Move all [type] Energy from each of your [predicate] to _this Pokémon_
+      - [ ] Discard _[multiple types]_ Energy from this Pokémon
+      - [ ] Move a _[multiple types]_ Energy...
+      - [ ] Discard a _[type]_ Energy from your opponent’s Active Pokémon
+      - [ ] Choose a _[predicate]_ card you find there and shuffle it...
+    - [ ] Unique Promo cards
+      - [ ] Horsea
+      - [ ] Chinchou
+      - [ ] Blissey ex
   - [ ] A4a
 - [ ] Bring in newer sets
   - [x] A2-A4a
