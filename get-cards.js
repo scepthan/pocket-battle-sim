@@ -1,6 +1,6 @@
-const card_data = await fetch("https://www.pokemon-zone.com/api/game/game-data/")
+const card_data = await fetch("https://www.pokemon-zone.com/api/game/card-data/")
   .then((x) => x.json())
-  .then((x) => x.data.cards);
+  .then((x) => x.cards);
 
 const convertEnergy = (energy) =>
   energy.toLowerCase() == "fire"
@@ -25,6 +25,7 @@ for (const card of card_data) {
     name: card.name.trim(),
     rarity: card.rarity,
   };
+  if (card.mirrorTypeLabel === "Parallel Foil") new_card.isParallelFoil = true;
 
   if (card.pokemon) {
     const pokemon = card.pokemon;
@@ -42,7 +43,14 @@ for (const card of card_data) {
         cost: attack.attackCost.map(convertEnergy).join(""),
       };
       if (!attack.isNoDamage) new_attack.damage = attack.damage;
-      if (attack.damageSymbolLabel) new_attack.damageSymbol = attack.damageSymbolLabel;
+      if (attack.damageSymbolLabel) {
+        // Damage symbols are backwards at the moment
+        if (attack.damageSymbolLabel === "+" && /\d+ damage/.test(attack.description))
+          new_attack.damageSymbol = "x";
+        else if (attack.damageSymbolLabel === "x" && /\d+ more damage/.test(attack.description))
+          new_attack.damageSymbol = "+";
+        else new_attack.damageSymbol = attack.damageSymbolLabel;
+      }
       if (attack.description) new_attack.text = fixDescription(attack.description);
       return new_attack;
     });

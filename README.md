@@ -50,7 +50,7 @@ Backend todo:
   - [ ] A4a
 - [ ] Bring in newer sets
   - [x] A2-A4a
-  - [ ] A4b-B1a
+  - [x] A4b-B2
 - [ ] Game logic improvements
   - [x] Combine statuses that increase and decrease the same stat
     - [x] ModifyAttackDamage/IncreaseAttack
