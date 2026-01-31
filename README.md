@@ -10,7 +10,7 @@ Backend todo:
   - [x] A2b: 73/73 (100%)
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
-  - [ ] A3b: 70/71 (98.6%)
+  - [x] A3b: 71/71 (100%)
     - [x] New triggers
       - [x] When played to evolve
       - [x] At end of your turn
@@ -21,8 +21,8 @@ Backend todo:
       - [x] Extra damage per Energy attached to self
       - [x] Extra damage per Energy attached to all of opponent's mon
       - [x] Damage per times attack used by your mon during current game
-    - [ ] New attacking effects
-      - [ ] Damage to each of your Benched mon
+    - [x] New attacking effects
+      - [x] Damage to each of your Benched mon
     - [x] New side effects
       - [x] Discard all Tools from opponent's Active mon
       - [x] Look at random Supporter from opponent's deck and use its effect
