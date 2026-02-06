@@ -103,6 +103,7 @@ Frontend todo:
 - [x] Allow user control of one or both players in arena
   - [x] Control selectNPokemon()
   - [ ] Control distributeEnergy()
+  - [ ] Select energy to retreat with
 - [ ] Allow user to select set of decks to run in mass simulator
 - [x] Deck list UI
   - [x] Custom and built-in decks
