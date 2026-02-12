@@ -612,16 +612,7 @@ export class Game {
     return result;
   }
 
-  /**
-   * Executes an attack with the attacking player's Active Pokémon.
-   *
-   * Note: This method directly executes the given attack, without first checking for confusion or
-   * similar status effects. It also does not check for knockouts when the attack ends. It is only
-   * exposed to allow for an attack to copy another.
-   *
-   * To execute an attack "properly", call useAttack() instead.
-   */
-  async executeAttack(attack: Attack): Promise<void> {
+  private async executeAttack(attack: Attack): Promise<void> {
     const attacker = this.AttackingPokemon;
     if (!attacker) throw new Error("Need an attacker to attack!");
 
@@ -691,6 +682,27 @@ export class Game {
     }
 
     return totalDamage;
+  }
+
+  /**
+   * Copies a given attack with the attacking player's Active Pokémon.
+   */
+  async copyAttack(attack: Attack, energyRequired: boolean): Promise<void> {
+    const player = this.AttackingPlayer;
+    const attacker = player.activeOrThrow();
+
+    this.GameLog.copyAttack(player, attack.name);
+
+    if (
+      attack.text?.includes("use it as this attack") ||
+      attack.explicitConditions.some((cond) => !cond(player, attacker)) ||
+      (energyRequired && !attacker.hasSufficientEnergy(attack.requiredEnergy))
+    ) {
+      this.GameLog.attackFailed(player);
+      return;
+    }
+
+    await this.executeAttack(attack);
   }
 
   // Methods to cover any action a player can take and execute the proper follow-up effects

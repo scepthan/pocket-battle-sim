@@ -1,5 +1,7 @@
-import { allCards } from "@/assets";
 import {
+  applyRandomSpecialCondition,
+  evolveWithRareCandy,
+  findValidRareCandyTargets,
   Game,
   InPlayPokemon,
   parseEnergy,
@@ -34,14 +36,6 @@ const attackTargetIfExists: (damage: number) => SideEffect =
     if (!target) return;
     game.attackPokemon(target, damage);
   };
-
-const findBasicForStage2 = (stage2: PokemonCard) => {
-  const stage1Name = stage2.EvolvesFrom;
-  if (!stage1Name) return null;
-  const stage1 = allCards.find((card) => card.name === stage1Name);
-  if (!stage1 || stage1.cardType !== "Pokemon") return null;
-  return stage1.previousEvolution ?? null;
-};
 
 const selfActive = (player: Player, self: InPlayPokemon) => self.player.ActivePokemon == self;
 const selfBenched = (player: Player, self: InPlayPokemon) =>
@@ -1596,30 +1590,10 @@ export const parseEffect = (
       pattern:
         /^Choose 1 of your Basic Pokémon in play\. If you have a Stage 2 card in your hand that evolves from that Pokémon, put that card onto the Basic Pokémon to evolve it, skipping the Stage 1\. You can’t use this card during your first turn or on a Basic Pokémon that was put into play this turn\.$/i,
       transform: () => {
-        effect.validTargets = (player) => {
-          const validBasicNames = player.Hand.filter(
-            (card) => card.CardType === "Pokemon" && card.Stage == 2,
-          )
-            .map((card) => findBasicForStage2(card as PokemonCard))
-            .filter((name) => name !== null);
-
-          return player.InPlayPokemon.filter(
-            (p) => p.Stage == 0 && !p.PlayedThisTurn && validBasicNames.includes(p.EvolvesAs),
-          );
-        };
+        effect.validTargets = findValidRareCandyTargets;
         addSideEffect(async (game, self, heads, target) => {
           if (!target) return;
-
-          const validCards = self.player.Hand.filter(
-            (card) =>
-              card.CardType === "Pokemon" &&
-              card.Stage == 2 &&
-              findBasicForStage2(card as PokemonCard) === target.EvolvesAs,
-          );
-          const card = await game.chooseCard(self.player, validCards);
-          if (!card) return;
-
-          await self.player.evolvePokemon(target, card as PokemonCard, true);
+          await evolveWithRareCandy(target);
         });
       },
     },
@@ -1688,28 +1662,7 @@ export const parseEffect = (
         /^1 Special Condition from among Asleep, Burned, Confused, Paralyzed, and Poisoned is chosen at random, and your opponent’s Active Pokémon is now affected by that Special Condition\. Any Special Conditions already affecting that Pokémon will not be chosen\.$/i,
       transform: () => {
         addSideEffect(async (game, self) => {
-          const conditions = (
-            ["Asleep", "Burned", "Confused", "Paralyzed", "Poisoned"] as const
-          ).filter(
-            (c) =>
-              !self.opponent
-                .activeOrThrow()
-                .CurrentConditions.map((c2) => c2.replace(/\+$/, ""))
-                .includes(c),
-          );
-
-          const condition = randomElement(conditions);
-          if (condition === "Asleep") {
-            game.sleepDefendingPokemon();
-          } else if (condition === "Burned") {
-            game.burnDefendingPokemon();
-          } else if (condition === "Confused") {
-            game.confuseDefendingPokemon();
-          } else if (condition === "Paralyzed") {
-            game.paralyzeDefendingPokemon();
-          } else if (condition === "Poisoned") {
-            game.poisonDefendingPokemon();
-          }
+          applyRandomSpecialCondition(self.opponent.activeOrThrow());
         });
       },
     },
@@ -2104,19 +2057,7 @@ export const parseEffect = (
             game.GameLog.attackFailed(self.player);
             return;
           }
-          game.GameLog.copyAttack(self.player, chosenAttack.name);
-          let attackFailed =
-            chosenAttack.text?.includes("use it as this attack") ||
-            chosenAttack.explicitConditions.some((cond) => !cond(self.player, chosenPokemon));
-          if (energyRequired) {
-            const active = self.player.activeOrThrow();
-            if (!active.hasSufficientEnergy(chosenAttack.requiredEnergy)) attackFailed = true;
-          }
-          if (attackFailed) {
-            game.GameLog.attackFailed(self.player);
-          } else {
-            await game.executeAttack(chosenAttack);
-          }
+          await game.copyAttack(chosenAttack, !!energyRequired);
         });
       },
     },
