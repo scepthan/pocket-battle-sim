@@ -5,6 +5,7 @@ import type { Player } from "./Player";
 import {
   EnergyMap,
   type Ability,
+  type Attack,
   type Energy,
   type PlayerStatus,
   type PlayingCard,
@@ -343,6 +344,22 @@ export class InPlayPokemon {
   }
   hasSufficientActualEnergy(energies: Energy[]) {
     return this.energyIsSufficient(energies, this.AttachedEnergy);
+  }
+  findEffectiveAttackCost(attack: Attack): Energy[] {
+    const requiredEnergy = [...attack.requiredEnergy];
+    for (const status of this.PokemonStatuses) {
+      if (status.type == "ModifyAttackCost") {
+        if (status.amount < 0) {
+          for (let i = 0; i < -status.amount; i++) {
+            if (requiredEnergy.includes(status.energyType))
+              removeElement(requiredEnergy, status.energyType);
+          }
+        } else {
+          requiredEnergy.push(...Array(status.amount).fill(status.energyType));
+        }
+      }
+    }
+    return requiredEnergy;
   }
 
   async triggerAbility(ability: Ability) {

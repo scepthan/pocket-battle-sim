@@ -1,4 +1,3 @@
-import { removeElement } from "../util";
 import type { EmptyCardSlot } from "./EmptyCardSlot";
 import type { Game } from "./Game";
 import { InPlayPokemon } from "./InPlayPokemon";
@@ -204,20 +203,7 @@ export class PlayerGameView {
   }
   findEffectiveAttackCost(attack: Attack): Energy[] {
     if (!this.hasActivePokemon()) return [];
-    const requiredEnergy = [...attack.requiredEnergy];
-    for (const status of this.selfActive.PokemonStatuses) {
-      if (status.type == "ModifyAttackCost") {
-        if (status.amount < 0) {
-          for (let i = 0; i < -status.amount; i++) {
-            if (requiredEnergy.includes(status.energyType))
-              removeElement(requiredEnergy, status.energyType);
-          }
-        } else {
-          requiredEnergy.push(...Array(status.amount).fill(status.energyType));
-        }
-      }
-    }
-    return requiredEnergy;
+    return this.player.activeOrThrow().findEffectiveAttackCost(attack);
   }
   canUseAttack(
     attack: Attack,

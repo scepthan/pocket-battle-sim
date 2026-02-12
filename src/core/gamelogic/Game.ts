@@ -693,12 +693,15 @@ export class Game {
 
     this.GameLog.copyAttack(player, attack.name);
 
-    if (
-      attack.text?.includes("use it as this attack") ||
-      attack.explicitConditions.some((cond) => !cond(player, attacker)) ||
-      (energyRequired && !attacker.hasSufficientEnergy(attack.requiredEnergy))
-    ) {
+    if (attack.text?.includes("use it as this attack")) {
       this.GameLog.attackFailed(player);
+      return;
+    }
+    if (
+      attack.explicitConditions.some((cond) => !cond(player, attacker)) ||
+      (energyRequired && !attacker.hasSufficientEnergy(attacker.findEffectiveAttackCost(attack)))
+    ) {
+      this.GameLog.conditionNotMet(player);
       return;
     }
 
