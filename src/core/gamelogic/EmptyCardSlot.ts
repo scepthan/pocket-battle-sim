@@ -1,12 +1,12 @@
 export class EmptyCardSlot {
   location: "Active" | "Bench";
-  index: number;
+  benchIndex: number;
 
   isPokemon = false as const;
 
-  constructor(location: "Active" | "Bench", index: number = -1) {
+  constructor(location: "Active" | "Bench", benchIndex: number = -1) {
     this.location = location;
-    this.index = index;
+    this.benchIndex = benchIndex;
   }
 
   static Active() {

@@ -116,6 +116,7 @@ export class Player {
     }
 
     const pokemon = new InPlayPokemon(this, setup.active);
+    pokemon.location = "Active";
     this.ActivePokemon = pokemon;
     this.InPlay.push(setup.active);
     removeElement(this.Hand, setup.active);
@@ -274,6 +275,9 @@ export class Player {
       throw new Error("Pokemon not on bench");
     }
     this.ActivePokemon = pokemon;
+    pokemon.location = "Active";
+    pokemon.benchIndex = -1;
+
     const index = this.Bench.indexOf(pokemon);
     this.Bench[index] = EmptyCardSlot.Bench(index);
 
@@ -292,6 +296,7 @@ export class Player {
     }
 
     const pokemon = new InPlayPokemon(this, card, trueCard);
+    pokemon.benchIndex = index;
     this.Bench[index] = pokemon;
     this.InPlay.push(trueCard);
     // Needs to be optional because fossils are currently removed from hand before this method is called
@@ -466,9 +471,15 @@ export class Player {
     choosingPlayer?: string,
   ) {
     const currentActive = this.activeOrThrow();
+    const benchIndex = this.Bench.indexOf(newActive);
 
     this.ActivePokemon = newActive;
-    this.Bench[this.Bench.indexOf(newActive)] = currentActive;
+    newActive.location = "Active";
+    newActive.benchIndex = -1;
+
+    this.Bench[benchIndex] = currentActive;
+    currentActive.location = "Bench";
+    currentActive.benchIndex = benchIndex;
 
     this.logger.swapActivePokemon(this, currentActive, newActive, reason, choosingPlayer);
 

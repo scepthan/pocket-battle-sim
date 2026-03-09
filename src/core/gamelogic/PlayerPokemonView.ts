@@ -14,6 +14,13 @@ export class PlayerPokemonView {
     return pokemon === this.self;
   }
 
+  get location() {
+    return this.self.location;
+  }
+  get benchIndex() {
+    return this.self.benchIndex;
+  }
+
   get ID() {
     return this.self.ID;
   }

@@ -94,6 +94,7 @@ import {
   PlayerGameView,
   PlayerPokemonView,
   removeElement,
+  type Energy,
   type PlayingCard,
   type PokemonCard,
 } from "@/core";
@@ -527,6 +528,39 @@ const setupAgent = () => {
     }
 
     return selectedOption;
+  };
+
+  agent.value.distributeEnergy = async (validPokemon, energy) => {
+    stage.value = "selectPokemon";
+    pokemonSelector.options.value = validPokemon;
+    pokemonSelector.addCancelButton.value = true;
+
+    const energyDistribution: Energy[][] = validPokemon.map(() => []);
+    outerloop: while (true) {
+      for (const energyToAttach of energy) {
+        pokemonSelector.text.value = `Select a Pokémon to attach ${energyToAttach} Energy to:`;
+        const pick = await pokemonSelector.selectionPromise();
+        if (pick === "cancel") {
+          energyDistribution.forEach((e) => (e.length = 0));
+          continue outerloop;
+        } else if (pick === null) {
+          break;
+        } else {
+          const chosenIndex = validPokemon.findIndex(
+            (p) => p.location === pick.location && p.benchIndex === pick.benchIndex,
+          );
+          energyDistribution[chosenIndex]!.push(energyToAttach);
+        }
+      }
+      break;
+    }
+
+    stage.value = "idle";
+    pokemonSelector.text.value = undefined;
+    pokemonSelector.options.value = [];
+    pokemonSelector.addCancelButton.value = false;
+
+    return energyDistribution;
   };
 };
 

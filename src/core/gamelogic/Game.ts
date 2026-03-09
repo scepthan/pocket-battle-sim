@@ -1111,7 +1111,7 @@ export class Game {
       },
     };
 
-    await this.AttackingPlayer.putPokemonOnBench(pokemon, slot.index, card);
+    await this.AttackingPlayer.putPokemonOnBench(pokemon, slot.benchIndex, card);
     await this.afterAction();
   }
 
