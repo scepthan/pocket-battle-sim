@@ -13,6 +13,7 @@ import {
   type SideEffect,
 } from "../gamelogic";
 import { randomElement, removeElement } from "../util";
+import { parseEnergies } from "./parseEnergies";
 import {
   parsePlayingCardPredicate as _cardParse,
   parsePokemonPredicate as _pokemonParse,
@@ -1333,11 +1334,20 @@ export const parseEffect = (
 
         addSideEffect(async (game, self, heads) => {
           const validPokemon = self.player.InPlayPokemon.filter(predicate);
-          if (validPokemon.length == 0) {
-            game.GameLog.noValidTargets(self.player);
-            return;
-          }
           await game.distributeEnergy(self.player, new Array(heads).fill(et), validPokemon);
+        });
+      },
+    },
+    {
+      pattern:
+        /^Take a (.+) Energy from your Energy Zone and attach them to your ([^.]+?) in any way you like\./i,
+      transform: (_, energyTypes, pokemonSpecifier) => {
+        const et = parseEnergies(energyTypes);
+        const predicate = parsePokemonPredicate(pokemonSpecifier);
+
+        addSideEffect(async (game, self) => {
+          const validPokemon = self.player.InPlayPokemon.filter(predicate);
+          await game.distributeEnergy(self.player, et, validPokemon);
         });
       },
     },

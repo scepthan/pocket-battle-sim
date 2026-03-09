@@ -1322,6 +1322,11 @@ export class Game {
    * Asks a player to distribute a set of Energy among a set of Pokémon.
    */
   async distributeEnergy(player: Player, energy: Energy[], validPokemon: InPlayPokemon[]) {
+    if (validPokemon.length == 0) {
+      this.GameLog.noValidTargets(player);
+      return;
+    }
+
     const agent = this.findAgent(player);
     const distribution = await agent.distributeEnergy(
       validPokemon.map((p) => new PlayerPokemonView(p)),

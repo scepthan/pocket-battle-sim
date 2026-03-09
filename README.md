@@ -11,8 +11,8 @@ Backend todo:
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
   - [x] A3b: 71/71 (100%)
-  - [ ] A4: 132/164 (80.5%)
-    - [ ] Baby Pokémon (0-cost attacks)
+  - [ ] A4: 133/164 (81.1%)
+    - [x] Baby Pokémon (0-cost attacks)
     - [ ] New conditionals
       - [ ] If this Pokémon has no damage on it
       - [ ] If defender is Burned
@@ -25,6 +25,7 @@ Backend todo:
     - [ ] New attacking effects
       - [ ] Damage any other Pokémon at random
     - [ ] New side effects
+      - [x] Take [multiple types] Energy from your Energy Zone and distribute them
       - [ ] Confused but not (FlipCoinToAttack with no turnsToKeep limit)
       - [ ] Set defender's HP to N
       - [ ] Put both Active Pokémon to sleep
@@ -44,7 +45,6 @@ Backend todo:
       - [ ] Evolution Pokémon
     - [ ] Parsing modifications
       - [ ] _make your opponent’s Active Pokémon_ Burned
-      - [ ] Take _[multiple types]_ Energy from your Energy Zone and attach it...
       - [ ] Move all _[typeless]_ Energy from this Pokémon to 1 of...
       - [ ] Move all [type] Energy from each of your [predicate] to _this Pokémon_
       - [ ] Discard _[multiple types]_ Energy from this Pokémon
