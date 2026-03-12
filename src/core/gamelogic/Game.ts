@@ -1263,6 +1263,32 @@ export class Game {
   }
 
   /**
+   * Reveals cards to the player and asks them to choose one.
+   */
+  async chooseFilteredCard(
+    player: Player,
+    options: PlayingCard[],
+    filter: (card: PlayingCard) => boolean,
+    prompt: string = "Choose a card.",
+  ): Promise<PlayingCard | undefined> {
+    if (options.length == 0) {
+      this.GameLog.noValidTargets(player);
+      return;
+    }
+    this.GameLog.viewCards(
+      player,
+      options.map((card) => card.ID),
+    );
+
+    const agent = this.findAgent(player);
+    const selected = await agent.chooseCard(options, prompt, filter);
+    if (!filter(selected) || !options.includes(selected)) {
+      throw new Error("Invalid card selected");
+    }
+    return selected;
+  }
+
+  /**
    * Asks a player to choose N options from a selection of cards.
    */
   async chooseNCards(

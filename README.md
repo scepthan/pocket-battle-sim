@@ -11,7 +11,7 @@ Backend todo:
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
   - [x] A3b: 71/71 (100%)
-  - [ ] A4: 135/164 (82.3%)
+  - [ ] A4: 136/164 (82.9%)
     - [x] Baby Pokémon (0-cost attacks)
     - [ ] New conditionals
       - [ ] If this Pokémon has no damage on it
@@ -50,7 +50,7 @@ Backend todo:
       - [ ] Move all [type] Energy from each of your [predicate] to _this Pokémon_
       - [x] Move a _[multiple types]_ Energy...
       - [ ] Discard a _[type]_ Energy from your opponent’s Active Pokémon
-      - [ ] Choose a _[predicate]_ card you find there and shuffle it...
+      - [x] Choose a _[predicate]_ card you find there and shuffle it...
     - [ ] Unique Promo cards
       - [ ] Horsea
       - [ ] Chinchou

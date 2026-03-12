@@ -88,9 +88,17 @@ export abstract class PlayerAgent {
   /**
    * Given a list of playing cards, choose one of them. The list is guaranteed to be non-empty.
    *
+   * The optional filter function can be used to restrict the choices presented to the user. If
+   * provided, the chosen card must satisfy the filter condition. If not provided, any card from
+   * the list can be chosen.
+   *
    * By default, calls `this.chooseNCards()` (random unless this function is user-defined).
    */
-  async chooseCard(cards: PlayingCard[], prompt: string): Promise<PlayingCard> {
+  async chooseCard(
+    cards: PlayingCard[],
+    prompt: string,
+    filter?: (card: PlayingCard) => boolean,
+  ): Promise<PlayingCard> {
     const output = await this.chooseNCards(cards, 1, prompt);
     if (output.length !== 1) throw new Error("chooseNCards(1) did not return exactly one card");
     return output[0]!;

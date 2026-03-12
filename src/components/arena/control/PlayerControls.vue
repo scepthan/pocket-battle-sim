@@ -438,9 +438,9 @@ const setupAgent = () => {
     return await chooseN(pokemonSelector, pokemon, n, prompt);
   };
 
-  agent.value.chooseCard = async (cards, prompt) => {
+  agent.value.chooseCard = async (cards, prompt, filter = () => true) => {
     stage.value = "selectCard";
-    cardSelector.options.value = cards;
+    cardSelector.options.value = cards.filter(filter);
     cardSelector.prompt.value = prompt;
 
     const selectedCard = await cardSelector.selectionPromise();

@@ -1086,10 +1086,17 @@ export const parseEffect = (
     },
     {
       pattern:
-        /^Your opponent reveals their hand\. Choose a card you find there and shuffle it into your opponent’s deck\./i,
-      transform: () => {
+        /^Your opponent reveals their hand\. Choose a (.*?card) you find there and shuffle it into your opponent’s deck\./i,
+      transform: (_, descriptor) => {
+        const predicate = parsePlayingCardPredicate(descriptor);
+        const prompt = `Choose a ${descriptor} from your opponent's hand to shuffle into their deck.`;
         addSideEffect(async (game, self) => {
-          const card = await game.chooseCard(self.player, self.opponent.Hand);
+          const card = await game.chooseFilteredCard(
+            self.player,
+            self.opponent.Hand,
+            predicate,
+            prompt,
+          );
           if (!card) return;
           self.opponent.returnToDeck([card]);
         });
