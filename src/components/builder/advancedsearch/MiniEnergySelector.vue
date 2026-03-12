@@ -15,9 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import { type Energy, EnergyMap } from "@/core";
+import { allTypes, type Energy } from "@/core";
 
 const selectedTypes = defineModel<Energy[]>();
-
-const allTypes = computed(() => Object.values(EnergyMap) as Energy[]);
 </script>

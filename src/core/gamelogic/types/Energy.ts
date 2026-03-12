@@ -13,6 +13,10 @@ export const EnergyMap = {
 export type EnergyShort = keyof typeof EnergyMap;
 export type Energy = (typeof EnergyMap)[EnergyShort];
 
+export const allTypes = Object.values(EnergyMap);
+export const allEnergies = allTypes.filter((e) => e !== "Dragon");
+export const naturalEnergies = allEnergies.filter((e) => e !== "Colorless");
+
 export const isEnergyShort = (E: string): E is EnergyShort => Object.keys(EnergyMap).includes(E);
 export const isEnergy = (E: string): E is Energy =>
   Object.values(EnergyMap as Record<string, string>).includes(E);

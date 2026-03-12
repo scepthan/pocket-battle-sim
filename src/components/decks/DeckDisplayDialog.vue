@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { EnergyMap, sortedBy, type DeckInfo } from "@/core";
+import { allTypes, sortedBy, type DeckInfo } from "@/core";
 import { usePlayingCardStore } from "@/stores";
 
 export interface Props {
@@ -47,7 +47,7 @@ const cards = computed(() => {
     (x) => x !== undefined,
   );
   output = sortedBy(output, (card) => (card.CardType === "Pokemon" ? card.Type : card.CardType), [
-    ...Object.values(EnergyMap),
+    ...allTypes,
     "Fossil",
     "PokemonTool",
     "Item",

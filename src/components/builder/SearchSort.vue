@@ -14,7 +14,7 @@
 
 <script setup lang="ts">
 import { allRarities } from "@/assets";
-import { EnergyMap, type PlayingCard, type Sortable } from "@/core";
+import { allTypes, type PlayingCard, type Sortable } from "@/core";
 
 export type CardSorter = (card: PlayingCard) => Sortable;
 
@@ -24,7 +24,7 @@ const sortOptions: Record<string, CardSorter> = {
   "Card ID": (card) => card.ID,
   Type: (card) =>
     card.CardType === "Pokemon"
-      ? Object.values(EnergyMap).indexOf(card.Type)
+      ? allTypes.indexOf(card.Type)
       : 10 + ["Fossil", "PokemonTool", "Item", "Supporter"].indexOf(card.CardType),
   Rarity: (card) => Object.keys(allRarities).indexOf(card.Rarity),
   Name: (card) => card.Name,

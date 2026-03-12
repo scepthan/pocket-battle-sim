@@ -3,7 +3,7 @@ import { randomElement, removeElement, sortedBy } from "../util";
 import type { Game } from "./Game";
 import type { Player } from "./Player";
 import {
-  EnergyMap,
+  allTypes,
   type Ability,
   type Attack,
   type Energy,
@@ -193,10 +193,9 @@ export class InPlayPokemon {
   }
 
   attachEnergy(energy: Energy[]) {
-    const energyOrder = Object.values(EnergyMap);
     for (const e of energy) {
       const index = this.AttachedEnergy.findIndex(
-        (en) => energyOrder.indexOf(e) < energyOrder.indexOf(en),
+        (en) => allTypes.indexOf(e) < allTypes.indexOf(en),
       );
       if (index !== -1) {
         this.AttachedEnergy.splice(index, 0, e);

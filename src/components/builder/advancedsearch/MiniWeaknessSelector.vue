@@ -1,7 +1,7 @@
 <template>
   <v-chip-group v-model="selectedTypes" multiple column>
     <v-chip
-      v-for="type in allTypes"
+      v-for="type in filteredTypes"
       :key="type"
       :value="type"
       color="#f0f"
@@ -16,11 +16,9 @@
 </template>
 
 <script setup lang="ts">
-import { type Energy, EnergyMap } from "@/core";
+import { allTypes, type Energy } from "@/core";
 
 const selectedTypes = defineModel<Energy[]>();
 
-const allTypes = computed(
-  () => Object.values(EnergyMap).filter((e) => e !== "Colorless") as Energy[],
-);
+const filteredTypes = computed(() => allTypes.filter((e) => e !== "Colorless"));
 </script>

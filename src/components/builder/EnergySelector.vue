@@ -27,7 +27,7 @@
       <v-card-text>
         <v-chip-group v-model="energyTypes" mandatory multiple column :max="3">
           <v-chip
-            v-for="type in filteredEnergyTypes"
+            v-for="type in naturalEnergies"
             :key="type"
             :value="type"
             :color="energyTypes.includes(type) ? 'purple' : ''"
@@ -56,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { type Energy, EnergyMap, sortedBy } from "@/core";
+import { type Energy, naturalEnergies, sortedBy } from "@/core";
 
 const energyDialog = ref(false);
 
@@ -70,11 +70,5 @@ const emit = defineEmits<{
   (e: "reset"): void;
 }>();
 
-const energyDisplay = computed(() =>
-  sortedBy(energyTypes.value, (x) => x, Object.values(EnergyMap)),
-);
-
-const filteredEnergyTypes = computed(
-  () => Object.values(EnergyMap).filter((x) => !["Colorless", "Dragon"].includes(x)) as Energy[],
-);
+const energyDisplay = computed(() => sortedBy(energyTypes.value, (x) => x, naturalEnergies));
 </script>

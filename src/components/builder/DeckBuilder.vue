@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { EnergyMap, sortedBy, type DeckInfo, type Energy, type PlayingCard } from "@/core";
+import { allTypes, sortedBy, type DeckInfo, type Energy, type PlayingCard } from "@/core";
 import { useDeckStore, usePlayingCardStore } from "@/stores";
 
 export interface Props {
@@ -111,7 +111,7 @@ const resetEnergy = async () => {
 
 const deck = computed<DeckInfo>(() => ({
   Cards: selectedCards.value.map((card) => card.ID),
-  EnergyTypes: sortedBy(energyTypes.value, (x) => x, Object.values(EnergyMap)),
+  EnergyTypes: sortedBy(energyTypes.value, (x) => x, allTypes),
 }));
 
 const resetDeck = () => {

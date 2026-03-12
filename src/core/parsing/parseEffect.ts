@@ -1,4 +1,5 @@
 import {
+  allEnergies,
   applyRandomSpecialCondition,
   evolveWithRareCandy,
   findValidRareCandyTargets,
@@ -1415,11 +1416,11 @@ export const parseEffect = (
     },
     {
       pattern:
-        /^move (an?|all)(?: {(\w)})? Energy from 1 of your (Benched .+?) to your Active (.+?)\./i,
-      transform: (_, amount, energyType, benchedSpecifier, activeSpecifier) => {
-        const fullType = energyType ? parseEnergy(energyType) : undefined;
+        /^move (an?|all)(?: (.+?))? Energy from 1 of your (Benched .+?) to your Active (.+?)\./i,
+      transform: (_, amount, energyTypes, benchedSpecifier, activeSpecifier) => {
+        const fullTypes = energyTypes ? parseEnergies(energyTypes) : allEnergies;
         const benchPredicate = parsePokemonPredicate(benchedSpecifier, (p) =>
-          fullType ? p.AttachedEnergy.includes(fullType) : p.AttachedEnergy.length > 0,
+          p.AttachedEnergy.some((e) => fullTypes.includes(e)),
         );
         const activePredicate = parsePokemonPredicate(activeSpecifier);
 
@@ -1430,13 +1431,12 @@ export const parseEffect = (
           if (!target) return;
           const active = self.player.activeOrThrow();
 
-          const prompt = "Choose an Energy to move.";
+          const prompt = "Choose an Energy to move:";
+          const validEnergy = target.AttachedEnergy.filter((e) => fullTypes.includes(e));
           const energyToMove =
             amount === "all"
-              ? target.AttachedEnergy.filter((e) => !fullType || e === fullType)
-              : fullType
-                ? [fullType]
-                : await game.chooseNEnergy(self.player, target.AttachedEnergy, 1, prompt);
+              ? validEnergy
+              : await game.chooseNEnergy(self.player, validEnergy, 1, prompt);
 
           await self.player.transferEnergy(target, active, energyToMove);
         });
