@@ -88,7 +88,7 @@
 </template>
 
 <script setup lang="ts">
-import { useSelectionHandler } from "@/composables";
+import { CANCEL_OPTION, READY_OPTION, useSelectionHandler } from "@/composables";
 import {
   PlayerAgent,
   PlayerGameView,
@@ -166,8 +166,8 @@ const setupAgent = () => {
 
       while (true) {
         const selectedPokemon = await cardSelector.selectionPromise();
-        if (selectedPokemon === null) break;
-        if (selectedPokemon === "cancel") {
+        if (selectedPokemon === READY_OPTION) break;
+        if (selectedPokemon === CANCEL_OPTION) {
           cancelling = true;
           break;
         }
@@ -180,10 +180,7 @@ const setupAgent = () => {
       }
 
       stage.value = "idle";
-      cardSelector.options.value = [];
-      cardSelector.text.value = undefined;
-      cardSelector.addReadyButton.value = false;
-      cardSelector.addCancelButton.value = false;
+      cardSelector.reset();
       pokemonSetup.value.active = undefined;
       pokemonSetup.value.bench = [];
 
@@ -214,17 +211,11 @@ const setupAgent = () => {
         pokemonSelector.addCancelButton.value = true;
 
         const selectedPokemon = await pokemonSelector.selectionPromise();
-
         stage.value = "idle";
-        pokemonSelector.text.value = undefined;
-        pokemonSelector.options.value = [];
-        pokemonSelector.addCancelButton.value = false;
+        pokemonSelector.reset();
 
-        if (selectedPokemon === "cancel") {
-          continue;
-        } else if (selectedPokemon?.isPokemon) {
-          await gameView.attachAvailableEnergy(selectedPokemon);
-        }
+        if (typeof selectedPokemon === "symbol") continue;
+        await gameView.attachAvailableEnergy(selectedPokemon);
       } else if (action === "playCard") {
         stage.value = "selectCard";
         cardSelector.text.value = "Select a card to play:";
@@ -232,15 +223,10 @@ const setupAgent = () => {
         cardSelector.addCancelButton.value = true;
 
         const selectedCard = await cardSelector.selectionPromise();
-
         stage.value = "idle";
-        cardSelector.text.value = undefined;
-        cardSelector.options.value = [];
-        cardSelector.addCancelButton.value = false;
+        cardSelector.reset();
 
-        if (selectedCard === "cancel" || selectedCard === null) {
-          continue;
-        }
+        if (typeof selectedCard === "symbol") continue;
 
         switch (selectedCard.CardType) {
           case "Pokemon":
@@ -266,15 +252,10 @@ const setupAgent = () => {
                 const selectedPokemon = await pokemonSelector.selectionPromise();
 
                 stage.value = "idle";
-                pokemonSelector.text.value = undefined;
-                pokemonSelector.options.value = [];
-                pokemonSelector.addCancelButton.value = false;
+                pokemonSelector.reset();
 
-                if (selectedPokemon === "cancel") {
-                  break;
-                } else if (selectedPokemon?.isPokemon) {
-                  targetPokemon = selectedPokemon;
-                }
+                if (typeof selectedPokemon === "symbol") break;
+                targetPokemon = selectedPokemon;
               }
               await gameView.playPokemonToEvolve(selectedCard, targetPokemon);
             }
@@ -306,23 +287,15 @@ const setupAgent = () => {
             ) {
               stage.value = "selectPokemon";
               pokemonSelector.text.value = "Select a Pokémon to use it on:";
-              pokemonSelector.options.value = gameView.validTargets(
-                selectedCard,
-              ) as PlayerPokemonView[];
+              pokemonSelector.options.value = gameView.validTargets(selectedCard);
               pokemonSelector.addCancelButton.value = true;
 
               const selectedPokemon = await pokemonSelector.selectionPromise();
-
               stage.value = "idle";
-              pokemonSelector.text.value = undefined;
-              pokemonSelector.options.value = [];
-              pokemonSelector.addCancelButton.value = false;
+              pokemonSelector.reset();
 
-              if (selectedPokemon === "cancel") {
-                break;
-              } else if (selectedPokemon?.isPokemon) {
-                await playSelectedCard(selectedPokemon);
-              }
+              if (typeof selectedPokemon === "symbol") break;
+              await playSelectedCard(selectedPokemon);
             } else {
               await playSelectedCard();
             }
@@ -335,17 +308,11 @@ const setupAgent = () => {
         pokemonSelector.addCancelButton.value = true;
 
         const selectedPokemon = await pokemonSelector.selectionPromise();
-
         stage.value = "idle";
-        pokemonSelector.text.value = undefined;
-        pokemonSelector.options.value = [];
-        pokemonSelector.addCancelButton.value = false;
+        pokemonSelector.reset();
 
-        if (selectedPokemon === "cancel") {
-          continue;
-        } else if (selectedPokemon?.isPokemon) {
-          await gameView.useAbility(selectedPokemon, selectedPokemon.Ability!);
-        }
+        if (typeof selectedPokemon === "symbol") continue;
+        await gameView.useAbility(selectedPokemon, selectedPokemon.Ability!);
       } else if (action === "retreat") {
         stage.value = "selectPokemon";
         pokemonSelector.text.value = "Select a Pokémon to swap in:";
@@ -353,19 +320,13 @@ const setupAgent = () => {
         pokemonSelector.addCancelButton.value = true;
 
         const selectedPokemon = await pokemonSelector.selectionPromise();
-
         stage.value = "idle";
-        pokemonSelector.text.value = undefined;
-        pokemonSelector.options.value = [];
-        pokemonSelector.addCancelButton.value = false;
+        pokemonSelector.reset();
 
-        if (selectedPokemon === "cancel") {
-          continue;
-        } else if (selectedPokemon?.isPokemon) {
-          await gameView.retreatActivePokemon(selectedPokemon);
-        }
+        if (typeof selectedPokemon === "symbol") continue;
+        await gameView.retreatActivePokemon(selectedPokemon);
       } else if (action === "attack") {
-        let attackName: string | null = null;
+        let attackName: string = "";
 
         if (usableAttacks.value.length === 1) {
           attackName = usableAttacks.value[0]!.name;
@@ -375,25 +336,21 @@ const setupAgent = () => {
           baseSelector.options.value = usableAttacks.value.map((attack) => attack.name);
           baseSelector.addCancelButton.value = true;
 
-          attackName = await baseSelector.selectionPromise();
+          const attackOption = await baseSelector.selectionPromise();
+          if (typeof attackOption === "symbol") continue;
 
-          baseSelector.text.value = undefined;
-          baseSelector.options.value = [];
-          baseSelector.addCancelButton.value = false;
+          attackName = attackOption;
+          baseSelector.reset();
         }
         stage.value = "idle";
 
-        if (attackName === "cancel") {
-          continue;
-        } else if (attackName) {
+        if (attackName) {
           const attack = usableAttacks.value.find((a) => a.name === attackName);
           if (attack) {
             await gameView.useAttack(attack);
             return;
           }
         }
-      } else {
-        console.log(`Player selected action: ${action}`);
       }
     }
   };
@@ -404,12 +361,10 @@ const setupAgent = () => {
     pokemonSelector.options.value = gameView.selfBenched;
 
     const selectedPokemon = await pokemonSelector.selectionPromise();
-
     stage.value = "idle";
-    pokemonSelector.text.value = undefined;
-    pokemonSelector.options.value = [];
+    pokemonSelector.reset();
 
-    if (selectedPokemon === "cancel" || !selectedPokemon?.isPokemon) {
+    if (typeof selectedPokemon === "symbol") {
       throw new Error("No Pokémon selected to swap in.");
     }
 
@@ -422,12 +377,10 @@ const setupAgent = () => {
     pokemonSelector.text.value = prompt;
 
     const selectedPokemon = await pokemonSelector.selectionPromise();
-
     stage.value = "idle";
-    pokemonSelector.options.value = [];
-    pokemonSelector.text.value = undefined;
+    pokemonSelector.reset();
 
-    if (selectedPokemon === "cancel" || !selectedPokemon?.isPokemon) {
+    if (typeof selectedPokemon === "symbol") {
       throw new Error("No Pokémon selected.");
     }
 
@@ -444,10 +397,10 @@ const setupAgent = () => {
     const selectedPokemon: PlayerPokemonView[] = [];
     while (true) {
       const pick = await pokemonSelector.selectionPromise();
-      if (pick === "cancel") {
+      if (pick === CANCEL_OPTION) {
         pokemonSelector.options.value = pokemon.slice();
         selectedPokemon.length = 0;
-      } else if (pick === null) {
+      } else if (pick === READY_OPTION) {
         break;
       } else if (selectedPokemon.length < n) {
         selectedPokemon.push(pick);
@@ -456,10 +409,7 @@ const setupAgent = () => {
     }
 
     stage.value = "idle";
-    pokemonSelector.text.value = undefined;
-    pokemonSelector.options.value = [];
-    pokemonSelector.addReadyButton.value = false;
-    pokemonSelector.addCancelButton.value = false;
+    pokemonSelector.reset();
 
     return selectedPokemon;
   };
@@ -470,12 +420,10 @@ const setupAgent = () => {
     cardSelector.text.value = prompt;
 
     const selectedCard = await cardSelector.selectionPromise();
-
     stage.value = "idle";
-    cardSelector.options.value = [];
-    cardSelector.text.value = undefined;
+    cardSelector.reset();
 
-    if (selectedCard === "cancel" || !selectedCard) {
+    if (typeof selectedCard === "symbol") {
       throw new Error("No card selected.");
     }
 
@@ -492,10 +440,10 @@ const setupAgent = () => {
     const selectedCards: PlayingCard[] = [];
     while (true) {
       const pick = await cardSelector.selectionPromise();
-      if (pick === "cancel") {
+      if (pick === CANCEL_OPTION) {
         cardSelector.options.value = cards.slice();
         selectedCards.length = 0;
-      } else if (pick === null) {
+      } else if (pick === READY_OPTION) {
         break;
       } else if (selectedCards.length < n) {
         selectedCards.push(pick);
@@ -504,10 +452,7 @@ const setupAgent = () => {
     }
 
     stage.value = "idle";
-    cardSelector.text.value = undefined;
-    cardSelector.options.value = [];
-    cardSelector.addReadyButton.value = false;
-    cardSelector.addCancelButton.value = false;
+    cardSelector.reset();
 
     return selectedCards;
   };
@@ -518,12 +463,10 @@ const setupAgent = () => {
     baseSelector.text.value = prompt;
 
     const selectedOption = await baseSelector.selectionPromise();
-
     stage.value = "idle";
-    baseSelector.options.value = [];
-    baseSelector.text.value = undefined;
+    baseSelector.reset();
 
-    if (selectedOption === "cancel" || !selectedOption) {
+    if (typeof selectedOption === "symbol") {
       throw new Error("No option selected.");
     }
 
@@ -540,10 +483,10 @@ const setupAgent = () => {
       for (const energyToAttach of energy) {
         pokemonSelector.text.value = `Select a Pokémon to attach ${energyToAttach} Energy to:`;
         const pick = await pokemonSelector.selectionPromise();
-        if (pick === "cancel") {
+        if (pick === CANCEL_OPTION) {
           energyDistribution.forEach((e) => (e.length = 0));
           continue outerloop;
-        } else if (pick === null) {
+        } else if (pick === READY_OPTION) {
           break;
         } else {
           const chosenIndex = validPokemon.findIndex(
@@ -556,9 +499,7 @@ const setupAgent = () => {
     }
 
     stage.value = "idle";
-    pokemonSelector.text.value = undefined;
-    pokemonSelector.options.value = [];
-    pokemonSelector.addCancelButton.value = false;
+    pokemonSelector.reset();
 
     return energyDistribution;
   };

@@ -4,17 +4,25 @@
     <v-btn v-for="(option, i) in selector.options.value" :key="i" @click="selector.select(option)">
       {{ buttonText(option) }}
     </v-btn>
-    <v-btn v-if="selector.addReadyButton.value" color="green" @click="selector.select(null)">
+    <v-btn
+      v-if="selector.addReadyButton.value"
+      color="green"
+      @click="selector.select(READY_OPTION)"
+    >
       Ready
     </v-btn>
-    <v-btn v-if="selector.addCancelButton.value" color="red" @click="selector.select('cancel')">
+    <v-btn
+      v-if="selector.addCancelButton.value"
+      color="red"
+      @click="selector.select(CANCEL_OPTION)"
+    >
       Cancel
     </v-btn>
   </div>
 </template>
 
 <script setup lang="ts" generic="T">
-import type { useSelectionHandler } from "@/composables";
+import { CANCEL_OPTION, READY_OPTION, type useSelectionHandler } from "@/composables";
 
 defineProps<{
   selector: ReturnType<typeof useSelectionHandler<T>>;
