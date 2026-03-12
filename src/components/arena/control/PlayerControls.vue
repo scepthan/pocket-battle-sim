@@ -12,7 +12,7 @@
     <SelectionMenu
       :selector="cardSelector"
       :button-text="(card) => card.Name"
-      default-text="Select a card:"
+      default-prompt="Select a card:"
     />
   </div>
 
@@ -20,7 +20,7 @@
     <SelectionMenu
       :selector="pokemonSelector"
       :button-text="(pokemon) => pokemon.Name"
-      default-text="Select a Pokémon:"
+      default-prompt="Select a Pokémon:"
     />
   </div>
 
@@ -28,7 +28,7 @@
     <SelectionMenu
       :selector="baseSelector"
       :button-text="(option) => option"
-      default-text="Select one:"
+      default-prompt="Select one:"
     />
   </div>
 
@@ -88,7 +88,12 @@
 </template>
 
 <script setup lang="ts">
-import { CANCEL_OPTION, READY_OPTION, useSelectionHandler } from "@/composables";
+import {
+  CANCEL_OPTION,
+  READY_OPTION,
+  useSelectionHandler,
+  type SelectionHandler,
+} from "@/composables";
 import {
   PlayerAgent,
   PlayerGameView,
@@ -148,7 +153,7 @@ const setupAgent = () => {
   agent.value.setupPokemon = async (gameView) => {
     while (true) {
       stage.value = "selectCard";
-      cardSelector.text.value = "Select your Active Pokémon:";
+      cardSelector.prompt.value = "Select your Active Pokémon:";
       cardSelector.options.value = gameView.hand.filter(
         (card) => card.CardType === "Pokemon" && card.Stage === 0,
       );
@@ -158,9 +163,9 @@ const setupAgent = () => {
       removeElement(cardSelector.options.value, active);
 
       const bench: PokemonCard[] = [];
-      cardSelector.text.value = "Select your Benched Pokémon:";
-      cardSelector.addReadyButton.value = true;
-      cardSelector.addCancelButton.value = true;
+      cardSelector.prompt.value = "Select your Benched Pokémon:";
+      cardSelector.allowReady.value = true;
+      cardSelector.allowCancel.value = true;
 
       let cancelling = false;
 
@@ -204,11 +209,11 @@ const setupAgent = () => {
         return;
       } else if (action === "attachTurnEnergy") {
         stage.value = "selectPokemon";
-        pokemonSelector.text.value = "Select a Pokémon to attach energy to:";
+        pokemonSelector.prompt.value = "Select a Pokémon to attach energy to:";
         pokemonSelector.options.value = gameView.selfInPlayPokemon.filter((p) =>
           gameView.canAttachFromEnergyZone(p, true),
         );
-        pokemonSelector.addCancelButton.value = true;
+        pokemonSelector.allowCancel.value = true;
 
         const selectedPokemon = await pokemonSelector.selectionPromise();
         stage.value = "idle";
@@ -218,9 +223,9 @@ const setupAgent = () => {
         await gameView.attachAvailableEnergy(selectedPokemon);
       } else if (action === "playCard") {
         stage.value = "selectCard";
-        cardSelector.text.value = "Select a card to play:";
+        cardSelector.prompt.value = "Select a card to play:";
         cardSelector.options.value = playableCards.value.slice();
-        cardSelector.addCancelButton.value = true;
+        cardSelector.allowCancel.value = true;
 
         const selectedCard = await cardSelector.selectionPromise();
         stage.value = "idle";
@@ -245,9 +250,9 @@ const setupAgent = () => {
               let targetPokemon = evolvablePokemon[0]!;
               if (evolvablePokemon.length > 1) {
                 stage.value = "selectPokemon";
-                pokemonSelector.text.value = "Select a Pokémon to evolve:";
+                pokemonSelector.prompt.value = "Select a Pokémon to evolve:";
                 pokemonSelector.options.value = evolvablePokemon;
-                pokemonSelector.addCancelButton.value = true;
+                pokemonSelector.allowCancel.value = true;
 
                 const selectedPokemon = await pokemonSelector.selectionPromise();
 
@@ -286,9 +291,9 @@ const setupAgent = () => {
               selectedCard.Effect.type === "Targeted"
             ) {
               stage.value = "selectPokemon";
-              pokemonSelector.text.value = "Select a Pokémon to use it on:";
+              pokemonSelector.prompt.value = "Select a Pokémon to use it on:";
               pokemonSelector.options.value = gameView.validTargets(selectedCard);
-              pokemonSelector.addCancelButton.value = true;
+              pokemonSelector.allowCancel.value = true;
 
               const selectedPokemon = await pokemonSelector.selectionPromise();
               stage.value = "idle";
@@ -303,9 +308,9 @@ const setupAgent = () => {
         }
       } else if (action === "useAbility") {
         stage.value = "selectPokemon";
-        pokemonSelector.text.value = "Select a Pokémon to use its ability:";
+        pokemonSelector.prompt.value = "Select a Pokémon to use its ability:";
         pokemonSelector.options.value = usableAbilities.value;
-        pokemonSelector.addCancelButton.value = true;
+        pokemonSelector.allowCancel.value = true;
 
         const selectedPokemon = await pokemonSelector.selectionPromise();
         stage.value = "idle";
@@ -315,9 +320,9 @@ const setupAgent = () => {
         await gameView.useAbility(selectedPokemon, selectedPokemon.Ability!);
       } else if (action === "retreat") {
         stage.value = "selectPokemon";
-        pokemonSelector.text.value = "Select a Pokémon to swap in:";
+        pokemonSelector.prompt.value = "Select a Pokémon to swap in:";
         pokemonSelector.options.value = gameView.selfBenched;
-        pokemonSelector.addCancelButton.value = true;
+        pokemonSelector.allowCancel.value = true;
 
         const selectedPokemon = await pokemonSelector.selectionPromise();
         stage.value = "idle";
@@ -332,9 +337,9 @@ const setupAgent = () => {
           attackName = usableAttacks.value[0]!.name;
         } else {
           stage.value = "selectAny";
-          baseSelector.text.value = "Select an attack:";
+          baseSelector.prompt.value = "Select an attack:";
           baseSelector.options.value = usableAttacks.value.map((attack) => attack.name);
-          baseSelector.addCancelButton.value = true;
+          baseSelector.allowCancel.value = true;
 
           const attackOption = await baseSelector.selectionPromise();
           if (typeof attackOption === "symbol") continue;
@@ -357,7 +362,7 @@ const setupAgent = () => {
 
   agent.value.chooseNewActivePokemon = async (gameView) => {
     stage.value = "selectPokemon";
-    pokemonSelector.text.value = "Select a Pokémon to swap in:";
+    pokemonSelector.prompt.value = "Select a Pokémon to swap in:";
     pokemonSelector.options.value = gameView.selfBenched;
 
     const selectedPokemon = await pokemonSelector.selectionPromise();
@@ -374,7 +379,7 @@ const setupAgent = () => {
   agent.value.choosePokemon = async (pokemon, prompt) => {
     stage.value = "selectPokemon";
     pokemonSelector.options.value = pokemon;
-    pokemonSelector.text.value = prompt;
+    pokemonSelector.prompt.value = prompt;
 
     const selectedPokemon = await pokemonSelector.selectionPromise();
     stage.value = "idle";
@@ -388,18 +393,18 @@ const setupAgent = () => {
   };
 
   const chooseN = async <T,>(
-    selector: ReturnType<typeof useSelectionHandler<T>>,
+    selector: SelectionHandler<T>,
     options: T[],
     n: number,
     prompt: string,
   ) => {
-    selector.text.value = prompt;
+    selector.prompt.value = prompt;
     selector.options.value = options.slice();
-    selector.addCancelButton.value = true;
+    selector.allowCancel.value = true;
 
     const selected: T[] = [];
     while (true) {
-      selector.addReadyButton.value = selected.length === n;
+      selector.allowReady.value = selected.length === n;
       const pick = await selector.selectionPromise();
       if (pick === CANCEL_OPTION) {
         selector.options.value = options.slice();
@@ -426,7 +431,7 @@ const setupAgent = () => {
   agent.value.chooseCard = async (cards, prompt) => {
     stage.value = "selectCard";
     cardSelector.options.value = cards;
-    cardSelector.text.value = prompt;
+    cardSelector.prompt.value = prompt;
 
     const selectedCard = await cardSelector.selectionPromise();
     stage.value = "idle";
@@ -447,7 +452,7 @@ const setupAgent = () => {
   agent.value.choose = async (options, prompt) => {
     stage.value = "selectAny";
     baseSelector.options.value = options;
-    baseSelector.text.value = prompt;
+    baseSelector.prompt.value = prompt;
 
     const selectedOption = await baseSelector.selectionPromise();
     stage.value = "idle";
@@ -463,12 +468,12 @@ const setupAgent = () => {
   agent.value.distributeEnergy = async (validPokemon, energy) => {
     stage.value = "selectPokemon";
     pokemonSelector.options.value = validPokemon;
-    pokemonSelector.addCancelButton.value = true;
+    pokemonSelector.allowCancel.value = true;
 
     const energyDistribution: Energy[][] = validPokemon.map(() => []);
     outerloop: while (true) {
       for (const energyToAttach of energy) {
-        pokemonSelector.text.value = `Select a Pokémon to attach ${energyToAttach} Energy to:`;
+        pokemonSelector.prompt.value = `Select a Pokémon to attach ${energyToAttach} Energy to:`;
         const pick = await pokemonSelector.selectionPromise();
         if (pick === CANCEL_OPTION) {
           energyDistribution.forEach((e) => (e.length = 0));

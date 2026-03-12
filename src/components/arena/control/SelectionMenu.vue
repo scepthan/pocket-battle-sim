@@ -1,32 +1,24 @@
 <template>
-  <p>{{ selector.text.value ?? defaultText }}</p>
+  <p>{{ selector.prompt.value ?? defaultPrompt }}</p>
   <div class="d-flex flex-wrap ga-2">
     <v-btn v-for="(option, i) in selector.options.value" :key="i" @click="selector.select(option)">
       {{ buttonText(option) }}
     </v-btn>
-    <v-btn
-      v-if="selector.addReadyButton.value"
-      color="green"
-      @click="selector.select(READY_OPTION)"
-    >
+    <v-btn v-if="selector.allowReady.value" color="green" @click="selector.select(READY_OPTION)">
       Ready
     </v-btn>
-    <v-btn
-      v-if="selector.addCancelButton.value"
-      color="red"
-      @click="selector.select(CANCEL_OPTION)"
-    >
+    <v-btn v-if="selector.allowCancel.value" color="red" @click="selector.select(CANCEL_OPTION)">
       Cancel
     </v-btn>
   </div>
 </template>
 
 <script setup lang="ts" generic="T">
-import { CANCEL_OPTION, READY_OPTION, type useSelectionHandler } from "@/composables";
+import { CANCEL_OPTION, READY_OPTION, type SelectionHandler } from "@/composables";
 
 defineProps<{
-  selector: ReturnType<typeof useSelectionHandler<T>>;
+  selector: SelectionHandler<T>;
   buttonText: (input: T) => string;
-  defaultText: string;
+  defaultPrompt: string;
 }>();
 </script>

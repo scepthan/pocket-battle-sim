@@ -5,7 +5,7 @@ export const applyRandomSpecialCondition = (target: InPlayPokemon) => {
   const game = target.game;
   const currentConditions = target.CurrentConditions.map((cond) => cond.replace(/\+$/, ""));
   const conditions = (["Asleep", "Burned", "Confused", "Paralyzed", "Poisoned"] as const).filter(
-    (c) => currentConditions.includes(c),
+    (c) => !currentConditions.includes(c),
   );
 
   const condition = randomElement(conditions);

@@ -5,15 +5,15 @@ export const useSelectionHandler = <T>() => {
   type SelectionOption = T | typeof READY_OPTION | typeof CANCEL_OPTION;
 
   const options: Ref<T[]> = ref([]);
-  const text = ref<string>();
-  const addReadyButton = ref<boolean>(false);
-  const addCancelButton = ref<boolean>(false);
+  const prompt = ref<string>();
+  const allowReady = ref<boolean>(false);
+  const allowCancel = ref<boolean>(false);
 
   const reset = () => {
     options.value = [];
-    text.value = undefined;
-    addReadyButton.value = false;
-    addCancelButton.value = false;
+    prompt.value = undefined;
+    allowReady.value = false;
+    allowCancel.value = false;
   };
 
   const resolver: Ref<(option: SelectionOption) => void> = ref(() => {});
@@ -23,5 +23,7 @@ export const useSelectionHandler = <T>() => {
       resolver.value = resolve;
     });
 
-  return { options, text, addReadyButton, addCancelButton, reset, select, selectionPromise };
+  return { options, prompt, allowReady, allowCancel, reset, select, selectionPromise };
 };
+
+export type SelectionHandler<T> = ReturnType<typeof useSelectionHandler<T>>;
