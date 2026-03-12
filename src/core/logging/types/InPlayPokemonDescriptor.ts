@@ -1,10 +1,10 @@
 interface ActivePokemonDescriptor {
   cardId: string;
-  location: "active";
+  location: "Active";
 }
 interface BenchPokemonDescriptor {
   cardId: string;
-  location: "bench";
+  location: "Bench";
   index: number;
 }
 export type InPlayPokemonDescriptor = ActivePokemonDescriptor | BenchPokemonDescriptor;

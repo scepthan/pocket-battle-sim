@@ -26,8 +26,14 @@ export class InPlayPokemon {
     return this.player.opponent;
   }
 
-  location: "Active" | "Bench" = "Bench";
-  benchIndex: number = -1;
+  get location() {
+    if (this.player.ActivePokemon === this) return "Active";
+    return "Bench";
+  }
+  get benchIndex() {
+    if (this.location === "Active") return -1;
+    return this.player.Bench.findIndex((p) => p === this);
+  }
 
   get ID() {
     return this.BaseCard.ID;

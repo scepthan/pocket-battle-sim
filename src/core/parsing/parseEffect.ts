@@ -494,7 +494,7 @@ export const parseEffect = (
           const activeAttackEvent = damageEvents.find(
             (event) =>
               event.player === self.opponent.Name &&
-              event.targetPokemon.location === "active" &&
+              event.targetPokemon.location === "Active" &&
               event.fromAttack,
           );
           if (!activeAttackEvent) return false;
@@ -800,7 +800,7 @@ export const parseEffect = (
           const activeAttackEvent = damageEvents.find(
             (event) =>
               event.player === self.opponent.Name &&
-              event.targetPokemon.location === "active" &&
+              event.targetPokemon.location === "Active" &&
               event.fromAttack,
           );
           if (!activeAttackEvent) return;
