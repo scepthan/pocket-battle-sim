@@ -366,13 +366,25 @@ export class Player {
     this.logger.attachEnergy(this, toPokemon, energy, "pokemon", fromPokemon);
   }
 
-  async discardEnergyFromPokemon(pokemon: InPlayPokemon, type: Energy, count: number = 1) {
+  async discardEnergyFromPokemon(
+    pokemon: InPlayPokemon,
+    type: Energy | Energy[],
+    count: number = 1,
+  ): Promise<void> {
     const discardedEnergy: Energy[] = [];
     const remainingEnergy = pokemon.AttachedEnergy.slice();
-    while (remainingEnergy.includes(type) && count > 0) {
-      discardedEnergy.push(type);
-      removeElement(remainingEnergy, type);
-      count -= 1;
+    if (Array.isArray(type)) {
+      for (const t of type) {
+        if (!remainingEnergy.includes(t)) continue;
+        discardedEnergy.push(t);
+        removeElement(remainingEnergy, t);
+      }
+    } else {
+      while (remainingEnergy.includes(type) && count > 0) {
+        discardedEnergy.push(type);
+        removeElement(remainingEnergy, type);
+        count -= 1;
+      }
     }
 
     pokemon.removeEnergy(discardedEnergy);

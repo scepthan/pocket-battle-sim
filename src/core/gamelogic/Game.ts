@@ -997,7 +997,13 @@ export class Game {
   /**
    * Discards (up to) a given amount of a given type of Energy from a Pokémon.
    */
-  async discardEnergy(pokemon: InPlayPokemon, type: Energy, count: number): Promise<void> {
+  async discardEnergy(pokemon: InPlayPokemon, type: Energy, count: number): Promise<void>;
+  async discardEnergy(pokemon: InPlayPokemon, type: Energy[]): Promise<void>;
+  async discardEnergy(
+    pokemon: InPlayPokemon,
+    type: Energy | Energy[],
+    count?: number,
+  ): Promise<void> {
     if (this.shouldPreventEffects(pokemon)) return;
     await pokemon.player.discardEnergyFromPokemon(pokemon, type, count);
   }

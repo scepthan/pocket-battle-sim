@@ -1231,6 +1231,13 @@ export const parseEffect = (
       },
     },
     {
+      pattern: /^Discard a (.+?) Energy from this Pokémon\./i,
+      transform: (_, energyType) => {
+        const fullType = parseEnergies(energyType);
+        addSideEffect(async (game, self) => await game.discardEnergy(self, fullType));
+      },
+    },
+    {
       pattern: /^Discard all Energy (?:from|attached to) this Pokémon\./i,
       transform: () => {
         addSideEffect(async (game, self) => game.discardAllEnergy(self));

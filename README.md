@@ -11,7 +11,7 @@ Backend todo:
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
   - [x] A3b: 71/71 (100%)
-  - [ ] A4: 133/164 (81.1%)
+  - [ ] A4: 134/164 (81.7%)
     - [x] Baby Pokémon (0-cost attacks)
     - [ ] New conditionals
       - [ ] If this Pokémon has no damage on it
@@ -32,6 +32,7 @@ Backend todo:
       - [ ] Evolve self with random evolution from deck
       - [ ] Apply ModifyAttackCost(+1, C) to defender
       - [ ] Draw cards until holding same number as opponent
+      - [x] Discard [multiple types] Energy from this Pokémon
       - [ ] Randomize type of random Energy on defender
       - [ ] Apply ModifyIncomingAttackDamage and PreventSpecialConditions to self
       - [ ] Put self into hand instead of discard
@@ -47,7 +48,6 @@ Backend todo:
       - [ ] _make your opponent’s Active Pokémon_ Burned
       - [ ] Move all _[typeless]_ Energy from this Pokémon to 1 of...
       - [ ] Move all [type] Energy from each of your [predicate] to _this Pokémon_
-      - [ ] Discard _[multiple types]_ Energy from this Pokémon
       - [ ] Move a _[multiple types]_ Energy...
       - [ ] Discard a _[type]_ Energy from your opponent’s Active Pokémon
       - [ ] Choose a _[predicate]_ card you find there and shuffle it...
