@@ -16,6 +16,14 @@
     />
   </div>
 
+  <div v-else-if="stage === 'selectEnergy'">
+    <SelectionMenu
+      :selector="energySelector"
+      :button-text="(energy) => energy"
+      default-prompt="Select energy:"
+    />
+  </div>
+
   <div v-else-if="stage === 'selectPokemon'">
     <SelectionMenu
       :selector="pokemonSelector"
@@ -143,6 +151,7 @@ const pokemonSetup = defineModel<{ active?: PokemonCard; bench: PokemonCard[] }>
 
 const actionSelector = useSelectionHandler<string>();
 const cardSelector = useSelectionHandler<PlayingCard>();
+const energySelector = useSelectionHandler<Energy>();
 const pokemonSelector = useSelectionHandler<PlayerPokemonView>();
 const baseSelector = useSelectionHandler<string>();
 
@@ -447,6 +456,11 @@ const setupAgent = () => {
   agent.value.chooseNCards = async (cards, n, prompt) => {
     stage.value = "selectCard";
     return await chooseN(cardSelector, cards, n, prompt);
+  };
+
+  agent.value.chooseNEnergy = async (energy, n, prompt) => {
+    stage.value = "selectEnergy";
+    return await chooseN(energySelector, energy, n, prompt);
   };
 
   agent.value.choose = async (options, prompt) => {
