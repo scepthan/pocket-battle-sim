@@ -387,31 +387,40 @@ const setupAgent = () => {
     return selectedPokemon;
   };
 
-  agent.value.chooseNPokemon = async (pokemon, n, prompt) => {
-    stage.value = "selectPokemon";
-    pokemonSelector.text.value = prompt;
-    pokemonSelector.options.value = pokemon.slice();
-    pokemonSelector.addReadyButton.value = true;
-    pokemonSelector.addCancelButton.value = true;
+  const chooseN = async <T,>(
+    selector: ReturnType<typeof useSelectionHandler<T>>,
+    options: T[],
+    n: number,
+    prompt: string,
+  ) => {
+    selector.text.value = prompt;
+    selector.options.value = options.slice();
+    selector.addCancelButton.value = true;
 
-    const selectedPokemon: PlayerPokemonView[] = [];
+    const selected: T[] = [];
     while (true) {
-      const pick = await pokemonSelector.selectionPromise();
+      selector.addReadyButton.value = selected.length === n;
+      const pick = await selector.selectionPromise();
       if (pick === CANCEL_OPTION) {
-        pokemonSelector.options.value = pokemon.slice();
-        selectedPokemon.length = 0;
+        selector.options.value = options.slice();
+        selected.length = 0;
       } else if (pick === READY_OPTION) {
         break;
-      } else if (selectedPokemon.length < n) {
-        selectedPokemon.push(pick);
-        removeElement(pokemonSelector.options.value, pick);
+      } else if (selected.length < n) {
+        selected.push(pick);
+        removeElement(selector.options.value, pick);
       }
     }
 
     stage.value = "idle";
-    pokemonSelector.reset();
+    selector.reset();
 
-    return selectedPokemon;
+    return selected;
+  };
+
+  agent.value.chooseNPokemon = async (pokemon, n, prompt) => {
+    stage.value = "selectPokemon";
+    return await chooseN(pokemonSelector, pokemon, n, prompt);
   };
 
   agent.value.chooseCard = async (cards, prompt) => {
@@ -432,29 +441,7 @@ const setupAgent = () => {
 
   agent.value.chooseNCards = async (cards, n, prompt) => {
     stage.value = "selectCard";
-    cardSelector.text.value = prompt;
-    cardSelector.options.value = cards.slice();
-    cardSelector.addReadyButton.value = true;
-    cardSelector.addCancelButton.value = true;
-
-    const selectedCards: PlayingCard[] = [];
-    while (true) {
-      const pick = await cardSelector.selectionPromise();
-      if (pick === CANCEL_OPTION) {
-        cardSelector.options.value = cards.slice();
-        selectedCards.length = 0;
-      } else if (pick === READY_OPTION) {
-        break;
-      } else if (selectedCards.length < n) {
-        selectedCards.push(pick);
-        removeElement(cardSelector.options.value, pick);
-      }
-    }
-
-    stage.value = "idle";
-    cardSelector.reset();
-
-    return selectedCards;
+    return await chooseN(cardSelector, cards, n, prompt);
   };
 
   agent.value.choose = async (options, prompt) => {
