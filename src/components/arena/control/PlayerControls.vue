@@ -406,6 +406,7 @@ const setupAgent = () => {
     options: T[],
     n: number,
     prompt: string,
+    isValid = (selected: T[]) => selected.length === n,
   ) => {
     selector.prompt.value = prompt;
     selector.options.value = options.slice();
@@ -413,7 +414,7 @@ const setupAgent = () => {
 
     const selected: T[] = [];
     while (true) {
-      selector.allowReady.value = selected.length === n;
+      selector.allowReady.value = isValid(selected);
       const pick = await selector.selectionPromise();
       if (pick === CANCEL_OPTION) {
         selector.options.value = options.slice();
@@ -458,9 +459,9 @@ const setupAgent = () => {
     return await chooseN(cardSelector, cards, n, prompt);
   };
 
-  agent.value.chooseNEnergy = async (energy, n, prompt) => {
+  agent.value.chooseNEnergy = async (energy, n, prompt, isValid) => {
     stage.value = "selectEnergy";
-    return await chooseN(energySelector, energy, n, prompt);
+    return await chooseN(energySelector, energy, n, prompt, isValid);
   };
 
   agent.value.choose = async (options, prompt) => {

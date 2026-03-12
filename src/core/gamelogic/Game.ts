@@ -1303,7 +1303,7 @@ export class Game {
     options: Energy[],
     n: number,
     prompt: string,
-    canSelectFewer?: boolean,
+    isValid?: (e: Energy[]) => boolean,
   ): Promise<Energy[]> {
     if (n === 0) return [];
 
@@ -1311,13 +1311,15 @@ export class Game {
       this.GameLog.noValidTargets(player);
       return [];
     }
-    if (options.length <= n) return options.slice();
-
-    if ((!canSelectFewer || n === 1) && options.every((e) => e === options[0]))
-      return options.slice(0, n);
+    if (!isValid || options.length === 1) {
+      if (options.length <= n) return options.slice();
+    }
+    if (!isValid || n === 1) {
+      if (options.every((e) => e === options[0])) return options.slice(0, n);
+    }
 
     const agent = this.findAgent(player);
-    const selected = await agent.chooseNEnergy(options, n, prompt);
+    const selected = await agent.chooseNEnergy(options, n, prompt, isValid);
     if (!isSubset(options, selected)) {
       throw new Error("Invalid option selected");
     }

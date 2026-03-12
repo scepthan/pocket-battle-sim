@@ -113,7 +113,12 @@ export abstract class PlayerAgent {
    *
    * By default, returns n random Energy.
    */
-  async chooseNEnergy(energy: Energy[], n: number, prompt: string): Promise<Energy[]> {
+  async chooseNEnergy(
+    energy: Energy[],
+    n: number,
+    prompt: string,
+    isValid?: (e: Energy[]) => boolean,
+  ): Promise<Energy[]> {
     return randomElements(energy, n);
   }
 
