@@ -8,7 +8,7 @@ export interface SearchFilters {
   isMega: boolean | null;
   isUltraBeast: boolean | null;
   hasAbility: boolean | null;
-  weakness: Energy[];
+  weakness: (Energy | null)[];
   retreatCost: number[];
   hpMin: number | null;
   hpMax: number | null;

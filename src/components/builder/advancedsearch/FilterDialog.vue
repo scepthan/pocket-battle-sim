@@ -28,9 +28,9 @@
         <!-- <FilterDialogRow label="Is Mega Evolution?">
           <Toggle3Way v-model="filters.isMega" :disabled="filters.isPokemon === false" />
         </FilterDialogRow> -->
-        <!-- <FilterDialogRow label="Is Ultra Beast?">
+        <FilterDialogRow label="Is Ultra Beast?">
           <Toggle3Way v-model="filters.isUltraBeast" :disabled="filters.isPokemon === false" />
-        </FilterDialogRow> -->
+        </FilterDialogRow>
         <FilterDialogRow label="Has Ability?">
           <Toggle3Way v-model="filters.hasAbility" :disabled="filters.isPokemon === false" />
         </FilterDialogRow>

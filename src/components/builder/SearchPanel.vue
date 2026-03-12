@@ -78,7 +78,7 @@ const cardsFiltered = computed(() =>
       if (searchFilters.weakness.length > 0) {
         if (card.CardType !== "Pokemon") return false;
         if (card.Weakness === undefined) {
-          if (!searchFilters.weakness.includes("Dragon")) return false;
+          if (!searchFilters.weakness.includes(null)) return false;
         } else if (!searchFilters.weakness.includes(card.Weakness)) return false;
       }
       if (searchFilters.retreatCost.length > 0) {

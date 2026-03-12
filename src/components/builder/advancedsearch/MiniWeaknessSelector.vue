@@ -2,12 +2,12 @@
   <v-chip-group v-model="selectedTypes" multiple column>
     <v-chip
       v-for="type in filteredTypes"
-      :key="type"
+      :key="type ?? 'None'"
       :value="type"
       color="#f0f"
       class="d-flex justify-center"
     >
-      <v-avatar v-if="type !== 'Dragon'" size="24">
+      <v-avatar v-if="type" size="24">
         <EnergyIcon :energy="type" width="24px" />
       </v-avatar>
       <span v-else>None</span>
@@ -16,9 +16,9 @@
 </template>
 
 <script setup lang="ts">
-import { allTypes, type Energy } from "@/core";
+import { naturalEnergies, type Energy } from "@/core";
 
-const selectedTypes = defineModel<Energy[]>();
+const selectedTypes = defineModel<(Energy | null)[]>();
 
-const filteredTypes = computed(() => allTypes.filter((e) => e !== "Colorless"));
+const filteredTypes = [...naturalEnergies, null];
 </script>
