@@ -89,6 +89,11 @@
       next turn</span
     >!
   </p>
+  <p v-else-if="entry.status.type == 'NextCoinFlip'">
+    The next coin <b>{{ entry.player }}</b> flips
+    <span v-if="entry.status.source == 'Effect'">on this turn</span> will definitely be
+    {{ entry.status.result ? "heads" : "tails" }}!
+  </p>
   <p v-else>
     Unknown player status applied to <b>{{ entry.player }}</b
     >: {{ entry.status.type }}
