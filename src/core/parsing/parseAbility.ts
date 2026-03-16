@@ -1,5 +1,6 @@
 import type { Ability, StatusAbilityEffect } from "../gamelogic";
-import { parseEffect, statusesToSideEffects } from "./parseEffect";
+import { statusesToSideEffects } from "./EffectParser";
+import { parseEffect } from "./parseEffect";
 import type { InputCardAbility, ParsedResult } from "./types";
 
 export const parseAbility = (

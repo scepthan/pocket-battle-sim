@@ -1,5 +1,6 @@
 import { Game, isEnergyShort, parseEnergy, type Attack } from "../gamelogic";
-import { parseEffect, statusesToSideEffects } from "./parseEffect";
+import { statusesToSideEffects } from "./EffectParser";
+import { parseEffect } from "./parseEffect";
 import type { InputCardAttack, ParsedResult } from "./types";
 
 export const parseAttack = (inputAttack: InputCardAttack): ParsedResult<Attack> => {

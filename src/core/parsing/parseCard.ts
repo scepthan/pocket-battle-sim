@@ -7,9 +7,10 @@ import {
   type PlayingCard,
   type SupporterCard,
 } from "../gamelogic";
+import { statusesToSideEffects } from "./EffectParser";
 import { parseAbility } from "./parseAbility";
 import { parseAttack } from "./parseAttack";
-import { parseEffect, statusesToSideEffects } from "./parseEffect";
+import { parseEffect } from "./parseEffect";
 import type { InputCard, ParsedResultOptional } from "./types";
 
 export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCard> => {
