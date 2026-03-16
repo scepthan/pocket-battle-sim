@@ -317,6 +317,8 @@ export class Game {
           if (status.keepNextTurn) {
             status.keepNextTurn = false;
             newStatuses.push(status);
+          } else {
+            this.GameLog.removePlayerStatus(player, status);
           }
         } else {
           newStatuses.push(status);

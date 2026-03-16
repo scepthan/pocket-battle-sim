@@ -11,7 +11,7 @@ Backend todo:
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
   - [x] A3b: 71/71 (100%)
-  - [ ] A4: 136/164 (82.9%)
+  - [ ] A4: 137/164 (83.5%)
     - [x] Baby Pokémon (0-cost attacks)
     - [ ] New conditionals
       - [ ] If this Pokémon has no damage on it
@@ -41,7 +41,7 @@ Backend todo:
     - [ ] New statuses
       - [ ] PreventAttackDamageOnCoinFlip
       - [ ] PreventSpecificSpecialCondition (or PreventAsleep)
-      - [ ] NextCoinFlipHeads
+      - [x] NextCoinFlip
     - [ ] New Pokémon predicates
       - [ ] Evolution Pokémon
     - [ ] Parsing modifications

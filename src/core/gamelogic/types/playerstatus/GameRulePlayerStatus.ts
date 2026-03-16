@@ -6,6 +6,10 @@ interface CannotUseSupporterPlayerStatus extends BasePlayerStatus {
 interface CannotUseItemPlayerStatus extends BasePlayerStatus {
   type: "CannotUseItem";
 }
+interface NextCoinFlipPlayerStatus extends BasePlayerStatus {
+  type: "NextCoinFlip";
+  result: boolean;
+}
 
 // A dummy status so the v-else in the game log works correctly
 interface DummyPlayerStatus extends BasePlayerStatus {
@@ -15,6 +19,7 @@ interface DummyPlayerStatus extends BasePlayerStatus {
 export type GameRulePlayerStatus =
   | CannotUseSupporterPlayerStatus
   | CannotUseItemPlayerStatus
+  | NextCoinFlipPlayerStatus
   | DummyPlayerStatus;
 
 export const GameRulePlayerStatus = {
@@ -26,6 +31,12 @@ export const GameRulePlayerStatus = {
   CannotUseItem: (keepNextTurn: boolean = true) => ({
     type: "CannotUseItem",
     source: "Effect",
+    keepNextTurn,
+  }),
+  NextCoinFlip: (result: boolean, keepNextTurn: boolean = true) => ({
+    type: "NextCoinFlip",
+    source: "Effect",
+    result,
     keepNextTurn,
   }),
 } satisfies Record<string, (...args: never) => GameRulePlayerStatus>;

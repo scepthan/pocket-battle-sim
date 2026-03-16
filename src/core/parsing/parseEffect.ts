@@ -1843,6 +1843,13 @@ export const parseEffect = (
         parser.addSelfPlayerPokemonStatus(PokemonStatus.DoubleEnergy(fullType), descriptor, true);
       },
     },
+    {
+      pattern:
+        /^The next time you flip any number of coins for the effect of an attack, Ability, or Trainer card after using this card on this turn, the first coin flip will definitely be heads\.$/,
+      transform: () => {
+        parser.addSelfPlayerStatus(PlayerStatus.NextCoinFlip(true, false));
+      },
+    },
 
     // Both player effects
     {
