@@ -1,18 +1,17 @@
 import type { Player } from "./Player";
-import type { PlayerStatus } from "./types";
 
 export class CoinFlipper {
   private player?: Player;
-  private usedPlayerStatus: PlayerStatus | null = null;
+  private usedPlayerStatus = false;
   private removePlayerStatus = () => {
-    if (!this.usedPlayerStatus) return;
-    if (this.usedPlayerStatus.id === undefined) {
-      console.warn("Attempting to remove a player status without an ID:", this.usedPlayerStatus);
-      return;
-    }
+    if (!this.player || !this.usedPlayerStatus) return;
 
-    this.player?.removePlayerStatus(this.usedPlayerStatus.id ?? "");
-    this.usedPlayerStatus = null;
+    for (const status of this.player.PlayerStatuses) {
+      if (status.type === "NextCoinFlip" && status.source === "Effect") {
+        this.player.removePlayerStatus(status.id!);
+      }
+    }
+    this.usedPlayerStatus = false;
   };
 
   constructor(player?: Player) {
@@ -20,10 +19,10 @@ export class CoinFlipper {
   }
 
   private coinFlip = () => {
-    if (this.player && this.usedPlayerStatus === null) {
+    if (this.player && !this.usedPlayerStatus) {
       const nextCoinFlipStatus = this.player.PlayerStatuses.find((s) => s.type === "NextCoinFlip");
       if (nextCoinFlipStatus) {
-        this.usedPlayerStatus = nextCoinFlipStatus;
+        this.usedPlayerStatus = true;
         return nextCoinFlipStatus.result;
       }
     }
