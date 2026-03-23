@@ -1282,6 +1282,11 @@ export class Game {
       options.map((card) => card.ID),
     );
 
+    if (!options.some(filter)) {
+      this.GameLog.noValidTargets(player);
+      return;
+    }
+
     const agent = this.findAgent(player);
     const selected = await agent.chooseCard(options, prompt, filter);
     if (!filter(selected) || !options.includes(selected)) {

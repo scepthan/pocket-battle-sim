@@ -99,7 +99,7 @@ export abstract class PlayerAgent {
     prompt: string,
     filter?: (card: PlayingCard) => boolean,
   ): Promise<PlayingCard> {
-    const output = await this.chooseNCards(cards, 1, prompt);
+    const output = await this.chooseNCards(cards.filter(filter ?? (() => true)), 1, prompt);
     if (output.length !== 1) throw new Error("chooseNCards(1) did not return exactly one card");
     return output[0]!;
   }
