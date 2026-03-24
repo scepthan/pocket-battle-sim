@@ -1629,6 +1629,16 @@ export const parseEffect = (
       },
     },
     {
+      pattern:
+        /^this Pokémon takes −(\d+) damage from attacks from your opponent’s Pokémon, recovers from all Special Conditions, and can’t be affected by any Special Conditions\.$/i,
+      transform: (_, amount) => {
+        parser.addSelfPokemonStatus(
+          PokemonStatus.ModifyIncomingAttackDamage(-amount, parser.turnsToKeep),
+        );
+        parser.addSelfPokemonStatus(PokemonStatus.PreventSpecialConditions(parser.turnsToKeep));
+      },
+    },
+    {
       pattern: /^this Pokémon takes (−|\+)(\d+) damage from attacks(?: from ([^.]+?))?\./i,
       transform: (_, sign, amount, descriptor) => {
         const trueAmount = +amount * (sign === "+" ? 1 : -1);

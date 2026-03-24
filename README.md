@@ -11,7 +11,7 @@ Backend todo:
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
   - [x] A3b: 71/71 (100%)
-  - [ ] A4: 137/164 (83.5%)
+  - [ ] A4: 138/164 (84.1%)
     - [x] Baby Pokémon (0-cost attacks)
     - [ ] New conditionals
       - [ ] If this Pokémon has no damage on it
@@ -34,7 +34,7 @@ Backend todo:
       - [ ] Draw cards until holding same number as opponent
       - [x] Discard [multiple types] Energy from this Pokémon
       - [ ] Randomize type of random Energy on defender
-      - [ ] Apply ModifyIncomingAttackDamage and PreventSpecialConditions to self
+      - [x] Apply ModifyIncomingAttackDamage and PreventSpecialConditions to self
       - [ ] Put self into hand instead of discard
       - [ ] For each heads, return random Pokémon from discard to hand
       - [ ] For each of your [type] Pokémon, look at top cards of own deck and rearrange
@@ -75,6 +75,11 @@ Backend todo:
   - [ ] Add increase/decrease max HP log events (probably does not need to be separate)
   - [ ] If damage prevention came from somewhere other than the afflicted mon, log it (e.g. Comfey)
   - [ ] Log the specific Special Condition prevented instead of just "a Special Condition"
+  - [ ] Put more information in the status source so it can be passed to the log event for things like damage prevention
+    - Oricorio's **Safeguard** prevented damage from the attack!
+    - **Dig** prevented an effect from the attack!
+    - Skarmory's **Steel Apron** prevented a Special Condition from the Ability!
+    - Teal Mask Ogerpon's **Soothing Wind** prevented a Special Condition from the Pokémon Tool!
   - [ ] Prevent "played to bench" event from appearing as a player action when it was a side effect
 - [ ] Interactions to test in-app
   - [ ] Heavy Helmet vs CounterAttack status effect (does it reduce damage? Reddit claims it will)
