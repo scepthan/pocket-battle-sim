@@ -295,6 +295,12 @@ export const parseEffect = (
       },
     },
     {
+      pattern: /^If this Pokémon has no damage on it,/i,
+      transform: () => {
+        parser.conditionalForNextEffect = (game, self) => !self.isDamaged();
+      },
+    },
+    {
       pattern: /^If this Pokémon is affected by any Special Conditions,/i,
       transform: () => {
         effect.explicitConditions.push((game, self) => self.hasSpecialCondition());

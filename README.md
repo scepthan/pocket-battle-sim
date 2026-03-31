@@ -11,10 +11,10 @@ Backend todo:
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
   - [x] A3b: 71/71 (100%)
-  - [ ] A4: 138/164 (84.1%)
+  - [ ] A4: 139/164 (84.8%)
     - [x] Baby Pokémon (0-cost attacks)
     - [ ] New conditionals
-      - [ ] If this Pokémon has no damage on it
+      - [x] If this Pokémon has no damage on it
       - [ ] If defender is Burned
       - [ ] If Unown in play with Ability other than [name]
       - [ ] If damaged by an attack during previous turn
