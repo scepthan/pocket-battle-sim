@@ -837,6 +837,17 @@ export const parseEffect = (
     },
     {
       pattern:
+        /^Draw cards until you have the same number of cards in your hand as your opponent\./i,
+      transform: () => {
+        parser.addSideEffect(async (game, self) => {
+          const cardsToDraw = self.opponent.Hand.length - self.player.Hand.length;
+          if (cardsToDraw > 0) self.player.drawCards(cardsToDraw);
+          else game.GameLog.conditionNotMet(self.player);
+        });
+      },
+    },
+    {
+      pattern:
         /^Shuffle your hand into your deck\. Draw a card for each card in your opponent’s hand\./i,
       transform: () => {
         parser.addSideEffect(async (game, self) => {

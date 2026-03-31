@@ -11,7 +11,7 @@ Backend todo:
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
   - [x] A3b: 71/71 (100%)
-  - [ ] A4: 140/164 (85.4%)
+  - [ ] A4: 141/164 (86.0%)
     - [x] Baby Pokémon (0-cost attacks)
     - [ ] New conditionals
       - [x] If this Pokémon has no damage on it
@@ -31,7 +31,7 @@ Backend todo:
       - [ ] Put both Active Pokémon to sleep
       - [ ] Evolve self with random evolution from deck
       - [ ] Apply ModifyAttackCost(+1, C) to defender
-      - [ ] Draw cards until holding same number as opponent
+      - [x] Draw cards until holding same number as opponent
       - [x] Discard [multiple types] Energy from this Pokémon
       - [ ] Randomize type of random Energy on defender
       - [x] Apply ModifyIncomingAttackDamage and PreventSpecialConditions to self
