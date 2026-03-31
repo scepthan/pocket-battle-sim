@@ -253,7 +253,7 @@ export class Player {
     return [card];
   }
 
-  returnToDeck(cards: PlayingCard[]) {
+  returnFromHandToDeck(cards: PlayingCard[]) {
     cards = cards.filter((card) => this.Hand.includes(card));
     if (cards.length == 0) return;
 
@@ -262,6 +262,15 @@ export class Player {
     this.Deck.push(...cards);
 
     this.shuffleDeck();
+  }
+
+  returnFromDiscardToHand(cards: PlayingCard[]) {
+    cards = cards.filter((card) => this.Discard.includes(card));
+    if (cards.length == 0) return;
+
+    this.Discard = this.Discard.filter((card) => !cards.includes(card));
+    this.Hand.push(...cards);
+    this.logger.putIntoHand(this, cards);
   }
 
   // Methods for moving and evolving Pokémon

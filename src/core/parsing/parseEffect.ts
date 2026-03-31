@@ -12,7 +12,7 @@ import {
   type PokemonCard,
   type SideEffect,
 } from "../gamelogic";
-import { randomElement, removeElement } from "../util";
+import { randomElement, randomElements, removeElement } from "../util";
 import { EffectParser, statusesToSideEffects } from "./EffectParser";
 import { parseEnergies } from "./parseEnergies";
 import type { ParsedEffect, ParsedResult } from "./types";
@@ -938,9 +938,20 @@ export const parseEffect = (
         parser.addSideEffect(async (game, self) => {
           const validCards = self.player.Discard.filter(predicate);
           const card = randomElement(validCards);
-          removeElement(self.player.Discard, card);
-          self.player.Hand.push(card);
-          game.GameLog.putIntoHand(self.player, [card]);
+          self.player.returnFromDiscardToHand([card]);
+        });
+      },
+    },
+    {
+      pattern:
+        /^For each heads, a (.+?) is chosen at random from your discard pile and put into your hand\.$/i,
+      transform: (_, descriptor) => {
+        const predicate = parser.parsePlayingCardPredicate(descriptor);
+        effect.implicitConditions.push((player) => player.Discard.some(predicate));
+        parser.addSideEffect(async (game, self, heads) => {
+          const validCards = self.player.Discard.filter(predicate);
+          const cards = randomElements(validCards, heads);
+          self.player.returnFromDiscardToHand(cards);
         });
       },
     },
@@ -1005,7 +1016,7 @@ export const parseEffect = (
             prompt,
           );
           if (!card) return;
-          self.opponent.returnToDeck([card]);
+          self.opponent.returnFromHandToDeck([card]);
         });
       },
     },
@@ -1017,7 +1028,7 @@ export const parseEffect = (
           if (self.opponent.Hand.length === 0) return;
           const card = randomElement(self.opponent.Hand);
           await game.showCards(self.player, [card]);
-          self.opponent.returnToDeck([card]);
+          self.opponent.returnFromHandToDeck([card]);
         });
       },
     },
@@ -1032,7 +1043,7 @@ export const parseEffect = (
             cards.push(randomElement(self.opponent.Hand));
           }
           await game.showCards(self.player, cards);
-          self.opponent.returnToDeck(cards);
+          self.opponent.returnFromHandToDeck(cards);
         });
       },
     },
@@ -1068,7 +1079,7 @@ export const parseEffect = (
           }
           const chosenCard = randomElement(supporters);
           await game.showCards(self.player, [chosenCard]);
-          self.opponent.returnToDeck([chosenCard]);
+          self.opponent.returnFromHandToDeck([chosenCard]);
           self.opponent.shuffleDeck();
           await game.copyTrainer(chosenCard);
         });
