@@ -1150,18 +1150,37 @@ export const parseEffect = (
     {
       pattern: /^Discard a random Energy from your opponent’s Active Pokémon\./i,
       transform: () => {
+        effect.implicitConditions.push(
+          (player, self) => self.opponent.activeOrThrow().EffectiveEnergy.length > 0,
+        );
         parser.addSideEffect(
           async (game, self) => await game.discardRandomEnergy(self.opponent.activeOrThrow()),
         );
       },
     },
     {
+      pattern: /^Discard a \{(\w)\} Energy from your opponent’s Active Pokémon\./i,
+      transform: (_, energyType) => {
+        const fullType = parseEnergy(energyType);
+        effect.implicitConditions.push((player, self) =>
+          self.opponent.activeOrThrow().EffectiveEnergy.some((e) => e === fullType),
+        );
+        parser.addSideEffect(
+          async (game, self) =>
+            await game.discardEnergy(self.opponent.activeOrThrow(), fullType, 1),
+        );
+      },
+    },
+    {
       pattern: /^For each heads, discard a random Energy from your opponent’s Active Pokémon\.$/i,
       transform: () => {
-        parser.addSideEffect(async (game, self, heads) => {
-          const active = self.opponent.activeOrThrow();
-          await self.opponent.discardRandomEnergyFromPokemon(active, heads);
-        });
+        effect.implicitConditions.push(
+          (player, self) => self.opponent.activeOrThrow().EffectiveEnergy.length > 0,
+        );
+        parser.addSideEffect(
+          async (game, self, heads) =>
+            await game.discardRandomEnergy(self.opponent.activeOrThrow(), heads),
+        );
       },
     },
     {
