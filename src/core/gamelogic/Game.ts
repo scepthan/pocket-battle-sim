@@ -592,7 +592,8 @@ export class Game {
     const result = pokemon.PokemonStatuses.some(
       (status) =>
         (status.type === "PreventAttackDamage" ||
-          status.type === "PreventAttackDamageAndEffects") &&
+          status.type === "PreventAttackDamageAndEffects" ||
+          (status.type === "PreventAttackDamageOnCoinFlip" && pokemon.player.flipCoin())) &&
         (!status.attackerCondition ||
           status.attackerCondition.test(this.AttackingPlayer.activeOrThrow())),
     );

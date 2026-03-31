@@ -1703,6 +1703,15 @@ export const parseEffect = (
     },
     {
       pattern:
+        /^If any damage is done to this Pokémon by attacks, flip a coin\. If heads, prevent that damage\.$/i,
+      transform: () => {
+        parser.addSelfPokemonStatus(
+          PokemonStatus.PreventAttackDamageOnCoinFlip(parser.turnsToKeep),
+        );
+      },
+    },
+    {
+      pattern:
         /^prevent all damage done to this Pokémon by attacks(?: from your opponent’s (.+?))?\./i,
       transform: (_, descriptor) => {
         parser.addSelfPokemonStatus(

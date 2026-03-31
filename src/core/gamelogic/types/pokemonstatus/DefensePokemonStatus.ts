@@ -19,6 +19,9 @@ interface ModifyIncomingAttackDamageOnCoinFlipPokemonStatus extends BaseDefenseP
 interface PreventAttackDamagePokemonStatus extends BaseDefensePokemonStatus {
   type: "PreventAttackDamage";
 }
+interface PreventAttackDamageOnCoinFlipPokemonStatus extends BaseDefensePokemonStatus {
+  type: "PreventAttackDamageOnCoinFlip";
+}
 interface PreventAttackEffectsPokemonStatus extends BaseDefensePokemonStatus {
   type: "PreventAttackEffects";
 }
@@ -34,6 +37,7 @@ export type DefensePokemonStatus =
   | ModifyIncomingAttackDamagePokemonStatus
   | ModifyIncomingAttackDamageOnCoinFlipPokemonStatus
   | PreventAttackDamagePokemonStatus
+  | PreventAttackDamageOnCoinFlipPokemonStatus
   | PreventAttackEffectsPokemonStatus
   | PreventAttackDamageAndEffectsPokemonStatus
   | CounterAttackPokemonStatus;
@@ -74,6 +78,11 @@ export const DefensePokemonStatus = {
     parseAttackerCondition({ type: "PreventAttackDamage", source, turnsToKeep }, descriptor),
   PreventAttackEffects: (turnsToKeep?: number, descriptor?: string) =>
     parseAttackerCondition({ type: "PreventAttackEffects", source, turnsToKeep }, descriptor),
+  PreventAttackDamageOnCoinFlip: (turnsToKeep?: number, descriptor?: string) =>
+    parseAttackerCondition(
+      { type: "PreventAttackDamageOnCoinFlip", source, turnsToKeep },
+      descriptor,
+    ),
   PreventAttackDamageAndEffects: (turnsToKeep?: number, descriptor?: string) =>
     parseAttackerCondition(
       { type: "PreventAttackDamageAndEffects", source, turnsToKeep },
