@@ -1220,18 +1220,19 @@ export class Game {
 
   /**
    * Asks a player to choose N options from a selection of Pokémon that are currently in play.
+   * If N is null, the player can choose any number of Pokémon from the options.
    */
   async chooseNPokemon(
     player: Player,
     options: InPlayPokemon[],
-    n: number,
-    prompt: string = `Choose ${n} Pokémon.`,
+    n: number | null,
+    prompt: string = `Choose ${n ?? "any number of"} Pokémon.`,
   ): Promise<InPlayPokemon[]> {
     if (options.length == 0) {
       this.GameLog.noValidTargets(player);
       return [];
     }
-    if (options.length <= n) return options.slice();
+    if (n !== null && options.length <= n) return options.slice();
 
     const agent = this.findAgent(player);
     const pokemonViews = options.map((p) => new PlayerPokemonView(p));

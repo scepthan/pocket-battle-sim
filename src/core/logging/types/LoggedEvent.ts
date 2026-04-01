@@ -273,6 +273,11 @@ interface PokemonKnockedOutEvent {
   targetPokemon: InPlayPokemonDescriptor;
   fromAttack: boolean;
 }
+interface PokemonDiscardedEvent {
+  type: "pokemonDiscarded";
+  player: string;
+  targetPokemon: InPlayPokemonDescriptor;
+}
 interface SpecialConditionAppliedEvent {
   type: "specialConditionApplied";
   player: string;
@@ -389,6 +394,7 @@ export type LoggedEvent =
   | PokemonHealedEvent
   | PokemonHpSetEvent
   | PokemonKnockedOutEvent
+  | PokemonDiscardedEvent
   | SpecialConditionAppliedEvent
   | SpecialConditionEndedEvent
   | SpecialConditionDamageEvent

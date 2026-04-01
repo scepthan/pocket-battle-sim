@@ -80,10 +80,10 @@ export abstract class PlayerAgent {
    */
   async chooseNPokemon(
     pokemon: PlayerPokemonView[],
-    n: number,
+    n: number | null,
     prompt: string,
   ): Promise<PlayerPokemonView[]> {
-    return randomElements(pokemon, n);
+    return randomElements(pokemon, n ?? Math.floor(Math.random() * (pokemon.length + 1)));
   }
   /**
    * Given a list of playing cards, choose one of them. The list is guaranteed to be non-empty.

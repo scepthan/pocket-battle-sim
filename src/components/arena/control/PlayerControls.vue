@@ -404,9 +404,9 @@ const setupAgent = () => {
   const chooseN = async <T,>(
     selector: SelectionHandler<T>,
     options: T[],
-    n: number,
+    n: number | null,
     prompt: string,
-    isValid = (selected: T[]) => selected.length === n,
+    isValid = (selected: T[]) => n === null || selected.length === n,
   ) => {
     selector.prompt.value = prompt;
     selector.options.value = options.slice();
@@ -421,7 +421,7 @@ const setupAgent = () => {
         selected.length = 0;
       } else if (pick === READY_OPTION) {
         break;
-      } else if (selected.length < n) {
+      } else if (n === null || selected.length < n) {
         selected.push(pick);
         removeElement(selector.options.value, pick);
       }

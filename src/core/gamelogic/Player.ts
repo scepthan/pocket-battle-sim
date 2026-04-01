@@ -552,6 +552,8 @@ export class Player {
   }
 
   async discardPokemonFromPlay(pokemon: InPlayPokemon) {
+    this.logger.pokemonDiscarded(this, pokemon);
+
     await this.removePokemonFromField(pokemon);
 
     for (const card of pokemon.InPlayCards) {

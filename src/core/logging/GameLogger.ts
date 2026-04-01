@@ -497,6 +497,14 @@ export class GameLogger {
     });
   }
 
+  pokemonDiscarded(player: Player, pokemon: InPlayPokemon) {
+    this.addEntry({
+      type: "pokemonDiscarded",
+      player: player.Name,
+      targetPokemon: player.pokemonToDescriptor(pokemon),
+    });
+  }
+
   applyPokemonStatus(player: Player, pokemon: InPlayPokemon, status: PokemonStatus) {
     this.addEntry({
       type: "applyPokemonStatus",

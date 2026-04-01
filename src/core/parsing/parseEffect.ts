@@ -501,6 +501,25 @@ export const parseEffect = (
       },
     },
     {
+      pattern:
+        /^You may discard any number of your (Benched .+?)\. This attack does (\d+) more damage for each Benched Pokémon you discarded in this way\./i,
+      transform: (_, descriptor, damage) => {
+        const predicate = parser.parsePokemonPredicate(descriptor);
+        effect.preDamageEffects.push(async (game, self) => {
+          const validPokemon = self.player.BenchedPokemon.filter(predicate);
+          const prompt = "Choose any number of your Benched Pokémon to discard.";
+          const chosenPokemon = await game.chooseNPokemon(self.player, validPokemon, null, prompt);
+          for (const p of chosenPokemon) {
+            await self.player.discardPokemonFromPlay(p);
+          }
+        });
+        effect.calculateDamage = (game, self) => {
+          const discardedCount = Effects.pokemonDiscardedFromPlayByCurrentAttack(game, self);
+          return baseDamage + discardedCount * +damage;
+        };
+      },
+    },
+    {
       pattern: /^This attack does more damage equal to the damage this Pokémon has on it\./i,
       transform: () => {
         effect.calculateDamage = (game, self) => baseDamage + self.currentDamage();

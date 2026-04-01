@@ -272,6 +272,14 @@
           </p>
         </div>
 
+        <div v-else-if="entry.type == 'pokemonKnockedOut'" class="sub-entry">
+          <p><CardName :card-id="entry.targetPokemon.cardId" /> is knocked out!</p>
+        </div>
+
+        <div v-else-if="entry.type == 'pokemonDiscarded'" class="sub-entry">
+          <p><CardName :card-id="entry.targetPokemon.cardId" /> is discarded from play!</p>
+        </div>
+
         <div v-else-if="entry.type == 'specialConditionApplied'" class="sub-entry">
           <p v-for="(condition, i) in entry.specialConditions" :key="i">
             <CardName :card-id="entry.targetPokemon.cardId" /> is now {{ condition }}!
@@ -294,10 +302,6 @@
           <p v-for="(condition, i) in entry.specialConditions" :key="i">
             <CardName :card-id="entry.targetPokemon.cardId" /> recovered from being {{ condition }}!
           </p>
-        </div>
-
-        <div v-else-if="entry.type == 'pokemonKnockedOut'" class="sub-entry">
-          <p><CardName :card-id="entry.targetPokemon.cardId" /> is knocked out!</p>
         </div>
 
         <div v-else-if="entry.type == 'scorePrizePoints'" class="sub-entry">

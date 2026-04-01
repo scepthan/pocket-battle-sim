@@ -17,3 +17,12 @@ export const damageDoneToOpposingPokemonByCurrentAttack = (game: Game, self: InP
   if (!activeAttackEvent) return;
   return activeAttackEvent.damageDealt;
 };
+
+export const pokemonDiscardedFromPlayByCurrentAttack = (game: Game, self: InPlayPokemon) => {
+  const attackIndex = game.GameLog.currentTurn.findIndex((event) => event.type === "useAttack");
+  if (attackIndex === -1) return 0;
+  return game.GameLog.currentTurn
+    .slice(attackIndex)
+    .filter((event) => event.type === "pokemonDiscarded" && event.player === self.player.Name)
+    .length;
+};
