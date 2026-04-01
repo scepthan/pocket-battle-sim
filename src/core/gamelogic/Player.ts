@@ -69,12 +69,14 @@ export class Player {
   pokemonToDescriptor(pokemon: InPlayPokemon): InPlayPokemonDescriptor {
     if (pokemon == this.ActivePokemon) {
       return {
-        cardId: pokemon.ID,
+        id: pokemon.id,
+        cardId: pokemon.cardId,
         location: "Active",
       };
     } else {
       return {
-        cardId: pokemon.ID,
+        id: pokemon.id,
+        cardId: pokemon.cardId,
         location: "Bench",
         index: pokemon.benchIndex,
       };

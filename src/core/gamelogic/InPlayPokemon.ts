@@ -22,6 +22,7 @@ export class InPlayPokemon {
   player: Player;
   game: Game;
   logger: GameLogger;
+  id: number;
   get opponent() {
     return this.player.opponent;
   }
@@ -35,7 +36,7 @@ export class InPlayPokemon {
     return this.player.Bench.findIndex((p) => p === this);
   }
 
-  get ID() {
+  get cardId() {
     return this.BaseCard.ID;
   }
   get Name() {
@@ -140,6 +141,7 @@ export class InPlayPokemon {
     this.logger = player.logger;
     this.BaseCard = inputCard;
     this.InPlayCards.push(trueCard);
+    this.id = this.game.nextPokemonId++;
 
     this.CurrentHP = this.BaseHP;
     this.MaxHP = this.BaseHP;

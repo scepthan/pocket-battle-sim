@@ -21,8 +21,8 @@ export class PlayerPokemonView {
     return this.self.benchIndex;
   }
 
-  get ID() {
-    return this.self.ID;
+  get cardId() {
+    return this.self.cardId;
   }
   get Name() {
     return this.self.Name;

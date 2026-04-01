@@ -11,13 +11,13 @@ Backend todo:
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
   - [x] A3b: 71/71 (100%)
-  - [ ] A4: 143/164 (87.2%)
+  - [ ] A4: 144/164 (87.8%)
     - [x] Baby Pokémon (0-cost attacks)
     - [ ] New conditionals
       - [x] If this Pokémon has no damage on it
       - [ ] If defender is Burned
       - [ ] If Unown in play with Ability other than [name]
-      - [ ] If damaged by an attack during previous turn
+      - [x] If damaged by an attack during previous turn
     - [ ] New damage modifiers
       - [ ] Extra damage per Energy in defender's Retreat Cost
       - [ ] Choose Benched Pokémon to discard for extra damage

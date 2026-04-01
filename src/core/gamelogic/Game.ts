@@ -46,6 +46,7 @@ export class Game {
   UsedAbilities: Set<InPlayPokemon> = new Set();
   AttackDamagedPokemon: Set<InPlayPokemon> = new Set();
   AttackKnockedOutPokemon: Set<InPlayPokemon> = new Set();
+  nextPokemonId: number = 1;
 
   get InPlayPokemon() {
     return [...this.AttackingPlayer.InPlayPokemon, ...this.DefendingPlayer.InPlayPokemon];

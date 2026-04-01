@@ -3,7 +3,7 @@
     <PlayingCard :card="card" :height-px="heightPx" />
   </div>
   <div v-else-if="card?.isPokemon" class="stacked" :style="cardStyle">
-    <PlayingCard :card="card.ID" :height-px="heightPx" />
+    <PlayingCard :card="card.cardId" :height-px="heightPx" />
 
     <div class="card-hp d-flex flex-column align-end">
       {{ Math.floor(card.CurrentHP) }}

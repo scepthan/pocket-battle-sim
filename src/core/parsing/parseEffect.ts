@@ -330,6 +330,20 @@ export const parseEffect = (
         };
       },
     },
+    {
+      pattern:
+        /^If this Pokémon was damaged by an attack during your opponent’s last turn while it was in the Active Spot,/i,
+      transform: () => {
+        parser.conditionalForNextEffect = (game, self) =>
+          game.GameLog.previousTurn?.some(
+            (e) =>
+              e.type === "pokemonDamaged" &&
+              e.fromAttack &&
+              e.targetPokemon.id === self.id &&
+              e.targetPokemon.location === "Active",
+          ) ?? false;
+      },
+    },
 
     // Defending Pokémon conditionals
     {
