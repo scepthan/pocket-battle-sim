@@ -92,6 +92,13 @@ export const parseEffect = (
     },
     {
       pattern:
+        /^If this Pokémon is Knocked Out by damage from an attack from your opponent’s Pokémon, /i,
+      transform: () => {
+        effect.trigger = { type: "AfterKnockedOutByAttack" };
+      },
+    },
+    {
+      pattern:
         /^If this Pokémon is in the Active Spot and is Knocked Out by damage from an attack from your opponent’s Pokémon, /i,
       transform: () => {
         effect.trigger = { type: "AfterKnockedOutByAttack" };
@@ -825,7 +832,7 @@ export const parseEffect = (
       pattern: /^Put (?:a|1) random (.+?) from your deck into your hand\./i,
       transform: (_, descriptor) => {
         const predicate = parser.parsePlayingCardPredicate(descriptor);
-        effect.implicitConditions.push((player) => player.canDraw());
+        effect.implicitConditions.push((player) => player.canDraw(true));
         parser.addSideEffect(async (game, self) => {
           self.player.drawRandomFilteredToHand(predicate);
         });
@@ -1955,6 +1962,14 @@ export const parseEffect = (
         /^Choose 1 of your opponent’s( Active)? Pokémon’s attacks and use it as this attack\.( If this Pokémon doesn’t have the necessary Energy to use that attack, this attack does nothing\.)?/i,
       transform: (_, active, energyRequired) => {
         parser.addSideEffect(Effects.chooseAttackToCopy(!!active, !!energyRequired));
+      },
+    },
+    {
+      pattern: /^put it into your hand instead of the discard pile\./i,
+      transform: () => {
+        parser.addSideEffect(async (game, self) => {
+          await self.player.returnPokemonToHand(self);
+        });
       },
     },
 

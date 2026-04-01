@@ -11,7 +11,7 @@ Backend todo:
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
   - [x] A3b: 71/71 (100%)
-  - [ ] A4: 144/164 (87.8%)
+  - [ ] A4: 146/164 (89.0%)
     - [x] Baby Pokémon (0-cost attacks)
     - [ ] New conditionals
       - [x] If this Pokémon has no damage on it
@@ -36,9 +36,9 @@ Backend todo:
       - [ ] Randomize type of random Energy on defender
       - [x] Apply ModifyIncomingAttackDamage and PreventSpecialConditions to self
       - [x] Discard a [type] Energy from your opponent’s Active Pokémon
-      - [ ] Put self into hand instead of discard
+      - [x] Put self into hand instead of discard
       - [x] For each heads, return random Pokémon from discard to hand
-      - [ ] For each of your [type] Pokémon, look at top cards of own deck and rearrange
+      - [x] For each of your [predicate] Pokémon, look at top cards of own deck and rearrange
     - [ ] New statuses
       - [x] PreventAttackDamageOnCoinFlip
       - [ ] PreventSpecificSpecialCondition (or PreventAsleep)

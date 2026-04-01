@@ -569,6 +569,9 @@ export class Player {
 
     if (fromAttack) await pokemon.afterKnockedOutByAttack();
 
+    // Rescue Scarf returns the Pokémon to the player's hand instead of discarding it
+    if (!this.InPlayPokemon.includes(pokemon)) return;
+
     for (const card of pokemon.InPlayCards) {
       if (!this.InPlay.includes(card)) throw new Error("Card not in play");
       removeElement(this.InPlay, card);
