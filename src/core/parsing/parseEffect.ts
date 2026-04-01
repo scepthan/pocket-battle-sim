@@ -1,8 +1,5 @@
 import {
   allEnergies,
-  applyRandomSpecialCondition,
-  evolveWithRareCandy,
-  findValidRareCandyTargets,
   InPlayPokemon,
   parseEnergy,
   Player,
@@ -12,6 +9,7 @@ import {
   type PokemonCard,
   type SideEffect,
 } from "../gamelogic";
+import * as Effects from "../gamelogic/effects";
 import { randomElement, randomElements, removeElement } from "../util";
 import { EffectParser, statusesToSideEffects } from "./EffectParser";
 import { parseEnergies } from "./parseEnergies";
@@ -265,13 +263,7 @@ export const parseEffect = (
     {
       pattern: /^If 1 of your Pokémon used (.+?) during your last turn,/i,
       transform: (_, attackName) => {
-        parser.conditionalForNextEffect = (game, self) =>
-          game.GameLog.turns[2]?.some(
-            (e) =>
-              e.type === "useAttack" &&
-              e.attackName === attackName &&
-              e.player === self.player.Name,
-          ) ?? false;
+        parser.conditionalForNextEffect = Effects.usedSpecificAttackLastTurn(attackName);
       },
     },
 
@@ -321,27 +313,14 @@ export const parseEffect = (
     {
       pattern: /^If this Pokémon moved from your Bench to the Active Spot this turn,/i,
       transform: () => {
-        parser.conditionalForNextEffect = (game, self) => {
-          // If any switching has happened this turn, then this condition is necessarily met
-          const switchingEvents = game.GameLog.currentTurn.filter(
-            (event) => event.type === "selectActivePokemon" || event.type === "swapActivePokemon",
-          );
-          return switchingEvents.some((event) => event.player === self.player.Name);
-        };
+        parser.conditionalForNextEffect = Effects.selfMovedToActiveThisTurn;
       },
     },
     {
       pattern:
         /^If this Pokémon was damaged by an attack during your opponent’s last turn while it was in the Active Spot,/i,
       transform: () => {
-        parser.conditionalForNextEffect = (game, self) =>
-          game.GameLog.previousTurn?.some(
-            (e) =>
-              e.type === "pokemonDamaged" &&
-              e.fromAttack &&
-              e.targetPokemon.id === self.id &&
-              e.targetPokemon.location === "Active",
-          ) ?? false;
+        parser.conditionalForNextEffect = Effects.selfDamagedByAttackLastTurn;
       },
     },
 
@@ -397,19 +376,7 @@ export const parseEffect = (
     {
       pattern: /^If your opponent’s Pokémon is knocked out by damage from this attack,/i,
       transform: () => {
-        parser.conditionalForNextEffect = (game, self) => {
-          const damageEvents = game.GameLog.currentTurn.filter(
-            (event) => event.type === "pokemonDamaged",
-          );
-          const activeAttackEvent = damageEvents.find(
-            (event) =>
-              event.player === self.opponent.Name &&
-              event.targetPokemon.location === "Active" &&
-              event.fromAttack,
-          );
-          if (!activeAttackEvent) return false;
-          return activeAttackEvent.finalHP === 0;
-        };
+        parser.conditionalForNextEffect = Effects.opposingPokemonKnockedOutByCurrentAttack;
       },
     },
 
@@ -418,9 +385,7 @@ export const parseEffect = (
       pattern:
         /^If any of your Pokémon were knocked out by damage from an attack during your opponent’s last turn,/i,
       transform: () => {
-        parser.conditionalForNextEffect = (game) =>
-          game.GameLog.previousTurn?.some((e) => e.type == "pokemonKnockedOut" && e.fromAttack) ??
-          false;
+        parser.conditionalForNextEffect = Effects.ownPokemonKnockedOutByAttackLastTurn;
       },
     },
     {
@@ -523,12 +488,7 @@ export const parseEffect = (
         /^This attack does (\d+) damage for each time your Pokémon used (.+?) during this game\./i,
       transform: (_, damage, attackName) => {
         effect.calculateDamage = (game, self) => {
-          const attackCount = game.GameLog.entries.filter(
-            (e) =>
-              e.type === "useAttack" &&
-              e.attackName === attackName &&
-              e.player === self.player.Name,
-          ).length;
+          const attackCount = Effects.countTimesAttackUsed(game, self, attackName);
           return attackCount * +damage;
         };
       },
@@ -705,17 +665,8 @@ export const parseEffect = (
         /^Heal from this Pokémon the same amount of damage you did to your opponent’s Active Pokémon\./i,
       transform: () => {
         parser.addSideEffect(async (game, self) => {
-          const damageEvents = game.GameLog.currentTurn.filter(
-            (event) => event.type === "pokemonDamaged",
-          );
-          const activeAttackEvent = damageEvents.find(
-            (event) =>
-              event.player === self.opponent.Name &&
-              event.targetPokemon.location === "Active" &&
-              event.fromAttack,
-          );
-          if (!activeAttackEvent) return;
-          self.healDamage(activeAttackEvent.damageDealt);
+          const damageDealt = Effects.damageDoneToOpposingPokemonByCurrentAttack(game, self);
+          if (damageDealt !== undefined) self.healDamage(damageDealt);
         });
       },
     },
@@ -899,18 +850,7 @@ export const parseEffect = (
         const predicate = parser.parsePlayingCardPredicate(descriptor);
 
         effect.implicitConditions.push((player) => player.canDraw(true));
-        parser.addSideEffect(async (game, self) => {
-          const topCard = self.player.Deck.shift()!;
-          await game.showCards(self.player, [topCard]);
-
-          if (predicate(topCard)) {
-            self.player.Hand.push(topCard);
-            game.GameLog.putIntoHand(self.player, [topCard]);
-          } else {
-            self.player.Deck.push(topCard);
-            game.GameLog.returnToBottomOfDeck(self.player, [topCard]);
-          }
-        });
+        parser.addSideEffect(Effects.MythicalSlab(predicate));
       },
     },
     {
@@ -920,28 +860,7 @@ export const parseEffect = (
         effect.implicitConditions.push(
           (player) => player.Hand.some(predicate) && player.Deck.length > 0,
         );
-        parser.addSideEffect(async (game, self) => {
-          const validHandCards = self.player.Hand.filter(predicate);
-          const chosen = await game.chooseCard(self.player, validHandCards);
-          if (!chosen) return;
-
-          const validDeckCards = self.player.Deck.filter(predicate);
-          if (validDeckCards.length == 0) {
-            game.GameLog.noValidCards(self.player);
-            return;
-          }
-          const pokemonFromDeck = randomElement(validDeckCards);
-
-          removeElement(self.player.Hand, chosen);
-          self.player.Deck.push(chosen);
-          game.GameLog.returnToDeck(self.player, [chosen], "hand");
-
-          removeElement(self.player.Deck, pokemonFromDeck);
-          self.player.Hand.push(pokemonFromDeck);
-          game.GameLog.putIntoHand(self.player, [pokemonFromDeck]);
-
-          self.player.shuffleDeck();
-        });
+        parser.addSideEffect(Effects.PokemonCommunication(predicate));
       },
     },
     {
@@ -1083,20 +1002,7 @@ export const parseEffect = (
       pattern:
         /^Look at a random Supporter card that’s not Penny from your opponent’s deck and shuffle it back into their deck\. Use the effect of that card as the effect of this card\./i,
       transform: () => {
-        parser.addSideEffect(async (game, self) => {
-          const supporters = self.opponent.Deck.filter(
-            (card) => card.CardType === "Supporter",
-          ).filter((card) => card.Name !== "Penny");
-          if (supporters.length === 0) {
-            game.GameLog.noValidCards(self.player);
-            return;
-          }
-          const chosenCard = randomElement(supporters);
-          await game.showCards(self.player, [chosenCard]);
-          self.opponent.returnFromHandToDeck([chosenCard]);
-          self.opponent.shuffleDeck();
-          await game.copyTrainer(chosenCard);
-        });
+        parser.addSideEffect(Effects.Penny);
       },
     },
     {
@@ -1565,10 +1471,10 @@ export const parseEffect = (
       pattern:
         /^Choose 1 of your Basic Pokémon in play\. If you have a Stage 2 card in your hand that evolves from that Pokémon, put that card onto the Basic Pokémon to evolve it, skipping the Stage 1\. You can’t use this card during your first turn or on a Basic Pokémon that was put into play this turn\.$/i,
       transform: () => {
-        effect.validTargets = findValidRareCandyTargets;
+        effect.validTargets = Effects.findValidRareCandyTargets;
         parser.addSideEffect(async (game, self, heads, target) => {
           if (!target) return;
-          await evolveWithRareCandy(target);
+          await Effects.evolveWithRareCandy(target);
         });
       },
     },
@@ -1637,7 +1543,7 @@ export const parseEffect = (
         /^1 Special Condition from among Asleep, Burned, Confused, Paralyzed, and Poisoned is chosen at random, and your opponent’s Active Pokémon is now affected by that Special Condition\. Any Special Conditions already affecting that Pokémon will not be chosen\.$/i,
       transform: () => {
         parser.addSideEffect(async (game, self) => {
-          applyRandomSpecialCondition(self.opponent.activeOrThrow());
+          Effects.applyRandomSpecialCondition(self.opponent.activeOrThrow());
         });
       },
     },
@@ -2041,23 +1947,7 @@ export const parseEffect = (
       pattern:
         /^Choose 1 of your opponent’s( Active)? Pokémon’s attacks and use it as this attack\.( If this Pokémon doesn’t have the necessary Energy to use that attack, this attack does nothing\.)?/i,
       transform: (_, active, energyRequired) => {
-        parser.addSideEffect(async (game, self) => {
-          const chosenPokemon = active
-            ? self.opponent.activeOrThrow()
-            : await game.choosePokemon(self.player, self.opponent.InPlayPokemon);
-          if (!chosenPokemon) {
-            game.GameLog.attackFailed(self.player);
-            return;
-          }
-          const attacks = Object.fromEntries(chosenPokemon.Attacks.map((a) => [a.name, a]));
-          const prompt = `Choose an attack to copy from ${chosenPokemon.Name}.`;
-          const chosenAttack = await game.choose(self.player, attacks, prompt);
-          if (!chosenAttack) {
-            game.GameLog.attackFailed(self.player);
-            return;
-          }
-          await game.copyAttack(chosenAttack, !!energyRequired);
-        });
+        parser.addSideEffect(Effects.chooseAttackToCopy(!!active, !!energyRequired));
       },
     },
 
