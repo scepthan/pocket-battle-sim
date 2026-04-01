@@ -1321,6 +1321,27 @@ export class Game {
   }
 
   /**
+   * Asks a player to rearrange a selection of cards and return them in the new order.
+   */
+  async rearrangeCards(
+    player: Player,
+    options: PlayingCard[],
+    prompt: string,
+  ): Promise<PlayingCard[]> {
+    if (options.length == 0) {
+      this.GameLog.noValidTargets(player);
+      return [];
+    }
+
+    const agent = this.findAgent(player);
+    const selected = await agent.chooseNCards(options, options.length, prompt);
+    if (!isSubset(options, selected) || selected.length !== options.length) {
+      throw new Error("Invalid card or not enough cards selected");
+    }
+    return selected;
+  }
+
+  /**
    * Shows a player a set of cards that they aren't normally able to see.
    */
   async showCards(player: Player, cards: PlayingCard[]): Promise<void> {

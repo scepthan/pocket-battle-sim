@@ -143,6 +143,12 @@ interface ReturnToDeckEvent {
   source: "hand" | "inPlay" | "discard";
   cardIds: string[];
 }
+interface ReturnToTopOfDeckEvent {
+  type: "returnToTopOfDeck";
+  player: string;
+  choosingPlayer?: string;
+  cardIds: string[];
+}
 interface ReturnToBottomOfDeckEvent {
   type: "returnToBottomOfDeck";
   player: string;
@@ -364,6 +370,7 @@ export type LoggedEvent =
   | DiscardCardsEvent
   | ReturnToHandEvent
   | ReturnToDeckEvent
+  | ReturnToTopOfDeckEvent
   | ReturnToBottomOfDeckEvent
   | ShuffleDeckEvent
   | SwapActivePokemonEvent

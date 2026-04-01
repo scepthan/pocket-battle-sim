@@ -232,6 +232,15 @@ export class GameLogger {
     });
   }
 
+  returnToTopOfDeck(player: Player, cards: PlayingCard[], choosingPlayer?: Player) {
+    this.addEntry({
+      type: "returnToTopOfDeck",
+      player: player.Name,
+      choosingPlayer: choosingPlayer?.Name,
+      cardIds: cards.map((card) => card.ID),
+    });
+  }
+
   returnToBottomOfDeck(player: Player, cards: PlayingCard[]) {
     this.addEntry({
       type: "returnToBottomOfDeck",

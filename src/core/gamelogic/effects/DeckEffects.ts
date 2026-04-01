@@ -1,4 +1,4 @@
-import type { PlayingCardPredicate } from "@/core/parsing/parsePredicates";
+import type { InPlayPokemonPredicate, PlayingCardPredicate } from "@/core/parsing/parsePredicates";
 import { randomElement, removeElement } from "@/core/util";
 import type { Game } from "../Game";
 import type { InPlayPokemon } from "../InPlayPokemon";
@@ -68,3 +68,22 @@ export const Penny = async (game: Game, self: InPlayPokemon) => {
   self.opponent.shuffleDeck();
   await game.copyTrainer(chosenCard);
 };
+
+/**
+ * Given a Pokémon predicate and a boolean indicating whether to target the opponent, returns a
+ * side effect that counts the number of Pokémon the player has in play that match the predicate,
+ * then lets them rearrange that many cards from the top of the targeted player's deck.
+ */
+export const HikerAndMorty =
+  (predicate: InPlayPokemonPredicate, opponent: boolean) =>
+  async (game: Game, self: InPlayPokemon) => {
+    const count = self.player.InPlayPokemon.filter(predicate).length;
+    const affectedPlayer = opponent ? self.opponent : self.player;
+
+    const topCards = affectedPlayer.Deck.splice(0, count);
+    const prompt = "Choose the order in which to put the cards back on your deck.";
+    const rearranged = await game.rearrangeCards(self.player, topCards, prompt);
+
+    affectedPlayer.Deck.unshift(...rearranged);
+    game.GameLog.returnToTopOfDeck(self.player, rearranged, opponent ? self.opponent : undefined);
+  };

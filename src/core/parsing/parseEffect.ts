@@ -854,6 +854,15 @@ export const parseEffect = (
       },
     },
     {
+      pattern:
+        /^For each of your (.+?) in play, look at that many cards from the top of your( opponent’s)? deck and put them back in any order\./i,
+      transform: (_, descriptor, opponent) => {
+        const predicate = parser.parsePokemonPredicate(descriptor);
+        effect.implicitConditions.push((player) => player.InPlayPokemon.some(predicate));
+        parser.addSideEffect(Effects.HikerAndMorty(predicate, !!opponent));
+      },
+    },
+    {
       pattern: /^Choose a (.+?) in your hand and switch it with a random \1 in your deck\.$/i,
       transform: (_, descriptor) => {
         const predicate = parser.parsePlayingCardPredicate(descriptor);
@@ -897,7 +906,7 @@ export const parseEffect = (
       },
     },
 
-    // Opponent hand manipulation
+    // Opponent card manipulation
     {
       pattern: /^Your opponent shuffles their hand into their deck and draws (\d+) cards\.$/i,
       transform: (_, count) => {
@@ -1933,9 +1942,7 @@ export const parseEffect = (
       pattern:
         /^Change the type of the next Energy that will be generated for your opponent to 1 of the following at random: ([^.]+?)\./i,
       transform: (_, energyTypes) => {
-        const possibleEnergies = energyTypes
-          .split(/, or |, /)
-          .map((x) => parseEnergy(x.slice(1, 2)));
+        const possibleEnergies = parseEnergies(energyTypes);
         parser.addSideEffect(async (game, self) => {
           self.opponent.changeNextEnergy(randomElement(possibleEnergies));
         });

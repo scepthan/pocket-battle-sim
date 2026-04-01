@@ -333,6 +333,21 @@
           </p>
         </div>
 
+        <div v-else-if="entry.type == 'returnToTopOfDeck'" class="sub-entry">
+          <p>
+            <span v-if="entry.choosingPlayer">
+              <b>{{ entry.choosingPlayer }}</b> returns
+            </span>
+            <CountDisplay :count="entry.cardIds" single="card" />
+            <span v-if="!entry.choosingPlayer"> returned </span> to the top of
+            <b>{{ entry.player }}</b
+            >'s deck<span
+              v-if="entry.choosingPlayer !== entry.player || shownPlayers.includes(entry.player)"
+              >: <CardNameList :card-ids="entry.cardIds" /> </span
+            >.
+          </p>
+        </div>
+
         <div v-else-if="entry.type == 'returnToBottomOfDeck'" class="sub-entry">
           <p>
             <CountDisplay :count="entry.cardIds" single="card" /> returned to bottom of
