@@ -19,12 +19,13 @@ import type { DeckInfo } from "@/core";
 
 const props = defineProps<{
   deck: DeckInfo;
+  name: string;
 }>();
 
 const snackbar = ref(false);
 
 const copyJson = async () => {
-  const deckJson = `{
+  const deckJson = `"${props.name}": {
   "Cards": [${props.deck.Cards.map((card) => `"${card}"`)
     .sort()
     .join(", ")}],

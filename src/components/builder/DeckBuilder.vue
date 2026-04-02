@@ -19,6 +19,7 @@
           />
           <ResetDeckButton @reset="resetDeck" />
           <CopyJsonButton
+            :name="deckName"
             :deck="{ Cards: selectedCards.map((x) => x.ID), EnergyTypes: energyTypes }"
           />
           <SaveDeckButton
