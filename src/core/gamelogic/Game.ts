@@ -1132,8 +1132,11 @@ export class Game {
   }
 
   /**
-   * Asks a player to choose from a selection of any type of object. For Pokémon specifically,
-   * use `.choosePokemon()`.
+   * Asks a player to choose one option from a selection of choices, which can be either an array
+   * of strings or a mapping of strings to arbitrary values.
+   *
+   * There are a number of specific use cases (e.g. Pokémon, cards, yes/no) that have defined
+   * helper methods; be sure to use those when appropriate.
    */
   async choose(player: Player, options: string[], prompt: string): Promise<string | undefined>;
   async choose<T>(
@@ -1173,7 +1176,9 @@ export class Game {
 
   /**
    * Asks a player to choose a new Active Pokémon from among their Benched Pokémon.
-   * If they have no Benched Pokémon, this does nothing.
+   *
+   * @returns true if a new Active Pokémon was chosen, false if the player has no Benched Pokémon
+   * or the effect was prevented.
    */
   async chooseNewActivePokemon(player: Player): Promise<boolean> {
     if (this.shouldPreventEffects(player.activeOrThrow())) return false;
@@ -1198,7 +1203,9 @@ export class Game {
   }
 
   /**
-   * Asks a player to choose from a selection of Pokémon that are currently in play.
+   * Asks a player to choose one option from a selection of Pokémon that are currently in play.
+   *
+   * Shortcuts if only 1 Pokémon is available; logs `noValidTargets` if no Pokémon are available.
    */
   async choosePokemon(
     player: Player,
@@ -1221,6 +1228,9 @@ export class Game {
   /**
    * Asks a player to choose N options from a selection of Pokémon that are currently in play.
    * If N is null, the player can choose any number of Pokémon from the options.
+   *
+   * Shortcuts if no more than N Pokémon are available; logs `noValidTargets` if no Pokémon are
+   * available.
    */
   async chooseNPokemon(
     player: Player,
@@ -1246,7 +1256,9 @@ export class Game {
   }
 
   /**
-   * Asks a player to choose from a selection of cards.
+   * Asks a player to choose one option from a selection of cards.
+   *
+   * Shortcuts if only 1 card is available; logs `noValidTargets` if no cards are available.
    */
   async chooseCard(
     player: Player,
@@ -1268,7 +1280,10 @@ export class Game {
   }
 
   /**
-   * Reveals cards to the player and asks them to choose one.
+   * Reveals a set of cards to the player and asks them to choose one that matches a given filter.
+   *
+   * Shortcuts if only 1 valid card is available; logs `noValidTargets` if none are available.
+   * Viewing cards is skipped only if there are no cards to view at all.
    */
   async chooseFilteredCard(
     player: Player,
@@ -1300,6 +1315,9 @@ export class Game {
 
   /**
    * Asks a player to choose N options from a selection of cards.
+   *
+   * Shortcuts if no more than N cards are available; logs `noValidTargets` if no cards are
+   * available.
    */
   async chooseNCards(
     player: Player,
@@ -1322,7 +1340,10 @@ export class Game {
   }
 
   /**
-   * Asks a player to rearrange a selection of cards and return them in the new order.
+   * Asks a player to rearrange a selection of cards and returns them in the new order.
+   *
+   * Logs `noValidTargets` if no cards are available; will not shortcut even if only 1 card is
+   * available, as the player may still want to view it.
    */
   async rearrangeCards(
     player: Player,
@@ -1354,6 +1375,17 @@ export class Game {
 
   /**
    * Asks a player to choose N options from a selection of Energy.
+   *
+   * If `isValid` is provided, shortcuts in the same manner as retreating does in-game: if there is
+   * only 1 Energy to choose from, or if N is 1 and all available Energy are the same.
+   * Otherwise, shortcuts if no more than N Energy are available, or if all available Energy are
+   * the same.
+   *
+   * Logs `noValidTargets` if no Energy are available and N > 0.
+   *
+   * @param isValid An optional function that can be used to override the default validation of
+   * "exactly N Energy must be chosen". This is useful for cases where fewer than N Energy are
+   * allowed, such as retreating with Serperior's Jungle Totem Ability in play.
    */
   async chooseNEnergy(
     player: Player,
@@ -1379,6 +1411,9 @@ export class Game {
     const selected = await agent.chooseNEnergy(options, n, prompt, isValid);
     if (!isSubset(options, selected)) {
       throw new Error("Invalid option selected");
+    }
+    if (isValid ? !isValid(selected) : selected.length !== n) {
+      throw new Error("Invalid amount of Energy selected");
     }
     return selected;
   }

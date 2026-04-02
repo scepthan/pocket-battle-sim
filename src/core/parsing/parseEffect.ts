@@ -1226,7 +1226,8 @@ export const parseEffect = (
 
         parser.addSideEffect(async (game, self) => {
           const pokemon = self.player.InPlayPokemon.filter(predicate);
-          const chosenPokemon = await game.chooseNPokemon(self.player, pokemon, 2);
+          const prompt = "Choose 2 of your Pokémon to attach Energy to.";
+          const chosenPokemon = await game.chooseNPokemon(self.player, pokemon, 2, prompt);
           for (const p of chosenPokemon) await self.player.attachEnergy(p, [energy], "energyZone");
         });
       },
@@ -1329,7 +1330,7 @@ export const parseEffect = (
           if (!target) return;
           const active = self.player.activeOrThrow();
 
-          const prompt = "Choose an Energy to move:";
+          const prompt = "Choose an Energy to move.";
           const validEnergy = target.getEnergy(fullTypes);
           const energyToMove =
             amount === "all"
@@ -1366,9 +1367,10 @@ export const parseEffect = (
         );
 
         parser.addSideEffect(async (game, self) => {
-          const energyCount = Math.min(2, self.getEnergy(energy).length);
+          const count = Math.min(2, self.getEnergy(energy).length);
           const pokemon = self.player.InPlayPokemon.filter(predicate);
-          const chosenPokemon = await game.chooseNPokemon(self.player, pokemon, energyCount);
+          const prompt = `Choose ${count} Pokémon to transfer Energy to.`;
+          const chosenPokemon = await game.chooseNPokemon(self.player, pokemon, count, prompt);
           for (const p of chosenPokemon) await self.player.transferEnergy(self, p, [energy]);
         });
       },
@@ -1494,7 +1496,8 @@ export const parseEffect = (
           const validCards = self.opponent.Discard.filter(
             (card) => card.CardType == "Pokemon" && card.Stage == 0,
           );
-          const card = await game.chooseCard(self.player, validCards);
+          const prompt = "Choose a Basic Pokémon to put on your opponent's Bench.";
+          const card = await game.chooseCard(self.player, validCards, prompt);
           if (!card) return;
           await self.opponent.putPokemonOnBench(card as PokemonCard, benchIndex, card);
         });
@@ -2033,7 +2036,8 @@ export const parseEffect = (
         effect.explicitConditions.push((player) => player.Hand.length > 0);
         parser.addSideEffect(async (game, self) => {
           const player = self.player;
-          const cardToDiscard = await game.chooseCard(player, player.Hand);
+          const prompt = "Choose a card to discard.";
+          const cardToDiscard = await game.chooseCard(player, player.Hand, prompt);
           if (!cardToDiscard) throw new Error("No card chosen to discard");
           player.discardCardsFromHand([cardToDiscard]);
         });

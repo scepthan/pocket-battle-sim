@@ -32,7 +32,7 @@ export const evolveWithRareCandy = async (target: InPlayPokemon) => {
       card.Stage == 2 &&
       findBasicForStage2(card) === target.EvolvesAs,
   );
-  const prompt = "Choose a Stage 2 Pokémon to evolve into:";
+  const prompt = "Choose a Stage 2 Pokémon to evolve into.";
   const card = await target.game.chooseCard(player, validCards, prompt);
   if (!card) return;
 

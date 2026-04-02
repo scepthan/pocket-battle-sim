@@ -29,7 +29,8 @@ export const MythicalSlab =
 export const PokemonCommunication =
   (predicate: PlayingCardPredicate) => async (game: Game, self: InPlayPokemon) => {
     const validHandCards = self.player.Hand.filter(predicate);
-    const chosen = await game.chooseCard(self.player, validHandCards);
+    const prompt = "Choose a card from your hand to swap with a card from your deck.";
+    const chosen = await game.chooseCard(self.player, validHandCards, prompt);
     if (!chosen) return;
 
     const validDeckCards = self.player.Deck.filter(predicate);
