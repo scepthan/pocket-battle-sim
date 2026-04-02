@@ -11,7 +11,7 @@ Backend todo:
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
   - [x] A3b: 71/71 (100%)
-  - [ ] A4: 147/164 (89.6%)
+  - [ ] A4: 148/164 (90.2%)
     - [x] Baby Pokémon (0-cost attacks)
     - [ ] New conditionals
       - [x] If this Pokémon has no damage on it
@@ -21,7 +21,6 @@ Backend todo:
     - [ ] New damage modifiers
       - [ ] Extra damage per Energy in defender's Retreat Cost
       - [x] Choose Benched Pokémon to discard for extra damage
-      - [ ] Extra damage per Energy on self
     - [ ] New attacking effects
       - [ ] Damage any other Pokémon at random
     - [ ] New side effects
@@ -49,6 +48,7 @@ Backend todo:
       - [ ] _make your opponent’s Active Pokémon_ Burned
       - [ ] Move all _[typeless]_ Energy from this Pokémon to 1 of...
       - [ ] Move all [type] Energy from each of your [predicate] to _this Pokémon_
+      - [x] This attack does extra damage per _[typeless]_ Energy on self
       - [x] Move a _[multiple types]_ Energy...
       - [x] Choose a _[predicate]_ card you find there and shuffle it...
     - [ ] Unique Promo cards

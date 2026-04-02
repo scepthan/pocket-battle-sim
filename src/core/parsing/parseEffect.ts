@@ -427,7 +427,7 @@ export const parseEffect = (
     },
     {
       pattern:
-        /^This attack does (\d+)( more)? damage for each(?: \{(\w)\}) Energy attached to this Pokémon\./i,
+        /^This attack does (\d+)( more)? damage for each(?: \{(\w)\})? Energy attached to this Pokémon\./i,
       transform: (_, damagePerEnergy, more, energyType) => {
         const fullEnergy = energyType ? parseEnergy(energyType) : undefined;
         effect.calculateDamage = (game, self) => {
