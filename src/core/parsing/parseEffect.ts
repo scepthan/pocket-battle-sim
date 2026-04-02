@@ -459,6 +459,16 @@ export const parseEffect = (
     },
     {
       pattern:
+        /^This attack does (\d+)( more)? damage for each Energy in your opponent’s Active Pokémon’s Retreat Cost\./i,
+      transform: (_, damagePerEnergy, more) => {
+        effect.calculateDamage = (game, self) => {
+          const energyCount = self.opponent.effectiveRetreatCost;
+          return (more ? baseDamage : 0) + energyCount * Number(damagePerEnergy);
+        };
+      },
+    },
+    {
+      pattern:
         /^This attack does (\d+)( more)? damage for each of your opponent’s Benched Pokémon\./i,
       transform: (_, damagePerBench, more) => {
         effect.calculateDamage = (game, self) => {
