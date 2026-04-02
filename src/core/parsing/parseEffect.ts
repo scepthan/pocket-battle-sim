@@ -1,5 +1,4 @@
 import {
-  allEnergies,
   InPlayPokemon,
   parseEnergy,
   Player,
@@ -1305,7 +1304,7 @@ export const parseEffect = (
         effect.implicitConditions.push((player) => predicate(player.activeOrThrow()));
         parser.addSideEffect(async (game, self) => {
           for (const pokemon of self.player.BenchedPokemon) {
-            const energyToMove = pokemon.AttachedEnergy.filter((e) => e == fullType);
+            const energyToMove = pokemon.getEnergy(fullType);
             if (energyToMove.length > 0) {
               await self.player.transferEnergy(pokemon, self.player.activeOrThrow(), energyToMove);
             }
@@ -1317,9 +1316,9 @@ export const parseEffect = (
       pattern:
         /^move (an?|all)(?: (.+?))? Energy from 1 of your (Benched .+?) to your Active (.+?)\./i,
       transform: (_, amount, energyTypes, benchedSpecifier, activeSpecifier) => {
-        const fullTypes = energyTypes ? parseEnergies(energyTypes) : allEnergies;
+        const fullTypes = energyTypes ? parseEnergies(energyTypes) : undefined;
         const benchPredicate = parser.parsePokemonPredicate(benchedSpecifier, (p) =>
-          p.AttachedEnergy.some((e) => fullTypes.includes(e)),
+          p.hasAnyEnergy(fullTypes),
         );
         const activePredicate = parser.parsePokemonPredicate(activeSpecifier);
 
@@ -1331,7 +1330,7 @@ export const parseEffect = (
           const active = self.player.activeOrThrow();
 
           const prompt = "Choose an Energy to move:";
-          const validEnergy = target.AttachedEnergy.filter((e) => fullTypes.includes(e));
+          const validEnergy = target.getEnergy(fullTypes);
           const energyToMove =
             amount === "all"
               ? validEnergy
@@ -1342,15 +1341,15 @@ export const parseEffect = (
       },
     },
     {
-      pattern: /^move all {(\w)} Energy from this Pokémon to 1 of your (.+?)\./i,
+      pattern: /^move all(?: \{(\w)\})? Energy from this Pokémon to 1 of your (.+?)\./i,
       transform: (_, energyType, descriptor) => {
-        const fullType = parseEnergy(energyType);
+        const fullType = energyType ? parseEnergy(energyType) : undefined;
         const predicate = parser.parsePokemonPredicate(descriptor);
-        effect.implicitConditions.push((player, self) => self.AttachedEnergy.includes(fullType));
+        effect.implicitConditions.push((player, self) => self.hasAnyEnergy(fullType));
         effect.validTargets = (player) => player.InPlayPokemon.filter(predicate);
         parser.addSideEffect(async (game, self, heads, target) => {
           if (!target) return;
-          const energyToMove = self.AttachedEnergy.filter((e) => e === fullType);
+          const energyToMove = self.getEnergy(fullType);
           await self.player.transferEnergy(self, target, energyToMove);
         });
       },
@@ -1363,12 +1362,11 @@ export const parseEffect = (
         const predicate = parser.parsePokemonPredicate(descriptor);
         effect.implicitConditions.push(
           (player, pokemon) =>
-            pokemon.AttachedEnergy.filter((e) => e === energy).length > 0 &&
-            player.InPlayPokemon.filter(predicate).length > 0,
+            pokemon.hasAnyEnergy(energy) && player.InPlayPokemon.filter(predicate).length > 0,
         );
 
         parser.addSideEffect(async (game, self) => {
-          const energyCount = Math.min(2, self.AttachedEnergy.filter((e) => e === energy).length);
+          const energyCount = Math.min(2, self.getEnergy(energy).length);
           const pokemon = self.player.InPlayPokemon.filter(predicate);
           const chosenPokemon = await game.chooseNPokemon(self.player, pokemon, energyCount);
           for (const p of chosenPokemon) await self.player.transferEnergy(self, p, [energy]);
@@ -2056,7 +2054,7 @@ export const parseEffect = (
     {
       pattern: /^If this Pokémon has any Energy attached, /i,
       transform: () => {
-        effect.explicitConditions.push((player, self) => self.AttachedEnergy.length > 0);
+        effect.explicitConditions.push((player, self) => self.hasAnyEnergy());
       },
     },
     {

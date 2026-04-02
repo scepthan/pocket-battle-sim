@@ -11,7 +11,7 @@ Backend todo:
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
   - [x] A3b: 71/71 (100%)
-  - [ ] A4: 148/164 (90.2%)
+  - [ ] A4: 149/164 (90.9%)
     - [x] Baby Pokémon (0-cost attacks)
     - [ ] New conditionals
       - [x] If this Pokémon has no damage on it
@@ -46,7 +46,7 @@ Backend todo:
       - [ ] Evolution Pokémon
     - [ ] Parsing modifications
       - [ ] _make your opponent’s Active Pokémon_ Burned
-      - [ ] Move all _[typeless]_ Energy from this Pokémon to 1 of...
+      - [x] Move all _[typeless]_ Energy from this Pokémon to 1 of...
       - [ ] Move all [type] Energy from each of your [predicate] to _this Pokémon_
       - [x] This attack does extra damage per _[typeless]_ Energy on self
       - [x] Move a _[multiple types]_ Energy...

@@ -72,9 +72,9 @@ export const parsePokemonPredicate = (
   parsePart(/ that has any(?: {(\w)})? Energy attached$/, ([, energy]) => {
     if (energy) {
       const fullEnergy = parseEnergy(energy);
-      return (pokemon) => pokemon.AttachedEnergy.some((e) => e === fullEnergy);
+      return (pokemon) => pokemon.hasAnyEnergy(fullEnergy);
     } else {
-      return (pokemon) => pokemon.AttachedEnergy.length > 0;
+      return (pokemon) => pokemon.hasAnyEnergy();
     }
   });
   parsePart(/ that ha(?:s|ve) damage on (?:it|them)$/, () => (pokemon) => pokemon.isDamaged());

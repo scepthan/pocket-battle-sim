@@ -210,6 +210,27 @@ export class InPlayPokemon {
     for (const e of energy) removeElement(this.AttachedEnergy, e);
   }
 
+  /**
+   * Determines whether this Pokémon has a specific type of Energy attached.
+   * - If given a single type, checks if at least one Energy of that type is attached.
+   * - If given an array of types, checks if at least one Energy of any of those types is attached.
+   * - If no Energy type is specified, checks if any Energy is attached.
+   */
+  hasAnyEnergy(energy?: Energy | Energy[]) {
+    return this.getEnergy(energy).length > 0;
+  }
+  /**
+   * Gets the Energy attached to this Pokémon, optionally filtered to a specific type or array of
+   * types.
+   */
+  getEnergy(energy?: Energy | Energy[]) {
+    if (!energy) return this.AttachedEnergy.slice();
+    if (Array.isArray(energy)) {
+      return this.AttachedEnergy.filter((e) => energy.includes(e));
+    }
+    return this.AttachedEnergy.filter((e) => e === energy);
+  }
+
   isPoisoned() {
     return this.SecondaryConditions.has("Poisoned") || this.SecondaryConditions.has("Poisoned+");
   }
