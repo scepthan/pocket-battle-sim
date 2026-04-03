@@ -78,6 +78,12 @@ export const parseAbility = (
     for (const abilityEffect of abilityEffects) {
       abilityEffect.status.source = source;
     }
+    const conditions = [...effect.explicitConditions, ...effect.implicitConditions];
+    if (effect.statusConditional) {
+      const conditional = effect.statusConditional;
+      conditions.push((player, pokemon) => conditional(player.game, pokemon, 0));
+    }
+
     return {
       parseSuccessful,
       value: {
@@ -85,7 +91,7 @@ export const parseAbility = (
         text: inputAbility.text,
         type: "Status",
         effect: abilityEffects,
-        conditions: [...effect.explicitConditions, ...effect.implicitConditions],
+        conditions,
       },
     };
   }
