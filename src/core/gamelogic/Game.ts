@@ -620,10 +620,10 @@ export class Game {
     const attacker = this.AttackingPokemon;
     if (!attacker) throw new Error("Need an attacker to attack!");
 
-    let flippedHeads: number = 0;
+    let passedAmount: number = 0;
     if (attack.type === "CoinFlipOrDoNothing") {
-      flippedHeads = +this.AttackingPlayer.flipCoin();
-      if (flippedHeads === 0) {
+      passedAmount = +this.AttackingPlayer.flipCoin();
+      if (passedAmount === 0) {
         this.GameLog.attackFailed(this.AttackingPlayer);
         return;
       }
@@ -635,18 +635,28 @@ export class Game {
       chosenPokemon = await this.choosePokemon(this.AttackingPlayer, validPokemon);
     }
 
+    if (attack.passedAmount && attack.passedAmount !== "UntilTails") {
+      if (typeof attack.passedAmount === "number") {
+        passedAmount = attack.passedAmount;
+      } else {
+        passedAmount = attack.passedAmount(this, attacker, chosenPokemon);
+      }
+    }
+    console.log(attack, passedAmount);
+
     for (const effect of attack.preDamageEffects)
-      await effect(this, attacker, flippedHeads, chosenPokemon);
+      await effect(this, attacker, passedAmount, chosenPokemon);
 
     if (attack.type !== "NoBaseDamage") {
       let baseDamage: number = attack.baseDamage ?? 0;
 
       if (attack.type === "CoinFlipForDamage" || attack.type === "CoinFlipForAddedDamage") {
-        flippedHeads = this.flipCoinsForAttack(attack.coinsToFlip);
+        const coinsToFlip = attack.passedAmount === "UntilTails" ? "UntilTails" : passedAmount;
+        passedAmount = this.flipCoinsForAttack(coinsToFlip);
       }
 
       if (attack.calculateDamage) {
-        baseDamage = attack.calculateDamage(this, attacker, flippedHeads);
+        baseDamage = attack.calculateDamage(this, attacker, passedAmount);
       } else if (attack.type === "CoinFlipForDamage" || attack.type === "CoinFlipForAddedDamage") {
         throw new Error(attack.name + " needs to know how much damage to deal");
       }
@@ -657,16 +667,18 @@ export class Game {
 
     if (
       (attack.type === "NoBaseDamage" || attack.type === "PredeterminableDamage") &&
-      attack.coinsToFlip
+      attack.flipCoins
     ) {
-      flippedHeads = this.flipCoinsForAttack(attack.coinsToFlip);
+      const coinsToFlip = attack.passedAmount === "UntilTails" ? "UntilTails" : passedAmount;
+      console.log(coinsToFlip);
+      passedAmount = this.flipCoinsForAttack(coinsToFlip);
     }
 
     for (const effect of attack.attackingEffects)
-      await effect(this, attacker, flippedHeads, chosenPokemon);
+      await effect(this, attacker, passedAmount, chosenPokemon);
 
     for (const effect of attack.sideEffects)
-      await effect(this, attacker, flippedHeads, chosenPokemon);
+      await effect(this, attacker, passedAmount, chosenPokemon);
   }
 
   calculateModifiedBaseDamage(totalDamage: number): number {
@@ -889,8 +901,6 @@ export class Game {
   }
 
   private async useTrainerEffect(card: ItemCard | SupporterCard, target?: InPlayPokemon) {
-    const heads = card.Effect.coinsToFlip ? this.flipCoinsForAttack(card.Effect.coinsToFlip) : 0;
-
     if (card.Effect.type === "Targeted") {
       if (!target) {
         throw new Error("Targeted effect requires a target Pokémon");
@@ -901,8 +911,22 @@ export class Game {
       }
     }
 
+    let passedAmount = 0;
+    if (card.Effect.passedAmount && card.Effect.passedAmount !== "UntilTails") {
+      if (typeof card.Effect.passedAmount === "number") {
+        passedAmount = card.Effect.passedAmount;
+      } else {
+        passedAmount = card.Effect.passedAmount(this, this.AttackingPlayer.activeOrThrow(), target);
+      }
+    }
+
+    if (card.Effect.flipCoins) {
+      const coinsToFlip = card.Effect.passedAmount === "UntilTails" ? "UntilTails" : passedAmount;
+      passedAmount = this.flipCoinsForAttack(coinsToFlip);
+    }
+
     for (const effect of card.Effect.sideEffects) {
-      await effect(this, this.AttackingPlayer.activeOrThrow(), heads, target);
+      await effect(this, this.AttackingPlayer.activeOrThrow(), passedAmount, target);
     }
   }
 

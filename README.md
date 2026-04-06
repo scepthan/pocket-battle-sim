@@ -65,6 +65,10 @@ Backend todo:
   - [ ] Implement max Energy and HP/damage limits
   - [x] Possibly rework how Tools that apply statuses work?
     - [x] Current bug: Eevee with Leaf Cape evolving into Leafeon will not gain HP
+  - [ ] Currently there are two different systems for parsing conditionals (`conditionalForNextEffect` vs. `explicitConditions`)
+    - Up until A4, all explicit conditionals for abilities had unique wording compared to conditionals for attacks; Cherubi finally broke this trend with "if this Pokémon has a Pokémon Tool attached," which forced me to shoehorn in a conversion from an attack conditional to an ability conditional
+    - I can't just merge the two systems without other changes, as abilities for Pokémon like Leafeon ex and Arceus Link Crobat would then be usable even if their conditions are not met (they would just fail when attempting to execute)
+    - I _also_ can't just determine behavior based on whether the parse is for an ability, as some conditionals such as "If heads," still need to be ignored when checking if the ability can be used
   - [ ] Some properties on `PlayerPokemonView` can be maliciously modified by agents—use `.slice()` and make deep copies
   - [x] Parsing logic is duplicated across different parsing files; there's probably a way to combine all the natural language parsing into one method
   - [ ] A lot of the reactive logic that I'm currently hard-coding could possibly be simplified by switching everything to Vue's `ref`/`computed`/`watch`

@@ -25,7 +25,7 @@ interface EffectTransformer {
  * @returns SideEffect that will damage target if it exists
  */
 const attackTargetIfExists: (damage: number) => SideEffect =
-  (damage: number) => async (game, self, heads, target) => {
+  (damage: number) => async (game, self, amount, target) => {
     if (!target) return;
     game.attackPokemon(target, damage);
   };
@@ -60,10 +60,10 @@ export const parseEffect = (
 
         const choices = { "Effect 1": sideEffects1, "Effect 2": sideEffects2 };
         const prompt = "Which effect will you use?";
-        parser.addSideEffect(async (game, self, heads, target) => {
+        parser.addSideEffect(async (game, self, amount, target) => {
           const chosenEffect = await game.choose(self.player, choices, prompt);
           if (!chosenEffect) return;
-          for (const sideEffect of chosenEffect) await sideEffect(game, self, heads, target);
+          for (const sideEffect of chosenEffect) await sideEffect(game, self, amount, target);
         });
       },
     },
@@ -164,27 +164,31 @@ export const parseEffect = (
     {
       pattern: /^Flip (a|\d+) coins?\./i,
       transform: (_, count) => {
-        effect.coinsToFlip = count === "a" ? 1 : Number(count);
+        effect.flipCoins = true;
+        effect.passedAmount = count === "a" ? 1 : Number(count);
       },
     },
     {
       pattern: /^Flip a coin until you get tails\./i,
       transform: () => {
-        effect.coinsToFlip = "UntilTails";
+        effect.flipCoins = true;
+        effect.passedAmount = "UntilTails";
       },
     },
     {
       pattern: /^Flip a coin for each(?: \{(\w)\})? Energy attached to this Pokémon\./i,
       transform: (_, type) => {
+        effect.flipCoins = true;
         const fullType = type ? parseEnergy(type) : undefined;
         const predicate = fullType ? (e: Energy) => e == fullType : () => true;
-        effect.coinsToFlip = (game, self) => self.EffectiveEnergy.filter(predicate).length;
+        effect.passedAmount = (game, self) => self.EffectiveEnergy.filter(predicate).length;
       },
     },
     {
       pattern: /^Flip a coin for each Pokémon you have in play\./i,
       transform: () => {
-        effect.coinsToFlip = (game, self) => self.player.InPlayPokemon.length;
+        effect.flipCoins = true;
+        effect.passedAmount = (game, self) => self.player.InPlayPokemon.length;
       },
     },
 
@@ -203,7 +207,7 @@ export const parseEffect = (
       transform: (_, damage) => {
         effect.attackType = "CoinFlipForDamage";
         const dmg = Number(damage);
-        effect.calculateDamage = (game, self, heads) => heads * dmg;
+        effect.calculateDamage = (game, self, amount) => amount * dmg;
       },
     },
 
@@ -213,7 +217,7 @@ export const parseEffect = (
       transform: (_, damage) => {
         effect.attackType = "CoinFlipForAddedDamage";
         const dmg = Number(damage);
-        effect.calculateDamage = (game, self, heads) => baseDamage + heads * dmg;
+        effect.calculateDamage = (game, self, amount) => baseDamage + amount * dmg;
       },
     },
     {
@@ -221,7 +225,7 @@ export const parseEffect = (
       transform: (_, damage) => {
         effect.attackType = "CoinFlipForAddedDamage";
         const dmg = Number(damage);
-        effect.calculateDamage = (game, self, heads) => baseDamage + (heads > 0 ? dmg : 0);
+        effect.calculateDamage = (game, self, amount) => baseDamage + (amount > 0 ? dmg : 0);
       },
     },
     {
@@ -229,7 +233,7 @@ export const parseEffect = (
       transform: (_, damage) => {
         effect.attackType = "CoinFlipForAddedDamage";
         const dmg = Number(damage);
-        effect.calculateDamage = (game, self, heads) => baseDamage + (heads > 1 ? dmg : 0);
+        effect.calculateDamage = (game, self, amount) => baseDamage + (amount > 1 ? dmg : 0);
       },
     },
 
@@ -237,25 +241,25 @@ export const parseEffect = (
     {
       pattern: /^If heads,/i,
       transform: () => {
-        parser.conditionalForNextEffect = (game, self, heads) => heads > 0;
+        parser.conditionalForNextEffect = (game, self, amount) => amount > 0;
       },
     },
     {
       pattern: /^If both of them are heads,/i,
       transform: () => {
-        parser.conditionalForNextEffect = (game, self, heads) => heads >= 2;
+        parser.conditionalForNextEffect = (game, self, amount) => amount >= 2;
       },
     },
     {
       pattern: /^If at least (\d+) of them (?:is|are) heads,/i,
       transform: (_, headsNeeded) => {
-        parser.conditionalForNextEffect = (game, self, heads) => heads >= Number(headsNeeded);
+        parser.conditionalForNextEffect = (game, self, amount) => amount >= Number(headsNeeded);
       },
     },
     {
       pattern: /^If tails,/i,
       transform: () => {
-        parser.conditionalForNextEffect = (game, self, heads) => heads === 0;
+        parser.conditionalForNextEffect = (game, self, amount) => amount === 0;
       },
     },
 
@@ -611,7 +615,7 @@ export const parseEffect = (
         const predicate = parser.parsePokemonPredicate(descriptor);
 
         effect.validTargets = (player) => player.opponent.InPlayPokemon.filter(predicate);
-        effect.attackingEffects.push(async (game, self, heads, target) => {
+        effect.attackingEffects.push(async (game, self, amount, target) => {
           if (!target) return;
           const energyCount = target.EffectiveEnergy.length;
           game.attackPokemon(target, energyCount * Number(damagePerEnergy));
@@ -650,7 +654,7 @@ export const parseEffect = (
       pattern: /^do (\d+) damage to 1 of your opponent’s Pokémon\.$/i,
       transform: (_, damage) => {
         effect.validTargets = (player) => player.opponent.InPlayPokemon;
-        parser.addSideEffect(async (game, self, heads, target) => {
+        parser.addSideEffect(async (game, self, amount, target) => {
           if (!target) return;
           game.applyDamage(target, Number(damage), false);
         });
@@ -751,7 +755,7 @@ export const parseEffect = (
           (p) => p.isDamaged() || p.hasSpecialCondition(),
         );
         effect.validTargets = (player) => player.InPlayPokemon.filter(predicate);
-        parser.addSideEffect(async (game, self, heads, target) => {
+        parser.addSideEffect(async (game, self, amount, target) => {
           if (!target) return;
           target.healDamage(Number(modifier));
           target.removeAllSpecialConditions();
@@ -776,7 +780,7 @@ export const parseEffect = (
       transform: (_, healing, descriptor) => {
         const predicate = parser.parsePokemonPredicate(descriptor, (p) => p.isDamaged());
         effect.validTargets = (player) => player.InPlayPokemon.filter(predicate);
-        parser.addSideEffect(async (game, self, heads, target) => {
+        parser.addSideEffect(async (game, self, amount, target) => {
           if (!target) return;
           if (target.isDamaged()) target.healDamage(Number(healing));
         });
@@ -788,7 +792,7 @@ export const parseEffect = (
       transform: (_, descriptor) => {
         const predicate = parser.parsePokemonPredicate(descriptor, (p) => p.isDamaged());
         effect.validTargets = (player) => player.InPlayPokemon.filter(predicate);
-        parser.addSideEffect(async (game, self, heads, target) => {
+        parser.addSideEffect(async (game, self, amount, target) => {
           if (!target) return;
           target.healDamage(target.MaxHP - target.CurrentHP);
           await game.discardAllEnergy(target);
@@ -797,10 +801,10 @@ export const parseEffect = (
     },
     {
       pattern: /^move (\d+) of its damage to your opponent’s Active Pokémon\.$/i,
-      transform: (_, amount) => {
-        parser.addSideEffect(async (game, self, heads, target) => {
+      transform: (_, damage) => {
+        parser.addSideEffect(async (game, self, amount, target) => {
           if (!target) return;
-          const damageHealed = target.healDamage(Number(amount));
+          const damageHealed = target.healDamage(Number(damage));
           game.applyDamage(self.opponent.activeOrThrow(), damageHealed, false);
         });
       },
@@ -809,7 +813,7 @@ export const parseEffect = (
       pattern:
         /^choose 1 of your Pokémon that has damage on it, and move all of its damage to this Pokémon\.$/i,
       transform: () => {
-        parser.addSideEffect(async (game, self, heads, target) => {
+        parser.addSideEffect(async (game, self, amount, target) => {
           if (!target) return;
           const damage = target.currentDamage();
           game.applyDamage(self, damage, false);
@@ -925,9 +929,9 @@ export const parseEffect = (
       transform: (_, descriptor) => {
         const predicate = parser.parsePlayingCardPredicate(descriptor);
         effect.implicitConditions.push((player) => player.Discard.some(predicate));
-        parser.addSideEffect(async (game, self, heads) => {
+        parser.addSideEffect(async (game, self, amount) => {
           const validCards = self.player.Discard.filter(predicate);
-          const cards = randomElements(validCards, heads);
+          const cards = randomElements(validCards, amount);
           self.player.returnFromDiscardToHand(cards);
         });
       },
@@ -1013,10 +1017,10 @@ export const parseEffect = (
       pattern:
         /^For each heads, a card is chosen at random from your opponent’s hand\. Your opponent reveals that card and shuffles it into their deck\./i,
       transform: () => {
-        parser.addSideEffect(async (game, self, heads) => {
-          if (self.opponent.Hand.length === 0 || heads === 0) return;
+        parser.addSideEffect(async (game, self, amount) => {
+          if (self.opponent.Hand.length === 0 || amount === 0) return;
           const cards = [];
-          while (heads-- > 0 && self.opponent.Hand.length > 0) {
+          while (amount-- > 0 && self.opponent.Hand.length > 0) {
             cards.push(randomElement(self.opponent.Hand));
           }
           await game.showCards(self.player, cards);
@@ -1164,8 +1168,8 @@ export const parseEffect = (
           (player, self) => self.opponent.activeOrThrow().EffectiveEnergy.length > 0,
         );
         parser.addSideEffect(
-          async (game, self, heads) =>
-            await game.discardRandomEnergy(self.opponent.activeOrThrow(), heads),
+          async (game, self, amount) =>
+            await game.discardRandomEnergy(self.opponent.activeOrThrow(), amount),
         );
       },
     },
@@ -1220,7 +1224,7 @@ export const parseEffect = (
           effect.validTargets = (player) => player.InPlayPokemon.filter(predicate);
         }
 
-        parser.addSideEffect(async (game, self, heads, target) => {
+        parser.addSideEffect(async (game, self, amount, target) => {
           if (!target) return;
           await self.player.attachEnergy(target, energy, "energyZone");
           if (endTurn) game.endTurnResolve(true);
@@ -1249,9 +1253,9 @@ export const parseEffect = (
         const et = parseEnergy(energyType);
         const predicate = parser.parsePokemonPredicate(pokemonSpecifier);
 
-        parser.addSideEffect(async (game, self, heads) => {
+        parser.addSideEffect(async (game, self, amount) => {
           const validPokemon = self.player.InPlayPokemon.filter(predicate);
-          await game.distributeEnergy(self.player, new Array(heads).fill(et), validPokemon);
+          await game.distributeEnergy(self.player, new Array(amount).fill(et), validPokemon);
         });
       },
     },
@@ -1274,9 +1278,9 @@ export const parseEffect = (
       transform: (_, energyType) => {
         const et = parseEnergy(energyType);
 
-        parser.addSideEffect(async (game, self, heads, target) => {
+        parser.addSideEffect(async (game, self, amount, target) => {
           if (!target) return;
-          await self.player.attachEnergy(target, new Array(heads).fill(et), "energyZone");
+          await self.player.attachEnergy(target, new Array(amount).fill(et), "energyZone");
         });
       },
     },
@@ -1289,7 +1293,7 @@ export const parseEffect = (
         const energyFilter = (e: Energy) => fullType === undefined || e === fullType;
 
         effect.implicitConditions.push((player) => player.DiscardedEnergy.some(energyFilter));
-        parser.addSideEffect(async (game, self, heads, target) => {
+        parser.addSideEffect(async (game, self, _, target) => {
           target = targeting === "this" ? self : target;
           if (!target) return;
           const energyToAttach: Energy[] = [];
@@ -1336,7 +1340,7 @@ export const parseEffect = (
         effect.implicitConditions.push((player) => activePredicate(player.activeOrThrow()));
         effect.validTargets = (player) => player.BenchedPokemon.filter(benchPredicate);
 
-        parser.addSideEffect(async (game, self, heads, target) => {
+        parser.addSideEffect(async (game, self, _, target) => {
           if (!target) return;
           const active = self.player.activeOrThrow();
 
@@ -1358,7 +1362,7 @@ export const parseEffect = (
         const predicate = parser.parsePokemonPredicate(descriptor);
         effect.implicitConditions.push((player, self) => self.hasAnyEnergy(fullType));
         effect.validTargets = (player) => player.InPlayPokemon.filter(predicate);
-        parser.addSideEffect(async (game, self, heads, target) => {
+        parser.addSideEffect(async (game, self, amount, target) => {
           if (!target) return;
           const energyToMove = self.getEnergy(fullType);
           await self.player.transferEnergy(self, target, energyToMove);
@@ -1412,7 +1416,7 @@ export const parseEffect = (
 
         const benchPredicate = parser.parsePokemonPredicate(benchDescriptor);
         effect.validTargets = (player) => player.BenchedPokemon.filter(benchPredicate);
-        parser.addSideEffect(async (game, self, heads, target) => {
+        parser.addSideEffect(async (game, self, amount, target) => {
           if (!target) return;
           await self.player.swapActivePokemon(target, "selfEffect");
         });
@@ -1443,7 +1447,7 @@ export const parseEffect = (
         const predicate = parser.parsePokemonPredicate(descriptor);
 
         effect.validTargets = (player) => player.InPlayPokemon.filter(predicate);
-        parser.addSideEffect(async (game, self, heads, target) => {
+        parser.addSideEffect(async (game, self, amount, target) => {
           if (!target) return;
           await self.player.returnPokemonToHand(target);
         });
@@ -1468,7 +1472,7 @@ export const parseEffect = (
       transform: (_, descriptor) => {
         const predicate = parser.parsePokemonPredicate(descriptor);
         effect.validTargets = (player) => player.opponent.BenchedPokemon.filter(predicate);
-        parser.addSideEffect(async (game, self, heads, target) => {
+        parser.addSideEffect(async (game, self, amount, target) => {
           if (!target) return;
           await self.opponent.swapActivePokemon(target, "opponentEffect", self.player.Name);
         });
@@ -1518,7 +1522,7 @@ export const parseEffect = (
         /^Choose 1 of your Basic Pokémon in play\. If you have a Stage 2 card in your hand that evolves from that Pokémon, put that card onto the Basic Pokémon to evolve it, skipping the Stage 1\. You can’t use this card during your first turn or on a Basic Pokémon that was put into play this turn\.$/i,
       transform: () => {
         effect.validTargets = Effects.findValidRareCandyTargets;
-        parser.addSideEffect(async (game, self, heads, target) => {
+        parser.addSideEffect(async (game, self, amount, target) => {
           if (!target) return;
           await Effects.evolveWithRareCandy(target);
         });
@@ -1877,7 +1881,7 @@ export const parseEffect = (
     },
     {
       pattern:
-        /^The next time you flip any number of coins for the effect of an attack, Ability, or Trainer card after using this card on this turn, the first coin flip will definitely be heads\.$/,
+        /^The next time you flip any number of coins for the effect of an attack, Ability, or Trainer card after using this card on this turn, the first coin flip will definitely be amount\.$/,
       transform: () => {
         parser.addSelfPlayerStatus(PlayerStatus.NextCoinFlip(true, false));
       },

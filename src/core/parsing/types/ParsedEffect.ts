@@ -17,16 +17,27 @@ import type {
  */
 export interface ParsedEffect {
   /**
-   * Determines how many coins to flip for the effect. There are 3 options:
-   * 1. A number, which flips that many coins.
-   * 2. "UntilTails", which flips a coin until it lands on tails.
-   * 3. A method that calculates how many coins to flip based on the game state.
+   * Determines a number to pass in to the attack effect. For coin flip Attacks, this is the number
+   * of coins to flip. For other effects, it can be a calculation of how many Energy are attached
+   * to a given Pokémon, how many Pokémon are on the player's Bench, or any other relevant number.
+   *
+   * There are 3 options:
+   * 1. A hardcoded number.
+   * 2. A method that calculates a number based on the game state.
+   * 3. (Coin flip only) "UntilTails", which flips a coin until it lands on tails.
    *
    * This flip happens before any damage is dealt for Attack types of "CoinFlipForDamage",
    * "CoinFlipForAddedDamage", or "CoinFlipOrDoNothing", and after for "NoBaseDamage" or
    * "PredeterminableDamage".
    */
-  coinsToFlip?: CoinFlipIndicator;
+  passedAmount?: CoinFlipIndicator;
+
+  /**
+   * Indicates to flip coins for this Attack. This is used for "PredeterminableDamage" or
+   * "NoBaseDamage" Attacks that still require coin flips. The number of coins to flip is
+   * determined by the passedAmount property.
+   */
+  flipCoins?: boolean;
 
   /**
    * Different Attacks use coin flip results in different ways; this indicates how the results

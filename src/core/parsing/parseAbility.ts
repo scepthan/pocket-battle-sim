@@ -26,7 +26,7 @@ export const parseAbility = (
           ...(effect.validTargets
             ? { type: "Targeted", validTargets: effect.validTargets }
             : { type: "Standard" }),
-          coinsToFlip: effect.coinsToFlip,
+          coinsToFlip: effect.passedAmount,
           sideEffects: [...effect.sideEffects, ...statusesToSideEffects(effect)],
         },
       },
