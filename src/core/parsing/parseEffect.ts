@@ -421,6 +421,59 @@ export const parseEffect = (
         return "for each <amount>";
       },
     },
+    {
+      pattern: /for each Energy attached to your opponent’s Active Pokémon/i,
+      transform: () => {
+        effect.passedAmount = (game, self) => self.opponent.activeOrThrow().EffectiveEnergy.length;
+        return "for each <amount>";
+      },
+    },
+    {
+      pattern: /for each Energy attached to all of your opponent’s Pokémon/i,
+      transform: () => {
+        effect.passedAmount = (game, self) =>
+          self.opponent.InPlayPokemon.flatMap((p) => p.EffectiveEnergy).length;
+        return "for each <amount>";
+      },
+    },
+    {
+      pattern: /for each Energy in your opponent’s Active Pokémon’s Retreat Cost/i,
+      transform: () => {
+        effect.passedAmount = (game, self) => self.opponent.effectiveRetreatCost;
+        return "for each <amount>";
+      },
+    },
+    {
+      pattern: /for each of your opponent’s Benched Pokémon/i,
+      transform: () => {
+        effect.passedAmount = (game, self) => self.opponent.BenchedPokemon.length;
+        return "for each <amount>";
+      },
+    },
+    {
+      pattern: /for each of your ([^.]+?)(?: in play)?(?=[,.])/i,
+      transform: (_, descriptor) => {
+        const predicate = parser.parsePokemonPredicate(descriptor);
+        effect.passedAmount = (game, self) => self.player.InPlayPokemon.filter(predicate).length;
+        effect.implicitConditions.push((player) => player.InPlayPokemon.some(predicate));
+        return "for each <amount>";
+      },
+    },
+    {
+      pattern: /for each ([^.]+) on your Bench/i,
+      transform: (_, descriptor) => {
+        const predicate = parser.parsePokemonPredicate(descriptor);
+        effect.passedAmount = (game, self) => self.player.BenchedPokemon.filter(predicate).length;
+        return "for each <amount>";
+      },
+    },
+    {
+      pattern: /for each time your Pokémon used (.+?) during this game/i,
+      transform: (_, attackName) => {
+        effect.passedAmount = (game, self) => Effects.countTimesAttackUsed(game, self, attackName);
+        return "for each <amount>";
+      },
+    },
 
     // Damage-determining effects
     {
@@ -441,78 +494,6 @@ export const parseEffect = (
       transform: (_, damagePer, more) => {
         effect.calculateDamage = (game, self, amount) => {
           return (more ? baseDamage : 0) + amount * Number(damagePer);
-        };
-      },
-    },
-    {
-      pattern:
-        /^This attack does (\d+)( more)? damage for each Energy attached to your opponent’s Active Pokémon\./i,
-      transform: (_, damagePerEnergy, more) => {
-        effect.calculateDamage = (game, self) => {
-          const energyCount = self.opponent.activeOrThrow().EffectiveEnergy.length;
-          return (more ? baseDamage : 0) + energyCount * Number(damagePerEnergy);
-        };
-      },
-    },
-    {
-      pattern:
-        /^This attack does (\d+)( more)? damage for each Energy attached to all of your opponent’s Pokémon\./i,
-      transform: (_, damagePerEnergy, more) => {
-        effect.calculateDamage = (game, self) => {
-          const energyCount = self.opponent.InPlayPokemon.flatMap((p) => p.EffectiveEnergy).length;
-          return (more ? baseDamage : 0) + energyCount * Number(damagePerEnergy);
-        };
-      },
-    },
-    {
-      pattern:
-        /^This attack does (\d+)( more)? damage for each Energy in your opponent’s Active Pokémon’s Retreat Cost\./i,
-      transform: (_, damagePerEnergy, more) => {
-        effect.calculateDamage = (game, self) => {
-          const energyCount = self.opponent.effectiveRetreatCost;
-          return (more ? baseDamage : 0) + energyCount * Number(damagePerEnergy);
-        };
-      },
-    },
-    {
-      pattern:
-        /^This attack does (\d+)( more)? damage for each of your opponent’s Benched Pokémon\./i,
-      transform: (_, damagePerBench, more) => {
-        effect.calculateDamage = (game, self) => {
-          const benchedCount = self.opponent.BenchedPokemon.length;
-          return (more ? baseDamage : 0) + benchedCount * Number(damagePerBench);
-        };
-      },
-    },
-    {
-      pattern: /^This attack does (\d+)( more)? damage for each of your ([^.]+)\./i,
-      transform: (_, damageEach, more, descriptor) => {
-        const predicate = parser.parsePokemonPredicate(descriptor);
-
-        effect.calculateDamage = (game, self) => {
-          const pokemonCount = self.player.InPlayPokemon.filter(predicate).length;
-          return (more ? baseDamage : 0) + pokemonCount * Number(damageEach);
-        };
-      },
-    },
-    {
-      pattern: /^This attack does (\d+)( more)? damage for each ([^.]+) on your Bench\./i,
-      transform: (_, damageEach, more, descriptor) => {
-        const predicate = parser.parsePokemonPredicate(descriptor);
-
-        effect.calculateDamage = (game, self) => {
-          const pokemonCount = self.player.BenchedPokemon.filter(predicate).length;
-          return (more ? baseDamage : 0) + pokemonCount * Number(damageEach);
-        };
-      },
-    },
-    {
-      pattern:
-        /^This attack does (\d+) damage for each time your Pokémon used (.+?) during this game\./i,
-      transform: (_, damage, attackName) => {
-        effect.calculateDamage = (game, self) => {
-          const attackCount = Effects.countTimesAttackUsed(game, self, attackName);
-          return attackCount * +damage;
         };
       },
     },
@@ -897,11 +878,9 @@ export const parseEffect = (
     },
     {
       pattern:
-        /^For each of your (.+?) in play, look at that many cards from the top of your( opponent’s)? deck and put them back in any order\./i,
-      transform: (_, descriptor, opponent) => {
-        const predicate = parser.parsePokemonPredicate(descriptor);
-        effect.implicitConditions.push((player) => player.InPlayPokemon.some(predicate));
-        parser.addSideEffect(Effects.HikerAndMorty(predicate, !!opponent));
+        /^For each <amount>, look at that many cards from the top of your( opponent’s)? deck and put them back in any order\./i,
+      transform: (_, opponent) => {
+        parser.addSideEffect(Effects.HikerAndMorty(!!opponent));
       },
     },
     {
@@ -1884,7 +1863,7 @@ export const parseEffect = (
     },
     {
       pattern:
-        /^The next time you flip any number of coins for the effect of an attack, Ability, or Trainer card after using this card on this turn, the first coin flip will definitely be amount\.$/,
+        /^The next time you flip any number of coins for the effect of an attack, Ability, or Trainer card after using this card on this turn, the first coin flip will definitely be heads\.$/,
       transform: () => {
         parser.addSelfPlayerStatus(PlayerStatus.NextCoinFlip(true, false));
       },
