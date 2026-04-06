@@ -294,8 +294,18 @@ export class PlayerGameView {
   getAttackDamageDisplay(attack: Attack): string {
     if (!this.hasActivePokemon()) return "";
     const pokemon = this.pokemonFromView(this.selfActive);
+    const passedAmount =
+      attack.type === "CoinFlipForDamage"
+        ? 1
+        : attack.type === "CoinFlipForAddedDamage"
+          ? 0
+          : attack.passedAmount && attack.passedAmount !== "UntilTails"
+            ? typeof attack.passedAmount === "number"
+              ? attack.passedAmount
+              : attack.passedAmount(this.game, pokemon)
+            : 0;
     const baseDamage = attack.calculateDamage
-      ? attack.calculateDamage(this.game, pokemon, attack.type === "CoinFlipForDamage" ? 1 : 0)
+      ? attack.calculateDamage(this.game, pokemon, passedAmount)
       : (attack.baseDamage ?? 0);
     const modifiedBaseDamage = this.game.calculateModifiedBaseDamage(baseDamage);
 

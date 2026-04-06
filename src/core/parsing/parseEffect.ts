@@ -176,19 +176,9 @@ export const parseEffect = (
       },
     },
     {
-      pattern: /^Flip a coin for each(?: \{(\w)\})? Energy attached to this Pokémon\./i,
-      transform: (_, type) => {
-        effect.flipCoins = true;
-        const fullType = type ? parseEnergy(type) : undefined;
-        const predicate = fullType ? (e: Energy) => e == fullType : () => true;
-        effect.passedAmount = (game, self) => self.EffectiveEnergy.filter(predicate).length;
-      },
-    },
-    {
-      pattern: /^Flip a coin for each Pokémon you have in play\./i,
+      pattern: /^Flip a coin for each <amount>\./i,
       transform: () => {
         effect.flipCoins = true;
-        effect.passedAmount = (game, self) => self.player.InPlayPokemon.length;
       },
     },
 
@@ -414,6 +404,24 @@ export const parseEffect = (
       },
     },
 
+    // Amount parsing
+    {
+      pattern: /for each(?: \{(\w)\})? Energy attached to this Pokémon/i,
+      transform: (_, type) => {
+        const fullType = type ? parseEnergy(type) : undefined;
+        const predicate = fullType ? (e: Energy) => e == fullType : () => true;
+        effect.passedAmount = (game, self) => self.EffectiveEnergy.filter(predicate).length;
+        return "for each <amount>";
+      },
+    },
+    {
+      pattern: /for each Pokémon you have in play/i,
+      transform: () => {
+        effect.passedAmount = (game, self) => self.player.InPlayPokemon.length;
+        return "for each <amount>";
+      },
+    },
+
     // Damage-determining effects
     {
       pattern: /^this attack does (\d+) more damage\./i,
@@ -429,15 +437,10 @@ export const parseEffect = (
       },
     },
     {
-      pattern:
-        /^This attack does (\d+)( more)? damage for each(?: \{(\w)\})? Energy attached to this Pokémon\./i,
-      transform: (_, damagePerEnergy, more, energyType) => {
-        const fullEnergy = energyType ? parseEnergy(energyType) : undefined;
-        effect.calculateDamage = (game, self) => {
-          const energyCount = self.EffectiveEnergy.filter(
-            (e) => fullEnergy === undefined || e === fullEnergy,
-          ).length;
-          return (more ? baseDamage : 0) + energyCount * Number(damagePerEnergy);
+      pattern: /^This attack does (\d+)( more)? damage for each <amount>\./i,
+      transform: (_, damagePer, more) => {
+        effect.calculateDamage = (game, self, amount) => {
+          return (more ? baseDamage : 0) + amount * Number(damagePer);
         };
       },
     },

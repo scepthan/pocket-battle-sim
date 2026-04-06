@@ -642,7 +642,6 @@ export class Game {
         passedAmount = attack.passedAmount(this, attacker, chosenPokemon);
       }
     }
-    console.log(attack, passedAmount);
 
     for (const effect of attack.preDamageEffects)
       await effect(this, attacker, passedAmount, chosenPokemon);
@@ -670,7 +669,6 @@ export class Game {
       attack.flipCoins
     ) {
       const coinsToFlip = attack.passedAmount === "UntilTails" ? "UntilTails" : passedAmount;
-      console.log(coinsToFlip);
       passedAmount = this.flipCoinsForAttack(coinsToFlip);
     }
 
