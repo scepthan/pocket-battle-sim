@@ -26,7 +26,7 @@ export const parseAbility = (
           ...(effect.validTargets
             ? { type: "Targeted", validTargets: effect.validTargets }
             : { type: "Standard" }),
-          coinsToFlip: effect.coinsToFlip,
+          coinsToFlip: effect.passedAmount,
           sideEffects: [...effect.sideEffects, ...statusesToSideEffects(effect)],
         },
       },
@@ -79,10 +79,7 @@ export const parseAbility = (
       abilityEffect.status.source = source;
     }
     const conditions = [...effect.explicitConditions, ...effect.implicitConditions];
-    if (effect.statusConditional) {
-      const conditional = effect.statusConditional;
-      conditions.push((player, pokemon) => conditional(player.game, pokemon, 0));
-    }
+    if (effect.statusConditional) conditions.push(effect.statusConditional);
 
     return {
       parseSuccessful,

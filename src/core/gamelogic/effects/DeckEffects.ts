@@ -1,4 +1,4 @@
-import type { InPlayPokemonPredicate, PlayingCardPredicate } from "@/core/parsing/parsePredicates";
+import type { PlayingCardPredicate } from "@/core/parsing/parsePredicates";
 import { randomElement, removeElement } from "@/core/util";
 import type { Game } from "../Game";
 import type { InPlayPokemon } from "../InPlayPokemon";
@@ -76,9 +76,7 @@ export const Penny = async (game: Game, self: InPlayPokemon) => {
  * then lets them rearrange that many cards from the top of the targeted player's deck.
  */
 export const HikerAndMorty =
-  (predicate: InPlayPokemonPredicate, opponent: boolean) =>
-  async (game: Game, self: InPlayPokemon) => {
-    const count = self.player.InPlayPokemon.filter(predicate).length;
+  (opponent: boolean) => async (game: Game, self: InPlayPokemon, count: number) => {
     const affectedPlayer = opponent ? self.opponent : self.player;
 
     const topCards = affectedPlayer.Deck.splice(0, count);

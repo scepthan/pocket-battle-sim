@@ -3,18 +3,19 @@ import type { Game } from "./Game";
 import { InPlayPokemon } from "./InPlayPokemon";
 import type { Player } from "./Player";
 import { PlayerPokemonView } from "./PlayerPokemonView";
-import type {
-  Ability,
-  Attack,
-  CardSlot,
-  Energy,
-  FossilCard,
-  ItemCard,
-  PlayingCard,
-  PokemonCard,
-  PokemonToolCard,
-  SupporterCard,
-  TrainerCard,
+import {
+  evaluatePassedAmount,
+  type Ability,
+  type Attack,
+  type CardSlot,
+  type Energy,
+  type FossilCard,
+  type ItemCard,
+  type PlayingCard,
+  type PokemonCard,
+  type PokemonToolCard,
+  type SupporterCard,
+  type TrainerCard,
 } from "./types";
 
 export type CardSlotView = PlayerPokemonView | EmptyCardSlot;
@@ -184,7 +185,9 @@ export class PlayerGameView {
       }
     } else if (card.CardType == "Supporter" || card.CardType == "Item") {
       if (card.CardType == "Supporter" ? !this.canPlaySupporter : !this.canPlayItem) return false;
-      if (card.Effect.conditions.some((cond) => !cond(this.player, this.player.activeOrThrow())))
+      const realActive = this.player.activeOrThrow();
+      const passedAmount = evaluatePassedAmount(card.Effect.passedAmount, realActive);
+      if (card.Effect.conditions.some((cond) => !cond(this.player, realActive, passedAmount)))
         return false;
       if (card.Effect.type === "Targeted") {
         const validTargets = card.Effect.validTargets(this.player);
@@ -225,7 +228,8 @@ export class PlayerGameView {
       return false;
 
     const realActive = this.player.activeOrThrow();
-    if (attack.explicitConditions.some((condition) => !condition(this.player, realActive)))
+    const passedAmount = evaluatePassedAmount(attack.passedAmount, realActive);
+    if (attack.explicitConditions.some((cond) => !cond(this.player, realActive, passedAmount)))
       return false;
 
     return this.selfActive.hasSufficientEnergy(this.findEffectiveAttackCost(attack));
@@ -243,7 +247,8 @@ export class PlayerGameView {
     if (!ability.trigger.multiUse) {
       if (this.game.UsedAbilities.has(realPokemon)) return false;
     }
-    if (!ability.conditions.every((condition) => condition(this.player, realPokemon))) return false;
+    if (!ability.conditions.every((condition) => condition(this.player, realPokemon, 0)))
+      return false;
     if (ability.effect.type == "Targeted") {
       if (ability.effect.validTargets(this.player, realPokemon).length == 0) return false;
     }
@@ -294,8 +299,14 @@ export class PlayerGameView {
   getAttackDamageDisplay(attack: Attack): string {
     if (!this.hasActivePokemon()) return "";
     const pokemon = this.pokemonFromView(this.selfActive);
+    const passedAmount =
+      attack.type === "CoinFlipForDamage"
+        ? 1
+        : attack.type === "CoinFlipForAddedDamage"
+          ? 0
+          : evaluatePassedAmount(attack.passedAmount, pokemon);
     const baseDamage = attack.calculateDamage
-      ? attack.calculateDamage(this.game, pokemon, attack.type === "CoinFlipForDamage" ? 1 : 0)
+      ? attack.calculateDamage(this.game, pokemon, passedAmount)
       : (attack.baseDamage ?? 0);
     const modifiedBaseDamage = this.game.calculateModifiedBaseDamage(baseDamage);
 

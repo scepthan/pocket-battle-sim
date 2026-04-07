@@ -7,24 +7,25 @@ import type { InPlayPokemon } from "./InPlayPokemon";
 import { Player } from "./Player";
 import { PlayerGameView } from "./PlayerGameView";
 import { PlayerPokemonView } from "./PlayerPokemonView";
-import type {
-  Ability,
-  Attack,
-  CardSlot,
-  CoinFlipIndicator,
-  Energy,
-  FossilCard,
-  GameRules,
-  ItemCard,
-  PlayerAgent,
-  PlayerGameSetup,
-  PlayerStatus,
-  PlayingCard,
-  PokemonCard,
-  PokemonStatus,
-  PokemonToolCard,
-  SupporterCard,
-  TrainerCard,
+import {
+  evaluatePassedAmount,
+  type Ability,
+  type Attack,
+  type CardSlot,
+  type CoinFlipIndicator,
+  type Energy,
+  type FossilCard,
+  type GameRules,
+  type ItemCard,
+  type PlayerAgent,
+  type PlayerGameSetup,
+  type PlayerStatus,
+  type PlayingCard,
+  type PokemonCard,
+  type PokemonStatus,
+  type PokemonToolCard,
+  type SupporterCard,
+  type TrainerCard,
 } from "./types";
 
 export class Game {
@@ -453,7 +454,7 @@ export class Game {
         for (const ability of pokemon.effectiveAbilities) {
           if (ability.type !== "Status") continue;
 
-          const applyStatus = ability.conditions.every((cond) => cond(player, pokemon));
+          const applyStatus = ability.conditions.every((cond) => cond(player, pokemon, 0));
 
           for (const effect of ability.effect) {
             if (effect.type === "PlayerStatus") {
@@ -620,10 +621,10 @@ export class Game {
     const attacker = this.AttackingPokemon;
     if (!attacker) throw new Error("Need an attacker to attack!");
 
-    let flippedHeads: number = 0;
+    let passedAmount: number = 0;
     if (attack.type === "CoinFlipOrDoNothing") {
-      flippedHeads = +this.AttackingPlayer.flipCoin();
-      if (flippedHeads === 0) {
+      passedAmount = +this.AttackingPlayer.flipCoin();
+      if (passedAmount === 0) {
         this.GameLog.attackFailed(this.AttackingPlayer);
         return;
       }
@@ -635,18 +636,23 @@ export class Game {
       chosenPokemon = await this.choosePokemon(this.AttackingPlayer, validPokemon);
     }
 
+    if (attack.passedAmount && attack.passedAmount !== "UntilTails") {
+      passedAmount = evaluatePassedAmount(attack.passedAmount, attacker, chosenPokemon);
+    }
+
     for (const effect of attack.preDamageEffects)
-      await effect(this, attacker, flippedHeads, chosenPokemon);
+      await effect(this, attacker, passedAmount, chosenPokemon);
 
     if (attack.type !== "NoBaseDamage") {
       let baseDamage: number = attack.baseDamage ?? 0;
 
       if (attack.type === "CoinFlipForDamage" || attack.type === "CoinFlipForAddedDamage") {
-        flippedHeads = this.flipCoinsForAttack(attack.coinsToFlip);
+        const coinsToFlip = attack.passedAmount === "UntilTails" ? "UntilTails" : passedAmount;
+        passedAmount = this.flipCoinsForAttack(coinsToFlip);
       }
 
       if (attack.calculateDamage) {
-        baseDamage = attack.calculateDamage(this, attacker, flippedHeads);
+        baseDamage = attack.calculateDamage(this, attacker, passedAmount);
       } else if (attack.type === "CoinFlipForDamage" || attack.type === "CoinFlipForAddedDamage") {
         throw new Error(attack.name + " needs to know how much damage to deal");
       }
@@ -657,16 +663,17 @@ export class Game {
 
     if (
       (attack.type === "NoBaseDamage" || attack.type === "PredeterminableDamage") &&
-      attack.coinsToFlip
+      attack.flipCoins
     ) {
-      flippedHeads = this.flipCoinsForAttack(attack.coinsToFlip);
+      const coinsToFlip = attack.passedAmount === "UntilTails" ? "UntilTails" : passedAmount;
+      passedAmount = this.flipCoinsForAttack(coinsToFlip);
     }
 
     for (const effect of attack.attackingEffects)
-      await effect(this, attacker, flippedHeads, chosenPokemon);
+      await effect(this, attacker, passedAmount, chosenPokemon);
 
     for (const effect of attack.sideEffects)
-      await effect(this, attacker, flippedHeads, chosenPokemon);
+      await effect(this, attacker, passedAmount, chosenPokemon);
   }
 
   calculateModifiedBaseDamage(totalDamage: number): number {
@@ -702,7 +709,7 @@ export class Game {
       return;
     }
     if (
-      attack.explicitConditions.some((cond) => !cond(player, attacker)) ||
+      attack.explicitConditions.some((cond) => !cond(player, attacker, 0)) ||
       (energyRequired && !attacker.hasSufficientEnergy(attacker.findEffectiveAttackCost(attack)))
     ) {
       this.GameLog.conditionNotMet(player);
@@ -871,7 +878,9 @@ export class Game {
 
     let target: InPlayPokemon | undefined;
     const player = this.AttackingPlayer;
-    if (card.Effect.conditions.some((cond) => !cond(player, player.activeOrThrow()))) {
+    const active = player.activeOrThrow();
+    const passedAmount = evaluatePassedAmount(card.Effect.passedAmount, active);
+    if (card.Effect.conditions.some((cond) => !cond(player, active, passedAmount))) {
       this.GameLog.conditionNotMet(this.AttackingPlayer);
       return;
     }
@@ -889,8 +898,6 @@ export class Game {
   }
 
   private async useTrainerEffect(card: ItemCard | SupporterCard, target?: InPlayPokemon) {
-    const heads = card.Effect.coinsToFlip ? this.flipCoinsForAttack(card.Effect.coinsToFlip) : 0;
-
     if (card.Effect.type === "Targeted") {
       if (!target) {
         throw new Error("Targeted effect requires a target Pokémon");
@@ -901,8 +908,19 @@ export class Game {
       }
     }
 
+    let passedAmount = 0;
+    if (card.Effect.passedAmount && card.Effect.passedAmount !== "UntilTails") {
+      const active = this.AttackingPlayer.activeOrThrow();
+      passedAmount = evaluatePassedAmount(card.Effect.passedAmount, active, target);
+    }
+
+    if (card.Effect.flipCoins) {
+      const coinsToFlip = card.Effect.passedAmount === "UntilTails" ? "UntilTails" : passedAmount;
+      passedAmount = this.flipCoinsForAttack(coinsToFlip);
+    }
+
     for (const effect of card.Effect.sideEffects) {
-      await effect(this, this.AttackingPlayer.activeOrThrow(), heads, target);
+      await effect(this, this.AttackingPlayer.activeOrThrow(), passedAmount, target);
     }
   }
 

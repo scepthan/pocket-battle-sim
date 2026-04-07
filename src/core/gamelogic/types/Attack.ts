@@ -1,10 +1,20 @@
-import type { Game, InPlayPokemon, Player } from "..";
+import type { Game, InPlayPokemon, Player, PlayerPokemonConditional } from "..";
 import type { Energy } from "./Energy";
 
-export type CoinFlipIndicator =
+export type AmountIndicator =
   | number
-  | "UntilTails"
-  | ((game: Game, self: InPlayPokemon) => number);
+  | ((game: Game, self: InPlayPokemon, target?: InPlayPokemon) => number);
+export type CoinFlipIndicator = AmountIndicator | "UntilTails";
+
+export const evaluatePassedAmount = (
+  passedAmount: CoinFlipIndicator | undefined,
+  self: InPlayPokemon,
+  target?: InPlayPokemon,
+) => {
+  if (typeof passedAmount === "number") return passedAmount;
+  if (typeof passedAmount === "function") return passedAmount(self.player.game, self, target);
+  return 0;
+};
 
 export type SideEffect = (
   game: Game,
@@ -13,7 +23,7 @@ export type SideEffect = (
   target?: InPlayPokemon,
 ) => Promise<void>;
 
-export type DamageCalculation = (game: Game, self: InPlayPokemon, heads: number) => number;
+export type DamageCalculation = (game: Game, self: InPlayPokemon, amount: number) => number;
 
 interface BaseAttack {
   // Properties inherited from InputAttack
@@ -24,20 +34,35 @@ interface BaseAttack {
   damageSymbol?: "+" | "x";
 
   /**
-   * Determines how many coins to flip for the attack effect. There are 3 options:
-   * 1. A number, which flips that many coins.
-   * 2. "UntilTails", which flips a coin until it lands on tails.
-   * 3. A method that calculates how many coins to flip based on the game state.
+   * Determines a number to pass in to the Attack effect. For coin flip Attacks, this is the number
+   * of coins to flip. For other effects, it can be a calculation of how many Energy are attached
+   * to a given Pokémon, how many Pokémon are on the player's Bench, or any other relevant number.
    *
-   * This flip happens before any damage is dealt for attack types of "CoinFlipForDamage",
+   * There are 3 options:
+   * 1. A hardcoded number.
+   * 2. A method that calculates a number based on the game state.
+   * 3. (Coin flip only) "UntilTails", which flips a coin until it lands on tails.
+   *
+   * The flip happens before any damage is dealt for attack types of "CoinFlipForDamage",
    * "CoinFlipForAddedDamage", or "CoinFlipOrDoNothing", and after for "NoBaseDamage" or
    * "PredeterminableDamage".
+   *
+   * If using a method, it should not have any side effects, as it may be used to check whether an
+   * effect can be used before actually using it.
    */
-  coinsToFlip?: CoinFlipIndicator;
+  passedAmount?: CoinFlipIndicator;
 
   /**
-   * A method that calculates the base damage of the attack to be applied to the Defending Pokémon.
-   * This method should not have any side effects.
+   * Indicates to flip coins for this Attack. This is used for "PredeterminableDamage" or
+   * "NoBaseDamage" Attacks that still require coin flips. The number of coins to flip is
+   * determined by the passedAmount property.
+   */
+  flipCoins?: boolean;
+
+  /**
+   * A method that calculates the base damage of the Attack to be applied to the Defending Pokémon.
+   * This method should not have any side effects, as it can be used for display purposes without
+   * actually using the Attack.
    */
   calculateDamage?: DamageCalculation;
 
@@ -66,7 +91,7 @@ interface BaseAttack {
    * Extraneous conditions that must be met for the attack to be used (other than the default
    * Energy and status condition requirements).
    */
-  explicitConditions: ((player: Player, self: InPlayPokemon) => boolean)[];
+  explicitConditions: PlayerPokemonConditional[];
 }
 
 // Flip a coin. If tails, this attack does nothing.
@@ -81,7 +106,7 @@ interface CoinFlipOrDoNothingAttack extends BaseAttack {
 // Flip a coin for each ___. This attack does X damage for each heads.
 interface CoinFlipForDamageAttack extends BaseAttack {
   type: "CoinFlipForDamage";
-  coinsToFlip: CoinFlipIndicator;
+  passedAmount: CoinFlipIndicator;
   calculateDamage: DamageCalculation;
 }
 
@@ -94,7 +119,7 @@ interface CoinFlipForDamageAttack extends BaseAttack {
 // Flip 2 coins. If both of them are heads, this attack does X more damage.
 interface CoinFlipForAddedDamageAttack extends BaseAttack {
   type: "CoinFlipForAddedDamage";
-  coinsToFlip: CoinFlipIndicator;
+  passedAmount: CoinFlipIndicator;
   calculateDamage: DamageCalculation;
 }
 

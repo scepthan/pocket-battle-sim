@@ -83,7 +83,8 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
             }
           : { type: "Standard" }),
         conditions: [...effect.explicitConditions, ...effect.implicitConditions],
-        coinsToFlip: effect.coinsToFlip,
+        passedAmount: effect.passedAmount,
+        flipCoins: effect.flipCoins,
         sideEffects: [...effect.sideEffects, ...statusesToSideEffects(effect)],
       },
     };
