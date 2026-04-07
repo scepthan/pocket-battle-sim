@@ -3,7 +3,6 @@ import type {
   Attack,
   CoinFlipIndicator,
   DamageCalculation,
-  Game,
   InPlayPokemon,
   Player,
   PlayerPokemonConditional,
@@ -17,18 +16,21 @@ import type {
  */
 export interface ParsedEffect {
   /**
-   * Determines a number to pass in to the attack effect. For coin flip Attacks, this is the number
-   * of coins to flip. For other effects, it can be a calculation of how many Energy are attached
-   * to a given Pokémon, how many Pokémon are on the player's Bench, or any other relevant number.
+   * Determines a number to pass in to the effect. For coin flip effects, this is the number of
+   * coins to flip. For other effects, it can be a calculation of how many Energy are attached to a
+   * given Pokémon, how many Pokémon are on the player's Bench, or any other relevant number.
    *
    * There are 3 options:
    * 1. A hardcoded number.
    * 2. A method that calculates a number based on the game state.
    * 3. (Coin flip only) "UntilTails", which flips a coin until it lands on tails.
    *
-   * This flip happens before any damage is dealt for Attack types of "CoinFlipForDamage",
+   * The flip happens before any damage is dealt for Attack types of "CoinFlipForDamage",
    * "CoinFlipForAddedDamage", or "CoinFlipOrDoNothing", and after for "NoBaseDamage" or
    * "PredeterminableDamage".
+   *
+   * If using a method, it should not have any side effects, as it may be used to check whether an
+   * effect can be used before actually using it.
    */
   passedAmount?: CoinFlipIndicator;
 
@@ -48,7 +50,8 @@ export interface ParsedEffect {
 
   /**
    * A method that calculates the base damage of the Attack to be applied to the Defending Pokémon.
-   * This method should not have any side effects.
+   * This method should not have any side effects, as it can be used for display purposes without
+   * actually using the Attack.
    */
   calculateDamage?: DamageCalculation;
 
@@ -113,5 +116,5 @@ export interface ParsedEffect {
   /**
    * Leftover conditional for Attacks that apply statuses.
    */
-  statusConditional?: (game: Game, self: InPlayPokemon, heads: number) => boolean;
+  statusConditional?: PlayerPokemonConditional;
 }

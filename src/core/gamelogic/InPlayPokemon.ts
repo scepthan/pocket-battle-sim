@@ -405,7 +405,7 @@ export class InPlayPokemon {
       throw new Error("Status ability cannot be used");
     }
 
-    if (!ability.conditions.every((condition) => condition(this.player, this))) return;
+    if (!ability.conditions.every((condition) => condition(this.player, this, 0))) return;
 
     if ("optional" in ability.trigger && ability.trigger.optional) {
       const prompt = `Use the effect of ${ability.name}?`;

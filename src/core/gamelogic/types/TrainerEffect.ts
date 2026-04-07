@@ -1,8 +1,15 @@
-import type { CoinFlipIndicator, Game, InPlayPokemon, Player, SideEffect } from "..";
+import type {
+  CoinFlipIndicator,
+  Game,
+  InPlayPokemon,
+  Player,
+  PlayerPokemonConditional,
+  SideEffect,
+} from "..";
 
 export type TargetedEffect = (game: Game, target: InPlayPokemon) => Promise<void>;
 interface BaseTrainerEffect {
-  conditions: ((player: Player, self: InPlayPokemon) => boolean)[];
+  conditions: PlayerPokemonConditional[];
   passedAmount?: CoinFlipIndicator;
   flipCoins?: boolean;
   sideEffects: SideEffect[];

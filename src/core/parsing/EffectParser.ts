@@ -1,4 +1,4 @@
-import type { Game, InPlayPokemon, PokemonStatus, SideEffect } from "../gamelogic";
+import type { PlayerPokemonConditional, PokemonStatus, SideEffect } from "../gamelogic";
 import { PlayerStatus } from "../gamelogic";
 import {
   parsePlayingCardPredicate,
@@ -22,9 +22,7 @@ export class EffectParser {
     opponentPlayerStatuses: [],
   };
   parseSuccessful = true;
-  conditionalForNextEffect:
-    | ((game: Game, self: InPlayPokemon, heads: number) => boolean)
-    | undefined;
+  conditionalForNextEffect: PlayerPokemonConditional | undefined;
   turnsToKeep: number | undefined;
 
   constructor(hasBaseDamage: boolean) {
@@ -46,7 +44,7 @@ export class EffectParser {
       const prevConditional = this.conditionalForNextEffect;
       this.conditionalForNextEffect = undefined;
       return async (game, self, heads, target) => {
-        if (prevConditional(game, self, heads)) await effect(game, self, heads, target);
+        if (prevConditional(self.player, self, heads)) await effect(game, self, heads, target);
       };
     }
     return effect;
@@ -134,7 +132,7 @@ export const statusesToSideEffects = (effect: ParsedEffect) => {
     if (effect.statusConditional) {
       const conditional = effect.statusConditional;
       sideEffects.push(async (game, self, heads, target) => {
-        if (conditional(game, self, heads)) await sideEffect(game, self, heads, target);
+        if (conditional(self.player, self, heads)) await sideEffect(game, self, heads, target);
       });
     } else sideEffects.push(sideEffect);
   };

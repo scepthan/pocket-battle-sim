@@ -1,10 +1,20 @@
-import type { Game, InPlayPokemon, Player } from "..";
+import type { Game, InPlayPokemon, Player, PlayerPokemonConditional } from "..";
 import type { Energy } from "./Energy";
 
 export type AmountIndicator =
   | number
   | ((game: Game, self: InPlayPokemon, target?: InPlayPokemon) => number);
 export type CoinFlipIndicator = AmountIndicator | "UntilTails";
+
+export const evaluatePassedAmount = (
+  passedAmount: CoinFlipIndicator | undefined,
+  self: InPlayPokemon,
+  target?: InPlayPokemon,
+) => {
+  if (typeof passedAmount === "number") return passedAmount;
+  if (typeof passedAmount === "function") return passedAmount(self.player.game, self, target);
+  return 0;
+};
 
 export type SideEffect = (
   game: Game,
@@ -33,9 +43,12 @@ interface BaseAttack {
    * 2. A method that calculates a number based on the game state.
    * 3. (Coin flip only) "UntilTails", which flips a coin until it lands on tails.
    *
-   * This flip happens before any damage is dealt for attack types of "CoinFlipForDamage",
+   * The flip happens before any damage is dealt for attack types of "CoinFlipForDamage",
    * "CoinFlipForAddedDamage", or "CoinFlipOrDoNothing", and after for "NoBaseDamage" or
    * "PredeterminableDamage".
+   *
+   * If using a method, it should not have any side effects, as it may be used to check whether an
+   * effect can be used before actually using it.
    */
   passedAmount?: CoinFlipIndicator;
 
@@ -47,9 +60,9 @@ interface BaseAttack {
   flipCoins?: boolean;
 
   /**
-   * A method that calculates the base damage of the attack to be applied to the Defending Pokémon.
+   * A method that calculates the base damage of the Attack to be applied to the Defending Pokémon.
    * This method should not have any side effects, as it can be used for display purposes without
-   * actually using the attack.
+   * actually using the Attack.
    */
   calculateDamage?: DamageCalculation;
 
@@ -78,7 +91,7 @@ interface BaseAttack {
    * Extraneous conditions that must be met for the attack to be used (other than the default
    * Energy and status condition requirements).
    */
-  explicitConditions: ((player: Player, self: InPlayPokemon) => boolean)[];
+  explicitConditions: PlayerPokemonConditional[];
 }
 
 // Flip a coin. If tails, this attack does nothing.

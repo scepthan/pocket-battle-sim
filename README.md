@@ -67,6 +67,7 @@ Backend todo:
     - [x] Current bug: Eevee with Leaf Cape evolving into Leafeon will not gain HP
   - [ ] Currently there are two different systems for parsing conditionals (`conditionalForNextEffect` vs. `explicitConditions`)
     - Up until A4, all explicit conditionals for abilities had unique wording compared to conditionals for attacks; Cherubi finally broke this trend with "if this Pokémon has a Pokémon Tool attached," which forced me to shoehorn in a conversion from an attack conditional to an ability conditional
+      - This has now been mediated by making everything use `PlayerPokemonConditional` which now takes an `amount` property
     - I can't just merge the two systems without other changes, as abilities for Pokémon like Leafeon ex and Arceus Link Crobat would then be usable even if their conditions are not met (they would just fail when attempting to execute)
     - I _also_ can't just determine behavior based on whether the parse is for an ability, as some conditionals such as "If heads," still need to be ignored when checking if the ability can be used
   - [ ] Some properties on `PlayerPokemonView` can be maliciously modified by agents—use `.slice()` and make deep copies

@@ -1,14 +1,14 @@
-import type { Game } from "../Game";
 import type { InPlayPokemon } from "../InPlayPokemon";
+import type { Player } from "../Player";
 
 export const usedSpecificAttackLastTurn =
-  (attackName: string) => (game: Game, self: InPlayPokemon) =>
-    game.GameLog.turns[2]?.some(
+  (attackName: string) => (player: Player, self: InPlayPokemon) =>
+    player.logger.turns[2]?.some(
       (e) => e.type === "useAttack" && e.attackName === attackName && e.player === self.player.Name,
     ) ?? false;
 
-export const selfDamagedByAttackLastTurn = (game: Game, self: InPlayPokemon) =>
-  game.GameLog.previousTurn?.some(
+export const selfDamagedByAttackLastTurn = (player: Player, self: InPlayPokemon) =>
+  player.logger.previousTurn?.some(
     (e) =>
       e.type === "pokemonDamaged" &&
       e.fromAttack &&
@@ -16,19 +16,19 @@ export const selfDamagedByAttackLastTurn = (game: Game, self: InPlayPokemon) =>
       e.targetPokemon.location === "Active",
   ) ?? false;
 
-export const selfMovedToActiveThisTurn = (game: Game, self: InPlayPokemon) => {
+export const selfMovedToActiveThisTurn = (player: Player) => {
   // If any switching has happened this turn, then this condition is necessarily met
-  const switchingEvents = game.GameLog.currentTurn.filter(
+  const switchingEvents = player.logger.currentTurn.filter(
     (event) => event.type === "selectActivePokemon" || event.type === "swapActivePokemon",
   );
-  return switchingEvents.some((event) => event.player === self.player.Name);
+  return switchingEvents.some((event) => event.player === player.Name);
 };
 
-export const opposingPokemonKnockedOutByCurrentAttack = (game: Game, self: InPlayPokemon) => {
-  const damageEvents = game.GameLog.currentTurn.filter((event) => event.type === "pokemonDamaged");
+export const opposingPokemonKnockedOutByCurrentAttack = (player: Player) => {
+  const damageEvents = player.logger.currentTurn.filter((event) => event.type === "pokemonDamaged");
   const activeAttackEvent = damageEvents.find(
     (event) =>
-      event.player === self.opponent.Name &&
+      event.player === player.opponent.Name &&
       event.targetPokemon.location === "Active" &&
       event.fromAttack,
   );
@@ -36,7 +36,7 @@ export const opposingPokemonKnockedOutByCurrentAttack = (game: Game, self: InPla
   return activeAttackEvent.finalHP === 0;
 };
 
-export const ownPokemonKnockedOutByAttackLastTurn = (game: Game, self: InPlayPokemon) =>
-  game.GameLog.previousTurn?.some(
-    (e) => e.type === "pokemonKnockedOut" && e.fromAttack && e.player === self.player.Name,
+export const ownPokemonKnockedOutByAttackLastTurn = (player: Player) =>
+  player.logger.previousTurn?.some(
+    (e) => e.type === "pokemonKnockedOut" && e.fromAttack && e.player === player.Name,
   ) ?? false;

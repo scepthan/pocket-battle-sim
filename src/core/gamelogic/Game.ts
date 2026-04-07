@@ -7,24 +7,25 @@ import type { InPlayPokemon } from "./InPlayPokemon";
 import { Player } from "./Player";
 import { PlayerGameView } from "./PlayerGameView";
 import { PlayerPokemonView } from "./PlayerPokemonView";
-import type {
-  Ability,
-  Attack,
-  CardSlot,
-  CoinFlipIndicator,
-  Energy,
-  FossilCard,
-  GameRules,
-  ItemCard,
-  PlayerAgent,
-  PlayerGameSetup,
-  PlayerStatus,
-  PlayingCard,
-  PokemonCard,
-  PokemonStatus,
-  PokemonToolCard,
-  SupporterCard,
-  TrainerCard,
+import {
+  evaluatePassedAmount,
+  type Ability,
+  type Attack,
+  type CardSlot,
+  type CoinFlipIndicator,
+  type Energy,
+  type FossilCard,
+  type GameRules,
+  type ItemCard,
+  type PlayerAgent,
+  type PlayerGameSetup,
+  type PlayerStatus,
+  type PlayingCard,
+  type PokemonCard,
+  type PokemonStatus,
+  type PokemonToolCard,
+  type SupporterCard,
+  type TrainerCard,
 } from "./types";
 
 export class Game {
@@ -453,7 +454,7 @@ export class Game {
         for (const ability of pokemon.effectiveAbilities) {
           if (ability.type !== "Status") continue;
 
-          const applyStatus = ability.conditions.every((cond) => cond(player, pokemon));
+          const applyStatus = ability.conditions.every((cond) => cond(player, pokemon, 0));
 
           for (const effect of ability.effect) {
             if (effect.type === "PlayerStatus") {
@@ -636,11 +637,7 @@ export class Game {
     }
 
     if (attack.passedAmount && attack.passedAmount !== "UntilTails") {
-      if (typeof attack.passedAmount === "number") {
-        passedAmount = attack.passedAmount;
-      } else {
-        passedAmount = attack.passedAmount(this, attacker, chosenPokemon);
-      }
+      passedAmount = evaluatePassedAmount(attack.passedAmount, attacker, chosenPokemon);
     }
 
     for (const effect of attack.preDamageEffects)
@@ -712,7 +709,7 @@ export class Game {
       return;
     }
     if (
-      attack.explicitConditions.some((cond) => !cond(player, attacker)) ||
+      attack.explicitConditions.some((cond) => !cond(player, attacker, 0)) ||
       (energyRequired && !attacker.hasSufficientEnergy(attacker.findEffectiveAttackCost(attack)))
     ) {
       this.GameLog.conditionNotMet(player);
@@ -881,7 +878,9 @@ export class Game {
 
     let target: InPlayPokemon | undefined;
     const player = this.AttackingPlayer;
-    if (card.Effect.conditions.some((cond) => !cond(player, player.activeOrThrow()))) {
+    const active = player.activeOrThrow();
+    const passedAmount = evaluatePassedAmount(card.Effect.passedAmount, active);
+    if (card.Effect.conditions.some((cond) => !cond(player, active, passedAmount))) {
       this.GameLog.conditionNotMet(this.AttackingPlayer);
       return;
     }
@@ -911,11 +910,8 @@ export class Game {
 
     let passedAmount = 0;
     if (card.Effect.passedAmount && card.Effect.passedAmount !== "UntilTails") {
-      if (typeof card.Effect.passedAmount === "number") {
-        passedAmount = card.Effect.passedAmount;
-      } else {
-        passedAmount = card.Effect.passedAmount(this, this.AttackingPlayer.activeOrThrow(), target);
-      }
+      const active = this.AttackingPlayer.activeOrThrow();
+      passedAmount = evaluatePassedAmount(card.Effect.passedAmount, active, target);
     }
 
     if (card.Effect.flipCoins) {
