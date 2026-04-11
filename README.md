@@ -11,11 +11,11 @@ Backend todo:
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
   - [x] A3b: 71/71 (100%)
-  - [ ] A4: 150/164 (91.5%)
+  - [ ] A4: 153/164 (93.3%)
     - [x] Baby Pokémon (0-cost attacks)
     - [ ] New conditionals
       - [x] If this Pokémon has no damage on it
-      - [ ] If defender is Burned
+      - [x] If defender is Burned
       - [ ] If Unown in play with Ability other than [name]
       - [x] If damaged by an attack during previous turn
     - [x] New damage modifiers
@@ -42,13 +42,12 @@ Backend todo:
       - [x] PreventAttackDamageOnCoinFlip
       - [ ] PreventSpecificSpecialCondition (or PreventAsleep)
       - [x] NextCoinFlip
-    - [ ] New Pokémon predicates
-      - [ ] Evolution Pokémon
     - [ ] Parsing modifications
-      - [ ] _make your opponent’s Active Pokémon_ Burned
+      - [x] _make your opponent’s Active Pokémon_ Burned
       - [x] Move all _[typeless]_ Energy from this Pokémon to 1 of...
       - [ ] Move all [type] Energy from each of your [predicate] to _this Pokémon_
       - [x] This attack does extra damage per _[typeless]_ Energy on self
+      - [x] If your opponent’s Active Pokémon is _an_...
       - [x] Move a _[multiple types]_ Energy...
       - [x] Choose a _[predicate]_ card you find there and shuffle it...
     - [ ] Unique Promo cards
