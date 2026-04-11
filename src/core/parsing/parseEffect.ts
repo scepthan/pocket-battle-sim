@@ -542,10 +542,13 @@ export const parseEffect = (
     },
     {
       pattern:
-        /^1 of your opponent’s Pokémon is chosen at random (\d+) times\. For each time a Pokémon was chosen, do (\d+) damage to it\./i,
-      transform: (_, times, damage) => {
+        /^1 (?:(of your opponent’s Pokémon)|other Pokémon \(either yours or your opponent’s\)) is chosen at random (\d+) times\. For each time a Pokémon was chosen, do (\d+) damage to it\./i,
+      transform: (_, opponent, times, damage) => {
         effect.attackingEffects.push(async (game, self) => {
-          const damages = self.opponent.InPlayPokemon.map((p) => ({
+          const availablePokemon = opponent
+            ? self.opponent.InPlayPokemon
+            : game.InPlayPokemon.filter((p) => p !== self);
+          const damages = availablePokemon.map((p) => ({
             pokemon: p,
             damage: 0,
           }));

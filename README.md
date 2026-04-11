@@ -11,7 +11,7 @@ Backend todo:
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
   - [x] A3b: 71/71 (100%)
-  - [ ] A4: 153/164 (93.3%)
+  - [ ] A4: 154/164 (93.9%)
     - [x] Baby Pokémon (0-cost attacks)
     - [ ] New conditionals
       - [x] If this Pokémon has no damage on it
@@ -21,8 +21,8 @@ Backend todo:
     - [x] New damage modifiers
       - [x] Extra damage per Energy in defender's Retreat Cost
       - [x] Choose Benched Pokémon to discard for extra damage
-    - [ ] New attacking effects
-      - [ ] Damage any other Pokémon at random
+    - [x] New attacking effects
+      - [x] Damage any other Pokémon at random
     - [ ] New side effects
       - [x] Take [multiple types] Energy from your Energy Zone and distribute them
       - [ ] Confused but not (FlipCoinToAttack with no turnsToKeep limit)
