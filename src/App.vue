@@ -15,20 +15,21 @@
 </template>
 
 <script setup lang="ts">
+import { rarityShort } from "./assets";
 import { sortedBy, type InputCard } from "./core";
 import { useDeckStore, usePlayingCardStore } from "./stores";
 
 const cardStore = usePlayingCardStore();
 const deckStore = useDeckStore();
 const debugMultiUseCards = false;
+const debugUniqueEffects = false;
 
 onMounted(() => {
   const decklists = deckStore.BuiltinDecklists;
   const cards = cardStore.InputCards;
   const encounteredCards = new Set<string>();
-  const rarityOrder = ["C", "U", "R", "RR", "AR", "SR", "SAR", "IM", "S", "SSR", "UR"];
 
-  let sortedCards = sortedBy(cards, (card) => card.rarity, rarityOrder);
+  let sortedCards = sortedBy(cards, (card) => card.rarity, rarityShort);
   sortedCards = sortedBy(sortedCards, (a) => a.id > "PROMO-A-007");
 
   const uniqueCards = sortedCards
@@ -45,7 +46,7 @@ onMounted(() => {
           HP: card.hp,
           RetreatCost: card.retreatCost,
           Ability: card.ability,
-          Moves: card.attacks,
+          Attacks: card.attacks,
         };
       } else {
         functionalCard = {
@@ -65,6 +66,30 @@ onMounted(() => {
     .sort((a, b) => a.id.localeCompare(b.id));
 
   console.log(`Loaded ${uniqueCards.length} unique cards from ${cards.length} total cards.`);
+
+  if (debugUniqueEffects) {
+    const effects: Record<string, InputCard[]> = {};
+    const addEffect = (text: string, card: InputCard) => {
+      const newText = text.replace(/\d+/g, "<number>").replace(/\{\w\}/g, "<type>");
+
+      if (!effects[newText]) {
+        effects[newText] = [card];
+        console.log("New effect #", Object.keys(effects).length, "found:", newText, card);
+      } else {
+        effects[newText].push(card);
+      }
+    };
+
+    for (const card of uniqueCards) {
+      if (card.cardType === "Pokemon") {
+        if (card.ability) addEffect(card.ability.text, card);
+        for (const attack of card.attacks) if (attack.text) addEffect(attack.text, card);
+      } else {
+        addEffect(card.text, card);
+      }
+    }
+    console.log(Object.keys(effects).sort());
+  }
 
   const unusedCards = uniqueCards.filter(
     (card) =>
