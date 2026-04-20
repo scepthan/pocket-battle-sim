@@ -9,5 +9,6 @@ export * from "./PlayerAgent";
 export * from "./playerstatus";
 export * from "./PlayingCard";
 export * from "./pokemonstatus";
+export * from "./Predicates";
 export * from "./SpecialCondition";
 export * from "./TrainerEffect";

@@ -1,6 +1,5 @@
-import type { ParsedResult } from "@/core/parsing";
-import { parsePokemonPredicate } from "@/core/parsing/parsePredicates";
-import type { NumberOrCalculation, PokemonDescriptor } from "../Effects";
+import { parsePokemonPredicate, type ParsedResult } from "@/core/parsing";
+import type { NumberOrCalculation, PokemonDescriptor } from "../Predicates";
 import type { BasePokemonStatus } from "./PokemonStatus";
 
 interface BaseAttackPokemonStatus extends BasePokemonStatus {

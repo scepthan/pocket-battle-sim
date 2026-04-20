@@ -1,7 +1,6 @@
-import type { ParsedResult } from "@/core/parsing";
-import { parsePokemonPredicate } from "@/core/parsing/parsePredicates";
-import type { PokemonDescriptor } from "../Effects";
+import { parsePokemonPredicate, type ParsedResult } from "@/core/parsing";
 import type { PokemonStatus } from "../pokemonstatus";
+import type { PokemonDescriptor } from "../Predicates";
 import { GameRulePlayerStatus } from "./GameRulePlayerStatus";
 
 export interface BasePlayerStatus {

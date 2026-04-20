@@ -1917,20 +1917,16 @@ export const parseEffect = (
       },
     },
     {
-      pattern: /^Your opponent can’t use any Supporter cards from their hand\./i,
-      transform: () => {
+      pattern: /^(?:Your opponent|they) can’t (?:use|play) any (.+ cards) from their hand\./i,
+      transform: (_, descriptor) => {
         parser.addOpponentPlayerStatus(
-          PlayerStatus.CannotUseSupporter(
+          PlayerStatus.CannotPlayCard(
+            {
+              descriptor,
+              test: parser.parsePlayingCardPredicate(descriptor),
+            },
             parser.turnsToKeep !== undefined && parser.turnsToKeep > 0,
           ),
-        );
-      },
-    },
-    {
-      pattern: /^they can’t play any Item cards from their hand\./i,
-      transform: () => {
-        parser.addOpponentPlayerStatus(
-          PlayerStatus.CannotUseItem(parser.turnsToKeep !== undefined && parser.turnsToKeep > 0),
         );
       },
     },

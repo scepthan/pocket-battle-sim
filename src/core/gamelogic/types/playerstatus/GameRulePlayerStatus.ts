@@ -1,10 +1,9 @@
+import type { PlayingCardDescriptor } from "../Predicates";
 import type { BasePlayerStatus } from "./PlayerStatus";
 
-interface CannotUseSupporterPlayerStatus extends BasePlayerStatus {
-  type: "CannotUseSupporter";
-}
-interface CannotUseItemPlayerStatus extends BasePlayerStatus {
-  type: "CannotUseItem";
+interface CannotPlayCardPlayerStatus extends BasePlayerStatus {
+  type: "CannotPlayCard";
+  cardCondition: PlayingCardDescriptor;
 }
 interface NextCoinFlipPlayerStatus extends BasePlayerStatus {
   type: "NextCoinFlip";
@@ -17,20 +16,15 @@ interface DummyPlayerStatus extends BasePlayerStatus {
 }
 
 export type GameRulePlayerStatus =
-  | CannotUseSupporterPlayerStatus
-  | CannotUseItemPlayerStatus
+  | CannotPlayCardPlayerStatus
   | NextCoinFlipPlayerStatus
   | DummyPlayerStatus;
 
 export const GameRulePlayerStatus = {
-  CannotUseSupporter: (keepNextTurn: boolean = true) => ({
-    type: "CannotUseSupporter",
+  CannotPlayCard: (cardCondition: PlayingCardDescriptor, keepNextTurn: boolean = true) => ({
+    type: "CannotPlayCard",
     source: "Effect",
-    keepNextTurn,
-  }),
-  CannotUseItem: (keepNextTurn: boolean = true) => ({
-    type: "CannotUseItem",
-    source: "Effect",
+    cardCondition,
     keepNextTurn,
   }),
   NextCoinFlip: (result: boolean, keepNextTurn: boolean = true) => ({

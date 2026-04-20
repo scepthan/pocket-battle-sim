@@ -75,19 +75,9 @@
       </p>
     </div>
   </div>
-  <p v-else-if="entry.status.type == 'CannotUseSupporter'">
-    <b>{{ entry.player }}</b> cannot use Supporter cards from their hand<span
-      v-if="entry.status.source == 'Effect'"
-    >
-      next turn</span
-    >!
-  </p>
-  <p v-else-if="entry.status.type == 'CannotUseItem'">
-    <b>{{ entry.player }}</b> cannot use Item cards from their hand<span
-      v-if="entry.status.source == 'Effect'"
-    >
-      next turn</span
-    >!
+  <p v-else-if="entry.status.type == 'CannotPlayCard'">
+    <b>{{ entry.player }}</b> cannot use {{ entry.status.cardCondition.descriptor }} from their
+    hand<span v-if="entry.status.source == 'Effect'"> next turn</span>!
   </p>
   <p v-else-if="entry.status.type == 'NextCoinFlip'">
     The next coin <b>{{ entry.player }}</b> flips

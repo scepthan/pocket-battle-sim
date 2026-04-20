@@ -1,11 +1,12 @@
-import type { PlayerPokemonConditional, PokemonStatus, SideEffect } from "../gamelogic";
+import type {
+  InPlayPokemonPredicate,
+  PlayerPokemonConditional,
+  PlayingCardPredicate,
+  PokemonStatus,
+  SideEffect,
+} from "../gamelogic";
 import { PlayerStatus } from "../gamelogic";
-import {
-  parsePlayingCardPredicate,
-  parsePokemonPredicate,
-  type InPlayPokemonPredicate,
-  type PlayingCardPredicate,
-} from "./parsePredicates";
+import { parsePlayingCardPredicate, parsePokemonPredicate } from "./parsePredicates";
 import type { ParsedEffect, ParsedResult } from "./types";
 
 export class EffectParser {

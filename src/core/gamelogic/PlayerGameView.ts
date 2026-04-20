@@ -134,15 +134,6 @@ export class PlayerGameView {
     return this.opponent.NextEnergy;
   }
 
-  get canPlaySupporter() {
-    return (
-      !this.game.HasPlayedSupporter &&
-      !this.player.PlayerStatuses.some((status) => status.type == "CannotUseSupporter")
-    );
-  }
-  get canPlayItem() {
-    return !this.player.PlayerStatuses.some((status) => status.type == "CannotUseItem");
-  }
   get effectiveRetreatCost() {
     return this.player.effectiveRetreatCost;
   }
@@ -174,6 +165,14 @@ export class PlayerGameView {
       return false;
     }
 
+    if (
+      this.player.PlayerStatuses.some(
+        (status) => status.type === "CannotPlayCard" && status.cardCondition.test(card),
+      )
+    ) {
+      return false;
+    }
+
     if (card.CardType == "Pokemon") {
       if (card.Stage == 0) {
         return this.selfBenched.length < 3;
@@ -184,7 +183,7 @@ export class PlayerGameView {
         );
       }
     } else if (card.CardType == "Supporter" || card.CardType == "Item") {
-      if (card.CardType == "Supporter" ? !this.canPlaySupporter : !this.canPlayItem) return false;
+      if (card.CardType == "Supporter" && this.game.HasPlayedSupporter) return false;
       const realActive = this.player.activeOrThrow();
       const passedAmount = evaluatePassedAmount(card.Effect.passedAmount, realActive);
       if (card.Effect.conditions.some((cond) => !cond(this.player, realActive, passedAmount)))

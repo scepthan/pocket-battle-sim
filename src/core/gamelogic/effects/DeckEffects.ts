@@ -1,7 +1,7 @@
-import type { PlayingCardPredicate } from "@/core/parsing/parsePredicates";
 import { randomElement, removeElement } from "@/core/util";
 import type { Game } from "../Game";
 import type { InPlayPokemon } from "../InPlayPokemon";
+import type { PlayingCardPredicate } from "../types";
 
 /**
  * Given a playing card predicate, returns a side effect that lets the player look at the top card

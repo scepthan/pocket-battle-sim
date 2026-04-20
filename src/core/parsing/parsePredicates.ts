@@ -1,10 +1,11 @@
 import { allCards } from "@/assets";
-import { parseEnergy, type Energy, type InPlayPokemon, type PlayingCard } from "../gamelogic";
+import {
+  parseEnergy,
+  type Energy,
+  type InPlayPokemonPredicate,
+  type PlayingCardPredicate,
+} from "../gamelogic";
 import type { ParsedResult } from "./types";
-
-export type Predicate<T> = (obj: T) => boolean;
-export type InPlayPokemonPredicate = Predicate<InPlayPokemon>;
-export type PlayingCardPredicate = Predicate<PlayingCard>;
 
 const parsePokemonNames = (text: string): ParsedResult<string[]> => {
   const names = text.split(/, or | or |, and | and |, /);
