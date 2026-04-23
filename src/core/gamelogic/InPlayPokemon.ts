@@ -278,7 +278,9 @@ export class InPlayPokemon {
   removeAllSpecialConditionsAndStatuses() {
     this.removeAllSpecialConditions();
 
-    this._PokemonStatuses = this._PokemonStatuses.filter((status) => status.source != "Effect");
+    for (const status of this._PokemonStatuses) {
+      if (status.source === "Effect") this.removePokemonStatus(status);
+    }
   }
 
   /**
@@ -287,8 +289,15 @@ export class InPlayPokemon {
    * Applies unconditionally; to check for effect prevention, use Game.applyPokemonStatus().
    */
   applyPokemonStatus(status: PokemonStatus) {
-    this._PokemonStatuses.push(status);
     this.logger.applyPokemonStatus(this.player, this, status);
+
+    if (status.doesNotStack) {
+      if (this._PokemonStatuses.some((s) => s.type === status.type && s.doesNotStack)) {
+        return;
+      }
+    }
+
+    this._PokemonStatuses.push(status);
 
     if (status.type === "IncreaseMaxHP") {
       const hpIncrease = status.amount;
@@ -315,18 +324,15 @@ export class InPlayPokemon {
    * Updates PokemonStatuses at the end of the turn, removing those that should expire.
    */
   updatePokemonStatusesAtTurnEnd() {
-    const newStatuses: PokemonStatus[] = [];
     for (const status of this._PokemonStatuses) {
-      if (status.source == "Effect" || status.turnsToKeep !== undefined) {
-        if (status.turnsToKeep) {
+      if (status.turnsToKeep !== undefined) {
+        if (status.turnsToKeep > 0) {
           status.turnsToKeep -= 1;
-          newStatuses.push(status);
+        } else {
+          this.removePokemonStatus(status);
         }
-      } else {
-        newStatuses.push(status);
       }
     }
-    this._PokemonStatuses = newStatuses;
   }
 
   /**

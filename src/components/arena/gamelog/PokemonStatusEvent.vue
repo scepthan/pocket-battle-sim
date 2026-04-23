@@ -54,7 +54,11 @@
   <span v-else> has unknown status "{{ entry.status.type }}" applied to it</span
   ><span v-if="'attackerCondition' in entry.status && entry.status.attackerCondition?.descriptor">
     from <PokemonDescriptor :text="entry.status.attackerCondition.descriptor" /></span
-  ><span v-if="entry.status.source == 'Effect'"> next turn</span>!
+  ><span v-if="entry.status.source == 'Effect'">
+    {{
+      entry.status.turnsToKeep === undefined ? " until it leaves the Active Spot" : " next turn"
+    }} </span
+  >!
 </template>
 
 <script setup lang="ts">

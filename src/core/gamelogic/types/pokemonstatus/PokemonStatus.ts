@@ -6,6 +6,7 @@ export interface BasePokemonStatus {
   id?: string;
   source: "Effect" | "Ability" | "PokemonTool" | "PlayerStatus";
   turnsToKeep?: number;
+  doesNotStack?: boolean;
 }
 
 export type PokemonStatus = DefensePokemonStatus | AttackPokemonStatus | OtherPokemonStatus;

@@ -25,6 +25,7 @@ export class EffectParser {
   parseSuccessful = true;
   conditionalForNextEffect: PlayerPokemonConditional | undefined;
   turnsToKeep: number | undefined;
+  doesNotStack: boolean | undefined;
 
   constructor(hasBaseDamage: boolean) {
     if (hasBaseDamage) {

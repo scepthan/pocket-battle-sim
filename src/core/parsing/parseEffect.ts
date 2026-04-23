@@ -1621,6 +1621,14 @@ export const parseEffect = (
         parser.turnsToKeep = 2;
       },
     },
+    {
+      pattern:
+        /This effect lasts until the Defending Pokémon leaves the Active Spot, and it doesn’t stack\.$/i,
+      transform: () => {
+        parser.turnsToKeep = undefined;
+        parser.doesNotStack = true;
+      },
+    },
 
     // Self Pokémon status effects
     {
@@ -1791,7 +1799,9 @@ export const parseEffect = (
       pattern:
         /^if the Defending Pokémon tries to use an attack, your opponent flips a coin\. If tails, that attack doesn’t happen\./i,
       transform: () => {
-        parser.addOpponentPokemonStatus(PokemonStatus.CoinFlipToAttack(parser.turnsToKeep));
+        parser.addOpponentPokemonStatus(
+          PokemonStatus.CoinFlipToAttack(parser.turnsToKeep, parser.doesNotStack),
+        );
       },
     },
     {

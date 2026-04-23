@@ -86,7 +86,12 @@ export const OtherPokemonStatus = {
     energyType,
     amount,
   }),
-  CoinFlipToAttack: (turnsToKeep?: number) => ({ type: "CoinFlipToAttack", source, turnsToKeep }),
+  CoinFlipToAttack: (turnsToKeep?: number, doesNotStack?: boolean) => ({
+    type: "CoinFlipToAttack",
+    source,
+    turnsToKeep,
+    doesNotStack,
+  }),
   CannotUseSpecificAttack: (attackName: string, turnsToKeep?: number) => ({
     type: "CannotUseSpecificAttack",
     source,
