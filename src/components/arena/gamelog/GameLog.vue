@@ -217,7 +217,9 @@
         </div>
 
         <div v-else-if="entry.type == 'coinFlip'" class="sub-entry">
-          <p>Flipping a coin... {{ entry.result }}!</p>
+          <p>
+            <b>{{ entry.player }}</b> flips a coin... {{ entry.result }}!
+          </p>
         </div>
 
         <div v-else-if="entry.type == 'coinMultiFlip'" class="sub-entry">

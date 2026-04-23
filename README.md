@@ -11,12 +11,12 @@ Backend todo:
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
   - [x] A3b: 71/71 (100%)
-  - [ ] A4: 158/164 (96.3%)
+  - [ ] A4: 161/164 (98.2%)
     - [x] Baby Pokémon (0-cost attacks)
-    - [ ] New conditionals
+    - [x] New conditionals
       - [x] If this Pokémon has no damage on it
       - [x] If defender is Burned
-      - [ ] If Unown in play with Ability other than [name]
+      - [x] If Unown in play with Ability other than [name]
       - [x] If damaged by an attack during previous turn
     - [x] New damage modifiers
       - [x] Extra damage per Energy in defender's Retreat Cost
@@ -27,7 +27,7 @@ Backend todo:
       - [x] Take [multiple types] Energy from your Energy Zone and distribute them
       - [x] Confused but not (FlipCoinToAttack with no turnsToKeep limit)
       - [x] Set defender's HP to N
-      - [ ] Put both Active Pokémon to sleep
+      - [x] Put both Active Pokémon to sleep
       - [x] Evolve self with random evolution from deck
       - [x] Apply ModifyAttackCost(+1, C) to defender
       - [x] Draw cards until holding same number as opponent

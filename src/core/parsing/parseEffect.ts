@@ -1622,6 +1622,15 @@ export const parseEffect = (
         parser.addSideEffect(async (game, self) => self.player.sleepActivePokemon());
       },
     },
+    {
+      pattern: /^Both Active Pokémon are now Asleep\./i,
+      transform: () => {
+        parser.addSideEffect(async (game, self) => {
+          self.player.sleepActivePokemon();
+          self.opponent.sleepActivePokemon();
+        });
+      },
+    },
 
     // Status effect headers
     {
@@ -2080,6 +2089,17 @@ export const parseEffect = (
           if (!cardToDiscard) throw new Error("No card chosen to discard");
           player.discardCardsFromHand([cardToDiscard]);
         });
+      },
+    },
+    {
+      pattern:
+        /^This ability works if you have any Unown in play with an Ability other than (.+?)\./i,
+      transform: (_, abilityName) => {
+        effect.explicitConditions.push((player) =>
+          player.InPlayPokemon.some(
+            (p) => p.Name === "Unown" && p.Ability && p.Ability.name !== abilityName,
+          ),
+        );
       },
     },
     {
