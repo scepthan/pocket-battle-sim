@@ -24,12 +24,10 @@ export class BetterRandomAgent extends PlayerAgent {
   }
 
   async doTurn(game: PlayerGameView) {
-    let ownPokemon = game.selfInPlayPokemon;
-
-    // Play Professor's Research if available
     const professor = game.selfHand.find((x) => x.Name == "Professor’s Research");
     let endTurnSupporter: SupporterCard | null = null;
     if (professor) {
+      // Play Professor's Research if available
       await game.playSupporterCard(professor as SupporterCard);
     } else if (Math.random() > 0.5) {
       // Play a random Supporter card if available
@@ -111,6 +109,7 @@ export class BetterRandomAgent extends PlayerAgent {
     }
 
     // Evolve a random Pokemon if possible
+    let ownPokemon = game.selfInPlayPokemon;
     const evolveablePokemon = ownPokemon.filter((x) => x.ReadyToEvolve);
     const pokemonToEvolveWith = game.selfHand.filter(
       (x) =>

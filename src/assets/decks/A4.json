@@ -31,6 +31,10 @@
     "Skarmory ex & Scizor": {
       "Cards": ["A2-111", "A2-111", "A2-150", "A2b-071", "A4-006", "A4-006", "A4-123", "A4-123", "A4-124", "A4-124", "A4-153", "A4-153", "A4-160", "A4-160", "PROMO-A-002", "PROMO-A-002", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007"],
       "EnergyTypes": ["Metal"]
+    },
+    "Blissey ex Drop Event": {
+      "Cards": ["A1a-068", "A2-147", "A2-147", "A2b-070", "A3-149", "A4-034", "A4-034", "A4-066", "A4-066", "A4-071", "A4-131", "A4-131", "A4-156", "PROMO-A-001", "PROMO-A-005", "PROMO-A-005", "PROMO-A-007", "PROMO-A-007", "PROMO-A-098", "PROMO-A-098"],
+      "EnergyTypes": ["Lightning"]
     }
   },
   "A4 Rentals": {
