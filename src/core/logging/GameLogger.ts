@@ -266,6 +266,16 @@ export class GameLogger {
     });
   }
 
+  changeAttachedEnergy(player: Player, targetPokemon: InPlayPokemon, from: Energy, to: Energy) {
+    this.addEntry({
+      type: "changeAttachedEnergy",
+      player: player.Name,
+      targetPokemon: player.pokemonToDescriptor(targetPokemon),
+      from,
+      to,
+    });
+  }
+
   discardEnergy(
     player: Player,
     energyTypes: Energy[],

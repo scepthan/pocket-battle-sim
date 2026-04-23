@@ -206,6 +206,13 @@ interface AttachEnergyEvent {
   from: AttachEnergySource;
   fromPokemon?: InPlayPokemonDescriptor;
 }
+interface ChangeAttachedEnergyEvent {
+  type: "changeAttachedEnergy";
+  player: string;
+  targetPokemon: InPlayPokemonDescriptor;
+  from: Energy;
+  to: Energy;
+}
 export type DiscardEnergySource =
   | "effect"
   | "retreat"
@@ -385,6 +392,7 @@ export type LoggedEvent =
   | GenerateNextEnergyEvent
   | ChangeNextEnergyEvent
   | AttachEnergyEvent
+  | ChangeAttachedEnergyEvent
   | DiscardEnergyEvent
   | TriggerAbilityEvent
   | UseAbilityEvent

@@ -2049,6 +2049,16 @@ export const parseEffect = (
     },
     {
       pattern:
+        /^Change the type of a random Energy attached to your opponent’s Active Pokémon to 1 of the following at random: ([^.]+?)\./i,
+      transform: (_, energyTypes) => {
+        const possibleEnergies = parseEnergies(energyTypes);
+        parser.addSideEffect(async (game, self) => {
+          Effects.changeRandomEnergy(self.player, self.opponent.activeOrThrow(), possibleEnergies);
+        });
+      },
+    },
+    {
+      pattern:
         /^Change the type of the next Energy that will be generated for your opponent to 1 of the following at random: ([^.]+?)\./i,
       transform: (_, energyTypes) => {
         const possibleEnergies = parseEnergies(energyTypes);

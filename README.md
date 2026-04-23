@@ -11,7 +11,7 @@ Backend todo:
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
   - [x] A3b: 71/71 (100%)
-  - [ ] A4: 163/164 (99.4%)
+  - [x] A4: 164/164 (100%)
     - [x] Baby Pokémon (0-cost attacks)
     - [x] New conditionals
       - [x] If this Pokémon has no damage on it
@@ -23,7 +23,7 @@ Backend todo:
       - [x] Choose Benched Pokémon to discard for extra damage
     - [x] New attacking effects
       - [x] Damage any other Pokémon at random
-    - [ ] New side effects
+    - [x] New side effects
       - [x] Take [multiple types] Energy from your Energy Zone and distribute them
       - [x] Confused but not (FlipCoinToAttack with no turnsToKeep limit)
       - [x] Set defender's HP to N
@@ -33,17 +33,17 @@ Backend todo:
       - [x] Apply ModifyAttackCost(+1, C) to defender
       - [x] Draw cards until holding same number as opponent
       - [x] Discard [multiple types] Energy from this Pokémon
-      - [ ] Randomize type of random Energy on defender
+      - [x] Randomize type of random Energy on defender
       - [x] Apply ModifyIncomingAttackDamage and PreventSpecialConditions to self
       - [x] Discard a [type] Energy from your opponent’s Active Pokémon
       - [x] Put self into hand instead of discard
       - [x] For each heads, return random Pokémon from discard to hand
       - [x] For each of your [predicate] Pokémon, look at top cards of own deck and rearrange
-    - [ ] New statuses
+    - [x] New statuses
       - [x] PreventAttackDamageOnCoinFlip
       - [x] PreventSpecificSpecialCondition
       - [x] NextCoinFlip
-    - [ ] Parsing modifications
+    - [x] Parsing modifications
       - [x] _make your opponent’s Active Pokémon_ Burned
       - [x] Move all _[typeless]_ Energy from this Pokémon to 1 of...
       - [x] This attack does extra damage per _[typeless]_ Energy on self

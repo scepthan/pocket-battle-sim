@@ -104,6 +104,12 @@
           <EnergyIcon inline :energy="entry.nextEnergy" />!
         </div>
 
+        <div v-else-if="entry.type == 'changeAttachedEnergy'" class="sub-entry">
+          A <EnergyIcon inline :energy="entry.from" /> Energy attached to
+          <CardName :card-id="entry.targetPokemon.cardId" /> is changed to
+          <EnergyIcon inline :energy="entry.to" />!
+        </div>
+
         <div v-else-if="entry.type == 'discardEnergy'" class="sub-entry">
           <p v-if="entry.energyTypes.length == 0">No Energy could be discarded.</p>
           <p v-else>
