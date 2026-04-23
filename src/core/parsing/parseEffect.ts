@@ -1769,6 +1769,25 @@ export const parseEffect = (
       },
     },
     {
+      pattern: /^This Pokémon can’t be (\w+)\./i,
+      transform: (_, condition) => {
+        if (
+          condition !== "Asleep" &&
+          condition !== "Burned" &&
+          condition !== "Confused" &&
+          condition !== "Paralyzed" &&
+          condition !== "Poisoned"
+        ) {
+          console.warn("Unknown Special Condition: " + condition);
+          parser.parseSuccessful = false;
+          return;
+        }
+        parser.addSelfPokemonStatus(
+          PokemonStatus.PreventSpecificSpecialCondition(condition, parser.turnsToKeep),
+        );
+      },
+    },
+    {
       pattern: /^this Pokémon can’t attack\./i,
       transform: () => {
         parser.addSelfPokemonStatus(PokemonStatus.CannotAttack(parser.turnsToKeep));

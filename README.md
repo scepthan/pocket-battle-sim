@@ -11,7 +11,7 @@ Backend todo:
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
   - [x] A3b: 71/71 (100%)
-  - [ ] A4: 162/164 (98.8%)
+  - [ ] A4: 163/164 (99.4%)
     - [x] Baby Pokémon (0-cost attacks)
     - [x] New conditionals
       - [x] If this Pokémon has no damage on it
@@ -41,7 +41,7 @@ Backend todo:
       - [x] For each of your [predicate] Pokémon, look at top cards of own deck and rearrange
     - [ ] New statuses
       - [x] PreventAttackDamageOnCoinFlip
-      - [ ] PreventSpecificSpecialCondition (or PreventAsleep)
+      - [x] PreventSpecificSpecialCondition
       - [x] NextCoinFlip
     - [ ] Parsing modifications
       - [x] _make your opponent’s Active Pokémon_ Burned

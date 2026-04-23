@@ -43,6 +43,9 @@
   <span v-else-if="entry.status.type == 'PreventSpecialConditions'">
     cannot be affected by Special Conditions</span
   >
+  <span v-else-if="entry.status.type == 'PreventSpecificSpecialCondition'">
+    cannot be {{ entry.status.specialCondition }}</span
+  >
   <span v-else-if="entry.status.type == 'ModifyAttackCost'">
     has its attack cost {{ entry.status.amount < 0 ? "reduced" : "increased" }} by
     {{ Math.abs(entry.status.amount) }} <EnergyIcon :energy="entry.status.energyType" inline

@@ -18,6 +18,7 @@ import type {
   PlayerStatus,
   PlayingCard,
   PokemonCard,
+  SpecialCondition,
 } from "./types";
 
 export class Player {
@@ -629,46 +630,49 @@ export class Player {
     this.logger.discardFromDeck(this, discarded);
   }
 
-  shouldPreventSpecialConditions(): boolean {
+  private applySpecialConditionToActive(condition: SpecialCondition) {
     const active = this.activeOrThrow();
+    const normalizedCondition = condition.replace(/\+$/, "") as SpecialCondition;
     const result = active.PokemonStatuses.some(
-      (status) => status.type === "PreventSpecialConditions",
+      (status) =>
+        status.type === "PreventSpecialConditions" ||
+        (status.type === "PreventSpecificSpecialCondition" &&
+          status.specialCondition === normalizedCondition),
     );
-    if (result) this.logger.specialConditionPrevented(this, active);
-    return result;
-  }
+    if (result) {
+      this.logger.specialConditionPrevented(this, active);
+      return;
+    }
 
+    if (condition === "Poisoned" && active.SecondaryConditions.has("Poisoned+"))
+      active.SecondaryConditions.delete("Poisoned+");
+    if (condition === "Poisoned+" && active.SecondaryConditions.has("Poisoned"))
+      active.SecondaryConditions.delete("Poisoned");
+
+    if (condition === "Asleep" || condition === "Confused" || condition === "Paralyzed") {
+      active.PrimaryCondition = condition;
+    } else {
+      active.SecondaryConditions.add(condition);
+    }
+    this.logger.specialConditionApplied(this, normalizedCondition);
+  }
   poisonActivePokemon() {
-    if (this.shouldPreventSpecialConditions()) return;
-    this.activeOrThrow().SecondaryConditions.add("Poisoned");
-    this.activeOrThrow().SecondaryConditions.delete("Poisoned+");
-    this.logger.specialConditionApplied(this, "Poisoned");
+    this.applySpecialConditionToActive("Poisoned");
   }
   poisonPlusActivePokemon() {
-    if (this.shouldPreventSpecialConditions()) return;
-    this.activeOrThrow().SecondaryConditions.add("Poisoned+");
-    this.activeOrThrow().SecondaryConditions.delete("Poisoned");
-    this.logger.specialConditionApplied(this, "Poisoned");
+    this.applySpecialConditionToActive("Poisoned+");
   }
   burnActivePokemon() {
-    if (this.shouldPreventSpecialConditions()) return;
-    this.activeOrThrow().SecondaryConditions.add("Burned");
-    this.logger.specialConditionApplied(this, "Burned");
+    this.applySpecialConditionToActive("Burned");
   }
   sleepActivePokemon() {
-    if (this.shouldPreventSpecialConditions()) return;
-    this.activeOrThrow().PrimaryCondition = "Asleep";
-    this.logger.specialConditionApplied(this, "Asleep");
+    this.applySpecialConditionToActive("Asleep");
   }
   paralyzeActivePokemon() {
-    if (this.shouldPreventSpecialConditions()) return;
-    this.activeOrThrow().PrimaryCondition = "Paralyzed";
-    this.logger.specialConditionApplied(this, "Paralyzed");
+    this.applySpecialConditionToActive("Paralyzed");
   }
   confuseActivePokemon() {
-    if (this.shouldPreventSpecialConditions()) return;
-    this.activeOrThrow().PrimaryCondition = "Confused";
-    this.logger.specialConditionApplied(this, "Confused");
+    this.applySpecialConditionToActive("Confused");
   }
 
   applyPlayerStatus(status: PlayerStatus, pokemon?: InPlayPokemon) {

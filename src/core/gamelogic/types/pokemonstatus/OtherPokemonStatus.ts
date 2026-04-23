@@ -1,4 +1,5 @@
 import type { Energy } from "../Energy";
+import type { SpecialCondition } from "../SpecialCondition";
 import type { BasePokemonStatus } from "./PokemonStatus";
 
 // Other statuses
@@ -41,6 +42,10 @@ interface IncreaseMaxHPPokemonStatus extends BasePokemonStatus {
 interface PreventSpecialConditionsPokemonStatus extends BasePokemonStatus {
   type: "PreventSpecialConditions";
 }
+interface PreventSpecificSpecialConditionPokemonStatus extends BasePokemonStatus {
+  type: "PreventSpecificSpecialCondition";
+  specialCondition: SpecialCondition;
+}
 interface IncreasePoisonDamagePokemonStatus extends BasePokemonStatus {
   type: "IncreasePoisonDamage";
   amount: number;
@@ -71,6 +76,7 @@ export type OtherPokemonStatus =
   | DoubleEnergyPokemonStatus
   | IncreaseMaxHPPokemonStatus
   | PreventSpecialConditionsPokemonStatus
+  | PreventSpecificSpecialConditionPokemonStatus
   | IncreasePoisonDamagePokemonStatus
   | CannotEvolvePokemonStatus
   | CanEvolveAsPokemonStatus
@@ -123,6 +129,12 @@ export const OtherPokemonStatus = {
     type: "PreventSpecialConditions",
     source,
     turnsToKeep,
+  }),
+  PreventSpecificSpecialCondition: (specialCondition: SpecialCondition, turnsToKeep?: number) => ({
+    type: "PreventSpecificSpecialCondition",
+    source,
+    turnsToKeep,
+    specialCondition,
   }),
   IncreasePoisonDamage: (amount: number, turnsToKeep?: number) => ({
     type: "IncreasePoisonDamage",
