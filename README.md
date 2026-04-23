@@ -12,49 +12,39 @@ Backend todo:
   - [x] A3a: 72/72 (100%)
   - [x] A3b: 71/71 (100%)
   - [x] A4: 164/164 (100%)
-    - [x] Baby Pokémon (0-cost attacks)
-    - [x] New conditionals
-      - [x] If this Pokémon has no damage on it
-      - [x] If defender is Burned
-      - [x] If Unown in play with Ability other than [name]
-      - [x] If damaged by an attack during previous turn
-    - [x] New damage modifiers
-      - [x] Extra damage per Energy in defender's Retreat Cost
-      - [x] Choose Benched Pokémon to discard for extra damage
-    - [x] New attacking effects
-      - [x] Damage any other Pokémon at random
-    - [x] New side effects
-      - [x] Take [multiple types] Energy from your Energy Zone and distribute them
-      - [x] Confused but not (FlipCoinToAttack with no turnsToKeep limit)
-      - [x] Set defender's HP to N
-      - [x] Put both Active Pokémon to sleep
-      - [x] Move all [type] Energy from each of your Pokémon to this Pokémon
-      - [x] Evolve self with random evolution from deck
-      - [x] Apply ModifyAttackCost(+1, C) to defender
-      - [x] Draw cards until holding same number as opponent
-      - [x] Discard [multiple types] Energy from this Pokémon
-      - [x] Randomize type of random Energy on defender
-      - [x] Apply ModifyIncomingAttackDamage and PreventSpecialConditions to self
-      - [x] Discard a [type] Energy from your opponent’s Active Pokémon
-      - [x] Put self into hand instead of discard
-      - [x] For each heads, return random Pokémon from discard to hand
-      - [x] For each of your [predicate] Pokémon, look at top cards of own deck and rearrange
-    - [x] New statuses
-      - [x] PreventAttackDamageOnCoinFlip
-      - [x] PreventSpecificSpecialCondition
-      - [x] NextCoinFlip
-    - [x] Parsing modifications
-      - [x] _make your opponent’s Active Pokémon_ Burned
-      - [x] Move all _[typeless]_ Energy from this Pokémon to 1 of...
-      - [x] This attack does extra damage per _[typeless]_ Energy on self
-      - [x] If your opponent’s Active Pokémon is _an_...
-      - [x] Move a _[multiple types]_ Energy...
-      - [x] Choose a _[predicate]_ card you find there and shuffle it...
+  - [ ] A4a: 52/73 (71.2%)
+    - [ ] New ability triggers
+      - [ ] When played to Bench
+      - [ ] After Knocking Out opposing mon
+    - [ ] New conditionals
+      - [ ] Opposing mon is an evolved Pokémon
+      - [ ] Discarded card is [predicate]
+      - [ ] Has any [type] Energy attached
+      - [ ] Opposing mon is [name]
+      - [ ] Has [number] or more Energy types attached
+    - [ ] New damage modifiers
+      - [ ] Damage per Pokémon on both Benches
+    - [ ] New attacking effects
+      - [ ] Discard Tools to increase damage
+    - [ ] New side effects
+      - [ ] Poison and Paralyze
+      - [ ] Heal from being Asleep, Paralyzed, and Confused
+      - [ ] Draw all [predicate] cards from top [number] of deck
+    - [ ] New statuses
+      - [ ] Delayed damage
+      - [ ] Can use prior evolutions' attacks
+    - [ ] Parsing modifications
+      - [ ] _You may_ switch this Pokémon with...
+      - [ ] Discard the top _card_ of your opponent's deck.
+      - [ ] _the Attacking_ Pokémon is Knocked Out.
+      - [ ] This attack does damage to your opponent’s Active Pokémon equal to the damage this Pokémon has on it.
+      - [ ] Until this Pokémon leaves the Active Spot, [status]. This effect stacks.
+      - [ ] The Retreat Cost of _this Pokémon_ is [number] less.
+    - [ ] Other
+      - [ ] Attack can be used for [cost]
     - [ ] Unique Promo cards
-      - [ ] Horsea
-      - [ ] Chinchou
-      - [ ] Blissey ex
-  - [ ] A4a
+      - [ ] Tropius
+      - [ ] Poliwag
 - [ ] Bring in newer sets
   - [x] A2-A4a
   - [x] A4b-B2

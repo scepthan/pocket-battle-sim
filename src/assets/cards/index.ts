@@ -22,7 +22,7 @@ export const cardData = {
 } as Record<string, InputCard[]>;
 
 export const allCards = Object.values(cardData)
-  .slice(0, 9)
+  .slice(0, 10)
   .reduce((acc, cardList) => {
     return acc.concat(cardList);
   }, [] as InputCard[]);
