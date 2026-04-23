@@ -392,6 +392,7 @@ export class Player {
     if (!fromPokemon.hasSufficientActualEnergy(energy))
       throw new Error("Energy not attached to fromPokemon");
 
+    if (energy.length === 0) return;
     fromPokemon.removeEnergy(energy);
     toPokemon.attachEnergy(energy);
     this.logger.attachEnergy(this, toPokemon, energy, "pokemon", fromPokemon);

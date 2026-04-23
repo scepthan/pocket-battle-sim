@@ -11,7 +11,7 @@ Backend todo:
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
   - [x] A3b: 71/71 (100%)
-  - [ ] A4: 161/164 (98.2%)
+  - [ ] A4: 162/164 (98.8%)
     - [x] Baby Pokémon (0-cost attacks)
     - [x] New conditionals
       - [x] If this Pokémon has no damage on it
@@ -28,6 +28,7 @@ Backend todo:
       - [x] Confused but not (FlipCoinToAttack with no turnsToKeep limit)
       - [x] Set defender's HP to N
       - [x] Put both Active Pokémon to sleep
+      - [x] Move all [type] Energy from each of your Pokémon to this Pokémon
       - [x] Evolve self with random evolution from deck
       - [x] Apply ModifyAttackCost(+1, C) to defender
       - [x] Draw cards until holding same number as opponent
@@ -45,7 +46,6 @@ Backend todo:
     - [ ] Parsing modifications
       - [x] _make your opponent’s Active Pokémon_ Burned
       - [x] Move all _[typeless]_ Energy from this Pokémon to 1 of...
-      - [ ] Move all [type] Energy from each of your [predicate] to _this Pokémon_
       - [x] This attack does extra damage per _[typeless]_ Energy on self
       - [x] If your opponent’s Active Pokémon is _an_...
       - [x] Move a _[multiple types]_ Energy...

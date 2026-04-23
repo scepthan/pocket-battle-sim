@@ -1339,9 +1339,24 @@ export const parseEffect = (
         parser.addSideEffect(async (game, self) => {
           for (const pokemon of self.player.BenchedPokemon) {
             const energyToMove = pokemon.getEnergy(fullType);
-            if (energyToMove.length > 0) {
-              await self.player.transferEnergy(pokemon, self.player.activeOrThrow(), energyToMove);
-            }
+            await self.player.transferEnergy(pokemon, self.player.activeOrThrow(), energyToMove);
+          }
+        });
+      },
+    },
+    {
+      pattern: /^move all \{(\w)\} Energy from each of your Pokémon to this Pokémon\.$/i,
+      transform: (_, energyType) => {
+        const fullType = parseEnergy(energyType);
+
+        effect.implicitConditions.push((player, self) =>
+          player.InPlayPokemon.some((p) => p !== self && p.hasAnyEnergy(fullType)),
+        );
+        parser.addSideEffect(async (game, self) => {
+          for (const pokemon of self.player.InPlayPokemon) {
+            if (pokemon === self) continue;
+            const energyToMove = pokemon.getEnergy(fullType);
+            await self.player.transferEnergy(pokemon, self, energyToMove);
           }
         });
       },
