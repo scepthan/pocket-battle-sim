@@ -246,6 +246,19 @@ export class Player {
     return card;
   }
 
+  async playRandomEvolution(target: InPlayPokemon) {
+    const card = this.pullRandomCard(
+      this.Deck,
+      (card) => card.CardType === "Pokemon" && card.EvolvesFrom === target.Name,
+    );
+    if (!card) return;
+    await this.evolvePokemon(target, card as PokemonCard, false, true);
+
+    this.shuffleDeck();
+
+    return card;
+  }
+
   discardRandomFiltered(predicate: (card: PlayingCard) => boolean = () => true) {
     const card = this.pullRandomCard(this.Hand, predicate);
     if (!card) return [];
@@ -316,21 +329,28 @@ export class Player {
     await pokemon.onEnterPlay();
   }
 
-  async evolvePokemon(pokemon: InPlayPokemon, card: PokemonCard, skipStage1: boolean = false) {
-    if (!this.Hand.includes(card)) {
+  async evolvePokemon(
+    pokemon: InPlayPokemon,
+    card: PokemonCard,
+    skipStage1: boolean = false,
+    ignoreChecks: boolean = false,
+  ) {
+    if (!this.Hand.includes(card) && !ignoreChecks) {
       throw new Error("Card not in hand");
     }
     if (card.EvolvesFrom !== pokemon.EvolvesAs && !skipStage1) {
       throw new Error("Card does not evolve from this Pokemon");
     }
-    if (pokemon.PlayedThisTurn) {
+    if (pokemon.PlayedThisTurn && !ignoreChecks) {
       throw new Error("Pokemon is not ready to evolve");
     }
     if (pokemon.PokemonStatuses.some((status) => status.type == "CannotEvolve")) {
       throw new Error("Cannot evolve this Pokemon due to status effect");
     }
 
-    removeElement(this.Hand, card);
+    if (this.Hand.includes(card)) {
+      removeElement(this.Hand, card);
+    }
     this.InPlay.push(card);
 
     this.logger.evolvePokemon(this, pokemon, card);

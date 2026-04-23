@@ -572,6 +572,18 @@ export const parseEffect = (
       },
     },
     {
+      pattern: /^your opponent’s Active Pokémon’s remaining HP is now (\d+)\./i,
+      transform: (_, hp) => {
+        effect.attackingEffects.push(
+          parser.applyConditionalIfAvailable(async (game, self) => {
+            const defender = self.opponent.activeOrThrow();
+            const targetHp = Number(hp);
+            game.setHP(defender, targetHp);
+          }),
+        );
+      },
+    },
+    {
       pattern: /^your opponent’s Active Pokémon is Knocked Out\./i,
       transform: () => {
         parser.addSideEffect(async (game, self) => {
@@ -875,6 +887,15 @@ export const parseEffect = (
         );
         parser.addSideEffect(async (game, self) => {
           await self.player.playRandomFilteredToBench(predicate);
+        });
+      },
+    },
+    {
+      pattern:
+        /^put a random card from your deck that evolves from this Pokémon onto this Pokémon to evolve it\./i,
+      transform: () => {
+        parser.addSideEffect(async (game, self) => {
+          await self.player.playRandomEvolution(self);
         });
       },
     },
@@ -1805,18 +1826,18 @@ export const parseEffect = (
       },
     },
     {
-      pattern:
-        /^attacks used by the Defending Pokémon cost (\d+) {(\w)} more, and its Retreat Cost is (\d+) {C} more\./i,
-      transform: (_, attackCostModifier, type, retreatCostModifier) => {
+      pattern: /^attacks used by the Defending Pokémon cost (\d+) \{(\w)\} more[,.]/i,
+      transform: (_, modifier, type) => {
         parser.addOpponentPokemonStatus(
-          PokemonStatus.ModifyAttackCost(
-            parseEnergy(type),
-            +attackCostModifier,
-            parser.turnsToKeep,
-          ),
+          PokemonStatus.ModifyAttackCost(parseEnergy(type), +modifier, parser.turnsToKeep),
         );
+      },
+    },
+    {
+      pattern: /^and its Retreat Cost is (\d+) {C} more\./i,
+      transform: (_, modifier) => {
         parser.addOpponentPokemonStatus(
-          PokemonStatus.ModifyRetreatCost(+retreatCostModifier, parser.turnsToKeep),
+          PokemonStatus.ModifyRetreatCost(+modifier, parser.turnsToKeep),
         );
       },
     },

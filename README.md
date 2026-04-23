@@ -11,7 +11,7 @@ Backend todo:
   - [x] A3: 157/157 (100%)
   - [x] A3a: 72/72 (100%)
   - [x] A3b: 71/71 (100%)
-  - [ ] A4: 155/164 (94.5%)
+  - [ ] A4: 158/164 (96.3%)
     - [x] Baby Pokémon (0-cost attacks)
     - [ ] New conditionals
       - [x] If this Pokémon has no damage on it
@@ -26,10 +26,10 @@ Backend todo:
     - [ ] New side effects
       - [x] Take [multiple types] Energy from your Energy Zone and distribute them
       - [x] Confused but not (FlipCoinToAttack with no turnsToKeep limit)
-      - [ ] Set defender's HP to N
+      - [x] Set defender's HP to N
       - [ ] Put both Active Pokémon to sleep
-      - [ ] Evolve self with random evolution from deck
-      - [ ] Apply ModifyAttackCost(+1, C) to defender
+      - [x] Evolve self with random evolution from deck
+      - [x] Apply ModifyAttackCost(+1, C) to defender
       - [x] Draw cards until holding same number as opponent
       - [x] Discard [multiple types] Energy from this Pokémon
       - [ ] Randomize type of random Energy on defender
