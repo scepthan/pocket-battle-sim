@@ -853,6 +853,8 @@ export class Game {
     } else if (card.cardType === "Fossil") {
       if (!target || target.isPokemon) throw new Error("Fossil card requires a target empty slot");
       await this.putFossilOnBench(card, target);
+    } else if (card.cardType === "Stadium") {
+      throw new Error("Stadiums not yet implemented");
     } else {
       this.GameLog.playTrainer(this.AttackingPlayer, card);
 

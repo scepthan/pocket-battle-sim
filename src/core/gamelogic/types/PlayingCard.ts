@@ -1,6 +1,5 @@
 import type { Ability } from "./ability/Ability";
 import type { Attack } from "./Attack";
-import type { BasicEffect } from "./Effects";
 import type { Energy } from "./Energy";
 import type { TrainerEffect } from "./TrainerEffect";
 
@@ -48,8 +47,8 @@ export interface PokemonToolCard extends BaseCard {
 export interface StadiumCard extends BaseCard {
   cardType: "Stadium";
   text: string;
-  effect: BasicEffect;
+  effect: Ability;
 }
 
-export type TrainerCard = ItemCard | FossilCard | SupporterCard | PokemonToolCard; // | StadiumCard
+export type TrainerCard = ItemCard | FossilCard | SupporterCard | PokemonToolCard | StadiumCard;
 export type PlayingCard = PokemonCard | TrainerCard;

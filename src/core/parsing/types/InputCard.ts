@@ -28,7 +28,7 @@ export interface PokemonInputCard extends BaseInputCard {
   isUltraBeast?: boolean;
 }
 export interface TrainerInputCard extends BaseInputCard {
-  cardType: "Item" | "Fossil" | "Supporter" | "PokemonTool";
+  cardType: "Item" | "Fossil" | "Supporter" | "PokemonTool" | "Stadium";
   text: string;
 }
 

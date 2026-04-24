@@ -5,7 +5,7 @@ import { GameRulePlayerStatus } from "./GameRulePlayerStatus";
 
 export interface BasePlayerStatus {
   id?: string;
-  source: "Effect" | "Ability";
+  source: "Effect" | "Ability" | "Stadium";
   keepNextTurn?: boolean;
   doesNotStack?: boolean;
 }

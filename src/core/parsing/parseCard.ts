@@ -3,8 +3,12 @@ import {
   parseEnergy,
   type Ability,
   type Energy,
+  type FossilCard,
   type ItemCard,
   type PlayingCard,
+  type PokemonCard,
+  type PokemonToolCard,
+  type StadiumCard,
   type SupporterCard,
 } from "../gamelogic";
 import { statusesToSideEffects } from "./EffectParser";
@@ -46,7 +50,7 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
       parseSuccessful = false;
     }
 
-    const outputCard = {
+    const outputCard: PokemonCard = {
       id: inputCard.id,
       name: inputCard.name,
       rarity: inputCard.rarity,
@@ -96,7 +100,7 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
     const result = inputCard.text.match(/(\d+)-HP Basic \{(\w)\} Pokémon/i);
     if (!result) parseSuccessful = false;
 
-    const outputCard = {
+    const outputCard: FossilCard = {
       id: inputCard.id,
       name: inputCard.name,
       rarity: inputCard.rarity,
@@ -118,7 +122,7 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
     );
     if (!result.parseSuccessful) parseSuccessful = false;
 
-    const outputCard = {
+    const outputCard: PokemonToolCard = {
       id: inputCard.id,
       name: inputCard.name,
       rarity: inputCard.rarity,
@@ -128,6 +132,25 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
       parseSuccessful,
     };
 
+    return { value: outputCard, parseSuccessful };
+  } else if (inputCard.cardType === "Stadium") {
+    const result = parseAbility(
+      {
+        name: inputCard.name,
+        text: inputCard.text,
+      },
+      "Stadium",
+    );
+    parseSuccessful = false;
+    const outputCard: StadiumCard = {
+      id: inputCard.id,
+      name: inputCard.name,
+      rarity: inputCard.rarity,
+      cardType: inputCard.cardType,
+      text: inputCard.text,
+      effect: result.value,
+      parseSuccessful,
+    };
     return { value: outputCard, parseSuccessful };
   } else {
     // Would only happen if a card is defined with an invalid CardType
