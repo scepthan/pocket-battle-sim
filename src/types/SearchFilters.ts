@@ -16,4 +16,5 @@ export interface SearchFilters {
   rarity: string[];
   expansion: string[];
   isPromo: boolean | null;
+  isFullyImplemented: boolean | null;
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="flip-card" :style="style">
     <div class="flip-card-inner">
-      <div class="flip-card-front">
+      <div class="flip-card-front" :class="{ unimplemented }">
         <PlayingCardImage :card-id="cardId" :height="height" />
       </div>
       <div class="flip-card-back">
@@ -26,6 +26,7 @@ const cardId = computed(() => {
     return props.card.id;
   }
 });
+const unimplemented = computed(() => typeof props.card === "object" && !props.card.parseSuccessful);
 
 const ratio = 367 / 512;
 const height = computed(() => props.heightPx ?? 200);
@@ -65,5 +66,8 @@ const style = computed(() => ({
 }
 .flip-card-back {
   transform: rotateY(180deg);
+}
+.unimplemented {
+  filter: grayscale(100%) brightness(80%);
 }
 </style>

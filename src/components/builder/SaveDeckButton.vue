@@ -81,13 +81,18 @@ const fullDeck = computed<Deck>(() => ({
   EnergyTypes: passedProps.deck.EnergyTypes,
 }));
 const validation = computed(() => deckValidator.validateDeck(fullDeck.value));
+const allParsed = computed(() => fullDeck.value.Cards.every((card) => card.parseSuccessful));
 const tooltip = computed(() =>
   validation.value !== true
     ? "Deck can be saved but not used:\n\n" + validation.value.join("; ")
-    : "Save",
+    : !allParsed.value
+      ? "Deck contains cards that are not fully implemented."
+      : "Save",
 );
 const color = computed(() =>
-  !cannotSaveReason.value && validation.value !== true ? "warning" : "default",
+  !cannotSaveReason.value && (validation.value !== true || !allParsed.value)
+    ? "warning"
+    : "default",
 );
 
 const onClick = () => {

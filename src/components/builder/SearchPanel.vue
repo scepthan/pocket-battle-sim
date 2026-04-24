@@ -61,6 +61,7 @@ const baseFilters: SearchFilters = {
   rarity: [],
   expansion: [],
   isPromo: null,
+  isFullyImplemented: null,
 };
 
 const searchFilters = reactive<SearchFilters>(Object.assign({}, baseFilters));
@@ -77,6 +78,9 @@ const toNormalLower = (str: string) =>
     .toLowerCase();
 
 const cardFilter = (card: PlayingCard) => {
+  if (searchFilters.isFullyImplemented !== null) {
+    if (searchFilters.isFullyImplemented !== card.parseSuccessful) return false;
+  }
   if (searchFilters.isPokemon !== null) {
     if (searchFilters.isPokemon !== (card.cardType === "Pokemon")) return false;
   }

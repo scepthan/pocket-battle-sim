@@ -62,6 +62,9 @@
         <FilterDialogRow label="Expansion">
           <ExpansionSelector v-model="filters.expansion" />
         </FilterDialogRow>
+        <FilterDialogRow label="Is fully implemented?">
+          <Toggle3Way v-model="filters.isFullyImplemented" />
+        </FilterDialogRow>
       </v-card-text>
     </v-card>
   </v-dialog>

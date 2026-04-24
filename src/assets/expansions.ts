@@ -1,4 +1,5 @@
 export const allExpansions = {
+  "PROMO-A": "Promo A",
   A1: "Genetic Apex",
   A1a: "Mythical Island",
   A2: "Space-Time Smackdown",
@@ -10,6 +11,7 @@ export const allExpansions = {
   A4: "Wisdom of Sea and Sky",
   A4a: "Secluded Springs",
   A4b: "Deluxe Pack: ex",
+  "PROMO-B": "Promo B",
   B1: "Mega Rising",
   B1a: "Crimson Blaze",
   B2: "Fantastical Parade",
