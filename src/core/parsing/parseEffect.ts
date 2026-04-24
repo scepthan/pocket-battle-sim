@@ -301,13 +301,13 @@ export const parseEffect = (
     {
       pattern: /^If this Pokémon has a Pokémon Tool attached,/i,
       transform: () => {
-        parser.conditionalForNextEffect = (player, self) => self.AttachedToolCards.length > 0;
+        parser.conditionalForNextEffect = (player, self) => self.attachedToolCards.length > 0;
       },
     },
     {
       pattern: /^If this Pokémon evolved during this turn,/i,
       transform: () => {
-        parser.conditionalForNextEffect = (player, self) => self.PlayedThisTurn && self.Stage > 0;
+        parser.conditionalForNextEffect = (player, self) => self.playedThisTurn && self.stage > 0;
       },
     },
     {
@@ -336,7 +336,7 @@ export const parseEffect = (
       pattern: /^If your opponent’s Active Pokémon has more remaining HP than this Pokémon,/i,
       transform: () => {
         parser.conditionalForNextEffect = (player, self) =>
-          self.opponent.activeOrThrow().CurrentHP > self.CurrentHP;
+          self.opponent.activeOrThrow().currentHP > self.currentHP;
       },
     },
     {
@@ -372,14 +372,14 @@ export const parseEffect = (
       pattern: /^If your opponent’s Active Pokémon has an Ability,/i,
       transform: () => {
         parser.conditionalForNextEffect = (player, self) =>
-          self.opponent.activeOrThrow().Ability !== undefined;
+          self.opponent.activeOrThrow().ability !== undefined;
       },
     },
     {
       pattern: /^If your opponent’s Active Pokémon has a Pokémon Tool attached,/i,
       transform: () => {
         parser.conditionalForNextEffect = (player, self) =>
-          self.opponent.activeOrThrow().AttachedToolCards.length > 0;
+          self.opponent.activeOrThrow().attachedToolCards.length > 0;
       },
     },
     {
@@ -420,7 +420,7 @@ export const parseEffect = (
       transform: (_, type) => {
         const fullType = type ? parseEnergy(type) : undefined;
         const predicate = fullType ? (e: Energy) => e == fullType : () => true;
-        effect.passedAmount = (game, self) => self.EffectiveEnergy.filter(predicate).length;
+        effect.passedAmount = (game, self) => self.effectiveEnergy.filter(predicate).length;
         return "for each <amount>";
       },
     },
@@ -434,7 +434,7 @@ export const parseEffect = (
     {
       pattern: /for each Energy attached to your opponent’s Active Pokémon/i,
       transform: () => {
-        effect.passedAmount = (game, self) => self.opponent.activeOrThrow().EffectiveEnergy.length;
+        effect.passedAmount = (game, self) => self.opponent.activeOrThrow().effectiveEnergy.length;
         return "for each <amount>";
       },
     },
@@ -442,7 +442,7 @@ export const parseEffect = (
       pattern: /for each Energy attached to all of your opponent’s Pokémon/i,
       transform: () => {
         effect.passedAmount = (game, self) =>
-          self.opponent.InPlayPokemon.flatMap((p) => p.EffectiveEnergy).length;
+          self.opponent.InPlayPokemon.flatMap((p) => p.effectiveEnergy).length;
         return "for each <amount>";
       },
     },
@@ -566,7 +566,7 @@ export const parseEffect = (
       transform: () => {
         effect.attackingEffects.push(async (game, self) => {
           const defender = self.opponent.activeOrThrow();
-          const targetHp = Math.floor(defender.CurrentHP / 2 / 10) * 10;
+          const targetHp = Math.floor(defender.currentHP / 2 / 10) * 10;
           game.setHP(defender, targetHp);
         });
       },
@@ -625,7 +625,7 @@ export const parseEffect = (
         effect.validTargets = (player) => player.opponent.InPlayPokemon.filter(predicate);
         effect.attackingEffects.push(async (game, self, amount, target) => {
           if (!target) return;
-          const energyCount = target.EffectiveEnergy.length;
+          const energyCount = target.effectiveEnergy.length;
           game.attackPokemon(target, energyCount * Number(damagePerEnergy));
         });
       },
@@ -776,7 +776,7 @@ export const parseEffect = (
         parser.addSideEffect(async (game, self) => {
           self.removeAllSpecialConditions();
 
-          const thisCard = self.AttachedToolCards.find((card) => card.text === inputText);
+          const thisCard = self.attachedToolCards.find((card) => card.text === inputText);
           if (!thisCard) throw new Error("Could not find this Pokemon Tool card");
 
           await game.discardPokemonTools(self, [thisCard]);
@@ -802,7 +802,7 @@ export const parseEffect = (
         effect.validTargets = (player) => player.InPlayPokemon.filter(predicate);
         parser.addSideEffect(async (game, self, amount, target) => {
           if (!target) return;
-          target.healDamage(target.MaxHP - target.CurrentHP);
+          target.healDamage(target.maxHP - target.currentHP);
           await game.discardAllEnergy(target);
         });
       },
@@ -1160,7 +1160,7 @@ export const parseEffect = (
       pattern: /^Discard a random Energy from your opponent’s Active Pokémon\./i,
       transform: () => {
         effect.implicitConditions.push(
-          (player, self) => self.opponent.activeOrThrow().EffectiveEnergy.length > 0,
+          (player, self) => self.opponent.activeOrThrow().effectiveEnergy.length > 0,
         );
         parser.addSideEffect(
           async (game, self) => await game.discardRandomEnergy(self.opponent.activeOrThrow()),
@@ -1172,7 +1172,7 @@ export const parseEffect = (
       transform: (_, energyType) => {
         const fullType = parseEnergy(energyType);
         effect.implicitConditions.push((player, self) =>
-          self.opponent.activeOrThrow().EffectiveEnergy.some((e) => e === fullType),
+          self.opponent.activeOrThrow().effectiveEnergy.some((e) => e === fullType),
         );
         parser.addSideEffect(
           async (game, self) =>
@@ -1184,7 +1184,7 @@ export const parseEffect = (
       pattern: /^For each heads, discard a random Energy from your opponent’s Active Pokémon\.$/i,
       transform: () => {
         effect.implicitConditions.push(
-          (player, self) => self.opponent.activeOrThrow().EffectiveEnergy.length > 0,
+          (player, self) => self.opponent.activeOrThrow().effectiveEnergy.length > 0,
         );
         parser.addSideEffect(
           async (game, self, amount) =>
@@ -1208,7 +1208,7 @@ export const parseEffect = (
         parser.addSideEffect(async (game) => {
           const allEnergy: { pokemon: InPlayPokemon; energy: Energy }[] = [];
           for (const p of game.InPlayPokemon) {
-            for (const e of p.AttachedEnergy) {
+            for (const e of p.attachedEnergy) {
               allEnergy.push({ pokemon: p, energy: e });
             }
           }
@@ -1429,7 +1429,7 @@ export const parseEffect = (
       pattern: /^Discard all Pokémon Tool cards attached to each of your opponent’s Pokémon\./i,
       transform: () => {
         effect.implicitConditions.push((player) =>
-          player.opponent.InPlayPokemon.some((p) => p.AttachedToolCards.length > 0),
+          player.opponent.InPlayPokemon.some((p) => p.attachedToolCards.length > 0),
         );
         parser.addSideEffect(async (game, self) => {
           for (const pokemon of self.opponent.InPlayPokemon) {
@@ -2099,7 +2099,7 @@ export const parseEffect = (
       pattern: /^You can use this attack only if you have Uxie and Azelf on your Bench\./i,
       transform: () => {
         effect.explicitConditions.push((player) =>
-          ["Uxie", "Azelf"].every((name) => player.BenchedPokemon.some((p) => p.Name == name)),
+          ["Uxie", "Azelf"].every((name) => player.BenchedPokemon.some((p) => p.name == name)),
         );
       },
     },
@@ -2141,7 +2141,7 @@ export const parseEffect = (
       transform: (_, abilityName) => {
         effect.explicitConditions.push((player) =>
           player.InPlayPokemon.some(
-            (p) => p.Name === "Unown" && p.Ability && p.Ability.name !== abilityName,
+            (p) => p.name === "Unown" && p.ability && p.ability.name !== abilityName,
           ),
         );
       },

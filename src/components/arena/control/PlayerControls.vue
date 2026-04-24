@@ -27,7 +27,7 @@
   <div v-else-if="stage === 'selectPokemon'">
     <SelectionMenu
       :selector="pokemonSelector"
-      :button-text="(pokemon) => pokemon.Name"
+      :button-text="(pokemon) => pokemon.name"
       default-prompt="Select a Pokémon:"
     />
   </div>
@@ -126,7 +126,7 @@ const playableCards = computed(
 const usableAbilities = computed(
   () =>
     game.value?.selfInPlayPokemon.filter(
-      (pokemon) => pokemon.Ability && game.value?.canUseAbility(pokemon, pokemon.Ability, true),
+      (pokemon) => pokemon.ability && game.value?.canUseAbility(pokemon, pokemon.ability, true),
     ) ?? [],
 );
 const usableAttacks = computed(() =>
@@ -250,7 +250,7 @@ const setupAgent = () => {
             } else {
               const evolvablePokemon = gameView.selfInPlayPokemon.filter(
                 (p) =>
-                  p.isPokemon && p.EvolvesAs === selectedCard.evolvesFrom && gameView.canEvolve(p),
+                  p.isPokemon && p.evolvesAs === selectedCard.evolvesFrom && gameView.canEvolve(p),
               );
               if (evolvablePokemon.length === 0) {
                 console.log("No valid Pokémon to evolve.");
@@ -326,7 +326,7 @@ const setupAgent = () => {
         pokemonSelector.reset();
 
         if (typeof selectedPokemon === "symbol") continue;
-        await gameView.useAbility(selectedPokemon, selectedPokemon.Ability!);
+        await gameView.useAbility(selectedPokemon, selectedPokemon.ability!);
       } else if (action === "retreat") {
         stage.value = "selectPokemon";
         pokemonSelector.prompt.value = "Select a Pokémon to swap in:";

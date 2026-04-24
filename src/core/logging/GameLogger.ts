@@ -206,9 +206,9 @@ export class GameLogger {
       type: "returnToHand",
       player: player.Name,
       source: "inPlay",
-      cardIds: pokemon.InPlayCards.filter((card) => card.cardType !== "PokemonTool").map(
-        (card) => card.id,
-      ),
+      cardIds: pokemon.inPlayCards
+        .filter((card) => card.cardType !== "PokemonTool")
+        .map((card) => card.id),
     });
   }
 
@@ -217,9 +217,9 @@ export class GameLogger {
       type: "returnToDeck",
       player: player.Name,
       source: "inPlay",
-      cardIds: pokemon.InPlayCards.filter((card) => card.cardType !== "PokemonTool").map(
-        (card) => card.id,
-      ),
+      cardIds: pokemon.inPlayCards
+        .filter((card) => card.cardType !== "PokemonTool")
+        .map((card) => card.id),
     });
   }
 
@@ -297,7 +297,7 @@ export class GameLogger {
       player: player.Name,
       specialConditions: [condition],
       targetPokemon: player.pokemonToDescriptor(player.activeOrThrow()),
-      currentConditionList: player.activeOrThrow().CurrentConditions,
+      currentConditionList: player.activeOrThrow().currentConditions,
     });
   }
 
@@ -306,7 +306,7 @@ export class GameLogger {
       type: "specialConditionEffective",
       player: pokemon.player.Name,
       targetPokemon: pokemon.player.pokemonToDescriptor(pokemon),
-      specialCondition: pokemon.PrimaryCondition!,
+      specialCondition: pokemon.primaryCondition!,
     });
   }
 
@@ -323,8 +323,8 @@ export class GameLogger {
       targetPokemon: pokemon.player.pokemonToDescriptor(pokemon),
       initialHP: initialHP,
       damageDealt: damage,
-      finalHP: pokemon.CurrentHP,
-      maxHP: pokemon.MaxHP,
+      finalHP: pokemon.currentHP,
+      maxHP: pokemon.maxHP,
     });
   }
 
@@ -334,7 +334,7 @@ export class GameLogger {
       player: pokemon.player.Name,
       targetPokemon: pokemon.player.pokemonToDescriptor(pokemon),
       specialConditions: conditions,
-      currentConditionList: pokemon.CurrentConditions,
+      currentConditionList: pokemon.currentConditions,
     });
   }
 
@@ -469,8 +469,8 @@ export class GameLogger {
       fromAttack,
       damageDealt,
       initialHP,
-      finalHP: pokemon.CurrentHP,
-      maxHP: pokemon.MaxHP,
+      finalHP: pokemon.currentHP,
+      maxHP: pokemon.maxHP,
       weaknessBoost,
     });
   }
@@ -482,8 +482,8 @@ export class GameLogger {
       targetPokemon: player.pokemonToDescriptor(pokemon),
       initialHP,
       healingDealt: HP,
-      finalHP: pokemon.CurrentHP,
-      maxHP: pokemon.MaxHP,
+      finalHP: pokemon.currentHP,
+      maxHP: pokemon.maxHP,
     });
   }
 
@@ -494,7 +494,7 @@ export class GameLogger {
       targetPokemon: player.pokemonToDescriptor(pokemon),
       initialHP,
       finalHP: HP,
-      maxHP: pokemon.MaxHP,
+      maxHP: pokemon.maxHP,
     });
   }
 

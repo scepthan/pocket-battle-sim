@@ -72,7 +72,7 @@ export class RandomAgent extends PlayerAgent {
     if (game.canRetreat()) {
       if (
         game.retreatCostModifier < 0
-          ? game.selfActive.RetreatCost + game.retreatCostModifier <= 0 || Math.random() < 0.5
+          ? game.selfActive.retreatCost + game.retreatCostModifier <= 0 || Math.random() < 0.5
           : Math.random() < 0.125
       ) {
         const randomBench = randomElement(game.selfBenched);
@@ -81,17 +81,17 @@ export class RandomAgent extends PlayerAgent {
     }
 
     // Evolve a random Pokemon if possible
-    const evolveablePokemon = ownPokemon.filter((x) => x.ReadyToEvolve);
+    const evolveablePokemon = ownPokemon.filter((x) => x.readyToEvolve);
     const pokemonToEvolveWith = game.selfHand.filter(
       (x) =>
         x.cardType == "Pokemon" &&
         x.stage > 0 &&
-        evolveablePokemon.some((y) => y.Name == x.evolvesFrom),
+        evolveablePokemon.some((y) => y.name == x.evolvesFrom),
     ) as PokemonCard[];
     if (pokemonToEvolveWith.length > 0) {
       const randomEvolver = randomElement(pokemonToEvolveWith);
       const pokemonToEvolveFrom = evolveablePokemon.filter(
-        (x) => x.Name == randomEvolver.evolvesFrom,
+        (x) => x.name == randomEvolver.evolvesFrom,
       );
       const randomEvolvee = randomElement(pokemonToEvolveFrom);
       await game.playPokemonToEvolve(randomEvolver, randomEvolvee);

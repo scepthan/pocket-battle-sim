@@ -6,7 +6,7 @@
     <PlayingCard :card="card.cardId" :height-px="heightPx" />
 
     <div class="card-hp d-flex flex-column align-end">
-      {{ Math.floor(card.CurrentHP) }}
+      {{ Math.floor(card.currentHP) }}
       <div class="stacked hp-bar-container">
         <div class="hp-bar-inner">
           <div :style="hpBarStyle" />
@@ -17,7 +17,7 @@
 
       <div class="pokemon-tools">
         <PlayingCardImage
-          v-for="(tool, i) in card.AttachedToolCards"
+          v-for="(tool, i) in card.attachedToolCards"
           :key="i"
           :card-id="tool.id"
           :title="tool.name"
@@ -27,7 +27,7 @@
 
     <div class="card-energy">
       <EnergyIcon
-        v-for="(energy, i) in card.AttachedEnergy"
+        v-for="(energy, i) in card.attachedEnergy"
         :key="i"
         :width="height / 10"
         :energy="energy"
@@ -53,7 +53,7 @@ const width = computed(() => height.value * ratio);
 
 const hpPercent = computed(() =>
   props.card && "isPokemon" in props.card && props.card.isPokemon
-    ? (props.card.CurrentHP / props.card.MaxHP) * 100
+    ? (props.card.currentHP / props.card.maxHP) * 100
     : 0,
 );
 

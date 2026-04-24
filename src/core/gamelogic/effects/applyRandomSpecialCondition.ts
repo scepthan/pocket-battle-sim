@@ -3,7 +3,7 @@ import type { InPlayPokemon } from "../InPlayPokemon";
 
 export const applyRandomSpecialCondition = (target: InPlayPokemon) => {
   const game = target.game;
-  const currentConditions = target.CurrentConditions.map((cond) => cond.replace(/\+$/, ""));
+  const currentConditions = target.currentConditions.map((cond) => cond.replace(/\+$/, ""));
   const conditions = (["Asleep", "Burned", "Confused", "Paralyzed", "Poisoned"] as const).filter(
     (c) => !currentConditions.includes(c),
   );

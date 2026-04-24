@@ -24,74 +24,74 @@ export class PlayerPokemonView {
   get cardId() {
     return this.self.cardId;
   }
-  get Name() {
-    return this.self.Name;
+  get name() {
+    return this.self.name;
   }
-  get EvolvesAs() {
-    return this.self.EvolvesAs;
+  get evolvesAs() {
+    return this.self.evolvesAs;
   }
-  get Type() {
-    return this.self.Type;
+  get type() {
+    return this.self.type;
   }
-  get BaseHP() {
-    return this.self.BaseHP;
+  get baseHP() {
+    return this.self.baseHP;
   }
-  get Stage() {
-    return this.self.Stage;
+  get stage() {
+    return this.self.stage;
   }
-  get RetreatCost() {
-    return this.self.RetreatCost;
+  get retreatCost() {
+    return this.self.retreatCost;
   }
-  get Weakness() {
-    return this.self.Weakness;
+  get weakness() {
+    return this.self.weakness;
   }
-  get PrizePoints() {
-    return this.self.PrizePoints;
+  get prizePoints() {
+    return this.self.prizePoints;
   }
   get attacks() {
     return this.self.attacks;
   }
-  get Ability() {
-    return this.self.Ability;
+  get ability() {
+    return this.self.ability;
   }
-  get CurrentHP() {
-    return this.self.CurrentHP;
+  get currentHP() {
+    return this.self.currentHP;
   }
-  get MaxHP() {
-    return this.self.MaxHP;
+  get maxHP() {
+    return this.self.maxHP;
   }
-  get AttachedEnergy() {
-    return this.self.AttachedEnergy;
+  get attachedEnergy() {
+    return this.self.attachedEnergy;
   }
-  get EffectiveEnergy() {
-    return this.self.EffectiveEnergy;
+  get effectiveEnergy() {
+    return this.self.effectiveEnergy;
   }
-  get AttachedToolCards() {
-    return this.self.AttachedToolCards;
+  get attachedToolCards() {
+    return this.self.attachedToolCards;
   }
-  get MaxToolCards() {
-    return this.self.MaxToolCards;
+  get maxToolCards() {
+    return this.self.maxToolCards;
   }
-  get PrimaryCondition() {
-    return this.self.PrimaryCondition;
+  get primaryCondition() {
+    return this.self.primaryCondition;
   }
-  get SecondaryConditions() {
-    return this.self.SecondaryConditions;
+  get secondaryConditions() {
+    return this.self.secondaryConditions;
   }
-  get CurrentConditions() {
-    return this.self.CurrentConditions;
+  get currentConditions() {
+    return this.self.currentConditions;
   }
-  get PokemonStatuses() {
-    return this.self.PokemonStatuses;
+  get pokemonStatuses() {
+    return this.self.pokemonStatuses;
   }
-  get ActivePlayerStatuses() {
-    return this.self.ActivePlayerStatuses;
+  get activePlayerStatuses() {
+    return this.self.activePlayerStatuses;
   }
-  get InPlayCards() {
-    return this.self.InPlayCards;
+  get inPlayCards() {
+    return this.self.inPlayCards;
   }
-  get ReadyToEvolve() {
-    return !this.self.PlayedThisTurn;
+  get readyToEvolve() {
+    return !this.self.playedThisTurn;
   }
 
   calculateEffectiveEnergy(energies: Energy[]): Energy[] {

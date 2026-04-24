@@ -125,7 +125,7 @@ export class Player {
 
     this.logger.playToActive(this, setup.active);
 
-    const ability = pokemon.Ability;
+    const ability = pokemon.ability;
     if (
       ability?.type === "Standard" &&
       ability.trigger.type === "OnEnterPlay" &&
@@ -250,7 +250,7 @@ export class Player {
   async playRandomEvolution(target: InPlayPokemon) {
     const card = this.pullRandomCard(
       this.Deck,
-      (card) => card.cardType === "Pokemon" && card.evolvesFrom === target.Name,
+      (card) => card.cardType === "Pokemon" && card.evolvesFrom === target.name,
     );
     if (!card) return;
     await this.evolvePokemon(target, card as PokemonCard, false, true);
@@ -339,13 +339,13 @@ export class Player {
     if (!this.Hand.includes(card) && !ignoreChecks) {
       throw new Error("Card not in hand");
     }
-    if (card.evolvesFrom !== pokemon.EvolvesAs && !skipStage1) {
+    if (card.evolvesFrom !== pokemon.evolvesAs && !skipStage1) {
       throw new Error("Card does not evolve from this Pokemon");
     }
-    if (pokemon.PlayedThisTurn && !ignoreChecks) {
+    if (pokemon.playedThisTurn && !ignoreChecks) {
       throw new Error("Pokemon is not ready to evolve");
     }
-    if (pokemon.PokemonStatuses.some((status) => status.type == "CannotEvolve")) {
+    if (pokemon.pokemonStatuses.some((status) => status.type == "CannotEvolve")) {
       throw new Error("Cannot evolve this Pokemon due to status effect");
     }
 
@@ -359,7 +359,7 @@ export class Player {
   }
 
   canAttachFromEnergyZone(pokemon: InPlayPokemon) {
-    if (pokemon.PokemonStatuses.some((status) => status.type === "CannotAttachFromEnergyZone"))
+    if (pokemon.pokemonStatuses.some((status) => status.type === "CannotAttachFromEnergyZone"))
       return false;
 
     return true;
@@ -405,7 +405,7 @@ export class Player {
     count: number = 1,
   ): Promise<void> {
     const discardedEnergy: Energy[] = [];
-    const remainingEnergy = pokemon.AttachedEnergy.slice();
+    const remainingEnergy = pokemon.attachedEnergy.slice();
     if (Array.isArray(type)) {
       for (const t of type) {
         if (!remainingEnergy.includes(t)) continue;
@@ -424,16 +424,16 @@ export class Player {
     this.discardEnergy(discardedEnergy, "effect", pokemon);
   }
   async discardAllEnergyFromPokemon(pokemon: InPlayPokemon) {
-    const discardedEnergy = pokemon.AttachedEnergy.slice();
+    const discardedEnergy = pokemon.attachedEnergy.slice();
 
     pokemon.removeEnergy(discardedEnergy);
     this.discardEnergy(discardedEnergy, "effect", pokemon);
   }
   async discardRandomEnergyFromPokemon(pokemon: InPlayPokemon, count: number = 1) {
-    if (pokemon.AttachedEnergy.length == 0) return;
+    if (pokemon.attachedEnergy.length == 0) return;
 
     const discardedEnergy: Energy[] = [];
-    const remainingEnergy = pokemon.AttachedEnergy.slice();
+    const remainingEnergy = pokemon.attachedEnergy.slice();
 
     while (remainingEnergy.length > 0 && count > 0) {
       const energy = randomElement(remainingEnergy);
@@ -461,9 +461,9 @@ export class Player {
 
   get effectiveRetreatCost(): number {
     const active = this.activeOrThrow();
-    let retreatCost = active.RetreatCost;
+    let retreatCost = active.retreatCost;
 
-    for (const status of this.activeOrThrow().PokemonStatuses) {
+    for (const status of this.activeOrThrow().pokemonStatuses) {
       if (status.type === "NoRetreatCost") {
         return 0;
       }
@@ -472,7 +472,7 @@ export class Player {
       }
     }
 
-    for (const status of active.PokemonStatuses) {
+    for (const status of active.pokemonStatuses) {
       if (status.type === "NoRetreatCost") {
         return 0;
       }
@@ -484,14 +484,14 @@ export class Player {
 
   async retreatActivePokemon(newActive: InPlayPokemon, energyToDiscard: Energy[]) {
     const currentActive = this.activeOrThrow();
-    if (currentActive.RetreatCost == -1) {
+    if (currentActive.retreatCost == -1) {
       throw new Error("This Pokémon cannot retreat");
     }
     if (
-      currentActive.PrimaryCondition == "Asleep" ||
-      currentActive.PrimaryCondition == "Paralyzed"
+      currentActive.primaryCondition == "Asleep" ||
+      currentActive.primaryCondition == "Paralyzed"
     ) {
-      throw new Error("Cannot retreat while " + currentActive.PrimaryCondition);
+      throw new Error("Cannot retreat while " + currentActive.primaryCondition);
     }
     if (!currentActive.hasSufficientActualEnergy(energyToDiscard)) {
       throw new Error("Energy not attached to Active Pokémon");
@@ -535,7 +535,7 @@ export class Player {
     await this.removePokemonFromField(pokemon);
 
     const discardedCards: PlayingCard[] = [];
-    for (const card of pokemon.InPlayCards) {
+    for (const card of pokemon.inPlayCards) {
       removeElement(this.InPlay, card);
       if (card.cardType == "PokemonTool") {
         this.Discard.push(card);
@@ -548,14 +548,14 @@ export class Player {
     this.logger.returnInPlayPokemonToHand(this, pokemon);
     if (discardedCards.length > 0) this.logger.discardFromPlay(this, discardedCards);
 
-    this.discardEnergy(pokemon.AttachedEnergy, "removedFromField");
+    this.discardEnergy(pokemon.attachedEnergy, "removedFromField");
   }
 
   async shufflePokemonIntoDeck(pokemon: InPlayPokemon) {
     await this.removePokemonFromField(pokemon);
 
     const discardedCards: PlayingCard[] = [];
-    for (const card of pokemon.InPlayCards) {
+    for (const card of pokemon.inPlayCards) {
       removeElement(this.InPlay, card);
       if (card.cardType == "PokemonTool") {
         this.Discard.push(card);
@@ -568,7 +568,7 @@ export class Player {
     this.logger.returnInPlayPokemonToDeck(this, pokemon);
     if (discardedCards.length > 0) this.logger.discardFromPlay(this, discardedCards);
 
-    this.discardEnergy(pokemon.AttachedEnergy, "removedFromField");
+    this.discardEnergy(pokemon.attachedEnergy, "removedFromField");
 
     this.shuffleDeck();
   }
@@ -578,14 +578,14 @@ export class Player {
 
     await this.removePokemonFromField(pokemon);
 
-    for (const card of pokemon.InPlayCards) {
+    for (const card of pokemon.inPlayCards) {
       removeElement(this.InPlay, card);
       this.Discard.push(card);
     }
 
-    this.logger.discardFromPlay(this, pokemon.InPlayCards);
+    this.logger.discardFromPlay(this, pokemon.inPlayCards);
 
-    this.discardEnergy(pokemon.AttachedEnergy, "removedFromField");
+    this.discardEnergy(pokemon.attachedEnergy, "removedFromField");
   }
 
   async handleKnockOut(pokemon: InPlayPokemon, fromAttack: boolean) {
@@ -596,14 +596,14 @@ export class Player {
     // Rescue Scarf returns the Pokémon to the player's hand instead of discarding it
     if (!this.InPlayPokemon.includes(pokemon)) return;
 
-    for (const card of pokemon.InPlayCards) {
+    for (const card of pokemon.inPlayCards) {
       if (!this.InPlay.includes(card)) throw new Error("Card not in play");
       removeElement(this.InPlay, card);
       this.Discard.push(card);
     }
-    this.logger.discardFromPlay(this, pokemon.InPlayCards);
+    this.logger.discardFromPlay(this, pokemon.inPlayCards);
 
-    this.discardEnergy(pokemon.AttachedEnergy, "knockOut");
+    this.discardEnergy(pokemon.attachedEnergy, "knockOut");
 
     await this.removePokemonFromField(pokemon);
   }
@@ -633,7 +633,7 @@ export class Player {
   private applySpecialConditionToActive(condition: SpecialCondition) {
     const active = this.activeOrThrow();
     const normalizedCondition = condition.replace(/\+$/, "") as SpecialCondition;
-    const result = active.PokemonStatuses.some(
+    const result = active.pokemonStatuses.some(
       (status) =>
         status.type === "PreventSpecialConditions" ||
         (status.type === "PreventSpecificSpecialCondition" &&
@@ -644,15 +644,15 @@ export class Player {
       return;
     }
 
-    if (condition === "Poisoned" && active.SecondaryConditions.has("Poisoned+"))
-      active.SecondaryConditions.delete("Poisoned+");
-    if (condition === "Poisoned+" && active.SecondaryConditions.has("Poisoned"))
-      active.SecondaryConditions.delete("Poisoned");
+    if (condition === "Poisoned" && active.secondaryConditions.has("Poisoned+"))
+      active.secondaryConditions.delete("Poisoned+");
+    if (condition === "Poisoned+" && active.secondaryConditions.has("Poisoned"))
+      active.secondaryConditions.delete("Poisoned");
 
     if (condition === "Asleep" || condition === "Confused" || condition === "Paralyzed") {
-      active.PrimaryCondition = condition;
+      active.primaryCondition = condition;
     } else {
-      active.SecondaryConditions.add(condition);
+      active.secondaryConditions.add(condition);
     }
     this.logger.specialConditionApplied(this, normalizedCondition);
   }
@@ -681,7 +681,7 @@ export class Player {
 
       const existingStatus = this.PlayerStatuses.find((s) => s.id === status.id);
       if (existingStatus) {
-        if (pokemon) pokemon.ActivePlayerStatuses.push(existingStatus);
+        if (pokemon) pokemon.activePlayerStatuses.push(existingStatus);
         return;
       }
     }
@@ -691,7 +691,7 @@ export class Player {
     this.PlayerStatuses.push(status);
     this.logger.applyPlayerStatus(this, status);
 
-    if (pokemon) pokemon.ActivePlayerStatuses.push(status);
+    if (pokemon) pokemon.activePlayerStatuses.push(status);
   }
   removePlayerStatus(statusId: string) {
     const status = this.PlayerStatuses.find((s) => s.id === statusId);
@@ -699,7 +699,7 @@ export class Player {
 
     if (status.source === "Ability") {
       const otherPokemonWithStatus = this.InPlayPokemon.filter((p) =>
-        p.ActivePlayerStatuses.some((s) => s.id === statusId),
+        p.activePlayerStatuses.some((s) => s.id === statusId),
       );
       if (otherPokemonWithStatus.length > 0) return;
     }

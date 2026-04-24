@@ -186,7 +186,7 @@ export class Game {
     this.AttackKnockedOutPokemon = new Set();
     if (this.TurnNumber > 2) {
       for (const pokemon of this.AttackingPlayer.InPlayPokemon) {
-        pokemon.PlayedThisTurn = false;
+        pokemon.playedThisTurn = false;
       }
     }
 
@@ -205,7 +205,7 @@ export class Game {
 
     // Log the Special Conditions that will affect the Active Pokémon
     const attackingPokemon = this.AttackingPlayer.activeOrThrow();
-    const status = attackingPokemon.PrimaryCondition;
+    const status = attackingPokemon.primaryCondition;
     if (status == "Asleep" || status == "Paralyzed") {
       this.GameLog.specialConditionEffective(attackingPokemon);
     }
@@ -268,9 +268,9 @@ export class Game {
     // Apply poison damage
     for (const pokemon of [attacker, defender]) {
       if (pokemon.isPoisoned()) {
-        const initialHP = pokemon.CurrentHP;
-        let damage = pokemon.SecondaryConditions.has("Poisoned+") ? 20 : 10;
-        for (const status of pokemon.PokemonStatuses) {
+        const initialHP = pokemon.currentHP;
+        let damage = pokemon.secondaryConditions.has("Poisoned+") ? 20 : 10;
+        for (const status of pokemon.pokemonStatuses) {
           if (status.type === "IncreasePoisonDamage") damage += status.amount;
         }
 
@@ -282,14 +282,14 @@ export class Game {
     // Apply burn damage and flip to recover
     for (const pokemon of [attacker, defender]) {
       if (pokemon.isBurned()) {
-        const initialHP = pokemon.CurrentHP;
+        const initialHP = pokemon.currentHP;
         const damage = 20;
 
         pokemon.applyDamage(damage);
         this.GameLog.specialConditionDamage(pokemon, "Burned", initialHP, damage);
 
         if (pokemon.player.flipCoin()) {
-          pokemon.SecondaryConditions.delete("Burned");
+          pokemon.secondaryConditions.delete("Burned");
           this.GameLog.specialConditionEnded(pokemon, ["Burned"]);
         }
       }
@@ -297,17 +297,17 @@ export class Game {
 
     // Flip to wake up sleeping Pokemon
     for (const pokemon of [attacker, defender]) {
-      if (pokemon.PrimaryCondition == "Asleep") {
+      if (pokemon.primaryCondition == "Asleep") {
         if (pokemon.player.flipCoin()) {
-          pokemon.PrimaryCondition = undefined;
+          pokemon.primaryCondition = undefined;
           this.GameLog.specialConditionEnded(pokemon, ["Asleep"]);
         }
       }
     }
 
     // Remove paralysis status from attacking player's Active Pokémon
-    if (attacker.PrimaryCondition == "Paralyzed") {
-      attacker.PrimaryCondition = undefined;
+    if (attacker.primaryCondition == "Paralyzed") {
+      attacker.primaryCondition = undefined;
       this.GameLog.specialConditionEnded(attacker, ["Paralyzed"]);
     }
 
@@ -379,11 +379,11 @@ export class Game {
     // Check for any pokemon that are knocked out
     for (const player of [this.DefendingPlayer, this.AttackingPlayer]) {
       for (const pokemon of player.InPlayPokemon) {
-        if (pokemon.CurrentHP <= 0) {
+        if (pokemon.currentHP <= 0) {
           const fromAttack = this.AttackKnockedOutPokemon.has(pokemon);
           // Give mon such as Conkeldurr a chance to avoid being knocked out
           if (fromAttack) await pokemon.beforeKnockedOutByAttack();
-          if (pokemon.CurrentHP <= 0) {
+          if (pokemon.currentHP <= 0) {
             anyKnockedOut = true;
             await this.handleKnockOut(pokemon, fromAttack);
           }
@@ -403,14 +403,14 @@ export class Game {
    */
   private removeOutdatedStatuses(): void {
     for (const pokemon of this.InPlayPokemon) {
-      for (const status of pokemon.PokemonStatuses) {
+      for (const status of pokemon.pokemonStatuses) {
         if (status.source === "Ability") {
-          const ability = pokemon.Ability;
+          const ability = pokemon.ability;
           if (ability?.type !== "Status" || !ability.effect.some((e) => e.status === status)) {
             pokemon.removePokemonStatus(status);
           }
         } else if (status.source === "PokemonTool") {
-          const tool = pokemon.AttachedToolCards.find(
+          const tool = pokemon.attachedToolCards.find(
             (t) => t.effect.type === "Status" && t.effect.effect.some((e) => e.status === status),
           );
           if (!tool) {
@@ -424,18 +424,18 @@ export class Game {
       for (const status of player.PlayerStatuses) {
         if (status.source === "Ability") {
           const triggeringPokemon = this.InPlayPokemon.filter((p) =>
-            p.ActivePlayerStatuses.some((s) => s.id === status.id),
+            p.activePlayerStatuses.some((s) => s.id === status.id),
           );
 
           let validPokemon = false;
           for (const pokemon of triggeringPokemon) {
             if (
-              pokemon.Ability?.type === "Status" &&
-              pokemon.Ability.effect.some((e) => e.status.id === status.id)
+              pokemon.ability?.type === "Status" &&
+              pokemon.ability.effect.some((e) => e.status.id === status.id)
             ) {
               validPokemon = true;
             } else {
-              removeElement(pokemon.ActivePlayerStatuses, status);
+              removeElement(pokemon.activePlayerStatuses, status);
             }
           }
 
@@ -459,20 +459,20 @@ export class Game {
           for (const effect of ability.effect) {
             if (effect.type === "PlayerStatus") {
               const statusPlayer = effect.opponent ? player.opponent : player;
-              const existingStatus = pokemon.ActivePlayerStatuses.find(
+              const existingStatus = pokemon.activePlayerStatuses.find(
                 (s) => s.id === effect.status.id,
               );
 
               if (existingStatus) {
                 if (!applyStatus) {
-                  removeElement(pokemon.ActivePlayerStatuses, existingStatus);
+                  removeElement(pokemon.activePlayerStatuses, existingStatus);
                   statusPlayer.removePlayerStatus(existingStatus.id!);
                 }
               } else {
                 if (applyStatus) statusPlayer.applyPlayerStatus(effect.status, pokemon);
               }
             } else {
-              if (pokemon.PokemonStatuses.some((x) => x === effect.status)) {
+              if (pokemon.pokemonStatuses.some((x) => x === effect.status)) {
                 if (!applyStatus) pokemon.removePokemonStatus(effect.status);
               } else {
                 if (applyStatus) pokemon.applyPokemonStatus(effect.status);
@@ -489,7 +489,7 @@ export class Game {
   private checkSpecialConditionImmunity(): void {
     for (const pokemon of this.InPlayPokemon) {
       if (
-        pokemon.PokemonStatuses.some((status) => status.type === "PreventSpecialConditions") &&
+        pokemon.pokemonStatuses.some((status) => status.type === "PreventSpecialConditions") &&
         pokemon.hasSpecialCondition()
       )
         pokemon.removeAllSpecialConditions();
@@ -580,7 +580,7 @@ export class Game {
   private async handleKnockOut(pokemon: InPlayPokemon, fromAttack: boolean): Promise<void> {
     await pokemon.player.handleKnockOut(pokemon, fromAttack);
 
-    pokemon.opponent.GamePoints += pokemon.PrizePoints;
+    pokemon.opponent.GamePoints += pokemon.prizePoints;
   }
 
   // Helper methods for the attack process
@@ -591,7 +591,7 @@ export class Game {
 
   private shouldPreventDamage(pokemon: InPlayPokemon): boolean {
     if (!this.CurrentAttack) return false;
-    const result = pokemon.PokemonStatuses.some(
+    const result = pokemon.pokemonStatuses.some(
       (status) =>
         (status.type === "PreventAttackDamage" ||
           status.type === "PreventAttackDamageAndEffects" ||
@@ -606,7 +606,7 @@ export class Game {
   private shouldPreventEffects(pokemon: InPlayPokemon): boolean {
     if (!this.CurrentAttack) return false;
     if (!this.DefendingPlayer.InPlayPokemon.includes(pokemon)) return false;
-    const result = pokemon.PokemonStatuses.some(
+    const result = pokemon.pokemonStatuses.some(
       (status) =>
         (status.type === "PreventAttackEffects" ||
           status.type === "PreventAttackDamageAndEffects") &&
@@ -681,7 +681,7 @@ export class Game {
 
     const attacker = this.AttackingPlayer.activeOrThrow();
     const defender = this.DefendingPlayer.activeOrThrow();
-    for (const status of attacker.PokemonStatuses) {
+    for (const status of attacker.pokemonStatuses) {
       if (status.type == "ModifyAttackDamage") {
         if (!status.defenderCondition || status.defenderCondition.test(defender)) {
           if (typeof status.amount === "number") totalDamage += status.amount;
@@ -728,10 +728,10 @@ export class Game {
   async useAttack(attack: Attack): Promise<void> {
     const attacker = this.AttackingPlayer.activeOrThrow();
 
-    let coinFlipsToAttack = attacker.PokemonStatuses.filter(
+    let coinFlipsToAttack = attacker.pokemonStatuses.filter(
       (status) => status.type === "CoinFlipToAttack",
     ).length;
-    if (attacker.PrimaryCondition === "Confused") {
+    if (attacker.primaryCondition === "Confused") {
       this.GameLog.specialConditionEffective(attacker);
       coinFlipsToAttack += 1;
     }
@@ -767,7 +767,7 @@ export class Game {
    * Manually triggers a Pokémon's Ability.
    */
   async useAbility(pokemon: InPlayPokemon, ability: Ability): Promise<void> {
-    if (pokemon.Ability !== ability) {
+    if (pokemon.ability !== ability) {
       throw new Error("Pokemon does not have this ability");
     }
     if (ability.type !== "Standard" || ability.trigger.type !== "Manual") {
@@ -846,7 +846,7 @@ export class Game {
     if (card.cardType === "PokemonTool") {
       if (!target || !target.isPokemon)
         throw new Error("Pokémon Tool card requires a target Pokémon");
-      if (target.AttachedToolCards.length >= target.MaxToolCards)
+      if (target.attachedToolCards.length >= target.maxToolCards)
         throw new Error("Target Pokémon cannot have any more Tool cards attached");
 
       await target.attachPokemonTool(card);
@@ -934,8 +934,8 @@ export class Game {
     if (this.shouldPreventDamage(defender)) return;
 
     const attacker = this.AttackingPlayer.activeOrThrow();
-    const type = attacker.Type;
-    const initialHP = defender.CurrentHP;
+    const type = attacker.type;
+    const initialHP = defender.currentHP;
     const owner = this.DefendingPlayer;
     const attackingActive = defender == owner.ActivePokemon;
 
@@ -950,7 +950,7 @@ export class Game {
 
     // Next, add weakness boost
     if (totalDamage > 0 && attackingActive) {
-      if (type == defender.Weakness) {
+      if (type == defender.weakness) {
         totalDamage += 20;
         weaknessBoost = true;
       }
@@ -958,7 +958,7 @@ export class Game {
 
     // After that, apply any damage modification statuses on the defender
     if (totalDamage > 0) {
-      for (const status of defender.PokemonStatuses) {
+      for (const status of defender.pokemonStatuses) {
         if (status.type === "ModifyIncomingAttackDamage") {
           if (status.attackerCondition && !status.attackerCondition.test(attacker)) continue;
           totalDamage += status.amount;
@@ -978,7 +978,7 @@ export class Game {
 
     if (totalDamage > 0) {
       this.AttackDamagedPokemon.add(defender);
-      if (defender.CurrentHP <= 0) {
+      if (defender.currentHP <= 0) {
         this.AttackKnockedOutPokemon.add(defender);
       }
     }
@@ -989,7 +989,7 @@ export class Game {
    * @param fromAttack whether the damage is considered by the game to be "from an attack".
    */
   applyDamage(target: InPlayPokemon, HP: number, fromAttack: boolean): void {
-    const initialHP = target.CurrentHP;
+    const initialHP = target.currentHP;
 
     target.applyDamage(HP);
     this.GameLog.pokemonDamaged(target.player, target, initialHP, HP, fromAttack);
@@ -999,9 +999,9 @@ export class Game {
    * Sets a Pokémon's remaining HP directly.
    */
   setHP(target: InPlayPokemon, HP: number): void {
-    const initialHP = target.CurrentHP;
+    const initialHP = target.currentHP;
 
-    target.CurrentHP = HP;
+    target.currentHP = HP;
     this.GameLog.pokemonHpSet(target.player, target, initialHP, HP);
   }
 
@@ -1049,7 +1049,7 @@ export class Game {
    */
   async discardPokemonTools(
     pokemon: InPlayPokemon,
-    tools: PokemonToolCard[] = pokemon.AttachedToolCards.slice(),
+    tools: PokemonToolCard[] = pokemon.attachedToolCards.slice(),
   ): Promise<void> {
     if (this.shouldPreventEffects(pokemon)) return;
     if (tools.length === 0) return;

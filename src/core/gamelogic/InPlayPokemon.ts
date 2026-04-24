@@ -18,7 +18,7 @@ import {
 } from "./types";
 
 export class InPlayPokemon {
-  BaseCard: PokemonCard;
+  baseCard: PokemonCard;
   player: Player;
   game: Game;
   logger: GameLogger;
@@ -37,89 +37,89 @@ export class InPlayPokemon {
   }
 
   get cardId() {
-    return this.BaseCard.id;
+    return this.baseCard.id;
   }
-  get Name() {
-    return this.BaseCard.name;
+  get name() {
+    return this.baseCard.name;
   }
-  get EvolvesAs() {
-    const status = this.PokemonStatuses.find((s) => s.type === "CanEvolveAs");
+  get evolvesAs() {
+    const status = this.pokemonStatuses.find((s) => s.type === "CanEvolveAs");
     if (status) return status.pokemonName;
-    return this.Name;
+    return this.name;
   }
-  get Type() {
-    return this.BaseCard.type;
+  get type() {
+    return this.baseCard.type;
   }
-  get BaseHP() {
-    return this.BaseCard.baseHP;
+  get baseHP() {
+    return this.baseCard.baseHP;
   }
-  get Stage() {
-    return this.BaseCard.stage;
+  get stage() {
+    return this.baseCard.stage;
   }
-  get RetreatCost() {
-    return this.BaseCard.retreatCost;
+  get retreatCost() {
+    return this.baseCard.retreatCost;
   }
-  get Weakness() {
-    return this.BaseCard.weakness;
+  get weakness() {
+    return this.baseCard.weakness;
   }
-  get PrizePoints() {
-    return this.BaseCard.prizePoints;
+  get prizePoints() {
+    return this.baseCard.prizePoints;
   }
   get attacks() {
-    return this.BaseCard.attacks;
+    return this.baseCard.attacks;
   }
-  get Ability() {
-    return this.BaseCard.ability;
+  get ability() {
+    return this.baseCard.ability;
   }
   get effectiveAbilities() {
-    const abilities = this.Ability ? [this.Ability] : [];
-    for (const tool of this.AttachedToolCards) {
+    const abilities = this.ability ? [this.ability] : [];
+    for (const tool of this.attachedToolCards) {
       abilities.push(tool.effect);
     }
     return abilities;
   }
   get isUltraBeast() {
-    return this.BaseCard.isUltraBeast === true;
+    return this.baseCard.isUltraBeast === true;
   }
 
-  CurrentHP: number;
-  MaxHP: number;
-  AttachedEnergy: Energy[] = [];
-  AttachedToolCards: PokemonToolCard[] = [];
-  MaxToolCards: number = 1;
+  currentHP: number;
+  maxHP: number;
+  attachedEnergy: Energy[] = [];
+  attachedToolCards: PokemonToolCard[] = [];
+  maxToolCards: number = 1;
 
-  PrimaryCondition?: PrimaryCondition;
-  SecondaryConditions: Set<SecondaryCondition> = new Set();
-  private _PokemonStatuses: PokemonStatus[] = [];
-  get PokemonStatuses() {
+  primaryCondition?: PrimaryCondition;
+  secondaryConditions: Set<SecondaryCondition> = new Set();
+  private _pokemonStatuses: PokemonStatus[] = [];
+  get pokemonStatuses() {
     const filteredPlayerStatuses = this.player.PlayerStatuses.filter(
       (status) => status.type === "PokemonStatus" && status.pokemonCondition.test(this),
     ) as PokemonPlayerStatus[];
 
-    return this._PokemonStatuses.concat(
+    return this._pokemonStatuses.concat(
       filteredPlayerStatuses.map((status) => status.pokemonStatus),
     );
   }
-  ActivePlayerStatuses: PlayerStatus[] = []; // PlayerStatuses currently in play from this Pokemon's Ability
+  activePlayerStatuses: PlayerStatus[] = []; // PlayerStatuses currently in play from this Pokemon's Ability
 
-  InPlayCards: PlayingCard[] = [];
-  PlayedThisTurn: boolean = true;
+  inPlayCards: PlayingCard[] = [];
+  playedThisTurn: boolean = true;
 
   isPokemon = true as const;
 
-  get CurrentConditions() {
-    return [this.PrimaryCondition, ...this.SecondaryConditions].filter(
+  get currentConditions() {
+    return [this.primaryCondition, ...this.secondaryConditions].filter(
       (condition) => condition !== undefined,
     );
   }
 
-  get EffectiveEnergy() {
-    return this.calculateEffectiveEnergy(this.AttachedEnergy);
+  get effectiveEnergy() {
+    return this.calculateEffectiveEnergy(this.attachedEnergy);
   }
 
   calculateEffectiveEnergy(energies: Energy[]) {
     const energiesToDouble = new Set<Energy>();
-    for (const status of this.PokemonStatuses) {
+    for (const status of this.pokemonStatuses) {
       if (status.type === "DoubleEnergy") {
         energiesToDouble.add(status.energyType);
       }
@@ -139,23 +139,23 @@ export class InPlayPokemon {
     this.player = player;
     this.game = player.game;
     this.logger = player.logger;
-    this.BaseCard = inputCard;
-    this.InPlayCards.push(trueCard);
+    this.baseCard = inputCard;
+    this.inPlayCards.push(trueCard);
     this.id = this.game.nextPokemonId++;
 
-    this.CurrentHP = this.BaseHP;
-    this.MaxHP = this.BaseHP;
+    this.currentHP = this.baseHP;
+    this.maxHP = this.baseHP;
   }
 
   async evolveInto(inputCard: PokemonCard) {
-    const hpIncrease = inputCard.baseHP - this.BaseHP;
+    const hpIncrease = inputCard.baseHP - this.baseHP;
 
-    this.BaseCard = inputCard;
-    this.InPlayCards.push(inputCard);
-    this.PlayedThisTurn = true;
+    this.baseCard = inputCard;
+    this.inPlayCards.push(inputCard);
+    this.playedThisTurn = true;
 
-    this.CurrentHP += hpIncrease;
-    this.MaxHP += hpIncrease;
+    this.currentHP += hpIncrease;
+    this.maxHP += hpIncrease;
 
     this.removeAllSpecialConditionsAndStatuses();
 
@@ -164,50 +164,50 @@ export class InPlayPokemon {
   }
 
   isDamaged() {
-    return this.CurrentHP < this.MaxHP;
+    return this.currentHP < this.maxHP;
   }
   currentDamage() {
-    return this.MaxHP - this.CurrentHP;
+    return this.maxHP - this.currentHP;
   }
 
   applyDamage(HP: number) {
-    this.CurrentHP -= HP;
-    if (this.CurrentHP < 0) this.CurrentHP = 0;
+    this.currentHP -= HP;
+    if (this.currentHP < 0) this.currentHP = 0;
   }
 
   /**
    * Heals a set amount of damage from this Pokémon.
    */
   healDamage(HP: number): number {
-    if (this.PokemonStatuses.some((s) => s.type === "CannotHeal")) {
+    if (this.pokemonStatuses.some((s) => s.type === "CannotHeal")) {
       this.logger.effectPrevented(this.player, this);
       return 0;
     }
 
-    const initialHP = this.CurrentHP;
+    const initialHP = this.currentHP;
 
-    this.CurrentHP += HP;
-    if (this.CurrentHP > this.MaxHP) this.CurrentHP = this.MaxHP;
+    this.currentHP += HP;
+    if (this.currentHP > this.maxHP) this.currentHP = this.maxHP;
 
     this.logger.pokemonHealed(this.player, this, initialHP, HP);
 
-    return this.CurrentHP - initialHP;
+    return this.currentHP - initialHP;
   }
 
   attachEnergy(energy: Energy[]) {
     for (const e of energy) {
-      const index = this.AttachedEnergy.findIndex(
+      const index = this.attachedEnergy.findIndex(
         (en) => allTypes.indexOf(e) < allTypes.indexOf(en),
       );
       if (index !== -1) {
-        this.AttachedEnergy.splice(index, 0, e);
+        this.attachedEnergy.splice(index, 0, e);
       } else {
-        this.AttachedEnergy.push(e);
+        this.attachedEnergy.push(e);
       }
     }
   }
   removeEnergy(energy: Energy[]) {
-    for (const e of energy) removeElement(this.AttachedEnergy, e);
+    for (const e of energy) removeElement(this.attachedEnergy, e);
   }
 
   /**
@@ -224,36 +224,36 @@ export class InPlayPokemon {
    * types.
    */
   getEnergy(energy?: Energy | Energy[]) {
-    if (!energy) return this.AttachedEnergy.slice();
+    if (!energy) return this.attachedEnergy.slice();
     if (Array.isArray(energy)) {
-      return this.AttachedEnergy.filter((e) => energy.includes(e));
+      return this.attachedEnergy.filter((e) => energy.includes(e));
     }
-    return this.AttachedEnergy.filter((e) => e === energy);
+    return this.attachedEnergy.filter((e) => e === energy);
   }
 
   isPoisoned() {
-    return this.SecondaryConditions.has("Poisoned") || this.SecondaryConditions.has("Poisoned+");
+    return this.secondaryConditions.has("Poisoned") || this.secondaryConditions.has("Poisoned+");
   }
   isBurned() {
-    return this.SecondaryConditions.has("Burned");
+    return this.secondaryConditions.has("Burned");
   }
   hasSpecialCondition() {
-    return this.CurrentConditions.length > 0;
+    return this.currentConditions.length > 0;
   }
 
   /**
    * Recovers this Pokemon from a random Special Condition.
    */
   removeRandomSpecialCondition() {
-    const conditions = this.CurrentConditions;
+    const conditions = this.currentConditions;
     if (conditions.length == 0) return;
 
     const condition = randomElement(conditions);
 
     if (condition === "Asleep" || condition === "Confused" || condition === "Paralyzed") {
-      this.PrimaryCondition = undefined;
+      this.primaryCondition = undefined;
     } else {
-      this.SecondaryConditions.delete(condition);
+      this.secondaryConditions.delete(condition);
     }
 
     this.logger.specialConditionEnded(this, [condition]);
@@ -263,11 +263,11 @@ export class InPlayPokemon {
    * Recovers this Pokemon from all Special Conditions.
    */
   removeAllSpecialConditions() {
-    const conditions = this.CurrentConditions;
+    const conditions = this.currentConditions;
     if (conditions.length == 0) return;
 
-    this.PrimaryCondition = undefined;
-    this.SecondaryConditions = new Set();
+    this.primaryCondition = undefined;
+    this.secondaryConditions = new Set();
 
     this.logger.specialConditionEnded(this, conditions);
   }
@@ -278,7 +278,7 @@ export class InPlayPokemon {
   removeAllSpecialConditionsAndStatuses() {
     this.removeAllSpecialConditions();
 
-    for (const status of this._PokemonStatuses) {
+    for (const status of this._pokemonStatuses) {
       if (status.source === "Effect") this.removePokemonStatus(status);
     }
   }
@@ -292,17 +292,17 @@ export class InPlayPokemon {
     this.logger.applyPokemonStatus(this.player, this, status);
 
     if (status.doesNotStack) {
-      if (this._PokemonStatuses.some((s) => s.type === status.type && s.doesNotStack)) {
+      if (this._pokemonStatuses.some((s) => s.type === status.type && s.doesNotStack)) {
         return;
       }
     }
 
-    this._PokemonStatuses.push(status);
+    this._pokemonStatuses.push(status);
 
     if (status.type === "IncreaseMaxHP") {
       const hpIncrease = status.amount;
-      this.MaxHP += hpIncrease;
-      this.CurrentHP += hpIncrease;
+      this.maxHP += hpIncrease;
+      this.currentHP += hpIncrease;
     }
   }
 
@@ -310,13 +310,13 @@ export class InPlayPokemon {
    * Removes a PokemonStatus from this Pokemon and deals with any side effects.
    */
   removePokemonStatus(status: PokemonStatus) {
-    removeElement(this._PokemonStatuses, status);
+    removeElement(this._pokemonStatuses, status);
     this.logger.removePokemonStatus(this, status);
 
     if (status.type === "IncreaseMaxHP") {
       const hpIncrease = status.amount;
-      this.MaxHP -= hpIncrease;
-      this.CurrentHP -= hpIncrease;
+      this.maxHP -= hpIncrease;
+      this.currentHP -= hpIncrease;
     }
   }
 
@@ -324,7 +324,7 @@ export class InPlayPokemon {
    * Updates PokemonStatuses at the end of the turn, removing those that should expire.
    */
   updatePokemonStatusesAtTurnEnd() {
-    for (const status of this._PokemonStatuses) {
+    for (const status of this._pokemonStatuses) {
       if (status.turnsToKeep !== undefined) {
         if (status.turnsToKeep > 0) {
           status.turnsToKeep -= 1;
@@ -342,8 +342,8 @@ export class InPlayPokemon {
    */
   async attachPokemonTool(card: PokemonToolCard) {
     this.logger.attachPokemonTool(this.player, card, this);
-    this.AttachedToolCards.push(card);
-    this.InPlayCards.push(card);
+    this.attachedToolCards.push(card);
+    this.inPlayCards.push(card);
     this.player.InPlay.push(card);
   }
 
@@ -354,8 +354,8 @@ export class InPlayPokemon {
    */
   async removePokemonTool(card: PokemonToolCard) {
     this.logger.removePokemonTool(this.player, card, this);
-    removeElement(this.AttachedToolCards, card);
-    removeElement(this.InPlayCards, card);
+    removeElement(this.attachedToolCards, card);
+    removeElement(this.inPlayCards, card);
     removeElement(this.player.InPlay, card);
   }
 
@@ -377,14 +377,14 @@ export class InPlayPokemon {
   }
 
   hasSufficientEnergy(energies: Energy[]) {
-    return this.energyIsSufficient(energies, this.EffectiveEnergy);
+    return this.energyIsSufficient(energies, this.effectiveEnergy);
   }
   hasSufficientActualEnergy(energies: Energy[]) {
-    return this.energyIsSufficient(energies, this.AttachedEnergy);
+    return this.energyIsSufficient(energies, this.attachedEnergy);
   }
   findEffectiveAttackCost(attack: Attack): Energy[] {
     const requiredEnergy = [...attack.requiredEnergy];
-    for (const status of this.PokemonStatuses) {
+    for (const status of this.pokemonStatuses) {
       if (status.type == "ModifyAttackCost") {
         if (status.amount < 0) {
           for (let i = 0; i < -status.amount; i++) {
@@ -483,7 +483,7 @@ export class InPlayPokemon {
           await this.triggerAbility(ability);
       }
     }
-    for (const status of this.PokemonStatuses) {
+    for (const status of this.pokemonStatuses) {
       if (status.type === "CounterAttack")
         this.game.applyDamage(this.game.AttackingPokemon!, status.amount, false);
     }

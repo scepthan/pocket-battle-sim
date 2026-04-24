@@ -54,9 +54,9 @@ export const parsePokemonPredicate = (
     () => (pokemon) => pokemon.player.ActivePokemon === pokemon,
   );
 
-  parsePart(/^Basic /, () => (pokemon) => pokemon.Stage === 0);
-  parsePart(/^Evolution /, () => (pokemon) => pokemon.Stage > 0);
-  parsePart(/^Stage 2 /, () => (pokemon) => pokemon.Stage === 2);
+  parsePart(/^Basic /, () => (pokemon) => pokemon.stage === 0);
+  parsePart(/^Evolution /, () => (pokemon) => pokemon.stage > 0);
+  parsePart(/^Stage 2 /, () => (pokemon) => pokemon.stage === 2);
 
   const energyTypes: Energy[] = [];
   let energyMatch;
@@ -67,7 +67,7 @@ export const parsePokemonPredicate = (
   }
   if (energyTypes.length > 0) {
     const prevPredicate = predicate;
-    predicate = (pokemon) => energyTypes.includes(pokemon.Type) && prevPredicate(pokemon);
+    predicate = (pokemon) => energyTypes.includes(pokemon.type) && prevPredicate(pokemon);
   }
 
   parsePart(/ that has any(?: {(\w)})? Energy attached$/, ([, energy]) => {
@@ -80,14 +80,14 @@ export const parsePokemonPredicate = (
   });
   parsePart(/ that ha(?:s|ve) damage on (?:it|them)$/, () => (pokemon) => pokemon.isDamaged());
 
-  parsePart(/^Pokémon ex$/, () => (pokemon) => pokemon.Name.endsWith(" ex"));
+  parsePart(/^Pokémon ex$/, () => (pokemon) => pokemon.name.endsWith(" ex"));
   parsePart(/^Ultra Beasts?$/, () => (pokemon) => pokemon.isUltraBeast);
 
   parsePart(/^Pokémon that evolves? from (.+)/, ([, namesText]) => {
     const { parseSuccessful: ps, value: names } = parsePokemonNames(namesText!);
     if (!ps) parseSuccessful = false;
     return (pokemon) =>
-      pokemon.BaseCard.evolvesFrom != undefined && names.includes(pokemon.BaseCard.evolvesFrom);
+      pokemon.baseCard.evolvesFrom != undefined && names.includes(pokemon.baseCard.evolvesFrom);
   });
 
   if (text === "" || text === "Pokémon") {
@@ -101,7 +101,7 @@ export const parsePokemonPredicate = (
   if (!ps) parseSuccessful = false;
   return {
     parseSuccessful,
-    value: (pokemon) => names.includes(pokemon.Name) && predicate(pokemon),
+    value: (pokemon) => names.includes(pokemon.name) && predicate(pokemon),
   };
 };
 

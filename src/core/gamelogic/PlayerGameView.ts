@@ -43,7 +43,7 @@ export class PlayerGameView {
   private pokemonFromView(view: PlayerPokemonView): InPlayPokemon {
     for (const pokemon of [...this.player.InPlayPokemon, ...this.opponent.InPlayPokemon])
       if (view.is(pokemon)) return pokemon;
-    throw new Error("Could not find Pokemon: " + view.Name);
+    throw new Error("Could not find Pokemon: " + view.name);
   }
 
   // Game attributes
@@ -179,7 +179,7 @@ export class PlayerGameView {
       } else {
         return this.selfInPlayPokemon.some(
           (pokemon) =>
-            card.evolvesFrom === pokemon.EvolvesAs && this.canEvolve(pokemon, ignoreCanPlay),
+            card.evolvesFrom === pokemon.evolvesAs && this.canEvolve(pokemon, ignoreCanPlay),
         );
       }
     } else if (card.cardType == "Supporter" || card.cardType == "Item") {
@@ -197,7 +197,7 @@ export class PlayerGameView {
       return this.selfBench.some((slot) => !slot.isPokemon);
     } else if (card.cardType == "PokemonTool") {
       return this.selfInPlayPokemon.some(
-        (pokemon) => pokemon.AttachedToolCards.length < pokemon.MaxToolCards,
+        (pokemon) => pokemon.attachedToolCards.length < pokemon.maxToolCards,
       );
     }
 
@@ -215,10 +215,10 @@ export class PlayerGameView {
     if (!this.canPlay && !ignoreCanPlay) return false;
 
     if (!this.selfActive.attacks.includes(attack)) return false;
-    if (this.selfActive.PrimaryCondition == "Asleep") return false;
-    if (this.selfActive.PrimaryCondition == "Paralyzed") return false;
+    if (this.selfActive.primaryCondition == "Asleep") return false;
+    if (this.selfActive.primaryCondition == "Paralyzed") return false;
     if (
-      this.selfActive.PokemonStatuses.some(
+      this.selfActive.pokemonStatuses.some(
         (status) =>
           status.type == "CannotAttack" ||
           (status.type == "CannotUseSpecificAttack" && status.attackName == attack.name),
@@ -240,7 +240,7 @@ export class PlayerGameView {
   ): boolean {
     if (!this.canPlay && !ignoreCanPlay) return false;
 
-    if (pokemon.Ability !== ability) return false;
+    if (pokemon.ability !== ability) return false;
     if (ability.type !== "Standard" || ability.trigger.type !== "Manual") return false;
     const realPokemon = this.pokemonFromView(pokemon);
     if (!ability.trigger.multiUse) {
@@ -259,21 +259,21 @@ export class PlayerGameView {
 
     if (this.game.HasRetreated) return false;
     if (this.selfBenched.length == 0) return false;
-    if (this.selfActive.RetreatCost == -1) return false;
-    if (this.selfActive.PrimaryCondition == "Asleep") return false;
-    if (this.selfActive.PrimaryCondition == "Paralyzed") return false;
-    if (this.selfActive.PokemonStatuses.some((status) => status.type == "CannotRetreat"))
+    if (this.selfActive.retreatCost == -1) return false;
+    if (this.selfActive.primaryCondition == "Asleep") return false;
+    if (this.selfActive.primaryCondition == "Paralyzed") return false;
+    if (this.selfActive.pokemonStatuses.some((status) => status.type == "CannotRetreat"))
       return false;
-    if (this.selfActive.PokemonStatuses.some((status) => status.type == "CannotRetreat"))
+    if (this.selfActive.pokemonStatuses.some((status) => status.type == "CannotRetreat"))
       return false;
-    return this.player.effectiveRetreatCost <= this.selfActive.EffectiveEnergy.length;
+    return this.player.effectiveRetreatCost <= this.selfActive.effectiveEnergy.length;
   }
   canEvolve(pokemon: PlayerPokemonView, ignoreCanPlay: boolean = false): boolean {
     if (!this.canPlay && !ignoreCanPlay) return false;
 
-    if (!pokemon.ReadyToEvolve) return false;
+    if (!pokemon.readyToEvolve) return false;
     const realPokemon = this.pokemonFromView(pokemon);
-    if (realPokemon.PokemonStatuses.some((status) => status.type == "CannotEvolve")) return false;
+    if (realPokemon.pokemonStatuses.some((status) => status.type == "CannotEvolve")) return false;
     return true;
   }
   canAttachFromEnergyZone(pokemon: PlayerPokemonView, ignoreCanPlay: boolean = false) {
@@ -285,7 +285,7 @@ export class PlayerGameView {
   validTargets(card: FossilCard): EmptyCardSlot[];
   validTargets(card: TrainerCard) {
     if (card.cardType === "PokemonTool") {
-      return this.selfInPlayPokemon.filter((p) => p.AttachedToolCards.length < p.MaxToolCards);
+      return this.selfInPlayPokemon.filter((p) => p.attachedToolCards.length < p.maxToolCards);
     }
     if (card.cardType === "Fossil") {
       return this.selfBench.filter((slot) => !slot.isPokemon);
@@ -353,7 +353,7 @@ export class PlayerGameView {
     if (!this.canPlay) return false;
     if (!this.canEvolve(inPlayPokemon)) return false;
 
-    if (pokemon.evolvesFrom == inPlayPokemon.EvolvesAs) {
+    if (pokemon.evolvesFrom == inPlayPokemon.evolvesAs) {
       const realPokemon = this.pokemonFromView(inPlayPokemon);
       await this.game.evolvePokemon(realPokemon, pokemon);
 
@@ -386,13 +386,13 @@ export class PlayerGameView {
     if (!this.canRetreat()) return false;
 
     if (!energy) {
-      const canSelectFewer = this.selfActive.PokemonStatuses.some(
+      const canSelectFewer = this.selfActive.pokemonStatuses.some(
         (status) => status.type == "DoubleEnergy",
       );
 
       energy = await this.game.chooseNEnergy(
         this.player,
-        this.selfActive.AttachedEnergy,
+        this.selfActive.attachedEnergy,
         this.player.effectiveRetreatCost,
         "Choose Energy to discard.",
         canSelectFewer
@@ -436,7 +436,7 @@ export class PlayerGameView {
   }
   async playPokemonToolCard(card: PokemonToolCard, target: PlayerPokemonView): Promise<boolean> {
     if (!this.canPlayCard(card)) return false;
-    if (target.AttachedToolCards.length >= target.MaxToolCards) return false;
+    if (target.attachedToolCards.length >= target.maxToolCards) return false;
     const realPokemon = this.pokemonFromView(target);
 
     await this.game.playTrainer(card, realPokemon);

@@ -19,7 +19,7 @@ export const findValidRareCandyTargets = (player: Player) => {
     .filter((name) => name !== null);
 
   return player.InPlayPokemon.filter(
-    (p) => p.Stage == 0 && !p.PlayedThisTurn && validBasicNames.includes(p.EvolvesAs),
+    (p) => p.stage == 0 && !p.playedThisTurn && validBasicNames.includes(p.evolvesAs),
   );
 };
 
@@ -30,7 +30,7 @@ export const evolveWithRareCandy = async (target: InPlayPokemon) => {
     (card) =>
       card.cardType === "Pokemon" &&
       card.stage == 2 &&
-      findBasicForStage2(card) === target.EvolvesAs,
+      findBasicForStage2(card) === target.evolvesAs,
   );
   const prompt = "Choose a Stage 2 Pokémon to evolve into.";
   const card = await target.game.chooseCard(player, validCards, prompt);

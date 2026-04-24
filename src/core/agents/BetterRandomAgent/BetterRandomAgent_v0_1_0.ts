@@ -85,9 +85,9 @@ export class BetterRandomAgent_v0_1_0 extends PlayerAgent {
     if (game.canRetreat()) {
       if (
         game.retreatCostModifier < 0
-          ? (game.selfActive.RetreatCost ?? 0) + game.retreatCostModifier <= 0 ||
+          ? (game.selfActive.retreatCost ?? 0) + game.retreatCostModifier <= 0 ||
             Math.random() < 0.5
-          : Math.random() < Math.pow(0.5, (game.selfActive.RetreatCost ?? 0) + 2)
+          : Math.random() < Math.pow(0.5, (game.selfActive.retreatCost ?? 0) + 2)
       ) {
         const randomBench = rand(game.selfBenched);
         await game.retreatActivePokemon(randomBench);
@@ -95,17 +95,17 @@ export class BetterRandomAgent_v0_1_0 extends PlayerAgent {
     }
 
     // Evolve a random Pokemon if possible
-    const evolveablePokemon = ownPokemon.filter((x) => x.ReadyToEvolve);
+    const evolveablePokemon = ownPokemon.filter((x) => x.readyToEvolve);
     const pokemonToEvolveWith = game.selfHand.filter(
       (x) =>
         x.cardType == "Pokemon" &&
         x.stage > 0 &&
-        evolveablePokemon.some((y) => y.Name == x.evolvesFrom),
+        evolveablePokemon.some((y) => y.name == x.evolvesFrom),
     ) as PokemonCard[];
     if (pokemonToEvolveWith.length > 0) {
       const randomEvolver = rand(pokemonToEvolveWith);
       const pokemonToEvolveFrom = evolveablePokemon.filter(
-        (x) => x.Name == randomEvolver.evolvesFrom,
+        (x) => x.name == randomEvolver.evolvesFrom,
       );
       const randomEvolvee = rand(pokemonToEvolveFrom);
       await game.playPokemonToEvolve(randomEvolver, randomEvolvee);
@@ -115,12 +115,12 @@ export class BetterRandomAgent_v0_1_0 extends PlayerAgent {
 
     // If any Pokemon has a usable Ability, use it
     const pokemonWithAbilities = ownPokemon.filter(
-      (x) => x.Ability && game.canUseAbility(x, x.Ability),
+      (x) => x.ability && game.canUseAbility(x, x.ability),
     );
     for (const pokemon of pokemonWithAbilities) {
       // Fossils are given a pseudo-Ability to discard themselves; don't use it unless in the Active Spot
-      if (pokemon.RetreatCost === -1 && pokemon != game.selfActive) continue;
-      await game.useAbility(pokemon, pokemon.Ability!);
+      if (pokemon.retreatCost === -1 && pokemon != game.selfActive) continue;
+      await game.useAbility(pokemon, pokemon.ability!);
     }
 
     const active = game.selfActive;
@@ -194,7 +194,7 @@ export class BetterRandomAgent_v0_1_0 extends PlayerAgent {
 
   findPotentialEvolutions(game: PlayerGameView, pokemon: PlayerPokemonView) {
     const allPokemon: PokemonCard[] = [];
-    let currentPokemon = [pokemon.Name];
+    let currentPokemon = [pokemon.name];
     while (currentPokemon.length > 0) {
       const nextEvolutions: PokemonCard[] = [];
       for (const mon of currentPokemon) {
@@ -212,7 +212,7 @@ export class BetterRandomAgent_v0_1_0 extends PlayerAgent {
 
   findRemainingEnergy(pokemon: PlayerPokemonView, cost: Energy[]): Energy[] {
     const remainingEnergy = cost.slice();
-    for (const e1 of pokemon.AttachedEnergy) {
+    for (const e1 of pokemon.attachedEnergy) {
       const index = remainingEnergy.findIndex((e2) => e2 == e1 || e2 == "Colorless");
       if (index >= 0) remainingEnergy.splice(index, 1);
     }
