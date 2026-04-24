@@ -18,7 +18,7 @@ export const chooseAttackToCopy =
       game.GameLog.attackFailed(self.player);
       return;
     }
-    const attacks = Object.fromEntries(chosenPokemon.Attacks.map((a) => [a.name, a]));
+    const attacks = Object.fromEntries(chosenPokemon.attacks.map((a) => [a.name, a]));
     const prompt2 = `Choose an attack to copy from ${chosenPokemon.Name}.`;
     const chosenAttack = await game.choose(self.player, attacks, prompt2);
     if (!chosenAttack) {

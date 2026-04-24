@@ -19,8 +19,8 @@
         <PlayingCardImage
           v-for="(tool, i) in card.AttachedToolCards"
           :key="i"
-          :card-id="tool.ID"
-          :title="tool.Name"
+          :card-id="tool.id"
+          :title="tool.name"
         />
       </div>
     </div>

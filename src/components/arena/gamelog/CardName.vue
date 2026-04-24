@@ -16,8 +16,8 @@ const { cardId } = defineProps<Props>();
 
 const cardStore = usePlayingCardStore();
 const card = computed(() => cardStore.getCardById(cardId));
-const cardName = computed(() => card.value?.Name || null);
-const cardType = computed(() => card.value?.CardType || null);
+const cardName = computed(() => card.value?.name || null);
+const cardType = computed(() => card.value?.cardType || null);
 </script>
 
 <style scoped>

@@ -28,7 +28,7 @@ const props = defineProps<Props>();
 const dialog = ref(false);
 
 const deckSize = computed(() => props.deck.length - (props.handSize ?? 0));
-const sortedCards = computed(() => props.deck.slice().sort((a, b) => a.ID.localeCompare(b.ID)));
+const sortedCards = computed(() => props.deck.slice().sort((a, b) => a.id.localeCompare(b.id)));
 
 const dialogTitle = computed(() => {
   let title = `Cards in Deck (${deckSize.value})`;

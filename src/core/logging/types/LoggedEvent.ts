@@ -97,7 +97,7 @@ interface PlayTrainerEvent {
   type: "playTrainer";
   player: string;
   cardId: string;
-  trainerType: TrainerCard["CardType"];
+  trainerType: TrainerCard["cardType"];
   targetPokemon?: InPlayPokemonDescriptor;
 }
 interface CopyTrainerEvent {

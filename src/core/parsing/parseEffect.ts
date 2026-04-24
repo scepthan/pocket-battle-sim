@@ -776,7 +776,7 @@ export const parseEffect = (
         parser.addSideEffect(async (game, self) => {
           self.removeAllSpecialConditions();
 
-          const thisCard = self.AttachedToolCards.find((card) => card.Text === inputText);
+          const thisCard = self.AttachedToolCards.find((card) => card.text === inputText);
           if (!thisCard) throw new Error("Could not find this Pokemon Tool card");
 
           await game.discardPokemonTools(self, [thisCard]);
@@ -1536,13 +1536,13 @@ export const parseEffect = (
         effect.implicitConditions.push(
           (player) =>
             player.opponent.Bench.some((slot) => !slot.isPokemon) &&
-            player.opponent.Discard.some((card) => card.CardType == "Pokemon" && card.Stage == 0),
+            player.opponent.Discard.some((card) => card.cardType == "Pokemon" && card.stage == 0),
         );
         parser.addSideEffect(async (game, self) => {
           const benchIndex = self.opponent.Bench.findIndex((slot) => !slot.isPokemon);
           if (benchIndex < 0) return;
           const validCards = self.opponent.Discard.filter(
-            (card) => card.CardType == "Pokemon" && card.Stage == 0,
+            (card) => card.cardType == "Pokemon" && card.stage == 0,
           );
           const prompt = "Choose a Basic Pokémon to put on your opponent's Bench.";
           const card = await game.chooseCard(self.player, validCards, prompt);

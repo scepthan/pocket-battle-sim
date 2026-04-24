@@ -4,7 +4,7 @@ import type { Player } from "../Player";
 import type { PokemonCard } from "../types";
 
 const findBasicForStage2 = (stage2: PokemonCard) => {
-  const stage1Name = stage2.EvolvesFrom;
+  const stage1Name = stage2.evolvesFrom;
   if (!stage1Name) return null;
   const stage1 = allCards.find((card) => card.name === stage1Name);
   if (!stage1 || stage1.cardType !== "Pokemon") return null;
@@ -13,7 +13,7 @@ const findBasicForStage2 = (stage2: PokemonCard) => {
 
 export const findValidRareCandyTargets = (player: Player) => {
   const validBasicNames = player.Hand.filter(
-    (card) => card.CardType === "Pokemon" && card.Stage == 2,
+    (card) => card.cardType === "Pokemon" && card.stage == 2,
   )
     .map((card) => findBasicForStage2(card as PokemonCard))
     .filter((name) => name !== null);
@@ -28,8 +28,8 @@ export const evolveWithRareCandy = async (target: InPlayPokemon) => {
 
   const validCards = player.Hand.filter(
     (card) =>
-      card.CardType === "Pokemon" &&
-      card.Stage == 2 &&
+      card.cardType === "Pokemon" &&
+      card.stage == 2 &&
       findBasicForStage2(card) === target.EvolvesAs,
   );
   const prompt = "Choose a Stage 2 Pokémon to evolve into.";

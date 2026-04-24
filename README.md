@@ -45,6 +45,10 @@ Backend todo:
     - [ ] Unique Promo cards
       - [ ] Tropius
       - [ ] Poliwag
+  - [ ] A4b
+  - [ ] B1
+  - [ ] B1a
+  - [ ] B2
 - [ ] Bring in newer sets
   - [x] A2-A4a
   - [x] A4b-B2

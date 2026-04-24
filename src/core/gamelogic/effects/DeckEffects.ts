@@ -56,8 +56,8 @@ export const PokemonCommunication =
  * use the effect of that card.
  */
 export const Penny = async (game: Game, self: InPlayPokemon) => {
-  const supporters = self.opponent.Deck.filter((card) => card.CardType === "Supporter").filter(
-    (card) => card.Name !== "Penny",
+  const supporters = self.opponent.Deck.filter((card) => card.cardType === "Supporter").filter(
+    (card) => card.name !== "Penny",
   );
   if (supporters.length === 0) {
     game.GameLog.noValidCards(self.player);

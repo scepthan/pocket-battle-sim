@@ -21,13 +21,13 @@ export type CardSorter = (card: PlayingCard) => Sortable;
 const sortBy = defineModel<CardSorter>();
 
 const sortOptions: Record<string, CardSorter> = {
-  "Card ID": (card) => card.ID,
+  "Card ID": (card) => card.id,
   Type: (card) =>
-    card.CardType === "Pokemon"
-      ? allTypes.indexOf(card.Type)
-      : 10 + ["Fossil", "PokemonTool", "Item", "Supporter"].indexOf(card.CardType),
-  Rarity: (card) => Object.keys(allRarities).indexOf(card.Rarity),
-  Name: (card) => card.Name,
-  HP: (card) => (card.CardType === "Pokemon" ? card.BaseHP : 999),
+    card.cardType === "Pokemon"
+      ? allTypes.indexOf(card.type)
+      : 10 + ["Fossil", "PokemonTool", "Item", "Supporter"].indexOf(card.cardType),
+  Rarity: (card) => Object.keys(allRarities).indexOf(card.rarity),
+  Name: (card) => card.name,
+  HP: (card) => (card.cardType === "Pokemon" ? card.baseHP : 999),
 };
 </script>

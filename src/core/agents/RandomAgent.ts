@@ -5,7 +5,7 @@ import { randomElement } from "../util";
 export class RandomAgent extends PlayerAgent {
   async setupPokemon(game: GameInitState) {
     const basicPokemon = game.hand.filter(
-      (x) => x.CardType == "Pokemon" && x.Stage == 0,
+      (x) => x.cardType == "Pokemon" && x.stage == 0,
     ) as PokemonCard[];
     if (basicPokemon.length === 0) {
       throw new Error("No basic Pokemon in hand");
@@ -27,7 +27,7 @@ export class RandomAgent extends PlayerAgent {
 
     // Play a random Basic Pokemon to the Bench if available
     const handBasics = game.selfHand.filter(
-      (x) => x.CardType == "Pokemon" && x.Stage == 0,
+      (x) => x.cardType == "Pokemon" && x.stage == 0,
     ) as PokemonCard[];
     if (handBasics.length > 0) {
       const randomBasic = randomElement(handBasics);
@@ -41,14 +41,14 @@ export class RandomAgent extends PlayerAgent {
     }
 
     // Play each held Item card with 50% chance
-    const itemCards = game.selfHand.filter((x) => x.CardType == "Item" || x.CardType == "Fossil");
+    const itemCards = game.selfHand.filter((x) => x.cardType == "Item" || x.cardType == "Fossil");
     for (const card of itemCards) {
       if (!game.canPlayCard(card) || Math.random() < 0.5) continue;
-      if (card.CardType === "Fossil") {
+      if (card.cardType === "Fossil") {
         await game.playFossilCard(card, randomElement(game.validTargets(card)));
       } else {
         let target: PlayerPokemonView | undefined;
-        if (card.Effect.type === "Targeted") {
+        if (card.effect.type === "Targeted") {
           target = randomElement(game.validTargets(card));
         }
         await game.playItemCard(card, target);
@@ -57,12 +57,12 @@ export class RandomAgent extends PlayerAgent {
 
     // Play a random Supporter card if available
     const supporterCards = game.selfHand
-      .filter((x) => x.CardType == "Supporter")
+      .filter((x) => x.cardType == "Supporter")
       .filter((x) => game.canPlayCard(x));
     if (supporterCards.length > 0) {
       const card = randomElement(supporterCards);
       let target: PlayerPokemonView | undefined;
-      if (card.Effect.type === "Targeted") {
+      if (card.effect.type === "Targeted") {
         target = randomElement(game.validTargets(card));
       }
       await game.playSupporterCard(card, target);
@@ -84,14 +84,14 @@ export class RandomAgent extends PlayerAgent {
     const evolveablePokemon = ownPokemon.filter((x) => x.ReadyToEvolve);
     const pokemonToEvolveWith = game.selfHand.filter(
       (x) =>
-        x.CardType == "Pokemon" &&
-        x.Stage > 0 &&
-        evolveablePokemon.some((y) => y.Name == x.EvolvesFrom),
+        x.cardType == "Pokemon" &&
+        x.stage > 0 &&
+        evolveablePokemon.some((y) => y.Name == x.evolvesFrom),
     ) as PokemonCard[];
     if (pokemonToEvolveWith.length > 0) {
       const randomEvolver = randomElement(pokemonToEvolveWith);
       const pokemonToEvolveFrom = evolveablePokemon.filter(
-        (x) => x.Name == randomEvolver.EvolvesFrom,
+        (x) => x.Name == randomEvolver.evolvesFrom,
       );
       const randomEvolvee = randomElement(pokemonToEvolveFrom);
       await game.playPokemonToEvolve(randomEvolver, randomEvolvee);
@@ -102,7 +102,7 @@ export class RandomAgent extends PlayerAgent {
 
     // End turn with a random attack
     const attacks = [];
-    for (const attack of active.Attacks) {
+    for (const attack of active.attacks) {
       if (game.canUseAttack(attack)) attacks.push(attack);
     }
     if (attacks.length > 0) {

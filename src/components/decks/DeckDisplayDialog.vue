@@ -46,7 +46,7 @@ const cards = computed(() => {
   let output = props.deck.Cards.map((id) => cardStore.getCardById(id)).filter(
     (x) => x !== undefined,
   );
-  output = sortedBy(output, (card) => (card.CardType === "Pokemon" ? card.Type : card.CardType), [
+  output = sortedBy(output, (card) => (card.cardType === "Pokemon" ? card.type : card.cardType), [
     ...allTypes,
     "Fossil",
     "PokemonTool",

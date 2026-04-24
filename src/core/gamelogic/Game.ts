@@ -411,7 +411,7 @@ export class Game {
           }
         } else if (status.source === "PokemonTool") {
           const tool = pokemon.AttachedToolCards.find(
-            (t) => t.Effect.type === "Status" && t.Effect.effect.some((e) => e.status === status),
+            (t) => t.effect.type === "Status" && t.effect.effect.some((e) => e.status === status),
           );
           if (!tool) {
             pokemon.removePokemonStatus(status);
@@ -833,7 +833,7 @@ export class Game {
     if (!this.AttackingPlayer.Hand.includes(card)) {
       throw new Error("Card not in hand");
     }
-    if (card.CardType == "Supporter") {
+    if (card.cardType == "Supporter") {
       if (this.HasPlayedSupporter) {
         throw new Error("Cannot play supporter card currently");
       }
@@ -843,14 +843,14 @@ export class Game {
     removeElement(this.AttackingPlayer.Hand, card);
     this.ActiveTrainerCard = card;
 
-    if (card.CardType === "PokemonTool") {
+    if (card.cardType === "PokemonTool") {
       if (!target || !target.isPokemon)
         throw new Error("Pokémon Tool card requires a target Pokémon");
       if (target.AttachedToolCards.length >= target.MaxToolCards)
         throw new Error("Target Pokémon cannot have any more Tool cards attached");
 
       await target.attachPokemonTool(card);
-    } else if (card.CardType === "Fossil") {
+    } else if (card.cardType === "Fossil") {
       if (!target || target.isPokemon) throw new Error("Fossil card requires a target empty slot");
       await this.putFossilOnBench(card, target);
     } else {
@@ -879,18 +879,18 @@ export class Game {
     let target: InPlayPokemon | undefined;
     const player = this.AttackingPlayer;
     const active = player.activeOrThrow();
-    const passedAmount = evaluatePassedAmount(card.Effect.passedAmount, active);
-    if (card.Effect.conditions.some((cond) => !cond(player, active, passedAmount))) {
+    const passedAmount = evaluatePassedAmount(card.effect.passedAmount, active);
+    if (card.effect.conditions.some((cond) => !cond(player, active, passedAmount))) {
       this.GameLog.conditionNotMet(this.AttackingPlayer);
       return;
     }
-    if (card.Effect.type === "Targeted") {
-      const validTargets = card.Effect.validTargets(player);
+    if (card.effect.type === "Targeted") {
+      const validTargets = card.effect.validTargets(player);
       if (validTargets.length == 0) {
         this.GameLog.noValidTargets(this.AttackingPlayer);
         return;
       }
-      const validPokemon = card.Effect.validTargets(this.AttackingPlayer);
+      const validPokemon = card.effect.validTargets(this.AttackingPlayer);
       target = await this.choosePokemon(this.AttackingPlayer, validPokemon);
     }
 
@@ -898,28 +898,28 @@ export class Game {
   }
 
   private async useTrainerEffect(card: ItemCard | SupporterCard, target?: InPlayPokemon) {
-    if (card.Effect.type === "Targeted") {
+    if (card.effect.type === "Targeted") {
       if (!target) {
         throw new Error("Targeted effect requires a target Pokémon");
       }
-      const validTargets = card.Effect.validTargets(this.AttackingPlayer);
+      const validTargets = card.effect.validTargets(this.AttackingPlayer);
       if (!validTargets.includes(target)) {
         throw new Error("Invalid target for targeted effect");
       }
     }
 
     let passedAmount = 0;
-    if (card.Effect.passedAmount && card.Effect.passedAmount !== "UntilTails") {
+    if (card.effect.passedAmount && card.effect.passedAmount !== "UntilTails") {
       const active = this.AttackingPlayer.activeOrThrow();
-      passedAmount = evaluatePassedAmount(card.Effect.passedAmount, active, target);
+      passedAmount = evaluatePassedAmount(card.effect.passedAmount, active, target);
     }
 
-    if (card.Effect.flipCoins) {
-      const coinsToFlip = card.Effect.passedAmount === "UntilTails" ? "UntilTails" : passedAmount;
+    if (card.effect.flipCoins) {
+      const coinsToFlip = card.effect.passedAmount === "UntilTails" ? "UntilTails" : passedAmount;
       passedAmount = this.flipCoinsForAttack(coinsToFlip);
     }
 
-    for (const effect of card.Effect.sideEffects) {
+    for (const effect of card.effect.sideEffects) {
       await effect(this, this.AttackingPlayer.activeOrThrow(), passedAmount, target);
     }
   }
@@ -1112,17 +1112,17 @@ export class Game {
    */
   async putFossilOnBench(card: FossilCard, slot: EmptyCardSlot) {
     const pokemon: PlayingCard = {
-      ID: card.ID,
-      Name: card.Name,
-      Rarity: card.Rarity,
-      CardType: "Pokemon",
-      Type: card.Type,
-      BaseHP: card.BaseHP,
-      Stage: 0,
-      RetreatCost: -1,
-      PrizePoints: 1,
-      Attacks: [],
-      Ability: {
+      id: card.id,
+      name: card.name,
+      rarity: card.rarity,
+      cardType: "Pokemon",
+      type: card.type,
+      baseHP: card.baseHP,
+      stage: 0,
+      retreatCost: -1,
+      prizePoints: 1,
+      attacks: [],
+      ability: {
         type: "Standard",
         name: "Discard",
         trigger: { type: "Manual", multiUse: false },
@@ -1137,6 +1137,7 @@ export class Game {
           ],
         },
       },
+      parseSuccessful: card.parseSuccessful,
     };
 
     await this.AttackingPlayer.putPokemonOnBench(pokemon, slot.benchIndex, card);
@@ -1315,7 +1316,7 @@ export class Game {
     }
     this.GameLog.viewCards(
       player,
-      options.map((card) => card.ID),
+      options.map((card) => card.id),
     );
 
     if (!options.some(filter)) {
@@ -1385,7 +1386,7 @@ export class Game {
    * Shows a player a set of cards that they aren't normally able to see.
    */
   async showCards(player: Player, cards: PlayingCard[]): Promise<void> {
-    const cardIds = cards.map((card) => card.ID);
+    const cardIds = cards.map((card) => card.id);
     this.GameLog.viewCards(player, cardIds);
     const agent = this.findAgent(player);
     await agent.viewCards(cards);

@@ -23,7 +23,7 @@ const cardId = computed(() => {
   if (typeof props.card === "string" || props.card === undefined) {
     return props.card;
   } else {
-    return props.card.ID;
+    return props.card.id;
   }
 });
 

@@ -24,10 +24,10 @@ const props = defineProps<Props>();
 
 const selectedCards = defineModel<PlayingCard[]>("selected-cards", { required: true });
 
-const count = computed(() => selectedCards.value.filter((x) => x.ID == props.card.ID).length);
+const count = computed(() => selectedCards.value.filter((x) => x.id == props.card.id).length);
 
 const cardClicked = () => {
-  if (selectedCards.value.filter((x) => x.Name == props.card.Name).length < 2) {
+  if (selectedCards.value.filter((x) => x.name == props.card.name).length < 2) {
     selectedCards.value.push(props.card);
   }
 };

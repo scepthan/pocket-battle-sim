@@ -89,7 +89,7 @@ export class Player {
   }
 
   hasBasicPokemon() {
-    return this.Hand.some((card) => card.CardType == "Pokemon" && card.Stage == 0);
+    return this.Hand.some((card) => card.cardType == "Pokemon" && card.stage == 0);
   }
 
   // Setup methods
@@ -114,7 +114,7 @@ export class Player {
     if (!this.Hand.includes(setup.active)) {
       throw new Error("Card not in hand");
     }
-    if (setup.active.Stage != 0) {
+    if (setup.active.stage != 0) {
       throw new Error("Can only play Basic Pokemon at game start");
     }
 
@@ -250,7 +250,7 @@ export class Player {
   async playRandomEvolution(target: InPlayPokemon) {
     const card = this.pullRandomCard(
       this.Deck,
-      (card) => card.CardType === "Pokemon" && card.EvolvesFrom === target.Name,
+      (card) => card.cardType === "Pokemon" && card.evolvesFrom === target.Name,
     );
     if (!card) return;
     await this.evolvePokemon(target, card as PokemonCard, false, true);
@@ -313,7 +313,7 @@ export class Player {
     if (this.Bench[index].isPokemon) {
       throw new Error("Bench already has a Pokemon in this slot");
     }
-    if (card.Stage != 0) {
+    if (card.stage != 0) {
       throw new Error("Can only play Basic Pokemon to bench");
     }
 
@@ -339,7 +339,7 @@ export class Player {
     if (!this.Hand.includes(card) && !ignoreChecks) {
       throw new Error("Card not in hand");
     }
-    if (card.EvolvesFrom !== pokemon.EvolvesAs && !skipStage1) {
+    if (card.evolvesFrom !== pokemon.EvolvesAs && !skipStage1) {
       throw new Error("Card does not evolve from this Pokemon");
     }
     if (pokemon.PlayedThisTurn && !ignoreChecks) {
@@ -537,7 +537,7 @@ export class Player {
     const discardedCards: PlayingCard[] = [];
     for (const card of pokemon.InPlayCards) {
       removeElement(this.InPlay, card);
-      if (card.CardType == "PokemonTool") {
+      if (card.cardType == "PokemonTool") {
         this.Discard.push(card);
         discardedCards.push(card);
       } else {
@@ -557,7 +557,7 @@ export class Player {
     const discardedCards: PlayingCard[] = [];
     for (const card of pokemon.InPlayCards) {
       removeElement(this.InPlay, card);
-      if (card.CardType == "PokemonTool") {
+      if (card.cardType == "PokemonTool") {
         this.Discard.push(card);
         discardedCards.push(card);
       } else {

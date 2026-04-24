@@ -55,12 +55,12 @@ const highlightCards = computed(() => {
   if (splitName.every((cardId) => cardId !== "PROMO-A-007")) return splitName;
 
   const deckCards = props.deck.Cards.map((card) => cardStore.getCardById(card))
-    .filter((card) => card?.CardType === "Pokemon")
-    .filter((card, i, arr) => arr.findIndex((c2) => card.Name === c2.Name) === i)
-    .filter((card, i, arr) => !arr.find((c2) => c2.EvolvesFrom === card.Name));
-  return sortedBy(deckCards, (card) => -card.BaseHP)
+    .filter((card) => card?.cardType === "Pokemon")
+    .filter((card, i, arr) => arr.findIndex((c2) => card.name === c2.name) === i)
+    .filter((card, i, arr) => !arr.find((c2) => c2.evolvesFrom === card.name));
+  return sortedBy(deckCards, (card) => -card.baseHP)
     .slice(0, 2)
-    .map((card) => card?.ID);
+    .map((card) => card?.id);
 });
 
 const dialog = ref(false);

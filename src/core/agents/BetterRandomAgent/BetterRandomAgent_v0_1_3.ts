@@ -18,7 +18,7 @@ import { randomElement as rand, removeElement } from "../../util";
 export class BetterRandomAgent_v0_1_3 extends PlayerAgent {
   async setupPokemon(game: GameInitState) {
     const basicPokemon = game.hand.filter(
-      (x) => x.CardType == "Pokemon" && x.Stage == 0,
+      (x) => x.cardType == "Pokemon" && x.stage == 0,
     ) as PokemonCard[];
 
     return {
@@ -31,18 +31,18 @@ export class BetterRandomAgent_v0_1_3 extends PlayerAgent {
     let ownPokemon = game.selfInPlayPokemon;
 
     // Play Professor's Research if available
-    const professor = game.selfHand.find((x) => x.Name == "Professor’s Research");
+    const professor = game.selfHand.find((x) => x.name == "Professor’s Research");
     if (professor) {
       await game.playSupporterCard(professor as SupporterCard);
     } else if (Math.random() > 0.5) {
       // Play a random Supporter card if available
       const supporterCards = game.selfHand.filter(
-        (x) => x.CardType == "Supporter" && game.canPlayCard(x),
+        (x) => x.cardType == "Supporter" && game.canPlayCard(x),
       ) as SupporterCard[];
       if (supporterCards.length > 0) {
         const card = rand(supporterCards);
         let target: PlayerPokemonView | undefined;
-        if (card.Effect.type === "Targeted") {
+        if (card.effect.type === "Targeted") {
           target = rand(game.validTargets(card));
         }
         await game.playSupporterCard(card, target);
@@ -52,7 +52,7 @@ export class BetterRandomAgent_v0_1_3 extends PlayerAgent {
     // Play any Poke Balls
     let pokeBall;
     while (
-      (pokeBall = game.selfHand.find((x) => x.Name == "Poké Ball")) &&
+      (pokeBall = game.selfHand.find((x) => x.name == "Poké Ball")) &&
       game.canPlayCard(pokeBall)
     ) {
       await game.playItemCard(pokeBall as ItemCard);
@@ -60,7 +60,7 @@ export class BetterRandomAgent_v0_1_3 extends PlayerAgent {
 
     // Play random Basic Pokemon to the Bench if available
     const handBasics = game.selfHand.filter(
-      (x) => x.CardType == "Pokemon" && x.Stage == 0,
+      (x) => x.cardType == "Pokemon" && x.stage == 0,
     ) as PokemonCard[];
     const bench = game.selfBench;
     for (let i = 0; i < 3 && handBasics.length > 0; i++) {
@@ -72,14 +72,14 @@ export class BetterRandomAgent_v0_1_3 extends PlayerAgent {
     }
 
     // Play each held Item card with 50% chance
-    const itemCards = game.selfHand.filter((x) => x.CardType == "Item" || x.CardType == "Fossil");
+    const itemCards = game.selfHand.filter((x) => x.cardType == "Item" || x.cardType == "Fossil");
     for (const card of itemCards) {
       if (!game.canPlayCard(card) || Math.random() < 0.5) continue;
-      if (card.CardType === "Fossil") {
+      if (card.cardType === "Fossil") {
         await game.playFossilCard(card, rand(game.validTargets(card)));
       } else {
         let target: PlayerPokemonView | undefined;
-        if (card.Effect.type === "Targeted") {
+        if (card.effect.type === "Targeted") {
           target = rand(game.validTargets(card));
         }
         await game.playItemCard(card, target);
@@ -87,7 +87,7 @@ export class BetterRandomAgent_v0_1_3 extends PlayerAgent {
     }
 
     // Play each held Pokemon Tool card with 50% chance
-    const toolCards = game.selfHand.filter((x) => x.CardType == "PokemonTool");
+    const toolCards = game.selfHand.filter((x) => x.cardType == "PokemonTool");
     for (const card of toolCards) {
       if (!game.canPlayCard(card) || Math.random() < 0.5) continue;
       const validTargets = game.validTargets(card) as PlayerPokemonView[];
@@ -112,14 +112,14 @@ export class BetterRandomAgent_v0_1_3 extends PlayerAgent {
     const evolveablePokemon = ownPokemon.filter((x) => x.ReadyToEvolve);
     const pokemonToEvolveWith = game.selfHand.filter(
       (x) =>
-        x.CardType == "Pokemon" &&
-        x.Stage > 0 &&
-        evolveablePokemon.some((y) => y.Name == x.EvolvesFrom),
+        x.cardType == "Pokemon" &&
+        x.stage > 0 &&
+        evolveablePokemon.some((y) => y.Name == x.evolvesFrom),
     ) as PokemonCard[];
     if (pokemonToEvolveWith.length > 0) {
       const randomEvolver = rand(pokemonToEvolveWith);
       const pokemonToEvolveFrom = evolveablePokemon.filter(
-        (x) => x.Name == randomEvolver.EvolvesFrom,
+        (x) => x.Name == randomEvolver.evolvesFrom,
       );
       const randomEvolvee = rand(pokemonToEvolveFrom);
       await game.playPokemonToEvolve(randomEvolver, randomEvolvee);
@@ -144,7 +144,7 @@ export class BetterRandomAgent_v0_1_3 extends PlayerAgent {
 
     // Play energy
     if (
-      active.Attacks.some((a) =>
+      active.attacks.some((a) =>
         this.findRemainingEnergy(active, a.requiredEnergy).some(
           (e) => e == game.selfAvailableEnergy || e == "Colorless",
         ),
@@ -156,7 +156,7 @@ export class BetterRandomAgent_v0_1_3 extends PlayerAgent {
       // Otherwise, check the energy needs of all Pokemon on the field and their evolutions
       const pokemonEnergyRequirements = ownPokemon.map((p) => {
         const allPokemon = [p, ...this.findPotentialEvolutions(game, p)];
-        const allAttacks = allPokemon.flatMap((x) => x.Attacks);
+        const allAttacks = allPokemon.flatMap((x) => x.attacks);
         let maxEnergyRequired = 0;
 
         for (const attack of allAttacks) {
@@ -198,7 +198,7 @@ export class BetterRandomAgent_v0_1_3 extends PlayerAgent {
 
     // End turn with the attack with the highest energy cost that can be used
     let chosenAttack: Attack | undefined;
-    for (const attack of active.Attacks) {
+    for (const attack of active.attacks) {
       if (game.canUseAttack(attack)) chosenAttack = attack;
     }
     if (chosenAttack) {
@@ -214,13 +214,13 @@ export class BetterRandomAgent_v0_1_3 extends PlayerAgent {
       const nextEvolutions: PokemonCard[] = [];
       for (const mon of currentPokemon) {
         for (const potentialEvolution of game.selfHand.concat(game.selfDeck)) {
-          if (potentialEvolution.CardType == "Pokemon" && potentialEvolution.EvolvesFrom == mon) {
+          if (potentialEvolution.cardType == "Pokemon" && potentialEvolution.evolvesFrom == mon) {
             allPokemon.push(potentialEvolution);
             nextEvolutions.push(potentialEvolution);
           }
         }
       }
-      currentPokemon = nextEvolutions.map((x) => x.Name).filter((x, i, a) => a.indexOf(x) === i);
+      currentPokemon = nextEvolutions.map((x) => x.name).filter((x, i, a) => a.indexOf(x) === i);
     }
     return allPokemon;
   }
@@ -240,7 +240,7 @@ export class BetterRandomAgent_v0_1_3 extends PlayerAgent {
 
     let maxScore = -10;
     const pokemonScores = bench.map((pokemon) => {
-      const usableAttacks = pokemon.Attacks.filter((a) => {
+      const usableAttacks = pokemon.attacks.filter((a) => {
         const energy = this.findRemainingEnergy(pokemon, a.requiredEnergy);
         if (energy.length == 0) return true;
         if (

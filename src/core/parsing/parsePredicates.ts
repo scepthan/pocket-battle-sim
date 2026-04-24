@@ -87,7 +87,7 @@ export const parsePokemonPredicate = (
     const { parseSuccessful: ps, value: names } = parsePokemonNames(namesText!);
     if (!ps) parseSuccessful = false;
     return (pokemon) =>
-      pokemon.BaseCard.EvolvesFrom != undefined && names.includes(pokemon.BaseCard.EvolvesFrom);
+      pokemon.BaseCard.evolvesFrom != undefined && names.includes(pokemon.BaseCard.evolvesFrom);
   });
 
   if (text === "" || text === "Pokémon") {
@@ -118,7 +118,7 @@ export const parsePlayingCardPredicate = (
 
   if (text.startsWith("Basic ")) {
     const prevPredicate = predicate;
-    predicate = (card) => card.CardType === "Pokemon" && card.Stage === 0 && prevPredicate(card);
+    predicate = (card) => card.cardType === "Pokemon" && card.stage === 0 && prevPredicate(card);
     text = text.slice(6);
   }
 
@@ -127,7 +127,7 @@ export const parsePlayingCardPredicate = (
     const energyType = parseEnergy(energyMatch[1]!);
     const prevPredicate = predicate;
     predicate = (card) =>
-      card.CardType === "Pokemon" && card.Type == energyType && prevPredicate(card);
+      card.cardType === "Pokemon" && card.type == energyType && prevPredicate(card);
     text = text.slice(energyMatch[0].length);
   }
 
@@ -136,9 +136,9 @@ export const parsePlayingCardPredicate = (
     return {
       parseSuccessful,
       value: (card) =>
-        card.CardType === "Pokemon" &&
-        card.EvolvesFrom != undefined &&
-        names.includes(card.EvolvesFrom) &&
+        card.cardType === "Pokemon" &&
+        card.evolvesFrom != undefined &&
+        names.includes(card.evolvesFrom) &&
         predicate(card),
     };
   }
@@ -148,25 +148,25 @@ export const parsePlayingCardPredicate = (
   if (text === "Pokémon") {
     return {
       parseSuccessful: true,
-      value: (card) => card.CardType == "Pokemon" && predicate(card),
+      value: (card) => card.cardType == "Pokemon" && predicate(card),
     };
   }
   if (text === "Item card") {
     return {
       parseSuccessful: true,
-      value: (card) => (card.CardType == "Item" || card.CardType == "Fossil") && predicate(card),
+      value: (card) => (card.cardType == "Item" || card.cardType == "Fossil") && predicate(card),
     };
   }
   if (text === "Supporter card") {
     return {
       parseSuccessful: true,
-      value: (card) => card.CardType == "Supporter" && predicate(card),
+      value: (card) => card.cardType == "Supporter" && predicate(card),
     };
   }
   if (text === "Pokémon Tool card") {
     return {
       parseSuccessful: true,
-      value: (card) => card.CardType == "PokemonTool" && predicate(card),
+      value: (card) => card.cardType == "PokemonTool" && predicate(card),
     };
   }
   if (text === "card") {
@@ -179,6 +179,6 @@ export const parsePlayingCardPredicate = (
   const { parseSuccessful, value: names } = parsePokemonNames(text);
   return {
     parseSuccessful,
-    value: (card) => names.includes(card.Name) && predicate(card),
+    value: (card) => names.includes(card.name) && predicate(card),
   };
 };

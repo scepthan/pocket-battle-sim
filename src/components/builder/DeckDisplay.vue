@@ -8,7 +8,7 @@
       <SelectableCard
         v-model:selected-cards="selectedCards"
         :card="card"
-        :count="selectedCards.filter((x) => x.ID == card.ID).length"
+        :count="selectedCards.filter((x) => x.id == card.id).length"
       />
     </v-col>
   </v-row>

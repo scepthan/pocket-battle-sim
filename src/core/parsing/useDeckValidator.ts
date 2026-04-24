@@ -4,21 +4,21 @@ export const useDeckValidator = (rules: GameRules) => {
   const hasCorrectAmountOfCards = (deck: Deck) => deck.Cards.length == rules.DeckSize;
 
   const hasBasicPokemon = (deck: Deck) =>
-    deck.Cards.some((card) => card.CardType == "Pokemon" && card.Stage == 0);
+    deck.Cards.some((card) => card.cardType == "Pokemon" && card.stage == 0);
 
   const hasNoMoreThanTwoWithSameName = (deck: Deck) => {
-    for (const name of new Set(deck.Cards.map((card) => card.Name)))
-      if (deck.Cards.filter((card) => card.Name == name).length > 2) return false;
+    for (const name of new Set(deck.Cards.map((card) => card.name)))
+      if (deck.Cards.filter((card) => card.name == name).length > 2) return false;
     return true;
   };
 
   const canUseAttack = (attack: Attack, energyTypes: Energy[]) =>
     attack.requiredEnergy.every((energy) => energy == "Colorless" || energyTypes.includes(energy));
   const canUseAnyAttack = (card: PokemonCard, energyTypes: Energy[]) =>
-    card.Attacks.some((attack) => canUseAttack(attack, energyTypes));
+    card.attacks.some((attack) => canUseAttack(attack, energyTypes));
   const anyCanUseAnyAttack = (deck: Deck) =>
     deck.Cards.some(
-      (card) => card.CardType == "Pokemon" && canUseAnyAttack(card, deck.EnergyTypes),
+      (card) => card.cardType == "Pokemon" && canUseAnyAttack(card, deck.EnergyTypes),
     );
 
   const validateDeck = (deck: Deck) => {

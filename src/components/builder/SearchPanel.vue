@@ -11,7 +11,7 @@
           <SelectableCard
             v-model:selected-cards="selectedCards"
             :card="card"
-            :count="selectedCards.filter((x) => x.ID == card.ID).length"
+            :count="selectedCards.filter((x) => x.id == card.id).length"
             :height-px="160"
             @click="emits('card-clicked', card)"
             @contextmenu.prevent="emits('card-unclicked', card)"
@@ -64,7 +64,7 @@ const baseFilters: SearchFilters = {
 };
 
 const searchFilters = reactive<SearchFilters>(Object.assign({}, baseFilters));
-const sortBy = ref<CardSorter>((card) => card.ID);
+const sortBy = ref<CardSorter>((card) => card.id);
 
 const resetFilters = () => {
   Object.assign(searchFilters, baseFilters);
@@ -78,71 +78,71 @@ const toNormalLower = (str: string) =>
 
 const cardFilter = (card: PlayingCard) => {
   if (searchFilters.isPokemon !== null) {
-    if (searchFilters.isPokemon !== (card.CardType === "Pokemon")) return false;
+    if (searchFilters.isPokemon !== (card.cardType === "Pokemon")) return false;
   }
   if (searchFilters.type.length > 0) {
-    if (card.CardType !== "Pokemon" || !searchFilters.type.includes(card.Type)) return false;
+    if (card.cardType !== "Pokemon" || !searchFilters.type.includes(card.type)) return false;
   }
   if (searchFilters.stage.length > 0) {
-    if (card.CardType !== "Pokemon" || !searchFilters.stage.includes(card.Stage)) return false;
+    if (card.cardType !== "Pokemon" || !searchFilters.stage.includes(card.stage)) return false;
   }
   if (searchFilters.isEx !== null) {
-    if (card.CardType !== "Pokemon") return false;
-    if (searchFilters.isEx !== card.Name.endsWith(" ex")) return false;
+    if (card.cardType !== "Pokemon") return false;
+    if (searchFilters.isEx !== card.name.endsWith(" ex")) return false;
   }
   if (searchFilters.isMega !== null) {
-    if (card.CardType !== "Pokemon") return false;
-    if (searchFilters.isMega !== card.Name.startsWith("Mega ")) return false;
+    if (card.cardType !== "Pokemon") return false;
+    if (searchFilters.isMega !== card.name.startsWith("Mega ")) return false;
   }
   if (searchFilters.isUltraBeast !== null) {
-    if (card.CardType !== "Pokemon") return false;
+    if (card.cardType !== "Pokemon") return false;
     if (searchFilters.isUltraBeast !== card.isUltraBeast) return false;
   }
   if (searchFilters.hasAbility !== null) {
-    if (card.CardType !== "Pokemon") return false;
-    if (searchFilters.hasAbility !== !!card.Ability) return false;
+    if (card.cardType !== "Pokemon") return false;
+    if (searchFilters.hasAbility !== !!card.ability) return false;
   }
   if (searchFilters.weakness.length > 0) {
-    if (card.CardType !== "Pokemon") return false;
-    if (card.Weakness === undefined) {
+    if (card.cardType !== "Pokemon") return false;
+    if (card.weakness === undefined) {
       if (!searchFilters.weakness.includes(null)) return false;
-    } else if (!searchFilters.weakness.includes(card.Weakness)) return false;
+    } else if (!searchFilters.weakness.includes(card.weakness)) return false;
   }
   if (searchFilters.retreatCost.length > 0) {
-    if (card.CardType !== "Pokemon") return false;
-    if (!searchFilters.retreatCost.includes(card.RetreatCost)) return false;
+    if (card.cardType !== "Pokemon") return false;
+    if (!searchFilters.retreatCost.includes(card.retreatCost)) return false;
   }
   if (searchFilters.hpMin) {
-    if (card.CardType !== "Pokemon") return false;
-    if (card.BaseHP < searchFilters.hpMin) return false;
+    if (card.cardType !== "Pokemon") return false;
+    if (card.baseHP < searchFilters.hpMin) return false;
   }
   if (searchFilters.hpMax) {
-    if (card.CardType !== "Pokemon") return false;
-    if (card.BaseHP > searchFilters.hpMax) return false;
+    if (card.cardType !== "Pokemon") return false;
+    if (card.baseHP > searchFilters.hpMax) return false;
   }
   if (searchFilters.trainerType.length > 0) {
-    if (!searchFilters.trainerType.includes(card.CardType)) return false;
+    if (!searchFilters.trainerType.includes(card.cardType)) return false;
   }
   if (searchFilters.rarity.length > 0) {
-    if (!searchFilters.rarity.includes(card.Rarity)) return false;
+    if (!searchFilters.rarity.includes(card.rarity)) return false;
   } else if (disableArtFilter.value) {
-    if (!["C", "U", "R", "RR"].includes(card.Rarity)) return false;
+    if (!["C", "U", "R", "RR"].includes(card.rarity)) return false;
   }
   if (searchFilters.expansion.length > 0) {
-    if (!searchFilters.expansion.some((set) => card.ID.startsWith(set + "-"))) return false;
+    if (!searchFilters.expansion.some((set) => card.id.startsWith(set + "-"))) return false;
   }
 
   if (searchQuery.value) {
-    const queriable = [card.Name];
-    if (card.CardType === "Pokemon") {
-      if (card.Ability) {
-        queriable.push(card.Ability.name, card.Ability.text);
+    const queriable = [card.name];
+    if (card.cardType === "Pokemon") {
+      if (card.ability) {
+        queriable.push(card.ability.name, card.ability.text);
       }
-      for (const attack of card.Attacks) {
+      for (const attack of card.attacks) {
         queriable.push(attack.name, attack.text ?? "");
       }
     } else {
-      queriable.push(card.Text);
+      queriable.push(card.text);
     }
     if (!queriable.some((t) => toNormalLower(t).includes(toNormalLower(searchQuery.value))))
       return false;

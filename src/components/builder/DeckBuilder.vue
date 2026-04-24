@@ -20,7 +20,7 @@
           <ResetDeckButton @reset="resetDeck" />
           <CopyJsonButton
             :name="deckName"
-            :deck="{ Cards: selectedCards.map((x) => x.ID), EnergyTypes: energyTypes }"
+            :deck="{ Cards: selectedCards.map((x) => x.id), EnergyTypes: energyTypes }"
           />
           <SaveDeckButton
             :deck-name="deckName"
@@ -76,8 +76,8 @@ const customEnergySelected = ref<boolean>(props.initialDeck.Cards.length > 0);
 const computedEnergy = computed<Set<Energy>>(() => {
   const requiredEnergyTypes = new Set<Energy>();
   selectedCards.value.forEach((card) => {
-    if (card.CardType !== "Pokemon") return;
-    card.Attacks.forEach((attack) =>
+    if (card.cardType !== "Pokemon") return;
+    card.attacks.forEach((attack) =>
       attack.requiredEnergy.forEach((energy) => {
         if (energy !== "Colorless" && requiredEnergyTypes.size < 3) requiredEnergyTypes.add(energy);
       }),
@@ -111,7 +111,7 @@ const resetEnergy = async () => {
 };
 
 const deck = computed<DeckInfo>(() => ({
-  Cards: selectedCards.value.map((card) => card.ID),
+  Cards: selectedCards.value.map((card) => card.id),
   EnergyTypes: sortedBy(energyTypes.value, (x) => x, allTypes),
 }));
 

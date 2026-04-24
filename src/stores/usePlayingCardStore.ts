@@ -16,7 +16,7 @@ export const usePlayingCardStore = defineStore("playing-cards", () => {
     const parsed = parseCard(card);
     if (parsed.value) {
       outputCards.push(parsed.value);
-      cardLookup.value[parsed.value.ID] = parsed.value;
+      cardLookup.value[parsed.value.id] = parsed.value;
       successCount++;
     }
     if (!parsed.parseSuccessful) {

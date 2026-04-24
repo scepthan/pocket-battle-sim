@@ -78,7 +78,7 @@ export class GameLogger {
     this.addEntry({
       type: "playToActive",
       player: player.Name,
-      cardId: card.ID,
+      cardId: card.id,
     });
   }
 
@@ -86,7 +86,7 @@ export class GameLogger {
     this.addEntry({
       type: "playToBench",
       player: player.Name,
-      cardId: card.ID,
+      cardId: card.id,
       benchIndex,
     });
   }
@@ -120,9 +120,9 @@ export class GameLogger {
     this.addEntry({
       type: "evolvePokemon",
       player: player.Name,
-      cardId: card.ID,
+      cardId: card.id,
       fromPokemon: player.pokemonToDescriptor(pokemon),
-      stage: card.Stage,
+      stage: card.stage,
     });
   }
 
@@ -132,7 +132,7 @@ export class GameLogger {
       type: "drawToHand",
       player: player.Name,
       attempted,
-      cardIds: cards.map((card) => card.ID),
+      cardIds: cards.map((card) => card.id),
       success,
       failureReason: success ? undefined : player.Deck.length === 0 ? "deckEmpty" : "handFull",
     });
@@ -142,7 +142,7 @@ export class GameLogger {
     this.addEntry({
       type: "putIntoHand",
       player: player.Name,
-      cardIds: cards.map((card) => card.ID),
+      cardIds: cards.map((card) => card.id),
     });
   }
 
@@ -152,7 +152,7 @@ export class GameLogger {
       type: "drawToHand",
       player: player.Name,
       attempted: 1,
-      cardIds: card ? [card.ID] : [],
+      cardIds: card ? [card.id] : [],
       success,
       failureReason: success ? undefined : "noValidCards",
     });
@@ -170,7 +170,7 @@ export class GameLogger {
       type: "returnToDeck",
       player: player.Name,
       source: "hand",
-      cardIds: cards.map((card) => card.ID),
+      cardIds: cards.map((card) => card.id),
     });
   }
 
@@ -179,7 +179,7 @@ export class GameLogger {
       type: "discardCards",
       player: player.Name,
       source: "hand",
-      cardIds: cards.map((card) => card.ID),
+      cardIds: cards.map((card) => card.id),
     });
   }
 
@@ -188,7 +188,7 @@ export class GameLogger {
       type: "discardCards",
       player: player.Name,
       source: "inPlay",
-      cardIds: cards.map((card) => card.ID),
+      cardIds: cards.map((card) => card.id),
     });
   }
 
@@ -197,7 +197,7 @@ export class GameLogger {
       type: "discardCards",
       player: player.Name,
       source: "deck",
-      cardIds: cards.map((card) => card.ID),
+      cardIds: cards.map((card) => card.id),
     });
   }
 
@@ -206,8 +206,8 @@ export class GameLogger {
       type: "returnToHand",
       player: player.Name,
       source: "inPlay",
-      cardIds: pokemon.InPlayCards.filter((card) => card.CardType !== "PokemonTool").map(
-        (card) => card.ID,
+      cardIds: pokemon.InPlayCards.filter((card) => card.cardType !== "PokemonTool").map(
+        (card) => card.id,
       ),
     });
   }
@@ -217,8 +217,8 @@ export class GameLogger {
       type: "returnToDeck",
       player: player.Name,
       source: "inPlay",
-      cardIds: pokemon.InPlayCards.filter((card) => card.CardType !== "PokemonTool").map(
-        (card) => card.ID,
+      cardIds: pokemon.InPlayCards.filter((card) => card.cardType !== "PokemonTool").map(
+        (card) => card.id,
       ),
     });
   }
@@ -228,7 +228,7 @@ export class GameLogger {
       type: "returnToDeck",
       player: player.Name,
       source,
-      cardIds: cards.map((card) => card.ID),
+      cardIds: cards.map((card) => card.id),
     });
   }
 
@@ -237,7 +237,7 @@ export class GameLogger {
       type: "returnToTopOfDeck",
       player: player.Name,
       choosingPlayer: choosingPlayer?.Name,
-      cardIds: cards.map((card) => card.ID),
+      cardIds: cards.map((card) => card.id),
     });
   }
 
@@ -245,7 +245,7 @@ export class GameLogger {
     this.addEntry({
       type: "returnToBottomOfDeck",
       player: player.Name,
-      cardIds: cards.map((card) => card.ID),
+      cardIds: cards.map((card) => card.id),
     });
   }
 
@@ -394,8 +394,8 @@ export class GameLogger {
     this.addEntry({
       type: "playTrainer",
       player: player.Name,
-      cardId: card.ID,
-      trainerType: card.CardType,
+      cardId: card.id,
+      trainerType: card.cardType,
     });
   }
 
@@ -403,7 +403,7 @@ export class GameLogger {
     this.addEntry({
       type: "copyTrainer",
       player: player.Name,
-      cardId: card.ID,
+      cardId: card.id,
       user: user ? player.pokemonToDescriptor(user) : undefined,
     });
   }
@@ -412,7 +412,7 @@ export class GameLogger {
     this.addEntry({
       type: "attachPokemonTool",
       player: player.Name,
-      cardId: card.ID,
+      cardId: card.id,
       targetPokemon: player.pokemonToDescriptor(targetPokemon),
     });
   }
@@ -421,7 +421,7 @@ export class GameLogger {
     this.addEntry({
       type: "triggerPokemonTool",
       player: player.Name,
-      cardId: tool.ID,
+      cardId: tool.id,
       targetPokemon: player.pokemonToDescriptor(pokemon),
     });
   }
@@ -430,7 +430,7 @@ export class GameLogger {
     this.addEntry({
       type: "removePokemonTool",
       player: player.Name,
-      cardId: card.ID,
+      cardId: card.id,
       targetPokemon: player.pokemonToDescriptor(targetPokemon),
     });
   }

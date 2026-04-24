@@ -48,8 +48,8 @@ export class PlayerPokemonView {
   get PrizePoints() {
     return this.self.PrizePoints;
   }
-  get Attacks() {
-    return this.self.Attacks;
+  get attacks() {
+    return this.self.attacks;
   }
   get Ability() {
     return this.self.Ability;

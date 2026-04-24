@@ -5,49 +5,50 @@ import type { Energy } from "./Energy";
 import type { TrainerEffect } from "./TrainerEffect";
 
 export interface BaseCard {
-  ID: string;
-  Name: string;
-  Rarity: string;
+  id: string;
+  name: string;
+  rarity: string;
+  parseSuccessful: boolean;
 }
 export interface PokemonCard extends BaseCard {
-  CardType: "Pokemon";
-  Type: Energy;
-  BaseHP: number;
-  Stage: number;
-  EvolvesFrom?: string;
-  RetreatCost: number;
-  Weakness?: Energy;
-  PrizePoints: number;
-  Attacks: Attack[];
-  Ability?: Ability;
+  cardType: "Pokemon";
+  type: Energy;
+  baseHP: number;
+  stage: number;
+  evolvesFrom?: string;
+  retreatCost: number;
+  weakness?: Energy;
+  prizePoints: number;
+  attacks: Attack[];
+  ability?: Ability;
   isUltraBeast?: boolean;
 }
 export interface ItemCard extends BaseCard {
-  CardType: "Item";
-  Text: string;
-  Effect: TrainerEffect;
+  cardType: "Item";
+  text: string;
+  effect: TrainerEffect;
 }
 export interface FossilCard extends BaseCard {
-  CardType: "Fossil";
-  Text: string;
-  BaseHP: number;
-  Type: Energy;
+  cardType: "Fossil";
+  text: string;
+  baseHP: number;
+  type: Energy;
 }
 export interface SupporterCard extends BaseCard {
-  CardType: "Supporter";
-  Text: string;
-  Effect: TrainerEffect;
+  cardType: "Supporter";
+  text: string;
+  effect: TrainerEffect;
 }
 
 export interface PokemonToolCard extends BaseCard {
-  CardType: "PokemonTool";
-  Text: string;
-  Effect: Ability;
+  cardType: "PokemonTool";
+  text: string;
+  effect: Ability;
 }
 export interface StadiumCard extends BaseCard {
-  CardType: "Stadium";
-  Text: string;
-  Effect: BasicEffect;
+  cardType: "Stadium";
+  text: string;
+  effect: BasicEffect;
 }
 
 export type TrainerCard = ItemCard | FossilCard | SupporterCard | PokemonToolCard; // | StadiumCard

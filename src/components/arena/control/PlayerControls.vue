@@ -11,7 +11,7 @@
   <div v-else-if="stage === 'selectCard'">
     <SelectionMenu
       :selector="cardSelector"
-      :button-text="(card) => card.Name"
+      :button-text="(card) => card.name"
       default-prompt="Select a card:"
     />
   </div>
@@ -131,14 +131,14 @@ const usableAbilities = computed(
 );
 const usableAttacks = computed(() =>
   game.value?.selfActive.isPokemon
-    ? (game.value.selfActive.Attacks.filter((attack) => game.value?.canUseAttack(attack, true)) ??
+    ? (game.value.selfActive.attacks.filter((attack) => game.value?.canUseAttack(attack, true)) ??
       [])
     : [],
 );
 
 const actionsLeft = computed(
   () =>
-    playableCards.value.some((x) => x.CardType === "Supporter" || x.CardType === "Pokemon") ||
+    playableCards.value.some((x) => x.cardType === "Supporter" || x.cardType === "Pokemon") ||
     game.value?.selfAvailableEnergy ||
     usableAbilities.value.length > 0,
 );
@@ -164,7 +164,7 @@ const setupAgent = () => {
       stage.value = "selectCard";
       cardSelector.prompt.value = "Select your Active Pokémon:";
       cardSelector.options.value = gameView.hand.filter(
-        (card) => card.CardType === "Pokemon" && card.Stage === 0,
+        (card) => card.cardType === "Pokemon" && card.stage === 0,
       );
 
       const active = (await cardSelector.selectionPromise()) as PokemonCard;
@@ -242,15 +242,15 @@ const setupAgent = () => {
 
         if (typeof selectedCard === "symbol") continue;
 
-        switch (selectedCard.CardType) {
+        switch (selectedCard.cardType) {
           case "Pokemon":
-            if (selectedCard.Stage === 0) {
+            if (selectedCard.stage === 0) {
               const index = gameView.selfBench.findIndex((p) => !p.isPokemon);
               await gameView.playPokemonToBench(selectedCard, index);
             } else {
               const evolvablePokemon = gameView.selfInPlayPokemon.filter(
                 (p) =>
-                  p.isPokemon && p.EvolvesAs === selectedCard.EvolvesFrom && gameView.canEvolve(p),
+                  p.isPokemon && p.EvolvesAs === selectedCard.evolvesFrom && gameView.canEvolve(p),
               );
               if (evolvablePokemon.length === 0) {
                 console.log("No valid Pokémon to evolve.");
@@ -284,9 +284,9 @@ const setupAgent = () => {
           case "Supporter":
           case "PokemonTool":
             const playSelectedCard = async (target?: PlayerPokemonView) => {
-              if (selectedCard.CardType === "Supporter") {
+              if (selectedCard.cardType === "Supporter") {
                 await gameView.playSupporterCard(selectedCard, target);
-              } else if (selectedCard.CardType === "Item") {
+              } else if (selectedCard.cardType === "Item") {
                 await gameView.playItemCard(selectedCard, target);
               } else {
                 if (!target || !target.isPokemon)
@@ -296,8 +296,8 @@ const setupAgent = () => {
             };
 
             if (
-              selectedCard.CardType === "PokemonTool" ||
-              selectedCard.Effect.type === "Targeted"
+              selectedCard.cardType === "PokemonTool" ||
+              selectedCard.effect.type === "Targeted"
             ) {
               stage.value = "selectPokemon";
               pokemonSelector.prompt.value = "Select a Pokémon to use it on:";

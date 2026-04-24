@@ -17,50 +17,51 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
   let parseSuccessful = true;
 
   if (inputCard.cardType == "Pokemon") {
-    const Attacks = inputCard.attacks.map((attack) => {
+    const attacks = inputCard.attacks.map((attack) => {
       const result = parseAttack(attack);
       if (!result.parseSuccessful) parseSuccessful = false;
       return result.value;
     });
 
-    let Ability: Ability | undefined;
+    let ability: Ability | undefined;
     if (inputCard.ability) {
       const result = parseAbility(inputCard.ability, "Ability");
       if (!result.parseSuccessful) parseSuccessful = false;
-      Ability = result.value;
+      ability = result.value;
     }
 
-    let Type: Energy = "Colorless";
+    let type: Energy = "Colorless";
     if (isEnergy(inputCard.type)) {
-      Type = inputCard.type;
+      type = inputCard.type;
     } else {
       parseSuccessful = false;
     }
 
-    let Weakness: Energy | undefined;
+    let weakness: Energy | undefined;
     if (!inputCard.weakness) {
-      Weakness = undefined;
+      weakness = undefined;
     } else if (isEnergy(inputCard.weakness)) {
-      Weakness = inputCard.weakness;
+      weakness = inputCard.weakness;
     } else {
       parseSuccessful = false;
     }
 
     const outputCard = {
-      ID: inputCard.id,
-      Name: inputCard.name,
-      Rarity: inputCard.rarity,
-      CardType: inputCard.cardType,
-      Type,
-      BaseHP: inputCard.hp,
-      Stage: inputCard.stage,
-      EvolvesFrom: inputCard.previousEvolution,
-      RetreatCost: inputCard.retreatCost,
-      Weakness,
-      PrizePoints: inputCard.name.endsWith(" ex") ? 2 : 1,
-      Attacks,
-      Ability,
+      id: inputCard.id,
+      name: inputCard.name,
+      rarity: inputCard.rarity,
+      cardType: inputCard.cardType,
+      type,
+      baseHP: inputCard.hp,
+      stage: inputCard.stage,
+      evolvesFrom: inputCard.previousEvolution,
+      retreatCost: inputCard.retreatCost,
+      weakness,
+      prizePoints: inputCard.name.endsWith(" ex") ? 2 : 1,
+      attacks,
+      ability,
       isUltraBeast: inputCard.isUltraBeast,
+      parseSuccessful,
     };
 
     return { value: outputCard, parseSuccessful };
@@ -70,12 +71,12 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
     const effect = result.value;
 
     const outputCard: ItemCard | SupporterCard = {
-      ID: inputCard.id,
-      Name: inputCard.name,
-      Rarity: inputCard.rarity,
-      CardType: inputCard.cardType,
-      Text: inputCard.text,
-      Effect: {
+      id: inputCard.id,
+      name: inputCard.name,
+      rarity: inputCard.rarity,
+      cardType: inputCard.cardType,
+      text: inputCard.text,
+      effect: {
         ...(effect.validTargets
           ? {
               type: "Targeted",
@@ -87,6 +88,7 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
         flipCoins: effect.flipCoins,
         sideEffects: [...effect.sideEffects, ...statusesToSideEffects(effect)],
       },
+      parseSuccessful,
     };
 
     return { value: outputCard, parseSuccessful };
@@ -95,13 +97,14 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
     if (!result) parseSuccessful = false;
 
     const outputCard = {
-      ID: inputCard.id,
-      Name: inputCard.name,
-      Rarity: inputCard.rarity,
-      CardType: inputCard.cardType,
-      Text: inputCard.text,
-      BaseHP: result ? parseInt(result[1]!) : 40,
-      Type: result ? parseEnergy(result[2]!) : "Colorless",
+      id: inputCard.id,
+      name: inputCard.name,
+      rarity: inputCard.rarity,
+      cardType: inputCard.cardType,
+      text: inputCard.text,
+      baseHP: result ? parseInt(result[1]!) : 40,
+      type: result ? parseEnergy(result[2]!) : "Colorless",
+      parseSuccessful,
     };
 
     return { value: outputCard, parseSuccessful };
@@ -116,12 +119,13 @@ export const parseCard = (inputCard: InputCard): ParsedResultOptional<PlayingCar
     if (!result.parseSuccessful) parseSuccessful = false;
 
     const outputCard = {
-      ID: inputCard.id,
-      Name: inputCard.name,
-      Rarity: inputCard.rarity,
-      CardType: inputCard.cardType,
-      Text: inputCard.text,
-      Effect: result.value,
+      id: inputCard.id,
+      name: inputCard.name,
+      rarity: inputCard.rarity,
+      cardType: inputCard.cardType,
+      text: inputCard.text,
+      effect: result.value,
+      parseSuccessful,
     };
 
     return { value: outputCard, parseSuccessful };

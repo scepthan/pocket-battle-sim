@@ -37,10 +37,10 @@ export class InPlayPokemon {
   }
 
   get cardId() {
-    return this.BaseCard.ID;
+    return this.BaseCard.id;
   }
   get Name() {
-    return this.BaseCard.Name;
+    return this.BaseCard.name;
   }
   get EvolvesAs() {
     const status = this.PokemonStatuses.find((s) => s.type === "CanEvolveAs");
@@ -48,33 +48,33 @@ export class InPlayPokemon {
     return this.Name;
   }
   get Type() {
-    return this.BaseCard.Type;
+    return this.BaseCard.type;
   }
   get BaseHP() {
-    return this.BaseCard.BaseHP;
+    return this.BaseCard.baseHP;
   }
   get Stage() {
-    return this.BaseCard.Stage;
+    return this.BaseCard.stage;
   }
   get RetreatCost() {
-    return this.BaseCard.RetreatCost;
+    return this.BaseCard.retreatCost;
   }
   get Weakness() {
-    return this.BaseCard.Weakness;
+    return this.BaseCard.weakness;
   }
   get PrizePoints() {
-    return this.BaseCard.PrizePoints;
+    return this.BaseCard.prizePoints;
   }
-  get Attacks() {
-    return this.BaseCard.Attacks;
+  get attacks() {
+    return this.BaseCard.attacks;
   }
   get Ability() {
-    return this.BaseCard.Ability;
+    return this.BaseCard.ability;
   }
   get effectiveAbilities() {
     const abilities = this.Ability ? [this.Ability] : [];
     for (const tool of this.AttachedToolCards) {
-      abilities.push(tool.Effect);
+      abilities.push(tool.effect);
     }
     return abilities;
   }
@@ -148,7 +148,7 @@ export class InPlayPokemon {
   }
 
   async evolveInto(inputCard: PokemonCard) {
-    const hpIncrease = inputCard.BaseHP - this.BaseHP;
+    const hpIncrease = inputCard.baseHP - this.BaseHP;
 
     this.BaseCard = inputCard;
     this.InPlayCards.push(inputCard);

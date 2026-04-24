@@ -89,7 +89,7 @@ export class PlayerGameView {
     return this.player.Hand.slice();
   }
   get selfDeck() {
-    return this.player.Deck.slice().sort((a, b) => a.ID.localeCompare(b.ID));
+    return this.player.Deck.slice().sort((a, b) => a.id.localeCompare(b.id));
   }
   get selfDiscard() {
     return this.player.Discard.slice();
@@ -121,7 +121,7 @@ export class PlayerGameView {
     return this.opponent.Deck.length;
   }
   get opponentUnseenCards() {
-    return this.opponent.Deck.concat(this.opponent.Hand).sort((a, b) => a.ID.localeCompare(b.ID));
+    return this.opponent.Deck.concat(this.opponent.Hand).sort((a, b) => a.id.localeCompare(b.id));
   }
   get opponentDiscard() {
     return this.opponent.Discard.slice();
@@ -173,29 +173,29 @@ export class PlayerGameView {
       return false;
     }
 
-    if (card.CardType == "Pokemon") {
-      if (card.Stage == 0) {
+    if (card.cardType == "Pokemon") {
+      if (card.stage == 0) {
         return this.selfBenched.length < 3;
       } else {
         return this.selfInPlayPokemon.some(
           (pokemon) =>
-            card.EvolvesFrom === pokemon.EvolvesAs && this.canEvolve(pokemon, ignoreCanPlay),
+            card.evolvesFrom === pokemon.EvolvesAs && this.canEvolve(pokemon, ignoreCanPlay),
         );
       }
-    } else if (card.CardType == "Supporter" || card.CardType == "Item") {
-      if (card.CardType == "Supporter" && this.game.HasPlayedSupporter) return false;
+    } else if (card.cardType == "Supporter" || card.cardType == "Item") {
+      if (card.cardType == "Supporter" && this.game.HasPlayedSupporter) return false;
       const realActive = this.player.activeOrThrow();
-      const passedAmount = evaluatePassedAmount(card.Effect.passedAmount, realActive);
-      if (card.Effect.conditions.some((cond) => !cond(this.player, realActive, passedAmount)))
+      const passedAmount = evaluatePassedAmount(card.effect.passedAmount, realActive);
+      if (card.effect.conditions.some((cond) => !cond(this.player, realActive, passedAmount)))
         return false;
-      if (card.Effect.type === "Targeted") {
-        const validTargets = card.Effect.validTargets(this.player);
+      if (card.effect.type === "Targeted") {
+        const validTargets = card.effect.validTargets(this.player);
         if (validTargets.length == 0) return false;
       }
       return true;
-    } else if (card.CardType == "Fossil") {
+    } else if (card.cardType == "Fossil") {
       return this.selfBench.some((slot) => !slot.isPokemon);
-    } else if (card.CardType == "PokemonTool") {
+    } else if (card.cardType == "PokemonTool") {
       return this.selfInPlayPokemon.some(
         (pokemon) => pokemon.AttachedToolCards.length < pokemon.MaxToolCards,
       );
@@ -214,7 +214,7 @@ export class PlayerGameView {
     if (!this.hasActivePokemon()) return false;
     if (!this.canPlay && !ignoreCanPlay) return false;
 
-    if (!this.selfActive.Attacks.includes(attack)) return false;
+    if (!this.selfActive.attacks.includes(attack)) return false;
     if (this.selfActive.PrimaryCondition == "Asleep") return false;
     if (this.selfActive.PrimaryCondition == "Paralyzed") return false;
     if (
@@ -284,14 +284,14 @@ export class PlayerGameView {
   validTargets(card: ItemCard | SupporterCard | PokemonToolCard): PlayerPokemonView[];
   validTargets(card: FossilCard): EmptyCardSlot[];
   validTargets(card: TrainerCard) {
-    if (card.CardType === "PokemonTool") {
+    if (card.cardType === "PokemonTool") {
       return this.selfInPlayPokemon.filter((p) => p.AttachedToolCards.length < p.MaxToolCards);
     }
-    if (card.CardType === "Fossil") {
+    if (card.cardType === "Fossil") {
       return this.selfBench.filter((slot) => !slot.isPokemon);
     }
-    if (card.Effect.type === "Targeted") {
-      return card.Effect.validTargets(this.player).map(viewOrEmpty);
+    if (card.effect.type === "Targeted") {
+      return card.effect.validTargets(this.player).map(viewOrEmpty);
     }
     return [];
   }
@@ -338,7 +338,7 @@ export class PlayerGameView {
   async playPokemonToBench(pokemon: PokemonCard, index: number): Promise<boolean> {
     if (!this.canPlay) return false;
 
-    if (pokemon.Stage == 0 && !this.selfBench[index]?.isPokemon) {
+    if (pokemon.stage == 0 && !this.selfBench[index]?.isPokemon) {
       await this.game.putPokemonOnBench(pokemon, index);
 
       await this.game.delay();
@@ -353,7 +353,7 @@ export class PlayerGameView {
     if (!this.canPlay) return false;
     if (!this.canEvolve(inPlayPokemon)) return false;
 
-    if (pokemon.EvolvesFrom == inPlayPokemon.EvolvesAs) {
+    if (pokemon.evolvesFrom == inPlayPokemon.EvolvesAs) {
       const realPokemon = this.pokemonFromView(inPlayPokemon);
       await this.game.evolvePokemon(realPokemon, pokemon);
 
@@ -417,8 +417,8 @@ export class PlayerGameView {
   private async playItemOrSupporter(card: ItemCard | SupporterCard, target?: PlayerPokemonView) {
     if (!this.canPlayCard(card)) return false;
     const realTarget = target && this.pokemonFromView(target);
-    if (card.Effect.type === "Targeted") {
-      if (!realTarget || !card.Effect.validTargets(this.player).includes(realTarget)) return false;
+    if (card.effect.type === "Targeted") {
+      if (!realTarget || !card.effect.validTargets(this.player).includes(realTarget)) return false;
     }
 
     await this.game.playTrainer(card, realTarget);

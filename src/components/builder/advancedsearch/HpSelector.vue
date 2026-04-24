@@ -33,9 +33,9 @@ const minHp = ref(999);
 const maxHp = ref(0);
 
 for (const card of Cards) {
-  if (card.CardType !== "Pokemon") continue;
-  if (card.BaseHP < minHp.value) minHp.value = card.BaseHP;
-  if (card.BaseHP > maxHp.value) maxHp.value = card.BaseHP;
+  if (card.cardType !== "Pokemon") continue;
+  if (card.baseHP < minHp.value) minHp.value = card.baseHP;
+  if (card.baseHP > maxHp.value) maxHp.value = card.baseHP;
 }
 
 const minOptions = computed(() => {
