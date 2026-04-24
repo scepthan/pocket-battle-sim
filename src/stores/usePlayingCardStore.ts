@@ -12,6 +12,7 @@ export const usePlayingCardStore = defineStore("playing-cards", () => {
 
   let successCount = 0;
   let softFailCount = 0;
+  let hardFailCount = 0;
   for (const card of inputCards) {
     const parsed = parseCard(card);
     if (parsed.value) {
@@ -20,16 +21,23 @@ export const usePlayingCardStore = defineStore("playing-cards", () => {
       successCount++;
     }
     if (!parsed.parseSuccessful) {
-      console.log("Failed to parse card:", card, parsed.value);
       if (parsed.value) {
+        console.log("Failed to fully parse card:", card, parsed.value);
         successCount--;
         softFailCount++;
+      } else {
+        console.error("Could not parse card:", card);
+        hardFailCount++;
       }
     }
   }
-  console.log(
-    `${inputCards.length} cards found: ${successCount} successfully parsed, ${softFailCount} soft failed`,
-  );
+  let message = `${inputCards.length} cards found: ${successCount} successfully parsed`;
+  if (softFailCount > 0) message += `, ${softFailCount} soft failed`;
+  if (hardFailCount > 0) {
+    console.error(message + `, ${hardFailCount} hard failed`);
+  } else {
+    console.log(message);
+  }
   console.log(outputCards);
   Cards.value = outputCards;
 

@@ -13,7 +13,7 @@ const parsePokemonNames = (text: string): ParsedResult<string[]> => {
 
   const unknownNames = names.filter((name) => !allCards.some((card) => card.name === name));
   if (unknownNames.length > 0) {
-    console.error(`Unknown Pokémon names in card effect: ${unknownNames.join(", ")}`);
+    console.warn(`Unknown Pokémon names in card effect: ${unknownNames.join(", ")}`);
     parseSuccessful = false;
   }
 

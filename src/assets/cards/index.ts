@@ -21,8 +21,6 @@ export const cardData = {
   ...seriesB,
 } as Record<string, InputCard[]>;
 
-export const allCards = Object.values(cardData)
-  .slice(0, 10)
-  .reduce((acc, cardList) => {
-    return acc.concat(cardList);
-  }, [] as InputCard[]);
+export const allCards = Object.values(cardData).reduce((acc, cardList) => {
+  return acc.concat(cardList);
+}, [] as InputCard[]);

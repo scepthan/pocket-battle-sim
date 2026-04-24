@@ -2190,7 +2190,9 @@ export const parseEffect = (
     if (parser.hasAnyStatuses()) {
       effect.statusConditional = parser.conditionalForNextEffect;
     } else {
-      console.warn("Unused conditional:", effect);
+      if (!text) {
+        console.warn("Unused conditional:", effect);
+      }
       parser.parseSuccessful = false;
     }
   }
