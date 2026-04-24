@@ -49,10 +49,11 @@ Backend todo:
   - [ ] B1
   - [ ] B1a
   - [ ] B2
-- [ ] Bring in newer sets
+- [x] Bring in newer sets
   - [x] A2-A4a
   - [x] A4b-B2
-  - [ ] B2a-B3
+  - [x] B2a-B2b
+  - [ ] B3
 - [ ] Game logic improvements
   - [x] Combine statuses that increase and decrease the same stat
     - [x] ModifyAttackDamage/IncreaseAttack
@@ -72,7 +73,6 @@ Backend todo:
     - I also don't know if this will be faster or slower than the callback approach, but I would guess slower at first glance
 - [ ] Logging improvements
   - [ ] Add increase/decrease max HP log events (probably does not need to be separate)
-  - [ ] If damage prevention came from somewhere other than the afflicted mon, log it (e.g. Comfey)
   - [ ] Log the specific Special Condition prevented instead of just "a Special Condition"
   - [ ] Put more information in the status source so it can be passed to the log event for things like damage prevention
     - Oricorio's **Safeguard** prevented damage from the attack!
@@ -80,6 +80,7 @@ Backend todo:
     - Skarmory's **Steel Apron** prevented a Special Condition from the Ability!
     - Teal Mask Ogerpon's **Soothing Wind** prevented a Special Condition from the Pokémon Tool!
   - [ ] Prevent "played to bench" event from appearing as a player action when it was a side effect
+    - A4 Porygon2 adds evolution as a possible side effect as well
 - [ ] Interactions to test in-app
   - [ ] Heavy Helmet vs CounterAttack status effect (does it reduce damage? Reddit claims it will)
   - [ ] Heavy Helmet vs max HP damage (990 or 970?)
@@ -118,3 +119,4 @@ Frontend todo:
   - [x] Allow energy selection
   - [x] Add ability to save decks and edit existing decks
   - [x] Advanced search filters
+- [ ] Clean up front page

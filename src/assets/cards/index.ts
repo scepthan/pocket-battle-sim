@@ -13,9 +13,11 @@ import A4b from "./A4b.json";
 import B1 from "./B1.json";
 import B1a from "./B1a.json";
 import B2 from "./B2.json";
+import B2a from "./B2a.json";
+import B2b from "./B2b.json";
 
 const seriesA = { A1, A1a, A2, A2a, A2b, A3, A3a, A3b, A4, A4a, A4b };
-const seriesB = { B1, B1a, B2 };
+const seriesB = { B1, B1a, B2, B2a, B2b };
 export const cardData = {
   ...seriesA,
   ...seriesB,
