@@ -1,0 +1,173 @@
+- A4a-003 Jumpluff ex
+- A4a-006 Celebi
+- A4a-007 Durant
+- A4a-016 Tentacruel
+- A4a-018 Slowking
+- A4a-020 Suicune ex
+- A4a-031 Boltund
+- A4a-032 Misdreavus
+- A4a-033 Mismagius
+- A4a-035 Galarian Cursola
+- A4a-041 Dugtrio
+- A4a-042 Poliwrath ex
+- A4a-043 Phanpy
+- A4a-048 Seviper
+- A4a-050 Zoroark
+- A4a-055 Altaria
+- A4a-062 Miltank
+- A4a-067 Inflatable Boat
+- A4a-068 Memory Light
+- A4a-069 Whitney
+- A4a-070 Traveling Merchant
+- PROMO-A-107 Miltank
+- PROMO-A-108 Phanpy
+- B1-004 Silcoon
+- B1-006 Cascoon
+- B1-007 Dustox
+- B1-018 Lilligant
+- B1-036 Mega Blaziken ex
+- B1-043 Chandelure
+- B1-051 Gyarados
+- B1-052 Mega Gyarados ex
+- B1-055 Ludicolo
+- B1-060 Luvdisc
+- B1-067 Carracosta
+- B1-080 Eiscue
+- B1-081 Jolteon ex
+- B1-084 Ampharos
+- B1-085 Mega Ampharos ex
+- B1-101 Sableye
+- B1-105 Dusknoir
+- B1-111 Cofagrigus
+- B1-114 Gothitelle
+- B1-120 Klefki
+- B1-124 Hitmonchan ex
+- B1-134 Archeops
+- B1-136 Golurk
+- B1-140 Crabominable
+- B1-149 Honchkrow
+- B1-150 Absol
+- B1-151 Mega Absol ex
+- B1-153 Drapion
+- B1-164 Morgrem
+- B1-172 Aegislash
+- B1-176 Druddigon
+- B1-182 Pidgeot
+- B1-184 Eevee
+- B1-186 Ambipom
+- B1-194 Delcatty
+- B1-195 Spinda
+- B1-213 Prank Spinner
+- B1-217 Flame Patch
+- B1-218 Sitrus Berry
+- B1-219 Heavy Helmet
+- B1-220 Lucky Mittens
+- B1-222 Hala
+- B1-223 May
+- B1-224 Fantina
+- B1-226 Lisia
+- PROMO-B-006 Mega Pidgeot ex
+- PROMO-B-009 Mega Absol ex
+- PROMO-B-011 Eevee
+- B1a-004 Mega Venusaur ex
+- B1a-006 Ariados
+- B1a-008 Sunflora
+- B1a-012 Charmeleon
+- B1a-019 Blastoise
+- B1a-020 Mega Blastoise ex
+- B1a-034 Reuniclus
+- B1a-037 Xerneas
+- B1a-048 Liepard
+- B1a-051 Steelix
+- B1a-052 Mega Steelix ex
+- B1a-055 Ditto
+- B1a-058 Porygon-Z
+- B1a-067 Quick-Grow Extract
+- B1a-068 Clemont
+- B1a-069 Serena
+- PROMO-B-020 Charmeleon
+- B2-002 Ledian
+- B2-005 Roserade
+- B2-013 Vivillon
+- B2-014 Buzzwole
+- B2-016 Eldegoss
+- B2-017 Teal Mask Ogerpon ex
+- B2-032 Delibird
+- B2-036 Mega Swampert ex
+- B2-042 Aurorus
+- B2-048 Wellspring Mask Ogerpon
+- B2-050 Alolan Raichu
+- B2-051 Zapdos
+- B2-059 Galarian Rapidash
+- B2-066 Mega Gardevoir ex
+- B2-069 Chandelure
+- B2-070 Meloetta
+- B2-072 Gourgeist
+- B2-073 Mimikyu ex
+- B2-075 Polteageist
+- B2-079 Machop
+- B2-081 Machamp
+- B2-084 Medicham
+- B2-090 Tyrantrum
+- B2-092 Falinks
+- B2-097 Alolan Muk
+- B2-103 Spiritomb
+- B2-104 Purrloin
+- B2-107 Scrafty
+- B2-109 Guzzlord
+- B2-111 Galarian Perrserker
+- B2-113 Mega Mawile ex
+- B2-117 Galarian Stunfisk
+- B2-120 Aegislash
+- B2-127 Mega Kangaskhan ex
+- B2-130 Smeargle
+- B2-138 Tornadus
+- B2-142 Tandemaus
+- B2-143 Maushold
+- B2-145 Lucky Ice Pop
+- B2-147 Protective Poncho
+- B2-148 Metal Core Barrier
+- B2-149 Diantha
+- B2-150 Sightseer
+- B2-151 Juggler
+- B2-152 Piers
+- B2-153 Training Area
+- B2-154 Starting Plains
+- B2-155 Peculiar Plaza
+- PROMO-B-029 Mega Medicham ex
+- PROMO-B-030 Tornadus
+- B2a-003 Meowscarada ex
+- B2a-009 Arboliva
+- B2a-018 Skeledirge
+- B2a-024 Quaquaval
+- B2a-031 Veluza
+- B2a-042 Bellibolt ex
+- B2a-052 Greavard
+- B2a-053 Houndstone
+- B2a-062 Ting-Lu
+- B2a-065 Paldean Clodsire
+- B2a-070 Grafaiai
+- B2a-078 Gholdengo ex
+- B2a-088 Team Star Grunt
+- B2a-093 Mesagoza
+- PROMO-B-040 Paldean Clodsire
+- B2b-004 Illumise
+- B2b-008 Charmeleon
+- B2b-009 Mega Charizard X ex
+- B2b-016 Mega Slowbro ex
+- B2b-027 Mega Manectric ex
+- B2b-030 Mew
+- B2b-032 Grumpig
+- B2b-035 Groudon
+- B2b-039 Mega Gengar ex
+- B2b-040 Darkrai
+- B2b-045 Morpeko
+- B2b-046 Forretress
+- B2b-052 Dragonair
+- B2b-056 Haxorus
+- B2b-065 Nasty Notice
+- B2b-066 Maintenance
+- B2b-067 Iris
+- B2b-068 Calem
+- B2b-069 Hiking Trail
+- PROMO-B-045 Haxorus
