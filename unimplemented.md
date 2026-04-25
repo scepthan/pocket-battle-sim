@@ -50,7 +50,6 @@
 - B1-151 Mega Absol ex
 - B1-153 Drapion
 - B1-164 Morgrem
-- B1-172 Aegislash
 - B1-176 Druddigon
 - B1-182 Pidgeot
 - B1-184 Eevee

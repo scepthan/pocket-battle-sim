@@ -60,7 +60,7 @@ export const parsePokemonPredicate = (
 
   const energyTypes: Energy[] = [];
   let energyMatch;
-  while ((energyMatch = text.match(/^(?:|or |, or |, )\{(\w)\} */))) {
+  while ((energyMatch = text.match(/^(?:|and |, and|or |, or |, )\{(\w)\}(?: Pokémon)? */))) {
     const energyType = parseEnergy(energyMatch[1]!);
     energyTypes.push(energyType);
     text = text.slice(energyMatch[0].length);
@@ -70,7 +70,7 @@ export const parsePokemonPredicate = (
     predicate = (pokemon) => energyTypes.includes(pokemon.type) && prevPredicate(pokemon);
   }
 
-  parsePart(/ that has any(?: {(\w)})? Energy attached$/, ([, energy]) => {
+  parsePart(/ *that has any(?: {(\w)})? Energy attached$/, ([, energy]) => {
     if (energy) {
       const fullEnergy = parseEnergy(energy);
       return (pokemon) => pokemon.hasAnyEnergy(fullEnergy);
@@ -78,7 +78,7 @@ export const parsePokemonPredicate = (
       return (pokemon) => pokemon.hasAnyEnergy();
     }
   });
-  parsePart(/ that ha(?:s|ve) damage on (?:it|them)$/, () => (pokemon) => pokemon.isDamaged());
+  parsePart(/ *that ha(?:s|ve) damage on (?:it|them)$/, () => (pokemon) => pokemon.isDamaged());
 
   parsePart(/^Pokémon ex$/, () => (pokemon) => pokemon.name.endsWith(" ex"));
   parsePart(/^Ultra Beasts?$/, () => (pokemon) => pokemon.isUltraBeast);
