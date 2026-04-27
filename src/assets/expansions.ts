@@ -17,4 +17,5 @@ export const allExpansions = {
   B2: "Fantastical Parade",
   B2a: "Paldean Wonders",
   B2b: "Mega Shine",
+  B3: "Pulsing Aura",
 };
