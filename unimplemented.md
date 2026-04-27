@@ -170,3 +170,47 @@
 - B2b-068 Calem
 - B2b-069 Hiking Trail
 - PROMO-B-045 Haxorus
+- B3-003 Heracross
+- B3-004 Celebi
+- B3-008 Mega Sceptile ex
+- B3-012 Breloom
+- B3-013 Budew
+- B3-022 Camerupt
+- B3-024 Castform Sunny Form
+- B3-025 Victini
+- B3-035 Politoed
+- B3-039 Quagsire
+- B3-040 Castform Rainy Form
+- B3-041 Castform Snowy Form
+- B3-045 Regice
+- B3-051 Rapid Strike Urshifu
+- B3-061 Toxtricity
+- B3-066 Meowstic
+- B3-068 Oricorio
+- B3-071 Hatterene
+- B3-073 Brambleghast
+- B3-084 Gallade
+- B3-086 Sawk
+- B3-094 Coalossal
+- B3-108 Amoonguss
+- B3-112 Malamar
+- B3-113 Single Strike Urshifu
+- B3-114 Zarude
+- B3-118 Bronzong
+- B3-126 Flygon ex
+- B3-128 Blissey
+- B3-130 Dunsparce
+- B3-133 Castform
+- B3-134 Regigigas
+- B3-137 Lillipup
+- B3-147 Field Blower
+- B3-148 Lucky Egg
+- B3-150 Cabbie
+- B3-151 Cheren
+- B3-152 Parasol Lady
+- B3-153 Fragrant Forest
+- B3-154 Arena of Antiquity
+- B3-155 Bounded Field
+- PROMO-B-057 Castform Sunny Form
+- PROMO-B-060 Zarude
+- PROMO-B-062 Gallade
