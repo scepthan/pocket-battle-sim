@@ -1117,6 +1117,7 @@ export class Game {
       id: card.id,
       name: card.name,
       rarity: card.rarity,
+      illustrationUrl: card.illustrationUrl,
       cardType: "Pokemon",
       type: card.type,
       baseHP: card.baseHP,

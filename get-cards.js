@@ -24,6 +24,9 @@ for (const card of card_data) {
   const new_card = {
     name: card.name.trim(),
     rarity: card.rarity,
+    illustrationUrl: card.illustrationUrl
+      .replace("https://assets.pokemon-zone.com/game-assets/CardPreviews/", "")
+      .replace(".webp", ""),
   };
   if (card.mirrorTypeLabel === "Parallel Foil") new_card.isParallelFoil = true;
 

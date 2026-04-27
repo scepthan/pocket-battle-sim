@@ -6,15 +6,19 @@
 import cardBackUrl from "@/assets/img/cardback.jpg";
 
 export interface Props {
-  cardId?: string;
+  cardUrl?: string;
+  widthPx?: number;
 }
 
 const props = defineProps<Props>();
 
 const cardURL = computed(() => {
-  if (!props.cardId) return cardBackUrl;
+  if (!props.cardUrl) return cardBackUrl;
 
-  const cardId = props.cardId.replace("PROMO-A", "PROMO");
-  return `https://static.dotgg.gg/pokepocket/card/${cardId}.webp`;
+  const url = `https://assets.pokemon-zone.com/game-assets/CardPreviews/${props.cardUrl}.webp`;
+
+  if (props.widthPx) return `${url}?width=${Math.round(props.widthPx)}&quality=80`;
+
+  return url;
 });
 </script>

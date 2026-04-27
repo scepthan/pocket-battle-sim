@@ -27,6 +27,9 @@ export class PlayerPokemonView {
   get name() {
     return this.self.name;
   }
+  get illustrationUrl() {
+    return this.self.baseCard.illustrationUrl;
+  }
   get evolvesAs() {
     return this.self.evolvesAs;
   }

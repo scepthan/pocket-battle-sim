@@ -2,10 +2,10 @@
   <div class="flip-card" :style="style">
     <div class="flip-card-inner">
       <div class="flip-card-front" :class="{ unimplemented }">
-        <PlayingCardImage :card-id="cardId" :height="height" />
+        <PlayingCardImage :card-url="cardUrl" :width-px="width" :height="height" />
       </div>
       <div class="flip-card-back">
-        <PlayingCardImage :height="height" />
+        <PlayingCardImage :width-px="width" :height="height" />
       </div>
     </div>
   </div>
@@ -19,12 +19,8 @@ export interface Props {
   card?: PlayingCard | string;
 }
 const props = defineProps<Props>();
-const cardId = computed(() => {
-  if (typeof props.card === "string" || props.card === undefined) {
-    return props.card;
-  } else {
-    return props.card.id;
-  }
+const cardUrl = computed(() => {
+  return typeof props.card === "string" ? props.card : props.card?.illustrationUrl;
 });
 const unimplemented = computed(() => typeof props.card === "object" && !props.card.parseSuccessful);
 

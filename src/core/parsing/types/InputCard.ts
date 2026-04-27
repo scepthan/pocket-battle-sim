@@ -14,6 +14,7 @@ export interface BaseInputCard {
   name: string;
   rarity: string;
   setId: string;
+  illustrationUrl: string;
 }
 export interface PokemonInputCard extends BaseInputCard {
   cardType: "Pokemon";

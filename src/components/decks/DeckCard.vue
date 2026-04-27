@@ -5,7 +5,7 @@
   >
     <div class="d-flex justify-center ga-2 pa-2">
       <div v-for="(card, i) in highlightCards" :key="i">
-        <PlayingCardImage :card-id="card" height="100" />
+        <PlayingCardImage :card-url="card" height="100" />
       </div>
     </div>
     <div>
@@ -41,8 +41,8 @@ const props = defineProps<Props>();
 const cardStore = usePlayingCardStore();
 
 const findNamedCard = (deck: DeckInfo, name: string) =>
-  cardStore.InputCards.find((card) => card.name === name && deck.Cards.includes(card.id))?.id ??
-  "PROMO-A-007";
+  cardStore.InputCards.find((card) => card.name === name && deck.Cards.includes(card.id))
+    ?.illustrationUrl ?? "";
 
 const highlightCards = computed(() => {
   if (props.deck.HighlightCards)
@@ -52,7 +52,7 @@ const highlightCards = computed(() => {
     .replace(" Drop Event", "")
     .split(" & ")
     .map((name) => findNamedCard(props.deck, name));
-  if (splitName.every((cardId) => cardId !== "PROMO-A-007")) return splitName;
+  if (splitName.every((cardId) => cardId !== "")) return splitName;
 
   const deckCards = props.deck.Cards.map((card) => cardStore.getCardById(card))
     .filter((card) => card?.cardType === "Pokemon")
@@ -60,7 +60,7 @@ const highlightCards = computed(() => {
     .filter((card, i, arr) => !arr.find((c2) => c2.evolvesFrom === card.name));
   return sortedBy(deckCards, (card) => -card.baseHP)
     .slice(0, 2)
-    .map((card) => card?.id);
+    .map((card) => card?.illustrationUrl ?? "");
 });
 
 const dialog = ref(false);

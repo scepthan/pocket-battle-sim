@@ -7,6 +7,7 @@ export interface BaseCard {
   id: string;
   name: string;
   rarity: string;
+  illustrationUrl: string;
   parseSuccessful: boolean;
 }
 export interface PokemonCard extends BaseCard {
