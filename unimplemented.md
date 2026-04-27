@@ -19,8 +19,6 @@
 - A4a-068 Memory Light
 - A4a-069 Whitney
 - A4a-070 Traveling Merchant
-- PROMO-A-107 Miltank
-- PROMO-A-108 Phanpy
 - B1-004 Silcoon
 - B1-006 Cascoon
 - B1-007 Dustox
@@ -65,9 +63,6 @@
 - B1-223 May
 - B1-224 Fantina
 - B1-226 Lisia
-- PROMO-B-006 Mega Pidgeot ex
-- PROMO-B-009 Mega Absol ex
-- PROMO-B-011 Eevee
 - B1a-004 Mega Venusaur ex
 - B1a-006 Ariados
 - B1a-008 Sunflora
@@ -84,7 +79,6 @@
 - B1a-067 Quick-Grow Extract
 - B1a-068 Clemont
 - B1a-069 Serena
-- PROMO-B-020 Charmeleon
 - B2-002 Ledian
 - B2-005 Roserade
 - B2-013 Vivillon
@@ -133,8 +127,6 @@
 - B2-153 Training Area
 - B2-154 Starting Plains
 - B2-155 Peculiar Plaza
-- PROMO-B-029 Mega Medicham ex
-- PROMO-B-030 Tornadus
 - B2a-003 Meowscarada ex
 - B2a-009 Arboliva
 - B2a-018 Skeledirge
@@ -149,7 +141,6 @@
 - B2a-078 Gholdengo ex
 - B2a-088 Team Star Grunt
 - B2a-093 Mesagoza
-- PROMO-B-040 Paldean Clodsire
 - B2b-004 Illumise
 - B2b-008 Charmeleon
 - B2b-009 Mega Charizard X ex
@@ -169,7 +160,6 @@
 - B2b-067 Iris
 - B2b-068 Calem
 - B2b-069 Hiking Trail
-- PROMO-B-045 Haxorus
 - B3-003 Heracross
 - B3-004 Celebi
 - B3-008 Mega Sceptile ex
@@ -211,6 +201,5 @@
 - B3-153 Fragrant Forest
 - B3-154 Arena of Antiquity
 - B3-155 Bounded Field
-- PROMO-B-057 Castform Sunny Form
-- PROMO-B-060 Zarude
-- PROMO-B-062 Gallade
+- PROMO-B-006 Mega Pidgeot ex
+- PROMO-B-029 Mega Medicham ex

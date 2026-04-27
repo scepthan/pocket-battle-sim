@@ -16,17 +16,20 @@
 
 <script setup lang="ts">
 import { rarityShort } from "./assets";
-import { sortedBy, type InputCard } from "./core";
+import { sortedBy, type PlayingCard } from "./core";
 import { useDeckStore, usePlayingCardStore } from "./stores";
 
 const cardStore = usePlayingCardStore();
 const deckStore = useDeckStore();
+
+const debugUnimplementedCards = false;
+const debugUnusedCards = false;
 const debugMultiUseCards = false;
 const debugUniqueEffects = false;
 
 onMounted(() => {
   const decklists = deckStore.BuiltinDecklists;
-  const cards = cardStore.InputCards;
+  const cards = cardStore.Cards;
   const encounteredCards = new Set<string>();
 
   let sortedCards = sortedBy(cards, (card) => card.rarity, rarityShort);
@@ -35,23 +38,23 @@ onMounted(() => {
   const uniqueCards = sortedCards
     .filter((card) => {
       const baseCard = {
-        Name: card.name,
-        CardType: card.cardType,
+        name: card.name,
+        cardType: card.cardType,
       };
       let functionalCard;
       if (card.cardType === "Pokemon") {
         functionalCard = {
           ...baseCard,
-          Type: card.type,
-          HP: card.hp,
-          RetreatCost: card.retreatCost,
-          Ability: card.ability,
-          Attacks: card.attacks,
+          type: card.type,
+          baseHP: card.baseHP,
+          retreatCost: card.retreatCost,
+          ability: card.ability,
+          attacks: card.attacks,
         };
       } else {
         functionalCard = {
           ...baseCard,
-          Text: card.text,
+          text: card.text,
         };
       }
 
@@ -67,9 +70,18 @@ onMounted(() => {
 
   console.log(`Loaded ${uniqueCards.length} unique cards from ${cards.length} total cards.`);
 
+  if (debugUnimplementedCards) {
+    console.log(
+      uniqueCards
+        .filter((c) => !c.parseSuccessful)
+        .map((c) => `- ${c.id} ${c.name}`)
+        .join("\n"),
+    );
+  }
+
   if (debugUniqueEffects) {
-    const effects: Record<string, InputCard[]> = {};
-    const addEffect = (text: string, card: InputCard) => {
+    const effects: Record<string, PlayingCard[]> = {};
+    const addEffect = (text: string, card: PlayingCard) => {
       const newText = text.replace(/\d+/g, "<number>").replace(/\{\w\}/g, "<type>");
 
       if (!effects[newText]) {
@@ -91,30 +103,32 @@ onMounted(() => {
     console.log(Object.keys(effects).sort());
   }
 
-  const unusedCards = uniqueCards.filter(
-    (card) =>
-      !Object.values(decklists).some((decks) =>
-        Object.values(decks).some((deck) => deck.Cards.includes(card.id)),
-      ),
-  );
+  if (debugUnusedCards) {
+    const unusedCards = uniqueCards.filter(
+      (card) =>
+        !Object.values(decklists).some((decks) =>
+          Object.values(decks).some((deck) => deck.Cards.includes(card.id)),
+        ),
+    );
 
-  const unusedCardGroups: Record<string, InputCard[]> = {};
-  for (const card of unusedCards) {
-    const key = card.cardType === "Pokemon" ? card.type : card.cardType;
-    if (!unusedCardGroups[key]) unusedCardGroups[key] = [];
-    unusedCardGroups[key].push(card);
+    const unusedCardGroups: Record<string, PlayingCard[]> = {};
+    for (const card of unusedCards) {
+      const key = card.cardType === "Pokemon" ? card.type : card.cardType;
+      if (!unusedCardGroups[key]) unusedCardGroups[key] = [];
+      unusedCardGroups[key].push(card);
+    }
+
+    console.log(
+      `Found ${unusedCards.length} unused cards:\n${Object.entries(unusedCardGroups)
+        .map(
+          ([key, cards]) =>
+            `- ${key} (${cards.length}): ${cards
+              .map((card) => `${card.id} (${card.name})`)
+              .join("; ")}`,
+        )
+        .join("\n")}`,
+    );
   }
-
-  console.log(
-    `Found ${unusedCards.length} unused cards:\n${Object.entries(unusedCardGroups)
-      .map(
-        ([key, cards]) =>
-          `- ${key} (${cards.length}): ${cards
-            .map((card) => `${card.id} (${card.name})`)
-            .join("; ")}`,
-      )
-      .join("\n")}`,
-  );
 
   if (debugMultiUseCards) {
     const multiUseCards = uniqueCards.filter(

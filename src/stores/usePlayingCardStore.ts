@@ -3,7 +3,6 @@ import { parseCard, type InputCard, type PlayingCard } from "@/core";
 import { defineStore } from "pinia";
 
 export const usePlayingCardStore = defineStore("playing-cards", () => {
-  console.log("Starting playing card store");
   const Cards = ref<PlayingCard[]>([]);
   const InputCards = ref<InputCard[]>(inputCards);
   const cardLookup = ref<Record<string, PlayingCard>>({});
@@ -38,7 +37,7 @@ export const usePlayingCardStore = defineStore("playing-cards", () => {
   } else {
     console.log(message);
   }
-  console.log(outputCards);
+
   Cards.value = outputCards;
 
   const parseDeck = (cardIds: string[]) => {
