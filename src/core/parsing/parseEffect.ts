@@ -413,6 +413,12 @@ export const parseEffect = (
           self.player.BenchedPokemon.some(predicate);
       },
     },
+    {
+      pattern: /^If you have no cards in your deck,/i,
+      transform: () => {
+        parser.conditionalForNextEffect = (player) => player.Deck.length === 0;
+      }
+    },
 
     // Amount parsing
     {
@@ -2082,6 +2088,22 @@ export const parseEffect = (
         parser.addSideEffect(async (game, self) => {
           await self.player.returnPokemonToHand(self);
         });
+      },
+    },
+    {
+      pattern: /^this attack can be used for (\d+) \{(\w)\} Energy\./i,
+      transform: (_, amount, energyType) => {
+        if (!parser.conditionalForNextEffect) {
+          console.warn("Unexpected alternate attack cost without a condition:", effect);
+          parser.parseSuccessful = false;
+          return;
+        }
+        const fullType = parseEnergy(energyType);
+        effect.alternateAttackCost = {
+          condition: parser.conditionalForNextEffect,
+          cost: Array.from({ length: +amount }, () => fullType),
+        };
+        parser.conditionalForNextEffect = undefined;
       },
     },
 

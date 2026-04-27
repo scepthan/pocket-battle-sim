@@ -383,7 +383,10 @@ export class InPlayPokemon {
     return this.energyIsSufficient(energies, this.attachedEnergy);
   }
   findEffectiveAttackCost(attack: Attack): Energy[] {
-    const requiredEnergy = [...attack.requiredEnergy];
+    let requiredEnergy = [...attack.requiredEnergy];
+    if (attack.alternateAttackCost && attack.alternateAttackCost.condition(this.player, this, 0)) {
+      requiredEnergy = attack.alternateAttackCost.cost;
+    }
     for (const status of this.pokemonStatuses) {
       if (status.type == "ModifyAttackCost") {
         if (status.amount < 0) {

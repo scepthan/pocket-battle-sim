@@ -4,7 +4,6 @@
 - A4a-016 Tentacruel
 - A4a-018 Slowking
 - A4a-020 Suicune ex
-- A4a-031 Boltund
 - A4a-032 Misdreavus
 - A4a-033 Mismagius
 - A4a-035 Galarian Cursola
@@ -131,7 +130,6 @@
 - B2a-009 Arboliva
 - B2a-018 Skeledirge
 - B2a-024 Quaquaval
-- B2a-031 Veluza
 - B2a-042 Bellibolt ex
 - B2a-052 Greavard
 - B2a-053 Houndstone

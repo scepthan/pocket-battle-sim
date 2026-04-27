@@ -1,5 +1,6 @@
 import type {
   AbilityTrigger,
+  AlternateAttackCost,
   Attack,
   CoinFlipIndicator,
   DamageCalculation,
@@ -87,6 +88,11 @@ export interface ParsedEffect {
    * Professor's Research cannot be used if there are no cards in the deck.
    */
   implicitConditions: PlayerPokemonConditional[];
+
+  /**
+   * Used for attacks that allow an alternate cost if specific conditions are met.
+   */
+  alternateAttackCost?: AlternateAttackCost;
 
   /**
    * Trigger for certain abilities and Pokémon Tools.

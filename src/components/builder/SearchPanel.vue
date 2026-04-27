@@ -1,13 +1,13 @@
 <template>
   <div class="d-flex ga-4">
-    <v-text-field v-model="searchQuery" variant="outlined" label="Search terms" clearable />
+    <v-text-field v-model="currentSearchQuery" variant="outlined" label="Search terms" clearable />
     <SearchSort v-model="sortBy" />
     <FilterDialog v-model="searchFilters" @reset-filters="resetFilters" />
   </div>
   <v-virtual-scroll :height="600" :items="cardRows" class="pr-4 no-select">
     <template #default="{ item: row }">
       <v-row class="mb-2">
-        <v-col v-for="(card, index) in row" :key="index" cols="4">
+        <v-col v-for="card in row" :key="card.id" cols="4">
           <SelectableCard
             v-model:selected-cards="selectedCards"
             :card="card"
@@ -42,6 +42,14 @@ const emits = defineEmits<{
 }>();
 
 const searchQuery = ref("");
+const currentSearchQuery = ref("");
+watch(currentSearchQuery, (newVal) =>
+  setTimeout(() => {
+    if (currentSearchQuery.value == newVal) {
+      searchQuery.value = newVal;
+    }
+  }, 300),
+);
 const { disableArtFilter } = useDisableArtFilter();
 const cardStore = usePlayingCardStore();
 

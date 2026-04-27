@@ -25,6 +25,11 @@ export type SideEffect = (
 
 export type DamageCalculation = (game: Game, self: InPlayPokemon, amount: number) => number;
 
+export interface AlternateAttackCost {
+  condition: PlayerPokemonConditional;
+  cost: Energy[];
+}
+
 interface BaseAttack {
   // Properties inherited from InputAttack
   name: string;
@@ -92,6 +97,11 @@ interface BaseAttack {
    * Energy and status condition requirements).
    */
   explicitConditions: PlayerPokemonConditional[];
+
+  /**
+   * Allows an alternate attack cost if specific conditions are met.
+   */
+  alternateAttackCost?: AlternateAttackCost;
 }
 
 // Flip a coin. If tails, this attack does nothing.

@@ -35,6 +35,7 @@ export const parseAttack = (inputAttack: InputCardAttack): ParsedResult<Attack> 
     attack.attackingEffects = effect.attackingEffects;
     attack.sideEffects = [...effect.sideEffects, ...statusesToSideEffects(effect)];
     attack.explicitConditions = effect.explicitConditions;
+    attack.alternateAttackCost = effect.alternateAttackCost;
 
     if (!result.parseSuccessful) {
       parseSuccessful = false;

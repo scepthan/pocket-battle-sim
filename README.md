@@ -12,7 +12,7 @@ Backend todo:
   - [x] A3a: 72/72 (100%)
   - [x] A3b: 71/71 (100%)
   - [x] A4: 164/164 (100%)
-  - [ ] A4a: 52/73 (71.2%)
+  - [ ] A4a: 53/73 (72.6%)
     - [ ] New ability triggers
       - [ ] When played to Bench
       - [ ] After Knocking Out opposing mon
@@ -40,8 +40,8 @@ Backend todo:
       - [ ] This attack does damage to your opponent’s Active Pokémon equal to the damage this Pokémon has on it.
       - [ ] Until this Pokémon leaves the Active Spot, [status]. This effect stacks.
       - [ ] The Retreat Cost of _this Pokémon_ is [number] less.
-    - [ ] Other
-      - [ ] Attack can be used for [cost]
+    - [x] Other
+      - [x] Attack can be used for [cost]
     - [ ] Unique Promo cards
       - [ ] Tropius
       - [ ] Poliwag
@@ -49,28 +49,18 @@ Backend todo:
   - [ ] B1
   - [ ] B1a
   - [ ] B2
-- [x] Bring in newer sets
-  - [x] A2-A4a
-  - [x] A4b-B2
-  - [x] B2a-B2b
+  - [ ] B2a
+  - [ ] B2b
   - [ ] B3
+- [x] Bring in newer sets
 - [ ] Game logic improvements
   - [x] Combine statuses that increase and decrease the same stat
     - [x] ModifyAttackDamage/IncreaseAttack
-  - [ ] Implement max Energy and HP/damage limits
   - [x] Possibly rework how Tools that apply statuses work?
     - [x] Current bug: Eevee with Leaf Cape evolving into Leafeon will not gain HP
-  - [ ] Currently there are two different systems for parsing conditionals (`conditionalForNextEffect` vs. `explicitConditions`)
-    - Up until A4, all explicit conditionals for abilities had unique wording compared to conditionals for attacks; Cherubi finally broke this trend with "if this Pokémon has a Pokémon Tool attached," which forced me to shoehorn in a conversion from an attack conditional to an ability conditional
-      - This has now been mediated by making everything use `PlayerPokemonConditional` which now takes an `amount` property
-    - I can't just merge the two systems without other changes, as abilities for Pokémon like Leafeon ex and Arceus Link Crobat would then be usable even if their conditions are not met (they would just fail when attempting to execute)
-    - I _also_ can't just determine behavior based on whether the parse is for an ability, as some conditionals such as "If heads," still need to be ignored when checking if the ability can be used
-  - [ ] Some properties on `PlayerPokemonView` can be maliciously modified by agents—use `.slice()` and make deep copies
   - [x] Parsing logic is duplicated across different parsing files; there's probably a way to combine all the natural language parsing into one method
-  - [ ] A lot of the reactive logic that I'm currently hard-coding could possibly be simplified by switching everything to Vue's `ref`/`computed`/`watch`
-    - Biggest downside I see with this approach is maintaining order-of-operations (OOO) becomes much trickier to keep track of (for example, every action _must_ be logged before the relevant property is modified)
-    - Callbacks still feel like a better approach for things like knockouts which happen out of sequence with the property they're related to (can't just do `watch(hp, (val) => { if (val == 0) ... })`)
-    - I also don't know if this will be faster or slower than the callback approach, but I would guess slower at first glance
+  - [ ] Implement max Energy and HP/damage limits
+  - [ ] Some properties on `PlayerPokemonView` can be maliciously modified by agents—use `.slice()` and make deep copies
 - [ ] Logging improvements
   - [ ] Add increase/decrease max HP log events (probably does not need to be separate)
   - [ ] Log the specific Special Condition prevented instead of just "a Special Condition"
@@ -79,6 +69,7 @@ Backend todo:
     - **Dig** prevented an effect from the attack!
     - Skarmory's **Steel Apron** prevented a Special Condition from the Ability!
     - Teal Mask Ogerpon's **Soothing Wind** prevented a Special Condition from the Pokémon Tool!
+  - [ ] Merge Special Conditions with PokemonStatus?
   - [ ] Prevent "played to bench" event from appearing as a player action when it was a side effect
     - A4 Porygon2 adds evolution as a possible side effect as well
 - [ ] Interactions to test in-app
@@ -120,3 +111,15 @@ Frontend todo:
   - [x] Add ability to save decks and edit existing decks
   - [x] Advanced search filters
 - [ ] Clean up front page
+
+Potential future backend work:
+
+- [ ] Currently there are two different systems for parsing conditionals (`conditionalForNextEffect` vs. `explicitConditions`)
+  - Up until A4, all explicit conditionals for abilities had unique wording compared to conditionals for attacks; Cherubi finally broke this trend with "if this Pokémon has a Pokémon Tool attached," which forced me to shoehorn in a conversion from an attack conditional to an ability conditional
+    - This has now been mediated by making everything use `PlayerPokemonConditional` which now takes an `amount` property
+  - I can't just merge the two systems without other changes, as abilities for Pokémon like Leafeon ex and Arceus Link Crobat would then be usable even if their conditions are not met (they would just fail when attempting to execute)
+  - I _also_ can't just determine behavior based on whether the parse is for an ability, as some conditionals such as "If heads," still need to be ignored when checking if the ability can be used
+- [ ] A lot of the reactive logic that I'm currently hard-coding could possibly be simplified by switching everything to Vue's `ref`/`computed`/`watch`
+  - Biggest downside I see with this approach is maintaining order-of-operations (OOO) becomes much trickier to keep track of (for example, every action _must_ be logged before the relevant property is modified)
+  - Callbacks still feel like a better approach for things like knockouts which happen out of sequence with the property they're related to (can't just do `watch(hp, (val) => { if (val == 0) ... })`)
+  - I also don't know if this will be faster or slower than the callback approach, but I would guess slower at first glance
