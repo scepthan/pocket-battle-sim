@@ -9,8 +9,8 @@ export type AbilityTrigger =
   | { type: "BeforeKnockedOutByAttack" }
   | { type: "AfterKnockedOutByAttack" }
   | { type: "OnEnergyZoneAttach"; energy?: Energy }
-  | { type: "OnEndOwnTurn"; firstOnly?: boolean }
-  | { type: "OnPokemonCheckup" };
+  | { type: "OnTurnStart" }
+  | { type: "OnTurnEnd" };
 
 interface BaseAbilityEffect {
   sideEffects: SideEffect[];

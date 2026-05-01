@@ -213,6 +213,15 @@ export class Game {
     // Draw a card into the attacking player's hand
     this.AttackingPlayer.drawCards(1);
 
+    // Trigger turn start effects
+    for (const pokemon of this.InPlayPokemon) {
+      for (const ability of pokemon.effectiveAbilities) {
+        if (ability.type === "Standard" && ability.trigger.type === "OnTurnStart") {
+          await pokemon.useAbility(ability, false);
+        }
+      }
+    }
+
     // Execute the player's turn
     try {
       await new Promise((resolve, reject) => {
@@ -259,7 +268,7 @@ export class Game {
     // Trigger turn end effects
     for (const pokemon of this.InPlayPokemon) {
       for (const ability of pokemon.effectiveAbilities) {
-        if (ability.type === "Standard" && ability.trigger.type === "OnPokemonCheckup") {
+        if (ability.type === "Standard" && ability.trigger.type === "OnTurnEnd") {
           await pokemon.useAbility(ability, false);
         }
       }

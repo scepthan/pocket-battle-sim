@@ -128,21 +128,28 @@ export const parseEffect = (
     {
       pattern: /^During Pokémon Checkup, |^At the end of each turn, /i,
       transform: () => {
-        effect.trigger = { type: "OnPokemonCheckup" };
+        effect.trigger = { type: "OnTurnEnd" };
       },
     },
     {
       pattern: /^At the end of your turn, /i,
       transform: () => {
-        effect.trigger = { type: "OnPokemonCheckup" };
+        effect.trigger = { type: "OnTurnEnd" };
         effect.explicitConditions.push((player) => player === player.game.AttackingPlayer);
       },
     },
     {
       pattern: /^At the end of your first turn, /i,
       transform: () => {
-        effect.trigger = { type: "OnPokemonCheckup" };
+        effect.trigger = { type: "OnTurnEnd" };
         effect.explicitConditions.push(isOwnFirstTurn);
+      },
+    },
+    {
+      pattern: /^At the beginning of your turn, /i,
+      transform: () => {
+        effect.trigger = { type: "OnTurnStart" };
+        effect.explicitConditions.push((player) => player === player.game.AttackingPlayer);
       },
     },
 
@@ -1736,7 +1743,8 @@ export const parseEffect = (
       },
     },
     {
-      pattern: /^this Pokémon takes (−|\+)(\d+) damage from attacks(?: from(?: your opponent’s)? ([^.]+?))?\./i,
+      pattern:
+        /^this Pokémon takes (−|\+)(\d+) damage from attacks(?: from(?: your opponent’s)? ([^.]+?))?\./i,
       transform: (_, sign, amount, descriptor) => {
         const trueAmount = +amount * (sign === "+" ? 1 : -1);
         parser.addSelfPokemonStatus(

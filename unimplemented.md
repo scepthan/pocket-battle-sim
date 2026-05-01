@@ -80,7 +80,6 @@
 - B2-050 Alolan Raichu
 - B2-051 Zapdos
 - B2-069 Chandelure
-- B2-070 Meloetta
 - B2-072 Gourgeist
 - B2-073 Mimikyu ex
 - B2-075 Polteageist
