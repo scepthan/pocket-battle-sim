@@ -15,7 +15,6 @@
 - A4a-062 Miltank
 - A4a-067 Inflatable Boat
 - A4a-068 Memory Light
-- A4a-069 Whitney
 - A4a-070 Traveling Merchant
 - B1-004 Silcoon
 - B1-006 Cascoon
@@ -41,7 +40,6 @@
 - B1-134 Archeops
 - B1-136 Golurk
 - B1-140 Crabominable
-- B1-149 Honchkrow
 - B1-150 Absol
 - B1-151 Mega Absol ex
 - B1-164 Morgrem
@@ -57,11 +55,9 @@
 - B1-220 Lucky Mittens
 - B1-222 Hala
 - B1-223 May
-- B1-224 Fantina
 - B1-226 Lisia
 - B1a-006 Ariados
 - B1a-008 Sunflora
-- B1a-012 Charmeleon
 - B1a-019 Blastoise
 - B1a-020 Mega Blastoise ex
 - B1a-034 Reuniclus
@@ -69,11 +65,9 @@
 - B1a-048 Liepard
 - B1a-051 Steelix
 - B1a-052 Mega Steelix ex
-- B1a-055 Ditto
 - B1a-058 Porygon-Z
 - B1a-067 Quick-Grow Extract
 - B1a-068 Clemont
-- B1a-069 Serena
 - B2-002 Ledian
 - B2-005 Roserade
 - B2-014 Buzzwole
@@ -85,8 +79,6 @@
 - B2-048 Wellspring Mask Ogerpon
 - B2-050 Alolan Raichu
 - B2-051 Zapdos
-- B2-059 Galarian Rapidash
-- B2-066 Mega Gardevoir ex
 - B2-069 Chandelure
 - B2-070 Meloetta
 - B2-072 Gourgeist
@@ -105,7 +97,6 @@
 - B2-111 Galarian Perrserker
 - B2-113 Mega Mawile ex
 - B2-117 Galarian Stunfisk
-- B2-120 Aegislash
 - B2-127 Mega Kangaskhan ex
 - B2-130 Smeargle
 - B2-138 Tornadus
@@ -125,7 +116,6 @@
 - B2a-009 Arboliva
 - B2a-018 Skeledirge
 - B2a-024 Quaquaval
-- B2a-042 Bellibolt ex
 - B2a-052 Greavard
 - B2a-053 Houndstone
 - B2a-062 Ting-Lu
@@ -135,14 +125,12 @@
 - B2a-088 Team Star Grunt
 - B2a-093 Mesagoza
 - B2b-004 Illumise
-- B2b-008 Charmeleon
 - B2b-009 Mega Charizard X ex
 - B2b-016 Mega Slowbro ex
 - B2b-027 Mega Manectric ex
 - B2b-030 Mew
 - B2b-032 Grumpig
 - B2b-035 Groudon
-- B2b-039 Mega Gengar ex
 - B2b-040 Darkrai
 - B2b-045 Morpeko
 - B2b-046 Forretress
@@ -186,9 +174,7 @@
 - B3-137 Lillipup
 - B3-147 Field Blower
 - B3-148 Lucky Egg
-- B3-150 Cabbie
 - B3-151 Cheren
-- B3-152 Parasol Lady
 - B3-153 Fragrant Forest
 - B3-154 Arena of Antiquity
 - B3-155 Bounded Field

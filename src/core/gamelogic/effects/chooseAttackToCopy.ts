@@ -9,11 +9,10 @@ import type { InPlayPokemon } from "../InPlayPokemon";
  * attack's energy cost in order to use it.
  */
 export const chooseAttackToCopy =
-  (activeOnly: boolean, energyRequired: boolean) => async (game: Game, self: InPlayPokemon) => {
+  (validPokemon: (game: Game) => InPlayPokemon[], energyRequired: boolean) =>
+  async (game: Game, self: InPlayPokemon) => {
     const prompt1 = "Choose a Pokémon to copy an attack from.";
-    const chosenPokemon = activeOnly
-      ? self.opponent.activeOrThrow()
-      : await game.choosePokemon(self.player, self.opponent.InPlayPokemon, prompt1);
+    const chosenPokemon = await game.choosePokemon(self.player, validPokemon(game), prompt1);
     if (!chosenPokemon) {
       game.GameLog.attackFailed(self.player);
       return;

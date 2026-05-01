@@ -1,11 +1,12 @@
 import type {
+  Energy,
   InPlayPokemonPredicate,
   PlayerPokemonConditional,
   PlayingCardPredicate,
   PokemonStatus,
   SideEffect,
 } from "../gamelogic";
-import { PlayerStatus } from "../gamelogic";
+import { parseEnergy, PlayerStatus } from "../gamelogic";
 import { parsePlayingCardPredicate, parsePokemonPredicate } from "./parsePredicates";
 import type { ParsedEffect, ParsedResult } from "./types";
 
@@ -66,6 +67,19 @@ export class EffectParser {
   }
   parsePlayingCardPredicate(descriptor: string, predicate?: PlayingCardPredicate) {
     return this.cascadeParseFailure(parsePlayingCardPredicate(descriptor, predicate));
+  }
+  parseEnergy(text: string): Energy {
+    try {
+      return parseEnergy(text);
+    } catch (_error) {
+      this.parseSuccessful = false;
+      console.warn(`Invalid energy type in card effect: "${text}"`);
+      return "Colorless";
+    }
+  }
+  parseEnergyOptional(text: string | undefined): Energy | undefined {
+    if (!text) return undefined;
+    return this.parseEnergy(text);
   }
 
   addSelfPokemonStatus(pokemonStatus: PokemonStatus | ParsedResult<PokemonStatus>) {

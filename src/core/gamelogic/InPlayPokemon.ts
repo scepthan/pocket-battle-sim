@@ -260,6 +260,18 @@ export class InPlayPokemon {
   }
 
   /**
+   * Recovers this Pokemon from all Primary Conditions.
+   */
+  removeAllPrimaryConditions() {
+    const condition = this.primaryCondition;
+    if (!condition) return;
+
+    this.primaryCondition = undefined;
+
+    this.logger.specialConditionEnded(this, [condition]);
+  }
+
+  /**
    * Recovers this Pokemon from all Special Conditions.
    */
   removeAllSpecialConditions() {

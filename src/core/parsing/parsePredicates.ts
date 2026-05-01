@@ -47,6 +47,7 @@ export const parsePokemonPredicate = (
   };
 
   parsePart(/^the /, () => () => true);
+  parsePart(/ in play/, () => () => true);
 
   parsePart(/^Benched /, () => (pokemon) => pokemon.player.BenchedPokemon.includes(pokemon));
   parsePart(
@@ -57,6 +58,11 @@ export const parsePokemonPredicate = (
   parsePart(/^Basic /, () => (pokemon) => pokemon.stage === 0);
   parsePart(/^Evolution /, () => (pokemon) => pokemon.stage > 0);
   parsePart(/^Stage 2 /, () => (pokemon) => pokemon.stage === 2);
+
+  parsePart(
+    /^evolved /,
+    () => (pokemon) => pokemon.inPlayCards.filter((card) => card.cardType === "Pokemon").length > 1,
+  );
 
   const energyTypes: Energy[] = [];
   let energyMatch;
@@ -70,16 +76,23 @@ export const parsePokemonPredicate = (
     predicate = (pokemon) => energyTypes.includes(pokemon.type) && prevPredicate(pokemon);
   }
 
-  parsePart(/ *that has any(?: {(\w)})? Energy attached$/, ([, energy]) => {
-    if (energy) {
-      const fullEnergy = parseEnergy(energy);
-      return (pokemon) => pokemon.hasAnyEnergy(fullEnergy);
-    } else {
-      return (pokemon) => pokemon.hasAnyEnergy();
-    }
+  parsePart(/ *that has any(?: \{(\w)\})? Energy attached$/, ([, energy]) => {
+    const fullEnergy = energy ? parseEnergy(energy) : undefined;
+    return (pokemon) => pokemon.hasAnyEnergy(fullEnergy);
+  });
+  parsePart(/ *that has (\d+) or more(?: \{(\w)\})? Energy attached$/, ([, count, energy]) => {
+    const fullEnergy = energy ? parseEnergy(energy) : undefined;
+    return (pokemon) => pokemon.getEnergy(fullEnergy).length >= +count!;
   });
   parsePart(/ *that ha(?:s|ve) damage on (?:it|them)$/, () => (pokemon) => pokemon.isDamaged());
+  parsePart(/ *that has an Ability$/, () => (pokemon) => pokemon.ability != undefined);
+  parsePart(/, except any (.+),/, ([_, descriptor]) => {
+    const { parseSuccessful: ps, value: exceptPredicate } = parsePokemonPredicate(descriptor!);
+    if (!ps) parseSuccessful = false;
+    return (pokemon) => !exceptPredicate(pokemon);
+  });
 
+  parsePart(/^Mega Evolution /, () => (pokemon) => pokemon.name.startsWith("Mega "));
   parsePart(/^Pokémon ex$/, () => (pokemon) => pokemon.name.endsWith(" ex"));
   parsePart(/^Ultra Beasts?$/, () => (pokemon) => pokemon.isUltraBeast);
 
@@ -143,12 +156,26 @@ export const parsePlayingCardPredicate = (
     };
   }
 
+  if (text === "Mega Evolution Pokémon ex") {
+    return {
+      parseSuccessful: true,
+      value: (card) =>
+        card.cardType == "Pokemon" && /^Mega .+ ex$/.test(card.name) && predicate(card),
+    };
+  }
+
   if (text.endsWith(" cards")) text = text.slice(0, -1);
 
   if (text === "Pokémon") {
     return {
       parseSuccessful: true,
       value: (card) => card.cardType == "Pokemon" && predicate(card),
+    };
+  }
+  if (text === "Trainer card") {
+    return {
+      parseSuccessful: true,
+      value: (card) => card.cardType !== "Pokemon" && predicate(card),
     };
   }
   if (text === "Item card") {
@@ -167,6 +194,12 @@ export const parsePlayingCardPredicate = (
     return {
       parseSuccessful: true,
       value: (card) => card.cardType == "PokemonTool" && predicate(card),
+    };
+  }
+  if (text === "Stadium card") {
+    return {
+      parseSuccessful: true,
+      value: (card) => card.cardType == "Stadium" && predicate(card),
     };
   }
   if (text === "card") {

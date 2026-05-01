@@ -12,7 +12,7 @@ Backend todo:
   - [x] A3a: 72/72 (100%)
   - [x] A3b: 71/71 (100%)
   - [x] A4: 164/164 (100%)
-  - [ ] A4a: 54/73 (74.0%)
+  - [ ] A4a: 55/73 (75.3%)
     - [ ] New ability triggers
       - [ ] When played to Bench
       - [ ] After Knocking Out opposing mon
@@ -28,7 +28,7 @@ Backend todo:
       - [ ] Discard Tools to increase damage
     - [ ] New side effects
       - [x] Poison and Paralyze
-      - [ ] Heal from being Asleep, Paralyzed, and Confused
+      - [x] Heal from being Asleep, Paralyzed, and Confused
       - [ ] Draw all [predicate] cards from top [number] of deck
     - [ ] New statuses
       - [ ] Delayed damage

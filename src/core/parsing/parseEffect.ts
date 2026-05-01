@@ -1,6 +1,5 @@
 import {
   InPlayPokemon,
-  parseEnergy,
   parseSpecialConditions,
   Player,
   PlayerStatus,
@@ -122,7 +121,7 @@ export const parseEffect = (
       pattern:
         /^Whenever you attach (?:a {(\w)}|an) Energy from your Energy Zone to (?:this Pokémon|it), /i,
       transform: (_, energyType) => {
-        const fullType = energyType ? parseEnergy(energyType) : undefined;
+        const fullType = parser.parseEnergyOptional(energyType);
         effect.trigger = { type: "OnEnergyZoneAttach", energy: fullType };
       },
     },
@@ -267,12 +266,49 @@ export const parseEffect = (
         parser.conditionalForNextEffect = Effects.usedSpecificAttackLastTurn(attackName);
       },
     },
+    {
+      pattern:
+        /^If any of your Pokémon were knocked out by damage from an attack during your opponent’s last turn,/i,
+      transform: () => {
+        parser.conditionalForNextEffect = Effects.ownPokemonKnockedOutByAttackLastTurn;
+      },
+    },
+    {
+      pattern: /^If any of your (.+?) have damage on them,/i,
+      transform: (_, descriptor) => {
+        const predicate = parser.parsePokemonPredicate(descriptor, (p) => p.isDamaged());
+        parser.conditionalForNextEffect = (player, self) =>
+          self.player.InPlayPokemon.some(predicate);
+      },
+    },
+    {
+      pattern: /^If (.+?) is on your Bench,/i,
+      transform: (_, descriptor) => {
+        const predicate = parser.parsePokemonPredicate(descriptor);
+        parser.conditionalForNextEffect = (player, self) =>
+          self.player.BenchedPokemon.some(predicate);
+      },
+    },
+    {
+      pattern: /^If you have (\d+) or more(?: \{(\w)\})? Energy in play,/i,
+      transform: (_, amount, energy) => {
+        const fullType = parser.parseEnergyOptional(energy);
+        parser.conditionalForNextEffect = (player, self) =>
+          self.player.InPlayPokemon.flatMap((p) => p.getEnergy(fullType)).length >= +amount;
+      },
+    },
+    {
+      pattern: /^If you have no cards in your deck,/i,
+      transform: () => {
+        parser.conditionalForNextEffect = (player) => player.Deck.length === 0;
+      },
+    },
 
     // Self conditionals
     {
       pattern: /^If this Pokémon has at least (\d+) extra (?:\{(\w)\} )?Energy attached,/i,
       transform: (_, energyCount, energyType) => {
-        const e = parseEnergy(energyType || "C");
+        const e = parser.parseEnergy(energyType || "C");
         if (!requiredEnergy) throw new Error("Could not determine required Energy for attack");
         const secondaryRequiredEnergy = requiredEnergy.slice();
         for (let i = 0; i < Number(energyCount); i++) secondaryRequiredEnergy.push(e);
@@ -390,42 +426,11 @@ export const parseEffect = (
       },
     },
 
-    // Player conditionals
-    {
-      pattern:
-        /^If any of your Pokémon were knocked out by damage from an attack during your opponent’s last turn,/i,
-      transform: () => {
-        parser.conditionalForNextEffect = Effects.ownPokemonKnockedOutByAttackLastTurn;
-      },
-    },
-    {
-      pattern: /^If any of your (.+?) have damage on them,/i,
-      transform: (_, descriptor) => {
-        const predicate = parser.parsePokemonPredicate(descriptor, (p) => p.isDamaged());
-        parser.conditionalForNextEffect = (player, self) =>
-          self.player.InPlayPokemon.some(predicate);
-      },
-    },
-    {
-      pattern: /^If (.+?) is on your Bench,/i,
-      transform: (_, descriptor) => {
-        const predicate = parser.parsePokemonPredicate(descriptor);
-        parser.conditionalForNextEffect = (player, self) =>
-          self.player.BenchedPokemon.some(predicate);
-      },
-    },
-    {
-      pattern: /^If you have no cards in your deck,/i,
-      transform: () => {
-        parser.conditionalForNextEffect = (player) => player.Deck.length === 0;
-      },
-    },
-
     // Amount parsing
     {
       pattern: /for each(?: \{(\w)\})? Energy attached to this Pokémon/i,
       transform: (_, type) => {
-        const fullType = type ? parseEnergy(type) : undefined;
+        const fullType = parser.parseEnergyOptional(type);
         const predicate = fullType ? (e: Energy) => e == fullType : () => true;
         effect.passedAmount = (game, self) => self.effectiveEnergy.filter(predicate).length;
         return "for each <amount>";
@@ -461,9 +466,10 @@ export const parseEffect = (
       },
     },
     {
-      pattern: /for each of your opponent’s Benched Pokémon/i,
-      transform: () => {
-        effect.passedAmount = (game, self) => self.opponent.BenchedPokemon.length;
+      pattern: /for each of your opponent’s (.*?)(?=[,.])/i,
+      transform: (_, descriptor) => {
+        const predicate = parser.parsePokemonPredicate(descriptor);
+        effect.passedAmount = (game, self) => self.opponent.InPlayPokemon.filter(predicate).length;
         return "for each <amount>";
       },
     },
@@ -774,6 +780,22 @@ export const parseEffect = (
           if (!target) return;
           target.healDamage(Number(modifier));
           target.removeAllSpecialConditions();
+        });
+      },
+    },
+    {
+      pattern:
+        /^Heal (\d+) damage from 1 of your ([^.]+?), and it recovers from being Asleep, Paralyzed, and Confused\.$/i,
+      transform: (_, modifier, descriptor) => {
+        const predicate = parser.parsePokemonPredicate(
+          descriptor,
+          (p) => p.isDamaged() || p.primaryCondition !== undefined,
+        );
+        effect.validTargets = (player) => player.InPlayPokemon.filter(predicate);
+        parser.addSideEffect(async (game, self, amount, target) => {
+          if (!target) return;
+          target.healDamage(Number(modifier));
+          target.removeAllPrimaryConditions();
         });
       },
     },
@@ -1138,7 +1160,7 @@ export const parseEffect = (
       pattern: /^Discard (a|\d+|all) \{(\w)\} Energy from this Pokémon\./i,
       transform: (_, count, energyType) => {
         const energyCount = count == "all" ? Infinity : count == "a" ? 1 : Number(count);
-        const fullType = parseEnergy(energyType);
+        const fullType = parser.parseEnergy(energyType);
 
         parser.addSideEffect(async (game, self) => game.discardEnergy(self, fullType, energyCount));
       },
@@ -1177,7 +1199,7 @@ export const parseEffect = (
     {
       pattern: /^Discard a \{(\w)\} Energy from your opponent’s Active Pokémon\./i,
       transform: (_, energyType) => {
-        const fullType = parseEnergy(energyType);
+        const fullType = parser.parseEnergy(energyType);
         effect.implicitConditions.push((player, self) =>
           self.opponent.activeOrThrow().effectiveEnergy.some((e) => e === fullType),
         );
@@ -1228,60 +1250,27 @@ export const parseEffect = (
     // Energy generation effects
     {
       pattern:
-        /^Take (a|\d+) \{(\w)\} Energy from your Energy Zone and attach it to this Pokémon\.( If you use this Ability, your turn ends\.)?/i,
-      transform: (_, count, type, endTurn) => {
-        const energyCount = count == "a" ? 1 : Number(count);
-        const energy = new Array(energyCount).fill(parseEnergy(type));
-
-        parser.addSideEffect(async (game, self) => {
-          await self.player.attachEnergy(self, energy, "energyZone");
-          if (endTurn) game.endTurnResolve(true);
-        });
-      },
-    },
-    {
-      pattern:
-        /^Take (a|\d+) \{(\w)\} Energy from your Energy Zone and attach it to (?:1 of your )?([^.]+)\.( Your turn ends\.)?/i,
-      transform: (_, count, type, descriptor, endTurn) => {
-        const energyCount = count == "a" ? 1 : Number(count);
-        const energy = new Array(energyCount).fill(parseEnergy(type));
-        if (descriptor !== "that Pokémon") {
-          const predicate = parser.parsePokemonPredicate(descriptor);
-          effect.validTargets = (player) => player.InPlayPokemon.filter(predicate);
-        }
-
-        parser.addSideEffect(async (game, self, amount, target) => {
-          if (!target) return;
-          await self.player.attachEnergy(target, energy, "energyZone");
-          if (endTurn) game.endTurnResolve(true);
-        });
-      },
-    },
-    {
-      pattern:
-        /^Choose 2 of your ([^.]+?)\. For each of those Pokémon, take a \{(\w)\} Energy from your Energy Zone and attach it to that Pokémon\./i,
-      transform: (_, descriptor, type) => {
-        const energy = parseEnergy(type);
-        const predicate = parser.parsePokemonPredicate(descriptor);
-
-        parser.addSideEffect(async (game, self) => {
-          const pokemon = self.player.InPlayPokemon.filter(predicate);
-          const prompt = "Choose 2 of your Pokémon to attach Energy to.";
-          const chosenPokemon = await game.chooseNPokemon(self.player, pokemon, 2, prompt);
-          for (const p of chosenPokemon) await self.player.attachEnergy(p, [energy], "energyZone");
-        });
-      },
-    },
-    {
-      pattern:
         /^Take an amount of \{(\w)\} Energy from your Energy Zone equal to the number of heads and attach it to your ([^.]+?) in any way you like\./i,
       transform: (_, energyType, pokemonSpecifier) => {
-        const et = parseEnergy(energyType);
+        const et = parser.parseEnergy(energyType);
         const predicate = parser.parsePokemonPredicate(pokemonSpecifier);
 
         parser.addSideEffect(async (game, self, amount) => {
           const validPokemon = self.player.InPlayPokemon.filter(predicate);
           await game.distributeEnergy(self.player, new Array(amount).fill(et), validPokemon);
+        });
+      },
+    },
+    {
+      pattern:
+        /^Take (\d+) \{(\w)\} Energy from your Energy Zone and attach it to your ([^.]+?) in any way you like\./i,
+      transform: (_, amount, energyType, pokemonSpecifier) => {
+        const et = parser.parseEnergy(energyType);
+        const predicate = parser.parsePokemonPredicate(pokemonSpecifier);
+
+        parser.addSideEffect(async (game, self) => {
+          const validPokemon = self.player.InPlayPokemon.filter(predicate);
+          await game.distributeEnergy(self.player, new Array(+amount).fill(et), validPokemon);
         });
       },
     },
@@ -1300,9 +1289,69 @@ export const parseEffect = (
     },
     {
       pattern:
+        /^Take (a|\d+) \{(\w)\} Energy from your Energy Zone and attach it to this Pokémon\.( If you use this Ability, your turn ends\.)?/i,
+      transform: (_, count, type, endTurn) => {
+        const energyCount = count == "a" ? 1 : Number(count);
+        const energy = new Array(energyCount).fill(parser.parseEnergy(type));
+
+        parser.addSideEffect(async (game, self) => {
+          await self.player.attachEnergy(self, energy, "energyZone");
+          if (endTurn) game.endTurnResolve(true);
+        });
+      },
+    },
+    {
+      pattern:
+        /^Take (a|\d+) \{(\w)\} Energy from your Energy Zone and attach it to each of your ([^.]+)\./i,
+      transform: (_, count, type, descriptor) => {
+        const energyCount = count == "a" ? 1 : Number(count);
+        const energy = new Array(energyCount).fill(parser.parseEnergy(type));
+        const predicate = parser.parsePokemonPredicate(descriptor);
+
+        parser.addSideEffect(async (game, self) => {
+          for (const p of self.player.InPlayPokemon.filter(predicate))
+            await self.player.attachEnergy(p, energy, "energyZone");
+        });
+      },
+    },
+    {
+      pattern:
+        /^Take (a|\d+) \{(\w)\} Energy from your Energy Zone and attach it to (?:(?:1 of )?your )?([^.]+)\.( Your turn ends\.)?/i,
+      transform: (_, count, type, descriptor, endTurn) => {
+        const energyCount = count == "a" ? 1 : Number(count);
+        const energy = new Array(energyCount).fill(parser.parseEnergy(type));
+        if (descriptor !== "that Pokémon") {
+          const predicate = parser.parsePokemonPredicate(descriptor);
+          effect.validTargets = (player) => player.InPlayPokemon.filter(predicate);
+        }
+
+        parser.addSideEffect(async (game, self, amount, target) => {
+          if (!target) return;
+          await self.player.attachEnergy(target, energy, "energyZone");
+          if (endTurn) game.endTurnResolve(true);
+        });
+      },
+    },
+    {
+      pattern:
+        /^Choose 2 of your ([^.]+?)\. For each of those Pokémon, take a \{(\w)\} Energy from your Energy Zone and attach it to that Pokémon\./i,
+      transform: (_, descriptor, type) => {
+        const energy = parser.parseEnergy(type);
+        const predicate = parser.parsePokemonPredicate(descriptor);
+
+        parser.addSideEffect(async (game, self) => {
+          const pokemon = self.player.InPlayPokemon.filter(predicate);
+          const prompt = "Choose 2 of your Pokémon to attach Energy to.";
+          const chosenPokemon = await game.chooseNPokemon(self.player, pokemon, 2, prompt);
+          for (const p of chosenPokemon) await self.player.attachEnergy(p, [energy], "energyZone");
+        });
+      },
+    },
+    {
+      pattern:
         /^For each heads, take a {(\w)} Energy from your Energy Zone and attach it to that Pokémon\.$/i,
       transform: (_, energyType) => {
-        const et = parseEnergy(energyType);
+        const et = parser.parseEnergy(energyType);
 
         parser.addSideEffect(async (game, self, amount, target) => {
           if (!target) return;
@@ -1315,7 +1364,7 @@ export const parseEffect = (
         /^Attach (a|\d+) (?:\{(\w)\}|random) Energy from your discard pile to (this|that) Pokémon\./i,
       transform: (_, count, energyType, targeting) => {
         const amount = count === "a" ? 1 : Number(count);
-        const fullType = energyType ? parseEnergy(energyType) : undefined;
+        const fullType = parser.parseEnergyOptional(energyType);
         const energyFilter = (e: Energy) => fullType === undefined || e === fullType;
 
         effect.implicitConditions.push((player) => player.DiscardedEnergy.some(energyFilter));
@@ -1339,7 +1388,7 @@ export const parseEffect = (
       pattern:
         /^Move all {(\w)} Energy from your Benched Pokémon to your (.+?) in the Active Spot\.$/i,
       transform: (_, energyType, descriptor) => {
-        const fullType = parseEnergy(energyType);
+        const fullType = parser.parseEnergy(energyType);
         const predicate = parser.parsePokemonPredicate(descriptor);
 
         effect.implicitConditions.push((player) => predicate(player.activeOrThrow()));
@@ -1354,7 +1403,7 @@ export const parseEffect = (
     {
       pattern: /^move all \{(\w)\} Energy from each of your Pokémon to this Pokémon\.$/i,
       transform: (_, energyType) => {
-        const fullType = parseEnergy(energyType);
+        const fullType = parser.parseEnergy(energyType);
 
         effect.implicitConditions.push((player, self) =>
           player.InPlayPokemon.some((p) => p !== self && p.hasAnyEnergy(fullType)),
@@ -1399,7 +1448,7 @@ export const parseEffect = (
     {
       pattern: /^move all(?: \{(\w)\})? Energy from this Pokémon to 1 of your (.+?)\./i,
       transform: (_, energyType, descriptor) => {
-        const fullType = energyType ? parseEnergy(energyType) : undefined;
+        const fullType = parser.parseEnergyOptional(energyType);
         const predicate = parser.parsePokemonPredicate(descriptor);
         effect.implicitConditions.push((player, self) => self.hasAnyEnergy(fullType));
         effect.validTargets = (player) => player.InPlayPokemon.filter(predicate);
@@ -1414,7 +1463,7 @@ export const parseEffect = (
       pattern:
         /^move 2 \{(\w)\} Energy from that Pokémon and attach 1 Energy each to 2 of your ([^.]+?)\./i,
       transform: (_, type, descriptor) => {
-        const energy = parseEnergy(type);
+        const energy = parser.parseEnergy(type);
         const predicate = parser.parsePokemonPredicate(descriptor);
         effect.implicitConditions.push(
           (player, pokemon) =>
@@ -1687,7 +1736,7 @@ export const parseEffect = (
       },
     },
     {
-      pattern: /^this Pokémon takes (−|\+)(\d+) damage from attacks(?: from ([^.]+?))?\./i,
+      pattern: /^this Pokémon takes (−|\+)(\d+) damage from attacks(?: from(?: your opponent’s)? ([^.]+?))?\./i,
       transform: (_, sign, amount, descriptor) => {
         const trueAmount = +amount * (sign === "+" ? 1 : -1);
         parser.addSelfPokemonStatus(
@@ -1792,7 +1841,7 @@ export const parseEffect = (
     {
       pattern: /^attacks used by this Pokémon cost (\d+) less {(\w)} Energy\./i,
       transform: (_, amount, energyType) => {
-        const fullType = parseEnergy(energyType);
+        const fullType = parser.parseEnergy(energyType);
         parser.addSelfPokemonStatus(
           PokemonStatus.ModifyAttackCost(fullType, -amount, parser.turnsToKeep),
         );
@@ -1852,7 +1901,7 @@ export const parseEffect = (
       pattern: /^attacks used by the Defending Pokémon cost (\d+) \{(\w)\} more[,.]/i,
       transform: (_, modifier, type) => {
         parser.addOpponentPokemonStatus(
-          PokemonStatus.ModifyAttackCost(parseEnergy(type), +modifier, parser.turnsToKeep),
+          PokemonStatus.ModifyAttackCost(parser.parseEnergy(type), +modifier, parser.turnsToKeep),
         );
       },
     },
@@ -1888,7 +1937,7 @@ export const parseEffect = (
       pattern: /^attacks used by your (.+?) cost (\d+) less {(\w)} Energy\.$/i,
       transform: (_, descriptor, count, energy) => {
         parser.addSelfPlayerPokemonStatus(
-          PokemonStatus.ModifyAttackCost(parseEnergy(energy), -count, parser.turnsToKeep),
+          PokemonStatus.ModifyAttackCost(parser.parseEnergy(energy), -count, parser.turnsToKeep),
           descriptor,
         );
       },
@@ -1926,7 +1975,7 @@ export const parseEffect = (
       pattern:
         /^Each {(\w)} Energy attached to your (.+?) provides 2 {\1} Energy. This effect doesn’t stack.$/i,
       transform: (_, energyType, descriptor) => {
-        const fullType = parseEnergy(energyType);
+        const fullType = parser.parseEnergy(energyType);
 
         parser.addSelfPlayerPokemonStatus(PokemonStatus.DoubleEnergy(fullType), descriptor, true);
       },
@@ -2053,7 +2102,27 @@ export const parseEffect = (
       pattern:
         /^Choose 1 of your opponent’s( Active)? Pokémon’s attacks and use it as this attack\.( If this Pokémon doesn’t have the necessary Energy to use that attack, this attack does nothing\.)?/i,
       transform: (_, active, energyRequired) => {
-        parser.addSideEffect(Effects.chooseAttackToCopy(!!active, !!energyRequired));
+        parser.addSideEffect(
+          Effects.chooseAttackToCopy(
+            active
+              ? (game) => [game.DefendingPlayer.activeOrThrow()]
+              : (game) => game.DefendingPlayer.InPlayPokemon,
+            !!energyRequired,
+          ),
+        );
+      },
+    },
+    {
+      pattern:
+        /^Choose 1 of your Benched Pokémon’s attacks, except any (.+?), and use it as this attack\.( If this Pokémon doesn’t have the necessary Energy to use that attack, this attack does nothing\.)?/i,
+      transform: (_, descriptor, energyRequired) => {
+        const predicate = parser.parsePokemonPredicate(descriptor);
+        parser.addSideEffect(
+          Effects.chooseAttackToCopy(
+            (game) => game.AttackingPlayer.BenchedPokemon.filter((p) => !predicate(p)),
+            !!energyRequired,
+          ),
+        );
       },
     },
     {
@@ -2072,7 +2141,7 @@ export const parseEffect = (
           parser.parseSuccessful = false;
           return;
         }
-        const fullType = parseEnergy(energyType);
+        const fullType = parser.parseEnergy(energyType);
         effect.alternateAttackCost = {
           condition: parser.conditionalForNextEffect,
           cost: Array.from({ length: +amount }, () => fullType),
@@ -2096,6 +2165,15 @@ export const parseEffect = (
       transform: () => {
         effect.explicitConditions.push((player) =>
           ["Uxie", "Azelf"].every((name) => player.BenchedPokemon.some((p) => p.name == name)),
+        );
+      },
+    },
+    {
+      pattern: /^If you have another (.+?) in play,/i,
+      transform: (_, descriptor) => {
+        const predicate = parser.parsePokemonPredicate(descriptor);
+        effect.explicitConditions.push((player, self) =>
+          player.InPlayPokemon.filter((p) => p !== self).some(predicate),
         );
       },
     },
