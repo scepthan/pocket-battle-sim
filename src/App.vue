@@ -24,7 +24,6 @@ const deckStore = useDeckStore();
 
 const debugUnimplementedCards = false;
 const debugUnusedCards = false;
-const debugMultiUseCards = false;
 const debugUniqueEffects = false;
 
 onMounted(() => {
@@ -127,31 +126,6 @@ onMounted(() => {
               .join("; ")}`,
         )
         .join("\n")}`,
-    );
-  }
-
-  if (debugMultiUseCards) {
-    const multiUseCards = uniqueCards.filter(
-      (card) =>
-        Object.values(decklists).flatMap((decks) =>
-          Object.values(decks).filter((deck) => deck.Cards.includes(card.id)),
-        ).length > 1,
-    );
-
-    console.log(
-      `Found ${multiUseCards.length} multi-use cards:\n`,
-      multiUseCards
-        .map(
-          (card) =>
-            `${card.id} (${card.name}): ${Object.entries(decklists)
-              .flatMap(([setName, set]) =>
-                Object.entries(set).flatMap(([deckName, deck]) =>
-                  deck.Cards.includes(card.id) ? `${deckName} (${setName})` : [],
-                ),
-              )
-              .join(", ")}`,
-        )
-        .join("\n"),
     );
   }
 

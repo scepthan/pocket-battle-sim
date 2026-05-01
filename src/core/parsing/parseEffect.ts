@@ -1,6 +1,7 @@
 import {
   InPlayPokemon,
   parseEnergy,
+  parseSpecialConditions,
   Player,
   PlayerStatus,
   PokemonStatus,
@@ -417,7 +418,7 @@ export const parseEffect = (
       pattern: /^If you have no cards in your deck,/i,
       transform: () => {
         parser.conditionalForNextEffect = (player) => player.Deck.length === 0;
-      }
+      },
     },
 
     // Amount parsing
@@ -1578,9 +1579,14 @@ export const parseEffect = (
       },
     },
     {
-      pattern: /^(?:make )?your opponent’s Active Pokémon (?:is now )?Poisoned\./i,
-      transform: () => {
-        parser.addSideEffect(async (game) => game.poisonDefendingPokemon(false));
+      pattern:
+        /^(?:make your opponent’s Active Pokémon|your opponent’s Active Pokémon is now) (.+?)\./i,
+      transform: (_, conditions) => {
+        const conditionList = parser.cascadeParseFailure(parseSpecialConditions(conditions));
+        parser.addSideEffect(async (game) => {
+          for (const condition of conditionList)
+            game.DefendingPlayer.applySpecialConditionToActive(condition);
+        });
       },
     },
     {
@@ -1590,42 +1596,25 @@ export const parseEffect = (
       },
     },
     {
-      pattern: /^(?:make )?your opponent’s Active Pokémon (?:is now )?Burned\./i,
-      transform: () => {
-        parser.addSideEffect(async (game) => game.burnDefendingPokemon());
-      },
-    },
-    {
-      pattern: /^Your opponent’s Active Pokémon is now Poisoned and Burned\./i,
-      transform: () => {
-        parser.addSideEffect(async (game) => {
-          game.poisonDefendingPokemon(false);
-          game.burnDefendingPokemon();
+      pattern: /^(?:This Pokémon|it) is now (.+?)\./i,
+      transform: (_, conditions) => {
+        const conditionList = parser.cascadeParseFailure(parseSpecialConditions(conditions));
+        parser.addSideEffect(async (game, self) => {
+          for (const condition of conditionList)
+            self.player.applySpecialConditionToActive(condition);
         });
       },
     },
     {
-      pattern: /^Your opponent’s Active Pokémon is now Asleep\./i,
-      transform: () => {
-        parser.addSideEffect(async (game) => game.sleepDefendingPokemon());
-      },
-    },
-    {
-      pattern: /^Your opponent’s Active Pokémon is now Paralyzed\./i,
-      transform: () => {
-        parser.addSideEffect(async (game) => game.paralyzeDefendingPokemon());
-      },
-    },
-    {
-      pattern: /^Your opponent’s Active Pokémon is now Confused\./i,
-      transform: () => {
-        parser.addSideEffect(async (game) => game.confuseDefendingPokemon());
-      },
-    },
-    {
-      pattern: /^This Pokémon is now Confused\./i,
-      transform: () => {
-        parser.addSideEffect(async (game, self) => self.player.confuseActivePokemon());
+      pattern: /^Both Active Pokémon are now (.+?)\./i,
+      transform: (_, conditions) => {
+        const conditionList = parser.cascadeParseFailure(parseSpecialConditions(conditions));
+        parser.addSideEffect(async (game, self) => {
+          for (const condition of conditionList) {
+            self.player.applySpecialConditionToActive(condition);
+            self.opponent.applySpecialConditionToActive(condition);
+          }
+        });
       },
     },
     {
@@ -1634,21 +1623,6 @@ export const parseEffect = (
       transform: () => {
         parser.addSideEffect(async (game, self) => {
           Effects.applyRandomSpecialCondition(self.opponent.activeOrThrow());
-        });
-      },
-    },
-    {
-      pattern: /^(?:This Pokémon|it) is now Asleep\./i,
-      transform: () => {
-        parser.addSideEffect(async (game, self) => self.player.sleepActivePokemon());
-      },
-    },
-    {
-      pattern: /^Both Active Pokémon are now Asleep\./i,
-      transform: () => {
-        parser.addSideEffect(async (game, self) => {
-          self.player.sleepActivePokemon();
-          self.opponent.sleepActivePokemon();
         });
       },
     },

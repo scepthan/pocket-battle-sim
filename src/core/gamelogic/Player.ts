@@ -630,7 +630,7 @@ export class Player {
     this.logger.discardFromDeck(this, discarded);
   }
 
-  private applySpecialConditionToActive(condition: SpecialCondition) {
+  applySpecialConditionToActive(condition: SpecialCondition) {
     const active = this.activeOrThrow();
     const normalizedCondition = condition.replace(/\+$/, "") as SpecialCondition;
     const result = active.pokemonStatuses.some(
