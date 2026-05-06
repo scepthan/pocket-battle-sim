@@ -325,6 +325,13 @@ export const parseEffect = (
       },
     },
     {
+      pattern: /^If this Pokémon has any \{(\w)\} Energy attached,/i,
+      transform: (_, energyType) => {
+        const e = parser.parseEnergy(energyType);
+        parser.conditionalForNextEffect = (player, self) => self.hasAnyEnergy(e);
+      },
+    },
+    {
       pattern: /^If this Pokémon has damage on it,/i,
       transform: () => {
         parser.conditionalForNextEffect = (player, self) => self.isDamaged();

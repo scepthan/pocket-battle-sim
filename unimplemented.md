@@ -5,7 +5,6 @@
 - A4a-033 Mismagius
 - A4a-035 Galarian Cursola
 - A4a-041 Dugtrio
-- A4a-042 Poliwrath ex
 - A4a-043 Phanpy
 - A4a-048 Seviper
 - A4a-050 Zoroark
@@ -79,7 +78,6 @@
 - B2-073 Mimikyu ex
 - B2-075 Polteageist
 - B2-079 Machop
-- B2-084 Medicham
 - B2-090 Tyrantrum
 - B2-092 Falinks
 - B2-097 Alolan Muk
@@ -141,7 +139,6 @@
 - B3-024 Castform Sunny Form
 - B3-025 Victini
 - B3-035 Politoed
-- B3-039 Quagsire
 - B3-040 Castform Rainy Form
 - B3-041 Castform Snowy Form
 - B3-045 Regice
