@@ -22,7 +22,7 @@ import { useDeckStore, usePlayingCardStore } from "./stores";
 const cardStore = usePlayingCardStore();
 const deckStore = useDeckStore();
 
-const debugUnimplementedCards = false;
+const debugUnimplementedCards = true;
 const debugUnusedCards = false;
 const debugUniqueEffects = false;
 

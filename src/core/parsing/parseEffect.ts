@@ -992,10 +992,13 @@ export const parseEffect = (
       },
     },
     {
-      pattern: /^Discard the top (\d+) cards of your deck\./i,
-      transform: (_, count) => {
+      pattern:
+        /^Discard the top (?:(\d+) cards|card) of (your|your opponent’s|each player’s) deck\./i,
+      transform: (_, count, owner) => {
+        const actualCount = count ? +count : 1;
         parser.addSideEffect(async (game, self) => {
-          self.player.discardTopOfDeck(Number(count));
+          if (owner !== "your opponent’s") self.player.discardTopOfDeck(actualCount);
+          if (owner !== "your") self.opponent.discardTopOfDeck(actualCount);
         });
       },
     },
@@ -1106,15 +1109,6 @@ export const parseEffect = (
         /^Look at a random Supporter card that’s not Penny from your opponent’s deck and shuffle it back into their deck\. Use the effect of that card as the effect of this card\./i,
       transform: () => {
         parser.addSideEffect(Effects.Penny);
-      },
-    },
-    {
-      pattern: /^Discard the top (\d+) cards of each player’s deck\./i,
-      transform: (_, count) => {
-        parser.addSideEffect(async (game, self) => {
-          self.player.discardTopOfDeck(+count);
-          self.opponent.discardTopOfDeck(+count);
-        });
       },
     },
 

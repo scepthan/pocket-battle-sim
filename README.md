@@ -12,7 +12,7 @@ Backend todo:
   - [x] A3a: 72/72 (100%)
   - [x] A3b: 71/71 (100%)
   - [x] A4: 164/164 (100%)
-  - [ ] A4a: 55/73 (75.3%)
+  - [ ] A4a: 56/73 (76.7%)
     - [ ] New ability triggers
       - [ ] When played to Bench
       - [ ] After Knocking Out opposing mon
@@ -35,7 +35,7 @@ Backend todo:
       - [ ] Can use prior evolutions' attacks
     - [ ] Parsing modifications
       - [ ] _You may_ switch this Pokémon with...
-      - [ ] Discard the top _card_ of your opponent's deck.
+      - [x] Discard the top _card_ of _your opponent's_ deck.
       - [ ] _the Attacking_ Pokémon is Knocked Out.
       - [ ] This attack does damage to your opponent’s Active Pokémon equal to the damage this Pokémon has on it.
       - [ ] Until this Pokémon leaves the Active Spot, [status]. This effect stacks.

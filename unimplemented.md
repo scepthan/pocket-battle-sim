@@ -1,6 +1,5 @@
 - A4a-003 Jumpluff ex
 - A4a-006 Celebi
-- A4a-007 Durant
 - A4a-018 Slowking
 - A4a-020 Suicune ex
 - A4a-032 Misdreavus
@@ -21,9 +20,6 @@
 - B1-007 Dustox
 - B1-018 Lilligant
 - B1-036 Mega Blaziken ex
-- B1-043 Chandelure
-- B1-051 Gyarados
-- B1-052 Mega Gyarados ex
 - B1-055 Ludicolo
 - B1-060 Luvdisc
 - B1-067 Carracosta
@@ -84,7 +80,6 @@
 - B2-073 Mimikyu ex
 - B2-075 Polteageist
 - B2-079 Machop
-- B2-081 Machamp
 - B2-084 Medicham
 - B2-090 Tyrantrum
 - B2-092 Falinks
@@ -118,7 +113,6 @@
 - B2a-052 Greavard
 - B2a-053 Houndstone
 - B2a-062 Ting-Lu
-- B2a-065 Paldean Clodsire
 - B2a-070 Grafaiai
 - B2a-078 Gholdengo ex
 - B2a-088 Team Star Grunt
