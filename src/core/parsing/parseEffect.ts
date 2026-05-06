@@ -489,6 +489,14 @@ export const parseEffect = (
       },
     },
     {
+      pattern: /for each ([^.]+?)(?: in play)? \(both yours and your opponent’s\)(?=[,.])/i,
+      transform: (_, descriptor) => {
+        const predicate = parser.parsePokemonPredicate(descriptor);
+        effect.passedAmount = (game) => game.InPlayPokemon.filter(predicate).length;
+        return "for each <amount>";
+      },
+    },
+    {
       pattern: /for each ([^.]+) on your Bench/i,
       transform: (_, descriptor) => {
         const predicate = parser.parsePokemonPredicate(descriptor);

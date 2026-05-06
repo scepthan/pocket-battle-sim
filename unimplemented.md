@@ -1,7 +1,6 @@
 - A4a-003 Jumpluff ex
 - A4a-006 Celebi
 - A4a-018 Slowking
-- A4a-020 Suicune ex
 - A4a-032 Misdreavus
 - A4a-033 Mismagius
 - A4a-035 Galarian Cursola
@@ -128,7 +127,6 @@
 - B2b-045 Morpeko
 - B2b-046 Forretress
 - B2b-052 Dragonair
-- B2b-056 Haxorus
 - B2b-065 Nasty Notice
 - B2b-066 Maintenance
 - B2b-067 Iris

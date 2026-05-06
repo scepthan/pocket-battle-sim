@@ -12,7 +12,7 @@ Backend todo:
   - [x] A3a: 72/72 (100%)
   - [x] A3b: 71/71 (100%)
   - [x] A4: 164/164 (100%)
-  - [ ] A4a: 56/73 (76.7%)
+  - [ ] A4a: 57/73 (78.1%)
     - [ ] New ability triggers
       - [ ] When played to Bench
       - [ ] After Knocking Out opposing mon
@@ -22,8 +22,8 @@ Backend todo:
       - [ ] Has any [type] Energy attached
       - [ ] Opposing mon is [name]
       - [ ] Has [number] or more Energy types attached
-    - [ ] New damage modifiers
-      - [ ] Damage per Pokémon on both Benches
+    - [x] New amounts
+      - [x] Pokémon on both Benches
     - [ ] New attacking effects
       - [ ] Discard Tools to increase damage
     - [ ] New side effects
