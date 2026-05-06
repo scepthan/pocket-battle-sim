@@ -949,6 +949,16 @@ export const parseEffect = (
     },
     {
       pattern:
+        /^Look at the top (\d+) cards of your deck\. Put all (.+?) you find there into your hand\. Shuffle the other cards back into your deck\.$/i,
+      transform: (_, count, descriptor) => {
+        const predicate = parser.parsePlayingCardPredicate(descriptor);
+
+        effect.implicitConditions.push((player) => player.canDraw(true));
+        parser.addSideEffect(Effects.TravelingMerchant(predicate, +count));
+      },
+    },
+    {
+      pattern:
         /^For each <amount>, look at that many cards from the top of your( opponent’s)? deck and put them back in any order\./i,
       transform: (_, opponent) => {
         effect.implicitConditions.push(

@@ -134,90 +134,62 @@ export const parsePlayingCardPredicate = (
   basePredicate: PlayingCardPredicate = () => true,
 ): ParsedResult<PlayingCardPredicate> => {
   let predicate: PlayingCardPredicate = basePredicate;
+  let parseSuccessful = true;
 
-  if (text.startsWith("Basic ")) {
-    const prevPredicate = predicate;
-    predicate = (card) => card.cardType === "Pokemon" && card.stage === 0 && prevPredicate(card);
-    text = text.slice(6);
-  }
+  const parsePart = (
+    regex: RegExp,
+    transform: (match: RegExpMatchArray) => PlayingCardPredicate,
+  ) => {
+    const match = text.match(regex);
+    if (match) {
+      const prevPredicate = predicate;
+      const newPredicate = transform(match);
+      predicate = (card) => newPredicate(card) && prevPredicate(card);
+      text = text.replace(regex, "");
+    }
+  };
 
-  const energyMatch = text.match(/^\{(\w)\} /);
-  if (energyMatch) {
-    const energyType = parseEnergy(energyMatch[1]!);
-    const prevPredicate = predicate;
-    predicate = (card) =>
-      card.cardType === "Pokemon" && card.type == energyType && prevPredicate(card);
-    text = text.slice(energyMatch[0].length);
-  }
+  parsePart(/^Basic /, () => (card) => card.cardType === "Pokemon" && card.stage === 0);
+  parsePart(/^Stage 1 /, () => (card) => card.cardType === "Pokemon" && card.stage === 1);
 
-  if (text.startsWith("card that evolves from ")) {
-    const { parseSuccessful, value: names } = parsePokemonNames(text.slice(23));
-    return {
-      parseSuccessful,
-      value: (card) =>
-        card.cardType === "Pokemon" &&
-        card.evolvesFrom != undefined &&
-        names.includes(card.evolvesFrom) &&
-        predicate(card),
-    };
-  }
+  parsePart(/^\{(\w)\} /, ([, energy]) => {
+    const energyType = parseEnergy(energy!);
+    return (card) => card.cardType === "Pokemon" && card.type === energyType;
+  });
 
-  if (text === "Mega Evolution Pokémon ex") {
-    return {
-      parseSuccessful: true,
-      value: (card) =>
-        card.cardType == "Pokemon" && /^Mega .+ ex$/.test(card.name) && predicate(card),
-    };
-  }
+  parsePart(/^card that evolves from (.+)$/, ([, namesText]) => {
+    const { parseSuccessful: ps, value: names } = parsePokemonNames(namesText!);
+    if (!ps) parseSuccessful = false;
+    return (card) =>
+      card.cardType === "Pokemon" &&
+      card.evolvesFrom !== undefined &&
+      names.includes(card.evolvesFrom);
+  });
+
+  parsePart(
+    /^Mega Evolution Pokémon ex$/,
+    () => (card) => card.cardType === "Pokemon" && /^Mega .+ ex$/.test(card.name),
+  );
 
   if (text.endsWith(" cards")) text = text.slice(0, -1);
 
-  if (text === "Pokémon") {
+  parsePart(/^Pokémon$/, () => (card) => card.cardType === "Pokemon");
+  parsePart(/^Trainer card$/, () => (card) => card.cardType !== "Pokemon");
+  parsePart(/^Item card$/, () => (card) => card.cardType === "Item" || card.cardType === "Fossil");
+  parsePart(/^Supporter card$/, () => (card) => card.cardType === "Supporter");
+  parsePart(/^Pokémon Tool card$/, () => (card) => card.cardType === "PokemonTool");
+  parsePart(/^Stadium card$/, () => (card) => card.cardType === "Stadium");
+
+  if (text === "card" || text === "") {
     return {
-      parseSuccessful: true,
-      value: (card) => card.cardType == "Pokemon" && predicate(card),
-    };
-  }
-  if (text === "Trainer card") {
-    return {
-      parseSuccessful: true,
-      value: (card) => card.cardType !== "Pokemon" && predicate(card),
-    };
-  }
-  if (text === "Item card") {
-    return {
-      parseSuccessful: true,
-      value: (card) => (card.cardType == "Item" || card.cardType == "Fossil") && predicate(card),
-    };
-  }
-  if (text === "Supporter card") {
-    return {
-      parseSuccessful: true,
-      value: (card) => card.cardType == "Supporter" && predicate(card),
-    };
-  }
-  if (text === "Pokémon Tool card") {
-    return {
-      parseSuccessful: true,
-      value: (card) => card.cardType == "PokemonTool" && predicate(card),
-    };
-  }
-  if (text === "Stadium card") {
-    return {
-      parseSuccessful: true,
-      value: (card) => card.cardType == "Stadium" && predicate(card),
-    };
-  }
-  if (text === "card") {
-    return {
-      parseSuccessful: true,
+      parseSuccessful,
       value: predicate,
     };
   }
 
-  const { parseSuccessful, value: names } = parsePokemonNames(text);
+  const { parseSuccessful: ps, value: names } = parsePokemonNames(text);
   return {
-    parseSuccessful,
+    parseSuccessful: parseSuccessful && ps,
     value: (card) => names.includes(card.name) && predicate(card),
   };
 };

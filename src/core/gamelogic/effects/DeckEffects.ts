@@ -1,7 +1,7 @@
 import { randomElement, removeElement } from "@/core/util";
 import type { Game } from "../Game";
 import type { InPlayPokemon } from "../InPlayPokemon";
-import type { PlayingCardPredicate } from "../types";
+import type { PlayingCard, PlayingCardPredicate } from "../types";
 
 /**
  * Given a playing card predicate, returns a side effect that lets the player look at the top card
@@ -20,6 +20,36 @@ export const MythicalSlab =
       self.player.Deck.push(topCard);
       game.GameLog.returnToBottomOfDeck(self.player, [topCard]);
     }
+  };
+
+/**
+ * Given a playing card predicate and an amount of cards to look at, returns a side effect that
+ * lets the player look at that many cards from the top of their deck and keep any that match the
+ * predicate. The rest are shuffled back into their deck.
+ */
+export const TravelingMerchant =
+  (predicate: PlayingCardPredicate, count: number) => async (game: Game, self: InPlayPokemon) => {
+    const topCards = self.player.Deck.splice(0, count);
+    await game.showCards(self.player, topCards);
+
+    const matchingCards: PlayingCard[] = [];
+    const nonMatchingCards: PlayingCard[] = [];
+
+    for (const card of topCards) {
+      if (predicate(card)) {
+        matchingCards.push(card);
+      } else {
+        nonMatchingCards.push(card);
+      }
+    }
+
+    self.player.Hand.push(...matchingCards);
+    self.player.Deck.push(...nonMatchingCards);
+
+    game.GameLog.putIntoHand(self.player, matchingCards);
+    game.GameLog.returnToDeck(self.player, nonMatchingCards, "hand");
+
+    self.player.shuffleDeck();
   };
 
 /**

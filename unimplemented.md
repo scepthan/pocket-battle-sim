@@ -10,7 +10,6 @@
 - A4a-062 Miltank
 - A4a-067 Inflatable Boat
 - A4a-068 Memory Light
-- A4a-070 Traveling Merchant
 - B1-004 Silcoon
 - B1-006 Cascoon
 - B1-007 Dustox
@@ -95,7 +94,6 @@
 - B2-147 Protective Poncho
 - B2-148 Metal Core Barrier
 - B2-149 Diantha
-- B2-150 Sightseer
 - B2-151 Juggler
 - B2-152 Piers
 - B2-153 Training Area
