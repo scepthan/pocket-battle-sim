@@ -5,7 +5,6 @@
 - A4a-033 Mismagius
 - A4a-035 Galarian Cursola
 - A4a-041 Dugtrio
-- A4a-048 Seviper
 - A4a-050 Zoroark
 - A4a-055 Altaria
 - A4a-062 Miltank
@@ -113,7 +112,6 @@
 - B2a-078 Gholdengo ex
 - B2a-088 Team Star Grunt
 - B2a-093 Mesagoza
-- B2b-004 Illumise
 - B2b-009 Mega Charizard X ex
 - B2b-016 Mega Slowbro ex
 - B2b-027 Mega Manectric ex
@@ -132,7 +130,6 @@
 - B3-003 Heracross
 - B3-004 Celebi
 - B3-008 Mega Sceptile ex
-- B3-012 Breloom
 - B3-013 Budew
 - B3-022 Camerupt
 - B3-024 Castform Sunny Form
@@ -143,8 +140,6 @@
 - B3-045 Regice
 - B3-051 Rapid Strike Urshifu
 - B3-061 Toxtricity
-- B3-068 Oricorio
-- B3-071 Hatterene
 - B3-073 Brambleghast
 - B3-084 Gallade
 - B3-086 Sawk

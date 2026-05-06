@@ -391,20 +391,6 @@ export const parseEffect = (
       },
     },
     {
-      pattern: /^If your opponent’s Active Pokémon is Poisoned,/i,
-      transform: () => {
-        parser.conditionalForNextEffect = (player, self) =>
-          self.opponent.activeOrThrow().isPoisoned();
-      },
-    },
-    {
-      pattern: /^If your opponent’s Active Pokémon is Burned,/i,
-      transform: () => {
-        parser.conditionalForNextEffect = (player, self) =>
-          self.opponent.activeOrThrow().isBurned();
-      },
-    },
-    {
       pattern: /^If your opponent’s Active Pokémon is affected by a Special Condition,/i,
       transform: () => {
         parser.conditionalForNextEffect = (player, self) =>
@@ -412,7 +398,7 @@ export const parseEffect = (
       },
     },
     {
-      pattern: /^If (?:your opponent’s Active|the Defending) Pokémon is an? ([^,]+?),/i,
+      pattern: /^If (?:your opponent’s Active|the Defending) Pokémon is(?: an?)? ([^,]+?),/i,
       transform: (_, descriptor) => {
         const predicate = parser.parsePokemonPredicate(descriptor);
         parser.conditionalForNextEffect = (player, self) =>

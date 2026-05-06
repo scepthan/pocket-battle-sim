@@ -103,6 +103,12 @@ export const parsePokemonPredicate = (
       pokemon.baseCard.evolvesFrom != undefined && names.includes(pokemon.baseCard.evolvesFrom);
   });
 
+  parsePart(/^Poisoned$/, () => (pokemon) => pokemon.isPoisoned());
+  parsePart(/^Burned$/, () => (pokemon) => pokemon.isBurned());
+  parsePart(/^Asleep$/, () => (pokemon) => pokemon.primaryCondition === "Asleep");
+  parsePart(/^Paralyzed$/, () => (pokemon) => pokemon.primaryCondition === "Paralyzed");
+  parsePart(/^Confused$/, () => (pokemon) => pokemon.primaryCondition === "Confused");
+
   if (text === "" || text === "Pokémon") {
     return {
       parseSuccessful: true,

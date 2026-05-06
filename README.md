@@ -12,7 +12,7 @@ Backend todo:
   - [x] A3a: 72/72 (100%)
   - [x] A3b: 71/71 (100%)
   - [x] A4: 164/164 (100%)
-  - [ ] A4a: 59/73 (80.8%)
+  - [ ] A4a: 60/73 (82.2%)
     - [ ] New ability triggers
       - [ ] When played to Bench
       - [ ] After Knocking Out opposing mon
@@ -20,7 +20,7 @@ Backend todo:
       - [ ] Opposing mon is an evolved Pokémon
       - [ ] Discarded card is [predicate]
       - [x] Has any [type] Energy attached
-      - [ ] Opposing mon is [name]
+      - [x] Opposing mon is [name]
       - [ ] Has [number] or more Energy types attached
     - [x] New amounts
       - [x] Pokémon on both Benches
