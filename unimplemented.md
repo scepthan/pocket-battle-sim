@@ -5,7 +5,6 @@
 - A4a-033 Mismagius
 - A4a-035 Galarian Cursola
 - A4a-041 Dugtrio
-- A4a-043 Phanpy
 - A4a-048 Seviper
 - A4a-050 Zoroark
 - A4a-055 Altaria

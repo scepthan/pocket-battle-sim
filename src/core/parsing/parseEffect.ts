@@ -561,9 +561,10 @@ export const parseEffect = (
       },
     },
     {
-      pattern: /^This attack does more damage equal to the damage this Pokémon has on it\./i,
-      transform: () => {
-        effect.calculateDamage = (game, self) => baseDamage + self.currentDamage();
+      pattern:
+        /^This attack does( more)? damage(?: to your opponent’s Active Pokémon)? equal to the damage this Pokémon has on it\./i,
+      transform: (_, more) => {
+        effect.calculateDamage = (game, self) => (more ? baseDamage : 0) + self.currentDamage();
       },
     },
     {

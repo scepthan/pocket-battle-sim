@@ -12,7 +12,7 @@ Backend todo:
   - [x] A3a: 72/72 (100%)
   - [x] A3b: 71/71 (100%)
   - [x] A4: 164/164 (100%)
-  - [ ] A4a: 58/73 (79.4%)
+  - [ ] A4a: 59/73 (80.8%)
     - [ ] New ability triggers
       - [ ] When played to Bench
       - [ ] After Knocking Out opposing mon
@@ -37,7 +37,7 @@ Backend todo:
       - [ ] _You may_ switch this Pokémon with...
       - [x] Discard the top _card_ of _your opponent's_ deck.
       - [ ] _the Attacking_ Pokémon is Knocked Out.
-      - [ ] This attack does damage to your opponent’s Active Pokémon equal to the damage this Pokémon has on it.
+      - [x] This attack does damage _to your opponent’s Active Pokémon_ equal to the damage this Pokémon has on it.
       - [ ] Until this Pokémon leaves the Active Spot, [status]. This effect stacks.
       - [ ] The Retreat Cost of _this Pokémon_ is [number] less.
     - [x] Other
