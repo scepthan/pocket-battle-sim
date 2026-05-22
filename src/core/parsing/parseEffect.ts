@@ -1868,6 +1868,12 @@ export const parseEffect = (
       },
     },
     {
+      pattern: /^The Retreat Cost of this Pokémon is (\d+) less\.$/i,
+      transform: (_, amount) => {
+        parser.addSelfPokemonStatus(PokemonStatus.ModifyRetreatCost(+amount, parser.turnsToKeep));
+      },
+    },
+    {
       pattern: /^this Pokémon gets \+(\d+) HP\.$/i,
       transform: (_, amount) => {
         parser.addSelfPokemonStatus(PokemonStatus.IncreaseMaxHP(+amount, parser.turnsToKeep));

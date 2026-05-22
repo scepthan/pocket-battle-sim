@@ -8,7 +8,6 @@
 - A4a-050 Zoroark
 - A4a-055 Altaria
 - A4a-062 Miltank
-- A4a-067 Inflatable Boat
 - A4a-068 Memory Light
 - B1-004 Silcoon
 - B1-006 Cascoon
