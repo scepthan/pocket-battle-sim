@@ -90,8 +90,8 @@ export class PlayerPokemonView {
   get activePlayerStatuses() {
     return this.self.activePlayerStatuses;
   }
-  get inPlayCards() {
-    return this.self.inPlayCards;
+  get evolutionCards() {
+    return this.self.evolutionCards;
   }
   get readyToEvolve() {
     return !this.self.playedThisTurn;

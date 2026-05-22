@@ -534,19 +534,18 @@ export class Player {
   async returnPokemonToHand(pokemon: InPlayPokemon) {
     await this.removePokemonFromField(pokemon);
 
-    const discardedCards: PlayingCard[] = [];
-    for (const card of pokemon.inPlayCards) {
+    for (const card of pokemon.evolutionCards) {
       removeElement(this.InPlay, card);
-      if (card.cardType == "PokemonTool") {
-        this.Discard.push(card);
-        discardedCards.push(card);
-      } else {
-        this.Hand.push(card);
-      }
+      this.Hand.push(card);
+    }
+    for (const tool of pokemon.attachedToolCards) {
+      removeElement(this.InPlay, tool);
+      this.Discard.push(tool);
     }
 
     this.logger.returnInPlayPokemonToHand(this, pokemon);
-    if (discardedCards.length > 0) this.logger.discardFromPlay(this, discardedCards);
+    if (pokemon.attachedToolCards.length > 0)
+      this.logger.discardFromPlay(this, pokemon.attachedToolCards);
 
     this.discardEnergy(pokemon.attachedEnergy, "removedFromField");
   }
@@ -554,19 +553,18 @@ export class Player {
   async shufflePokemonIntoDeck(pokemon: InPlayPokemon) {
     await this.removePokemonFromField(pokemon);
 
-    const discardedCards: PlayingCard[] = [];
-    for (const card of pokemon.inPlayCards) {
+    for (const card of pokemon.evolutionCards) {
       removeElement(this.InPlay, card);
-      if (card.cardType == "PokemonTool") {
-        this.Discard.push(card);
-        discardedCards.push(card);
-      } else {
-        this.Deck.push(card);
-      }
+      this.Hand.push(card);
+    }
+    for (const tool of pokemon.attachedToolCards) {
+      removeElement(this.InPlay, tool);
+      this.Discard.push(tool);
     }
 
     this.logger.returnInPlayPokemonToDeck(this, pokemon);
-    if (discardedCards.length > 0) this.logger.discardFromPlay(this, discardedCards);
+    if (pokemon.attachedToolCards.length > 0)
+      this.logger.discardFromPlay(this, pokemon.attachedToolCards);
 
     this.discardEnergy(pokemon.attachedEnergy, "removedFromField");
 
@@ -578,12 +576,12 @@ export class Player {
 
     await this.removePokemonFromField(pokemon);
 
-    for (const card of pokemon.inPlayCards) {
+    for (const card of pokemon.allInPlayCards) {
       removeElement(this.InPlay, card);
       this.Discard.push(card);
     }
 
-    this.logger.discardFromPlay(this, pokemon.inPlayCards);
+    this.logger.discardFromPlay(this, pokemon.allInPlayCards);
 
     this.discardEnergy(pokemon.attachedEnergy, "removedFromField");
   }
@@ -596,12 +594,12 @@ export class Player {
     // Rescue Scarf returns the Pokémon to the player's hand instead of discarding it
     if (!this.InPlayPokemon.includes(pokemon)) return;
 
-    for (const card of pokemon.inPlayCards) {
+    for (const card of pokemon.evolutionCards) {
       if (!this.InPlay.includes(card)) throw new Error("Card not in play");
       removeElement(this.InPlay, card);
       this.Discard.push(card);
     }
-    this.logger.discardFromPlay(this, pokemon.inPlayCards);
+    this.logger.discardFromPlay(this, pokemon.evolutionCards);
 
     this.discardEnergy(pokemon.attachedEnergy, "knockOut");
 

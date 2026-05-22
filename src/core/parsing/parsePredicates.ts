@@ -61,7 +61,8 @@ export const parsePokemonPredicate = (
 
   parsePart(
     /^evolved /,
-    () => (pokemon) => pokemon.inPlayCards.filter((card) => card.cardType === "Pokemon").length > 1,
+    () => (pokemon) =>
+      pokemon.evolutionCards.filter((card) => card.cardType === "Pokemon").length > 1,
   );
 
   const energyTypes: Energy[] = [];

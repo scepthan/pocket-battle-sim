@@ -206,9 +206,7 @@ export class GameLogger {
       type: "returnToHand",
       player: player.Name,
       source: "inPlay",
-      cardIds: pokemon.inPlayCards
-        .filter((card) => card.cardType !== "PokemonTool")
-        .map((card) => card.id),
+      cardIds: pokemon.evolutionCards.map((card) => card.id),
     });
   }
 
@@ -217,9 +215,7 @@ export class GameLogger {
       type: "returnToDeck",
       player: player.Name,
       source: "inPlay",
-      cardIds: pokemon.inPlayCards
-        .filter((card) => card.cardType !== "PokemonTool")
-        .map((card) => card.id),
+      cardIds: pokemon.evolutionCards.map((card) => card.id),
     });
   }
 

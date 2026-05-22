@@ -102,8 +102,12 @@ export class InPlayPokemon {
   }
   activePlayerStatuses: PlayerStatus[] = []; // PlayerStatuses currently in play from this Pokemon's Ability
 
-  inPlayCards: PlayingCard[] = [];
+  evolutionCards: PlayingCard[] = [];
   playedThisTurn: boolean = true;
+
+  get allInPlayCards() {
+    return this.evolutionCards.concat(this.attachedToolCards);
+  }
 
   isPokemon = true as const;
 
@@ -140,22 +144,24 @@ export class InPlayPokemon {
     this.game = player.game;
     this.logger = player.logger;
     this.baseCard = inputCard;
-    this.inPlayCards.push(trueCard);
+    this.evolutionCards.push(trueCard);
     this.id = this.game.nextPokemonId++;
 
     this.currentHP = this.baseHP;
     this.maxHP = this.baseHP;
   }
 
-  async evolveInto(inputCard: PokemonCard) {
-    const hpIncrease = inputCard.baseHP - this.baseHP;
+  async evolveInto(inputCard: PokemonCard, devolving = false) {
+    const hpDelta = inputCard.baseHP - this.baseHP;
 
     this.baseCard = inputCard;
-    this.inPlayCards.push(inputCard);
-    this.playedThisTurn = true;
+    if (!devolving) {
+      this.evolutionCards.push(inputCard);
+      this.playedThisTurn = true;
+    }
 
-    this.currentHP += hpIncrease;
-    this.maxHP += hpIncrease;
+    this.currentHP += hpDelta;
+    this.maxHP += hpDelta;
 
     this.removeAllSpecialConditionsAndStatuses();
 
@@ -355,7 +361,6 @@ export class InPlayPokemon {
   async attachPokemonTool(card: PokemonToolCard) {
     this.logger.attachPokemonTool(this.player, card, this);
     this.attachedToolCards.push(card);
-    this.inPlayCards.push(card);
     this.player.InPlay.push(card);
   }
 
@@ -367,7 +372,6 @@ export class InPlayPokemon {
   async removePokemonTool(card: PokemonToolCard) {
     this.logger.removePokemonTool(this.player, card, this);
     removeElement(this.attachedToolCards, card);
-    removeElement(this.inPlayCards, card);
     removeElement(this.player.InPlay, card);
   }
 
