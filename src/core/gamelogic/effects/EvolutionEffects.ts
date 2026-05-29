@@ -36,5 +36,5 @@ export const evolveWithRareCandy = async (target: InPlayPokemon) => {
   const card = await target.game.chooseCard(player, validCards, prompt);
   if (!card) return;
 
-  await player.evolvePokemon(target, card as PokemonCard, true);
+  await player.evolvePokemon(target, card as PokemonCard);
 };

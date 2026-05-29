@@ -810,6 +810,9 @@ export class Game {
    * Plays a Basic Pokémon from the player's hand to one of their open Bench slots.
    */
   async putPokemonOnBench(pokemon: PokemonCard, index: number): Promise<void> {
+    if (pokemon.stage != 0) {
+      throw new Error("Can only play Basic Pokemon to bench");
+    }
     await this.AttackingPlayer.putPokemonOnBench(pokemon, index);
     await this.afterAction();
   }
@@ -817,8 +820,20 @@ export class Game {
   /**
    * Plays an Evolution Pokémon from the player's hand to evolve one of their Pokémon.
    */
-  async evolvePokemon(inPlayPokemon: InPlayPokemon, pokemon: PokemonCard): Promise<void> {
-    await this.AttackingPlayer.evolvePokemon(inPlayPokemon, pokemon);
+  async evolvePokemon(pokemon: InPlayPokemon, card: PokemonCard): Promise<void> {
+    if (!this.AttackingPlayer.Hand.includes(card)) {
+      throw new Error("Card not in hand");
+    }
+    if (card.evolvesFrom !== pokemon.evolvesAs) {
+      throw new Error("Card does not evolve from this Pokemon");
+    }
+    if (pokemon.playedThisTurn) {
+      throw new Error("Pokemon is not ready to evolve");
+    }
+    if (pokemon.pokemonStatuses.some((status) => status.type == "CannotEvolve")) {
+      throw new Error("Cannot evolve this Pokemon due to status effect");
+    }
+    await this.AttackingPlayer.evolvePokemon(pokemon, card);
     await this.afterAction();
   }
 
@@ -1118,11 +1133,8 @@ export class Game {
     this.DefendingPlayer.confuseActivePokemon();
   }
 
-  /**
-   * Puts a Fossil card onto the Bench as if it were a Pokémon.
-   */
-  async putFossilOnBench(card: FossilCard, slot: EmptyCardSlot) {
-    const pokemon: PlayingCard = {
+  fossilToPokemonCard(card: FossilCard): PokemonCard {
+    return {
       id: card.id,
       name: card.name,
       rarity: card.rarity,
@@ -1143,7 +1155,7 @@ export class Game {
         effect: {
           type: "Standard",
           sideEffects: [
-            async (game: Game, self: InPlayPokemon) => {
+            async (game, self) => {
               await game.AttackingPlayer.discardPokemonFromPlay(self);
             },
           ],
@@ -1151,6 +1163,13 @@ export class Game {
       },
       parseSuccessful: card.parseSuccessful,
     };
+  }
+
+  /**
+   * Puts a Fossil card onto the Bench as if it were a Pokémon.
+   */
+  async putFossilOnBench(card: FossilCard, slot: EmptyCardSlot) {
+    const pokemon: PlayingCard = this.fossilToPokemonCard(card);
 
     await this.AttackingPlayer.putPokemonOnBench(pokemon, slot.benchIndex, card);
     await this.afterAction();

@@ -60,7 +60,8 @@
 
         <div v-else-if="entry.type == 'evolvePokemon'">
           <p>
-            <b>{{ entry.player }}</b> evolves <CardName :card-id="entry.fromPokemon.cardId" /> into
+            <b>{{ entry.player }}</b> {{ entry.devolving ? "devolves" : "evolves" }}
+            <CardName :card-id="entry.fromPokemon.cardId" /> into
             <CardName :card-id="entry.cardId" />!
           </p>
         </div>

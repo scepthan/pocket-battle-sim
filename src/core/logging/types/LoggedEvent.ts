@@ -184,6 +184,7 @@ interface EvolvePokemonEvent {
   cardId: string;
   fromPokemon: InPlayPokemonDescriptor;
   stage: number;
+  devolving?: boolean;
 }
 
 interface GenerateNextEnergyEvent {

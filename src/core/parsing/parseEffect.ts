@@ -1616,7 +1616,7 @@ export const parseEffect = (
           const prompt = "Choose a Basic Pokémon to put on your opponent's Bench.";
           const card = await game.chooseCard(self.player, validCards, prompt);
           if (!card) return;
-          await self.opponent.putPokemonOnBench(card as PokemonCard, benchIndex, card);
+          await self.opponent.putPokemonOnBench(card as PokemonCard, benchIndex);
         });
       },
     },
@@ -1628,6 +1628,16 @@ export const parseEffect = (
         parser.addSideEffect(async (game, self, amount, target) => {
           if (!target) return;
           await Effects.evolveWithRareCandy(target);
+        });
+      },
+    },
+    {
+      pattern:
+        /^devolve it by putting the highest Stage Evolution card on it into your opponent’s hand\.$/,
+      transform: () => {
+        parser.addSideEffect(async (game, self) => {
+          const active = self.opponent.activeOrThrow();
+          await self.opponent.devolvePokemon(active, true);
         });
       },
     },

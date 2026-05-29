@@ -126,6 +126,18 @@ export class GameLogger {
     });
   }
 
+  devolvePokemon(player: Player, pokemon: InPlayPokemon) {
+    const card = pokemon.evolutionCards[pokemon.evolutionCards.length - 2]!;
+    this.addEntry({
+      type: "evolvePokemon",
+      player: player.Name,
+      cardId: card.id,
+      fromPokemon: player.pokemonToDescriptor(pokemon),
+      stage: card.cardType === "Pokemon" ? card.stage : 0,
+      devolving: true,
+    });
+  }
+
   drawToHand(player: Player, attempted: number, cards: PlayingCard[]) {
     const success = attempted === cards.length;
     this.addEntry({

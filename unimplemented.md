@@ -1,5 +1,4 @@
 - A4a-003 Jumpluff ex
-- A4a-006 Celebi
 - A4a-018 Slowking
 - A4a-032 Misdreavus
 - A4a-033 Mismagius

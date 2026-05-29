@@ -56,14 +56,10 @@ export const parsePokemonPredicate = (
   );
 
   parsePart(/^Basic /, () => (pokemon) => pokemon.stage === 0);
-  parsePart(/^Evolution /, () => (pokemon) => pokemon.stage > 0);
+  parsePart(/^Stage 1 /, () => (pokemon) => pokemon.stage === 1);
   parsePart(/^Stage 2 /, () => (pokemon) => pokemon.stage === 2);
-
-  parsePart(
-    /^evolved /,
-    () => (pokemon) =>
-      pokemon.evolutionCards.filter((card) => card.cardType === "Pokemon").length > 1,
-  );
+  parsePart(/^Evolution /, () => (pokemon) => pokemon.stage > 0);
+  parsePart(/^evolved /, () => (pokemon) => pokemon.evolutionCards.length > 1);
 
   const energyTypes: Energy[] = [];
   let energyMatch;
@@ -152,6 +148,7 @@ export const parsePlayingCardPredicate = (
 
   parsePart(/^Basic /, () => (card) => card.cardType === "Pokemon" && card.stage === 0);
   parsePart(/^Stage 1 /, () => (card) => card.cardType === "Pokemon" && card.stage === 1);
+  parsePart(/^Stage 2 /, () => (card) => card.cardType === "Pokemon" && card.stage === 2);
 
   parsePart(/^\{(\w)\} /, ([, energy]) => {
     const energyType = parseEnergy(energy!);

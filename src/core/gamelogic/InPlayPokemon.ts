@@ -7,8 +7,8 @@ import {
   type Ability,
   type Attack,
   type Energy,
+  type FossilCard,
   type PlayerStatus,
-  type PlayingCard,
   type PokemonCard,
   type PokemonPlayerStatus,
   type PokemonStatus,
@@ -102,11 +102,11 @@ export class InPlayPokemon {
   }
   activePlayerStatuses: PlayerStatus[] = []; // PlayerStatuses currently in play from this Pokemon's Ability
 
-  evolutionCards: PlayingCard[] = [];
+  evolutionCards: (PokemonCard | FossilCard)[] = [];
   playedThisTurn: boolean = true;
 
   get allInPlayCards() {
-    return this.evolutionCards.concat(this.attachedToolCards);
+    return [...this.evolutionCards, ...this.attachedToolCards];
   }
 
   isPokemon = true as const;
@@ -139,11 +139,15 @@ export class InPlayPokemon {
     return effectiveEnergy;
   }
 
-  constructor(player: Player, inputCard: PokemonCard, trueCard: PlayingCard = inputCard) {
+  constructor(
+    player: Player,
+    pokemonCard: PokemonCard,
+    trueCard: PokemonCard | FossilCard = pokemonCard,
+  ) {
     this.player = player;
     this.game = player.game;
     this.logger = player.logger;
-    this.baseCard = inputCard;
+    this.baseCard = pokemonCard;
     this.evolutionCards.push(trueCard);
     this.id = this.game.nextPokemonId++;
 
@@ -151,14 +155,12 @@ export class InPlayPokemon {
     this.maxHP = this.baseHP;
   }
 
-  async evolveInto(inputCard: PokemonCard, devolving = false) {
+  async evolveInto(inputCard: PokemonCard) {
     const hpDelta = inputCard.baseHP - this.baseHP;
 
     this.baseCard = inputCard;
-    if (!devolving) {
-      this.evolutionCards.push(inputCard);
-      this.playedThisTurn = true;
-    }
+    this.evolutionCards.push(inputCard);
+    this.playedThisTurn = true;
 
     this.currentHP += hpDelta;
     this.maxHP += hpDelta;
@@ -167,6 +169,24 @@ export class InPlayPokemon {
 
     await this.onEvolution();
     await this.onEnterPlay();
+  }
+
+  async devolve() {
+    if (this.evolutionCards.length <= 1)
+      throw new Error("Cannot devolve a Pokemon with no previous evolutions");
+
+    const previousEvolution = this.evolutionCards[this.evolutionCards.length - 2]!;
+    const hpDelta = previousEvolution.baseHP - this.baseHP;
+
+    this.baseCard =
+      previousEvolution.cardType === "Fossil"
+        ? this.game.fossilToPokemonCard(previousEvolution)
+        : previousEvolution;
+
+    this.currentHP += hpDelta;
+    this.maxHP += hpDelta;
+
+    this.removeAllSpecialConditionsAndStatuses();
   }
 
   isDamaged() {

@@ -14,6 +14,7 @@ import type {
   CoinFlipIndicator,
   Deck,
   Energy,
+  FossilCard,
   PlayerGameSetup,
   PlayerStatus,
   PlayingCard,
@@ -253,7 +254,7 @@ export class Player {
       (card) => card.cardType === "Pokemon" && card.evolvesFrom === target.name,
     );
     if (!card) return;
-    await this.evolvePokemon(target, card as PokemonCard, false, true);
+    await this.evolvePokemon(target, card as PokemonCard);
 
     this.shuffleDeck();
 
@@ -306,18 +307,19 @@ export class Player {
     this.logger.selectActivePokemon(this);
   }
 
-  async putPokemonOnBench(card: PokemonCard, index: number, trueCard: PlayingCard = card) {
+  async putPokemonOnBench(
+    pokemonCard: PokemonCard,
+    index: number,
+    trueCard: PokemonCard | FossilCard = pokemonCard,
+  ) {
     if (!this.Bench[index]) {
       throw new Error("Invalid bench index specified");
     }
     if (this.Bench[index].isPokemon) {
       throw new Error("Bench already has a Pokemon in this slot");
     }
-    if (card.stage != 0) {
-      throw new Error("Can only play Basic Pokemon to bench");
-    }
 
-    const pokemon = new InPlayPokemon(this, card, trueCard);
+    const pokemon = new InPlayPokemon(this, pokemonCard, trueCard);
     this.Bench[index] = pokemon;
     this.InPlay.push(trueCard);
     // Needs to be optional because fossils are currently removed from hand before this method is called
@@ -325,30 +327,12 @@ export class Player {
       removeElement(this.Hand, trueCard);
     }
 
-    this.logger.playToBench(this, card, index);
+    this.logger.playToBench(this, pokemonCard, index);
 
     await pokemon.onEnterPlay();
   }
 
-  async evolvePokemon(
-    pokemon: InPlayPokemon,
-    card: PokemonCard,
-    skipStage1: boolean = false,
-    ignoreChecks: boolean = false,
-  ) {
-    if (!this.Hand.includes(card) && !ignoreChecks) {
-      throw new Error("Card not in hand");
-    }
-    if (card.evolvesFrom !== pokemon.evolvesAs && !skipStage1) {
-      throw new Error("Card does not evolve from this Pokemon");
-    }
-    if (pokemon.playedThisTurn && !ignoreChecks) {
-      throw new Error("Pokemon is not ready to evolve");
-    }
-    if (pokemon.pokemonStatuses.some((status) => status.type == "CannotEvolve")) {
-      throw new Error("Cannot evolve this Pokemon due to status effect");
-    }
-
+  async evolvePokemon(pokemon: InPlayPokemon, card: PokemonCard) {
     if (this.Hand.includes(card)) {
       removeElement(this.Hand, card);
     }
@@ -356,6 +340,18 @@ export class Player {
 
     this.logger.evolvePokemon(this, pokemon, card);
     await pokemon.evolveInto(card);
+  }
+  async devolvePokemon(pokemon: InPlayPokemon, triggeredByOpponent: boolean) {
+    if (pokemon.evolutionCards.length <= 1) return;
+
+    const removedCard = pokemon.baseCard;
+    this.logger.devolvePokemon(triggeredByOpponent ? this.opponent : this, pokemon);
+
+    removeElement(this.InPlay, removedCard);
+    this.Hand.push(removedCard);
+    this.logger.putIntoHand(this, [removedCard]);
+
+    await pokemon.devolve();
   }
 
   canAttachFromEnergyZone(pokemon: InPlayPokemon) {
