@@ -956,7 +956,7 @@ export class Game {
   /**
    * Hits a Pokémon for a base amount of damage, after applying weakness and status effects.
    */
-  attackPokemon(defender: InPlayPokemon, HP: number): void {
+  attackPokemon(defender: InPlayPokemon, damage: number): void {
     if (this.shouldPreventDamage(defender)) return;
 
     const attacker = this.AttackingPlayer.activeOrThrow();
@@ -965,7 +965,7 @@ export class Game {
     const owner = this.DefendingPlayer;
     const attackingActive = defender == owner.ActivePokemon;
 
-    let totalDamage = HP;
+    let totalDamage = damage;
     let weaknessBoost = false;
 
     // First, apply any of the attacker's own damage modification statuses
@@ -1014,20 +1014,21 @@ export class Game {
    * Applies a set amount of damage directly to a Pokémon, ignoring weakness or status effects.
    * @param fromAttack whether the damage is considered by the game to be "from an attack".
    */
-  applyDamage(target: InPlayPokemon, HP: number, fromAttack: boolean): void {
+  applyDamage(target: InPlayPokemon, damage: number, fromAttack: boolean): void {
     const initialHP = target.currentHP;
 
-    target.applyDamage(HP);
-    this.GameLog.pokemonDamaged(target.player, target, initialHP, HP, fromAttack);
+    target.applyDamage(damage);
+    this.GameLog.pokemonDamaged(target.player, target, initialHP, damage, fromAttack);
   }
 
   /**
    * Sets a Pokémon's remaining HP directly.
    */
   setHP(target: InPlayPokemon, HP: number): void {
-    const initialHP = target.currentHP;
+    if (this.shouldPreventEffects(target)) return;
 
-    target.currentHP = HP;
+    const initialHP = target.currentHP;
+    target.damageTaken = target.maxHP - HP;
     this.GameLog.pokemonHpSet(target.player, target, initialHP, HP);
   }
 

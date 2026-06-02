@@ -82,7 +82,10 @@ export class InPlayPokemon {
     return this.baseCard.isUltraBeast === true;
   }
 
-  currentHP: number;
+  damageTaken: number = 0;
+  get currentHP() {
+    return Math.max(this.maxHP - this.damageTaken, 0);
+  }
   maxHP: number;
   attachedEnergy: Energy[] = [];
   attachedToolCards: PokemonToolCard[] = [];
@@ -151,7 +154,6 @@ export class InPlayPokemon {
     this.evolutionCards.push(trueCard);
     this.id = this.game.nextPokemonId++;
 
-    this.currentHP = this.baseHP;
     this.maxHP = this.baseHP;
   }
 
@@ -162,7 +164,6 @@ export class InPlayPokemon {
     this.evolutionCards.push(inputCard);
     this.playedThisTurn = true;
 
-    this.currentHP += hpDelta;
     this.maxHP += hpDelta;
 
     this.removeAllSpecialConditionsAndStatuses();
@@ -183,22 +184,17 @@ export class InPlayPokemon {
         ? this.game.fossilToPokemonCard(previousEvolution)
         : previousEvolution;
 
-    this.currentHP += hpDelta;
     this.maxHP += hpDelta;
 
     this.removeAllSpecialConditionsAndStatuses();
   }
 
   isDamaged() {
-    return this.currentHP < this.maxHP;
-  }
-  currentDamage() {
-    return this.maxHP - this.currentHP;
+    return this.damageTaken > 0;
   }
 
   applyDamage(HP: number) {
-    this.currentHP -= HP;
-    if (this.currentHP < 0) this.currentHP = 0;
+    this.damageTaken += HP;
   }
 
   /**
@@ -212,8 +208,8 @@ export class InPlayPokemon {
 
     const initialHP = this.currentHP;
 
-    this.currentHP += HP;
-    if (this.currentHP > this.maxHP) this.currentHP = this.maxHP;
+    this.damageTaken -= HP;
+    if (this.damageTaken < 0) this.damageTaken = 0;
 
     this.logger.pokemonHealed(this.player, this, initialHP, HP);
 
@@ -340,7 +336,6 @@ export class InPlayPokemon {
     if (status.type === "IncreaseMaxHP") {
       const hpIncrease = status.amount;
       this.maxHP += hpIncrease;
-      this.currentHP += hpIncrease;
     }
   }
 
@@ -354,7 +349,6 @@ export class InPlayPokemon {
     if (status.type === "IncreaseMaxHP") {
       const hpIncrease = status.amount;
       this.maxHP -= hpIncrease;
-      this.currentHP -= hpIncrease;
     }
   }
 

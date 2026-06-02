@@ -269,8 +269,9 @@
         <div v-else-if="entry.type == 'pokemonDamaged'" class="sub-entry">
           <p v-if="entry.weaknessBoost">It's super effective!</p>
           <p>
-            <CardName :card-id="entry.targetPokemon.cardId" /> is hit for
-            {{ entry.damageDealt }} damage! <HpChange :event="entry" />
+            <CardName :card-id="entry.targetPokemon.cardId" />
+            {{ entry.fromAttack ? "is hit for" : "takes" }} {{ entry.damageDealt }} damage!
+            <HpChange :event="entry" />
           </p>
         </div>
 
