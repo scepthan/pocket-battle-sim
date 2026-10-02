@@ -18,4 +18,9 @@ export const allExpansions = {
   B2a: "Paldean Wonders",
   B2b: "Mega Shine",
   B3: "Pulsing Aura",
+  B3a: "Paradox Drive",
+  B3b: "Everyday Wonders",
+  B4: "Ruler of the Skies",
+  B4a: "Team Rocket’s Ambition",
+  B4b: "Deluxe Pack: Mega",
 };
